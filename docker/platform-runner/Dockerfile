@@ -47,7 +47,7 @@ WORKDIR /app
 # ---------------------------------------------------------------------------
 # Copy runner service source code
 # ---------------------------------------------------------------------------
-COPY services/runner/src/runner /app/services/runner/src/runner
+COPY --chown=10002:10002 services/runner/src/runner /app/runner
 
 # ---------------------------------------------------------------------------
 # Set Python path so imports like services.runner.src.runner.models resolve

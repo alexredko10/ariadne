@@ -24,15 +24,16 @@ contain agent configs, execute agents, or manage agent containers.
 | Component | Location |
 |-----------|----------|
 | Python 3.12 | From `python:3.12-slim` |
-| `services/runner/src/runner` | `/app/services/runner/src/runner` |
+| `services/runner/src/runner` | `/app/runner` |
 | `runner` user | UID 10002, GID 10002 |
 | ca-certificates | TLS bundle |
 
 ### Import strategy
 
-The runner package is copied to `/app/services/runner/src/runner`. The
-environment variable `PYTHONPATH=/app` allows Python to resolve imports such as
-`services.runner.src.runner.models`.
+The runner package is copied to `/app/runner`. The environment variable
+`PYTHONPATH=/app` allows `import runner` to resolve because
+`/app/runner/__init__.py` exists. Copied files are owned by non-root
+UID/GID `10002:10002`. No repository root is copied.
 
 ## What's intentionally excluded
 
