@@ -1,0 +1,26 @@
+version: "0.1"
+label: "agent-config"
+purpose: "Manual Docker Agent roles and controlled context usage."
+read_first:
+  - "docs/DOCKER_AGENTS_MEMORY.md"
+  - "agents/architect.yml"
+  - "agents/coder.yml"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+anchors:
+  - "agents.manual-only"
+  - "agents.context-receipt"
+  - "agents.scope-limited"
+allowed_scan:
+  - "agents/*.yml"
+  - "prompts/**"
+  - "docs/DOCKER_AGENTS_MEMORY.md"
+avoid_scan:
+  - "agents/archive/**"
+  - "services/**"
+  - "packages/**"
+  - "apps/**"
+notes:
+  - "Four separate manually-controlled Docker Agents — no automatic swarm orchestration."
+  - "Each agent must include CONTEXT USED receipt in every response."
+  - "Agents read memory_index.yml first, then only bundles matching task labels."

@@ -1,0 +1,25 @@
+version: "0.1"
+label: "sprint-0"
+purpose: "Repository skeleton, smoke tests, CI, Makefile and controlled agent setup."
+read_first:
+  - "docs/sprints/SPRINT_0_REPOSITORY_SKELETON.md"
+  - "docs/DOCKER_AGENTS_MEMORY.md"
+  - "Makefile"
+  - "pyproject.toml"
+anchors:
+  - "sprint-0.repository-skeleton"
+  - "tests.smoke"
+  - "agents.controlled-manual"
+allowed_scan:
+  - "services/*/tests/**"
+  - "agents/*.yml"
+  - ".github/workflows/**"
+  - "prompts/**"
+avoid_scan:
+  - "services/*/src/**"
+  - "packages/**"
+  - "apps/**"
+notes:
+  - "Smoke tests use unique basenames (test_*_smoke.py) to avoid pytest import conflicts."
+  - "No __init__.py in tests/ directories — tests are namespace-scanned via importlib mode."
+  - "See pyproject.toml for pytest config and pythonpath entries."

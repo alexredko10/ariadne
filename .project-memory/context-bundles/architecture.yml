@@ -1,0 +1,23 @@
+version: "0.1"
+label: "architecture"
+purpose: "High-level repository architecture and control planes."
+read_first:
+  - "docs/START_HERE.md"
+  - "docs/architecture/CONTROL_PLANES.md"
+  - "docs/REPOSITORY_STRUCTURE.md"
+  - ".project-memory/project_contract.yml"
+anchors:
+  - "architecture.control-planes"
+  - "repository.boundaries"
+  - "repo.canonical-write.single-gate"
+allowed_scan:
+  - "docs/architecture/**"
+  - "docs/adr/**"
+  - "README.md"
+avoid_scan:
+  - "services/*/src/**"
+  - "apps/**"
+  - "artifacts/**"
+notes:
+  - "Read project_contract.yml first to understand protected behaviors."
+  - "Do not scan service implementation code for architecture questions."

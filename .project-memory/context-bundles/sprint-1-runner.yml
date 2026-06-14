@@ -1,0 +1,28 @@
+version: "0.1"
+label: "sprint-1-runner"
+purpose: "Runner contracts, patch normalization, sandbox path safety and run artifacts."
+read_first:
+  - "docs/sprints/SPRINT_1_RUNNER_PATCH_PIPELINE.md"
+  - ".project-memory/project_contract.yml"
+  - ".project-memory/pr/0001-runner-patch-contracts/PLAN.md"
+anchors:
+  - "runner.patch-safety"
+  - "runner.sandbox-isolation"
+  - "patch.repo-relative-only"
+  - "repo.canonical-write.single-gate"
+allowed_scan:
+  - "services/runner/src/runner/**"
+  - "services/runner/tests/**"
+  - ".project-memory/pr/0001-runner-patch-contracts/PLAN.md"
+avoid_scan:
+  - "services/core/**"
+  - "services/conductor/**"
+  - "services/model_gateway/**"
+  - "services/task_intake/**"
+  - "apps/**"
+  - "packages/**"
+notes:
+  - "No Docker execution in this sprint."
+  - "No git mutation commands."
+  - "Patch paths must be repo-relative only."
+  - "See PLAN.md for path validation algorithm and forbidden patterns."
