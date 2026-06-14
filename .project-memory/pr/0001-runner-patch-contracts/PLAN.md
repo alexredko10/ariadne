@@ -10,6 +10,10 @@ Introduce the first safe Runner foundation:
 - forbidden path rejection
 - run artifact schema
 
+This PR also includes a CI workflow fix: GitHub Actions must not install the root monorepo as an editable Python package yet, so `pip install -e ".[dev]"` is replaced with `pip install pytest`.
+
+CI may install test tooling directly, but must not install the repository root with `pip install -e` until packaging strategy is explicitly designed.
+
 This PR explicitly does **not** include:
 
 - no Docker execution yet
@@ -29,6 +33,7 @@ services/runner/src/runner/patch.py
 services/runner/tests/test_runner_models.py
 services/runner/tests/test_patch_normalizer.py
 services/runner/tests/test_sandbox_paths.py
+.github/workflows/ci.yml
 ```
 
 ## Forbidden files
@@ -40,7 +45,6 @@ services/*/src/** except services/runner/src/runner/models.py and services/runne
 packages/**
 .project-memory/** except .project-memory/pr/0001-runner-patch-contracts/PLAN.md
 .git/**
-.github/**
 docker-compose.yml
 Dockerfile
 Makefile
