@@ -1,0 +1,48 @@
+# ---------------------------------------------------------------------------
+# .dockerignore — platform-runner
+#
+# This file is a secret-protection boundary and controls which repository
+# directories are visible to the Docker build context.
+#
+# Only the runner service runtime source is allowed.
+# ---------------------------------------------------------------------------
+
+# --- Exclude everything by default ---
+*
+
+# --- Allow only the runner service source tree ---
+!services/runner/
+!services/runner/src/
+!services/runner/src/runner/
+!services/runner/src/runner/**
+
+# --- Re-exclude runner test files (not needed at runtime) ---
+services/runner/tests/
+
+# --- Block repository-private areas and secrets ---
+.git
+.github/
+.project-memory/
+agents/
+prompts/
+docs/
+artifacts/
+.env
+.env.*
+*.pem
+*.key
+.aws/
+.gcloud/
+.secrets/
+credentials
+id_rsa
+id_ed25519
+.venv
+node_modules
+.pytest_cache
+__pycache__
+.DS_Store
+.idea/
+.vscode/
+packages/
+apps/
