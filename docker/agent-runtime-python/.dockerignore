@@ -1,0 +1,33 @@
+# ---------------------------------------------------------------------------
+# .dockerignore — agent-runtime-python
+#
+# This file is a secret-protection boundary. It prevents accidental inclusion
+# of sensitive or unwanted files into the Docker build context.
+# ---------------------------------------------------------------------------
+
+.git
+.venv
+node_modules
+.pytest_cache
+__pycache__
+.DS_Store
+.env
+.env.*
+artifacts
+*.pem
+*.key
+.aws/
+.gcloud/
+.secrets/
+credentials
+id_rsa
+id_ed25519
+.idea/
+.vscode/
+services/
+packages/
+apps/
+agents/
+prompts/
+.project-memory/
+docs/
