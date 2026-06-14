@@ -1,0 +1,9 @@
+{
+  "name": "universal-agentic-platform",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "echo \"No frontend tests yet\"",
+    "lint": "echo \"No frontend lint yet\""
+  }
+}

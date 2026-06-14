@@ -1,0 +1,22 @@
+[project]
+name = "universal-agentic-platform"
+version = "0.1.0"
+description = "Universal agentic development platform starter repository"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0", "ruff>=0.5.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["services"]
+pythonpath = [
+  "services/task_intake/src",
+  "services/core/src",
+  "services/conductor/src",
+  "services/runner/src",
+  "services/model_gateway/src"
+]
+
+[tool.ruff]
+line-length = 100
