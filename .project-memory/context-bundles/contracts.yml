@@ -1,0 +1,23 @@
+version: "0.1"
+label: "contracts"
+purpose: "Safety, scope and validation contracts shared by all agents."
+read_first:
+  - ".project-memory/project_contract.yml"
+  - ".project-memory/anchors.yml"
+anchors:
+  - "repo.canonical-write.single-gate"
+  - "agents.no-git-mutation"
+  - "agents.no-secrets"
+  - "patch.repo-relative-only"
+  - "human-approval.high-risk"
+allowed_scan:
+  - ".project-memory/project_contract.yml"
+  - ".project-memory/anchors.yml"
+avoid_scan:
+  - ".git/**"
+  - ".venv/**"
+  - "node_modules/**"
+  - "artifacts/**"
+notes:
+  - "Check project_contract.yml protected_behaviors before any edit."
+  - "Human approval required for high-risk operations listed in project_contract.yml."
