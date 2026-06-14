@@ -1,0 +1,58 @@
+version: "0.1"
+description: "Machine-readable contracts for the platform repository itself."
+
+repository_identity:
+  type: "universal agentic engineering platform"
+  project_specific_domains_allowed: false
+  old_project_coupling_allowed: false
+
+protected_behaviors:
+  - id: "repo.canonical-write.single-gate"
+    text: "Agents must not write directly to the canonical repository. Only an explicit apply-patch step may change it."
+    severity: "critical"
+  - id: "agents.no-git-mutation"
+    text: "Docker Agents must not commit, push, reset, restore, checkout, or stash unless a human explicitly approves a dedicated operation."
+    severity: "critical"
+  - id: "agents.no-secrets"
+    text: "Agents must not receive production secrets, API keys, cloud credentials, or local private tokens."
+    severity: "critical"
+  - id: "patch.repo-relative-only"
+    text: "Patch paths must be repository-relative and must reject absolute paths and traversal."
+    severity: "critical"
+  - id: "memory.neutral-labels"
+    text: "Shared memory labels and anchors must stay project-neutral and reusable."
+    severity: "high"
+  - id: "context.no-whole-repo-default"
+    text: "Agents must not scan the entire repository by default; they must start from the memory index and selected bundles."
+    severity: "high"
+
+validation_commands:
+  python:
+    - "python -m pytest -q"
+    - "python -m compileall services packages"
+  make:
+    - "make test"
+    - "make lint"
+
+forbidden_generated_files:
+  - ".DS_Store"
+  - "__pycache__/"
+  - ".pytest_cache/"
+  - ".mypy_cache/"
+  - ".ruff_cache/"
+  - ".venv/"
+  - "venv/"
+  - "node_modules/"
+  - "coverage.xml"
+  - ".coverage"
+  - "htmlcov/"
+  - "*.db"
+  - "*.sqlite"
+
+human_approval_required_for:
+  - "changing agent write permissions"
+  - "allowing git mutation commands"
+  - "running Docker with mounted docker.sock"
+  - "adding model provider credentials"
+  - "changing protected behavior contracts"
+  - "broad repository restructuring"

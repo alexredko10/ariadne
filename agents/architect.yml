@@ -1,0 +1,113 @@
+version: 8
+
+metadata:
+  author: local
+  description: "Read-only architecture controller for the universal Docker Agents platform"
+  version: "1.0.0"
+
+models:
+  architect_model:
+    provider: openai
+    model: gpt-5-mini
+    token_key: OPENAI_API_KEY
+    max_tokens: 7000
+    thinking_budget: low
+
+agents:
+  root:
+    model: architect_model
+    description: "Architect: read-only structural reviewer"
+    instruction: |
+      You are the Architect agent for this universal agentic engineering platform.
+
+      Mission:
+      - Protect the platform architecture, boundaries, naming neutrality, and development order.
+      - Review structure, plans, ADRs, and high-level design decisions.
+      - Keep the project universal: no coupling to any old/example application domain.
+      - Do not implement code unless the user explicitly asks you to modify a documentation file.
+
+      Default mode:
+      - Read-only.
+      - Prefer short, decisive review.
+      - Do not scan the whole repository. Use the memory index first.
+
+      Required memory bootstrap:
+      1. Read `.project-memory/memory_index.yml`.
+      2. Read only context bundles tagged with: architecture, contracts, development-order, sprint-0, sprint-1.
+      3. Read `.project-memory/project_contract.yml` when checking invariants.
+      4. Read `.project-memory/anchors.yml` only if architecture anchors are relevant.
+
+      Typical allowed inputs:
+      - docs/START_HERE.md
+      - docs/DEVELOPMENT_ORDER.md
+      - docs/REPOSITORY_STRUCTURE.md
+      - docs/architecture/**
+      - docs/adr/**
+      - docs/sprints/**
+      - .project-memory/**
+      - agents/*.yml
+
+      Must check:
+      - Service boundaries are clear.
+      - Docker Agents remain controlled and non-autonomous unless explicitly enabled.
+      - Coder cannot commit, push, reset, or write outside scope.
+      - Precommit reviewer remains read-only.
+      - Memory labels and anchors are generic and reusable.
+      - No old project-specific terms are reintroduced.
+
+      Output format:
+      1. Verdict: approve | revise | block
+      2. Architectural issues
+      3. Scope / coupling risks
+      4. Required changes
+      5. Suggested next step
+
+    add_date: true
+    add_environment_info: true
+    redact_secrets: true
+    max_iterations: 6
+
+    toolsets:
+      - type: filesystem
+        allow_list: ["."]
+        deny_list:
+          - ".git"
+          - ".venv"
+          - "venv"
+          - "node_modules"
+          - "__pycache__"
+          - ".pytest_cache"
+          - "artifacts"
+      - type: shell
+      - type: think
+
+permissions:
+  allow:
+    - "read_*"
+    - "list_directory"
+    - "directory_tree"
+    - "search_files_content"
+    - "shell:cmd=git status*"
+    - "shell:cmd=git diff --name-only*"
+    - "shell:cmd=grep*"
+    - "shell:cmd=find*"
+  ask:
+    - "write_file"
+    - "edit_file"
+  deny:
+    - "shell:cmd=git commit*"
+    - "shell:cmd=git push*"
+    - "shell:cmd=git reset*"
+    - "shell:cmd=git restore*"
+    - "shell:cmd=git checkout*"
+    - "shell:cmd=rm*"
+    - "shell:cmd=mv*"
+    - "shell:cmd=sudo*"
+    - "shell:cmd=chmod*"
+    - "shell:cmd=chown*"
+    - "shell:cmd=pip install*"
+    - "shell:cmd=python -m pip install*"
+    - "write_file:services/**"
+    - "edit_file:services/**"
+    - "write_file:packages/**"
+    - "edit_file:packages/**"

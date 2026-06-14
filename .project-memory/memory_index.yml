@@ -1,0 +1,94 @@
+version: "0.1"
+description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
+
+rules:
+  first_file_to_read: ".project-memory/memory_index.yml"
+  do_not_scan_entire_repo_by_default: true
+  prefer_context_bundles: true
+  use_current_task_if_present: ".project-memory/current_task.yml"
+  fallback_task_source: "user message"
+  max_default_context_files: 8
+  stop_if_scope_unclear: true
+
+labels:
+  architecture:
+    description: "System architecture, trust zones, boundaries, ADRs."
+    bundles:
+      - ".project-memory/context-bundles/architecture.yml"
+    preferred_agent: "architect"
+  sprint-0:
+    description: "Repository skeleton, package layout, smoke tests, CI, Makefile."
+    bundles:
+      - ".project-memory/context-bundles/sprint-0.yml"
+    preferred_agent: "coder"
+  sprint-1:
+    description: "Runner, sandbox snapshot, raw diff, patch normalization."
+    bundles:
+      - ".project-memory/context-bundles/sprint-1-runner.yml"
+    preferred_agent: "coder"
+  task-intake:
+    description: "Text/voice/issue to task draft and preview."
+    bundles:
+      - ".project-memory/context-bundles/task-intake.yml"
+    preferred_agent: "coder"
+  contracts:
+    description: "Safety invariants, scope manifest, project contracts, review gates."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    preferred_agent: "precommit-review"
+  agent-config:
+    description: "Docker Agent YAML configs and agent operating rules."
+    bundles:
+      - ".project-memory/context-bundles/agent-config.yml"
+    preferred_agent: "architect"
+
+agent_memory_profiles:
+  architect:
+    always_read:
+      - ".project-memory/project_contract.yml"
+      - ".project-memory/anchors.yml"
+    default_labels: ["architecture", "contracts", "agent-config"]
+    max_files_before_review: 10
+  coder:
+    always_read:
+      - ".project-memory/project_contract.yml"
+    default_labels: ["sprint-0"]
+    max_files_before_edit: 8
+  plan-review:
+    always_read:
+      - ".project-memory/project_contract.yml"
+    default_labels: ["contracts", "architecture"]
+    max_files_before_verdict: 8
+  precommit-review:
+    always_read:
+      - ".project-memory/project_contract.yml"
+      - ".project-memory/anchors.yml"
+    default_labels: ["contracts", "agent-config"]
+    max_files_before_verdict: 12
+
+forbidden_legacy_terms:
+  - "water_meter"
+  - "water-meter"
+  - "Water Meter"
+  - "broken_clock"
+  - "broken-clock"
+  - "Broken Clock"
+  - "daily-consumption"
+  - "daily consumption"
+  - "Flask articles-api"
+  - "Practical_Repo"
+  - "DynamoDB Scan"
+  - "Warm Sand"
+  - "@grace-"
+  - ".grace"
+
+context_refresh_policy:
+  update_memory_index_when:
+    - "new service/package is added"
+    - "new sprint starts"
+    - "new architectural invariant is accepted"
+    - "agent config permissions change"
+  do_not_update_memory_for:
+    - "ordinary smoke test fixes"
+    - "formatting-only changes"
+    - "generated files"

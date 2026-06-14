@@ -1,0 +1,13 @@
+task_id: "example-task"
+description: "Describe the task here."
+mode: "bugfix | feature | refactor | test | docs | review"
+risk_level: "low | medium | high | critical"
+
+scope:
+  allowed_write_paths: []
+  runtime_read_paths: []
+  out_of_scope: []
+
+acceptance:
+  automated: []
+  manual_checks: []

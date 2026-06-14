@@ -1,0 +1,54 @@
+version: "0.1"
+description: "Stable anchors for quick context retrieval. Keep anchors generic and project-neutral."
+
+anchors:
+  repo.structure.root:
+    type: "architecture"
+    labels: ["architecture", "sprint-0"]
+    description: "Top-level repository skeleton and ownership boundaries."
+    paths:
+      - "README.md"
+      - "docs/REPOSITORY_STRUCTURE.md"
+      - "docs/START_HERE.md"
+
+  agents.controlled-docker-agents:
+    type: "agent-config"
+    labels: ["agent-config", "contracts"]
+    description: "Four separate manually-controlled Docker Agents. No automatic swarm orchestration."
+    paths:
+      - "agents/architect.yml"
+      - "agents/coder.yml"
+      - "agents/plan-review.yml"
+      - "agents/precommit-review.yml"
+    invariants:
+      - "agents.no-git-mutation"
+      - "context.no-whole-repo-default"
+
+  memory.shared-index:
+    type: "memory"
+    labels: ["contracts", "agent-config"]
+    description: "Shared memory entrypoint for all agents. Agents read this before selecting context bundles."
+    paths:
+      - ".project-memory/memory_index.yml"
+      - ".project-memory/context-bundles/"
+
+  runner.patch-safety:
+    type: "architecture"
+    labels: ["sprint-1", "contracts"]
+    description: "Runner and patch pipeline safety boundary."
+    paths:
+      - "services/runner/"
+      - "packages/contracts/"
+      - "packages/policy/"
+      - "docs/sprints/SPRINT_1_RUNNER_PATCH_PIPELINE.md"
+    invariants:
+      - "repo.canonical-write.single-gate"
+      - "patch.repo-relative-only"
+
+  task-intake.normalization:
+    type: "feature-area"
+    labels: ["task-intake"]
+    description: "Input normalization layer: text/voice/issue to task draft and preview."
+    paths:
+      - "services/task_intake/"
+      - "docs/api/TASK_INTAKE_API.md"

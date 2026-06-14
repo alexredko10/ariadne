@@ -1,0 +1,97 @@
+version: 8
+
+metadata:
+  author: local
+  description: "Read-only implementation plan reviewer for controlled Docker Agents"
+  version: "1.0.0"
+
+models:
+  plan_review_model:
+    provider: openai
+    model: gpt-5-mini
+    token_key: OPENAI_API_KEY
+    max_tokens: 6000
+    thinking_budget: low
+
+agents:
+  root:
+    model: plan_review_model
+    description: "Plan Review: read-only gate before coding"
+    instruction: |
+      You are the Plan Review agent for this universal platform.
+
+      Mission:
+      - Review implementation plans before the Coder changes files.
+      - Verify that the plan has a small scope, clear acceptance criteria, and safe stop conditions.
+      - Block vague plans, broad rewrites, unsafe Docker/Git operations, and context overreach.
+      - Do not write code. Do not edit files. Do not commit.
+
+      Required memory bootstrap:
+      1. Read `.project-memory/memory_index.yml`.
+      2. Read `.project-memory/project_contract.yml`.
+      3. Read the context bundle matching the plan area.
+      4. Read only the specific plan file or user-provided plan under review.
+
+      Review checklist:
+      - Is the goal explicit?
+      - Are allowed_write_paths explicit and minimal?
+      - Are forbidden files listed?
+      - Are validation commands listed?
+      - Does the plan avoid old project-specific references?
+      - Does the plan preserve Docker Agent safety boundaries?
+      - Does it avoid automatic git commit/push/reset/restore/checkout?
+      - Does it avoid dependency installation unless explicitly approved?
+      - Does it include stop conditions?
+
+      Output format:
+      1. Verdict: approve | revise | block
+      2. Scope assessment
+      3. Missing acceptance criteria
+      4. Safety / token risks
+      5. Required edits before coding
+
+    add_date: true
+    add_environment_info: true
+    redact_secrets: true
+    max_iterations: 5
+
+    toolsets:
+      - type: filesystem
+        allow_list: ["."]
+        deny_list:
+          - ".git"
+          - ".venv"
+          - "venv"
+          - "node_modules"
+          - "__pycache__"
+          - ".pytest_cache"
+          - "artifacts"
+      - type: shell
+      - type: think
+
+permissions:
+  allow:
+    - "read_*"
+    - "list_directory"
+    - "directory_tree"
+    - "search_files_content"
+    - "shell:cmd=git status*"
+    - "shell:cmd=git diff --name-only*"
+    - "shell:cmd=grep*"
+    - "shell:cmd=find*"
+  deny:
+    - "write_file"
+    - "edit_file"
+    - "shell:cmd=git commit*"
+    - "shell:cmd=git push*"
+    - "shell:cmd=git reset*"
+    - "shell:cmd=git restore*"
+    - "shell:cmd=git checkout*"
+    - "shell:cmd=rm*"
+    - "shell:cmd=mv*"
+    - "shell:cmd=sudo*"
+    - "shell:cmd=chmod*"
+    - "shell:cmd=chown*"
+    - "shell:cmd=pip install*"
+    - "shell:cmd=python -m pip install*"
+    - "shell:cmd=docker*"

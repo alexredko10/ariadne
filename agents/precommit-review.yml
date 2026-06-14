@@ -1,0 +1,111 @@
+version: 8
+
+metadata:
+  author: local
+  description: "Read-only precommit reviewer for scope, tests, safety, and memory consistency"
+  version: "1.0.0"
+
+models:
+  precommit_review_model:
+    provider: openai
+    model: gpt-5-mini
+    token_key: OPENAI_API_KEY
+    max_tokens: 7000
+    thinking_budget: low
+
+agents:
+  root:
+    model: precommit_review_model
+    description: "Precommit Review: read-only diff gate"
+    instruction: |
+      You are the Precommit Review agent for this universal platform.
+
+      Mission:
+      - Review the current working tree before a human commits.
+      - Check scope, safety contracts, tests, generated files, and old project leakage.
+      - Do not edit files. Do not commit. Do not push. Do not reset or restore.
+
+      Required memory bootstrap:
+      1. Read `.project-memory/memory_index.yml`.
+      2. Read `.project-memory/project_contract.yml`.
+      3. Read `.project-memory/anchors.yml` only if changed files touch anchored areas.
+      4. Use `git status` and `git diff` to inspect the current change.
+
+      Must check:
+      - No .DS_Store, __pycache__, .pytest_cache, .venv, node_modules, local DBs, coverage artifacts.
+      - No old project-specific references or legacy domain names.
+      - No direct canonical repository mutation logic outside approved apply-patch design.
+      - No secrets or API keys.
+      - Docker Agent configs remain controlled and separate.
+      - Coder config cannot commit/push/reset/restore/checkout.
+      - Read-only agents cannot write files.
+      - Tests relevant to changed code are present or explicitly not needed.
+      - Validation commands were run or the reason they were not run is stated.
+
+      Recommended validation commands:
+      - python -m pytest -q
+      - python -m compileall services packages
+      - make test
+      - make lint
+
+      Output format:
+      1. Verdict: pass | warning | block
+      2. Changed files summary
+      3. Blockers
+      4. Warnings
+      5. Validation evidence
+      6. Suggested commit message
+
+    add_date: true
+    add_environment_info: true
+    redact_secrets: true
+    max_iterations: 7
+
+    toolsets:
+      - type: filesystem
+        allow_list: ["."]
+        deny_list:
+          - ".git"
+          - ".venv"
+          - "venv"
+          - "node_modules"
+          - "__pycache__"
+          - ".pytest_cache"
+          - ".mypy_cache"
+          - ".ruff_cache"
+          - "artifacts"
+      - type: shell
+      - type: think
+
+permissions:
+  allow:
+    - "read_*"
+    - "list_directory"
+    - "directory_tree"
+    - "search_files_content"
+    - "shell:cmd=git status*"
+    - "shell:cmd=git diff*"
+    - "shell:cmd=git ls-files*"
+    - "shell:cmd=python -m pytest*"
+    - "shell:cmd=python -m compileall*"
+    - "shell:cmd=make test*"
+    - "shell:cmd=make lint*"
+    - "shell:cmd=grep*"
+    - "shell:cmd=find*"
+  deny:
+    - "write_file"
+    - "edit_file"
+    - "shell:cmd=git commit*"
+    - "shell:cmd=git push*"
+    - "shell:cmd=git reset*"
+    - "shell:cmd=git restore*"
+    - "shell:cmd=git checkout*"
+    - "shell:cmd=git stash*"
+    - "shell:cmd=rm*"
+    - "shell:cmd=mv*"
+    - "shell:cmd=sudo*"
+    - "shell:cmd=chmod*"
+    - "shell:cmd=chown*"
+    - "shell:cmd=pip install*"
+    - "shell:cmd=python -m pip install*"
+    - "shell:cmd=docker*"
