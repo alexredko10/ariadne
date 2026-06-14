@@ -1,0 +1,19 @@
+# Dockerfile-specific ignore for docker/platform-runner/Dockerfile.
+# The build context is repository root because the Dockerfile copies
+# services/runner/src/runner into /app/runner.
+#
+# Keep the context minimal and exclude repository files that are not required
+# for the platform-runner image.
+
+*
+
+!services/
+!services/runner/
+!services/runner/src/
+!services/runner/src/runner/
+!services/runner/src/runner/**
+
+!docker/
+!docker/platform-runner/
+!docker/platform-runner/Dockerfile
+!docker/platform-runner/Dockerfile.dockerignore

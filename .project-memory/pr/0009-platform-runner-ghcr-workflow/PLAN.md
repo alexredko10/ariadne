@@ -42,6 +42,7 @@ Future allowed files for implementation PR:
 ```text
 .github/workflows/platform-runner-image.yml
 .project-memory/pr/0009-platform-runner-ghcr-workflow/PLAN.md
+docker/platform-runner/Dockerfile.dockerignore
 ```
 
 No other files.
@@ -178,7 +179,7 @@ Implementation must preserve these constraints:
 
 - workflow name: `platform-runner image`
 - image name: `ghcr.io/${{ github.repository_owner }}/ariadne/platform-runner`
-- context: `docker/platform-runner`
+- context: `.`
 - file: `docker/platform-runner/Dockerfile`
 - platform: `linux/amd64`
 - no multi-arch by default
@@ -340,9 +341,18 @@ The implementation PR must satisfy all of the following grep-able checks.
 - `workflow_name: platform-runner image`
 - `image_name_default: ghcr.io/${{ github.repository_owner }}/ariadne/platform-runner`
 - `image_name_final: ghcr.io/${{ github.repository_owner }}/ariadne/platform-runner` (default, no fallback)
-- `context: docker/platform-runner`
+- `context: .`
 - `dockerfile: docker/platform-runner/Dockerfile`
+- `dockerfile_specific_ignore: docker/platform-runner/Dockerfile.dockerignore`
 - `platforms: linux/amd64`
+
+### Build context note
+
+The platform-runner Dockerfile copies `services/runner/src/runner` into the
+image. Therefore the workflow build context must be repository root (`context: .`)
+instead of the docker subdirectory. A Dockerfile-specific ignore file
+(`Dockerfile.dockerignore`) keeps the build context minimal. No Dockerfile or
+service code was changed.
 
 ### Triggers
 

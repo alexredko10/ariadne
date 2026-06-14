@@ -22,15 +22,17 @@ on:
     paths:
       - ".github/workflows/platform-runner-image.yml"
       - "docker/platform-runner/**"
+      - "services/runner/src/runner/**"
       - ".project-memory/pr/0009-platform-runner-ghcr-workflow/PLAN.md"
   push:
     branches:
       - main
     tags:
-      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v*.*.*"
     paths:
       - ".github/workflows/platform-runner-image.yml"
       - "docker/platform-runner/**"
+      - "services/runner/src/runner/**"
       - ".project-memory/pr/0009-platform-runner-ghcr-workflow/PLAN.md"
 
 # Default workflow-level permissions are read-only.
@@ -66,7 +68,7 @@ jobs:
       - name: Build image without publishing
         uses: docker/build-push-action@v7
         with:
-          context: docker/platform-runner
+          context: .
           file: docker/platform-runner/Dockerfile
           platforms: linux/amd64
           push: false
@@ -115,7 +117,7 @@ jobs:
       - name: Build and publish image
         uses: docker/build-push-action@v7
         with:
-          context: docker/platform-runner
+          context: .
           file: docker/platform-runner/Dockerfile
           platforms: linux/amd64
           push: true
