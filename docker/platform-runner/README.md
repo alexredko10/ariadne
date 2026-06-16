@@ -66,15 +66,24 @@ UID/GID `10002:10002`. No repository root is copied.
 
 ## Command / entrypoint
 
-The default command is an **import-only placeholder**:
+The default command runs the **doctor CLI**:
 
 ```bash
-python -c "import runner; print('runner image ready')"
+python -m runner doctor
 ```
 
-This validates that the runner package is importable. No real network service
-is started. No ports are exposed. A real entrypoint will be added in a future
-PR once a stable service interface exists.
+Expected output:
+
+```text
+platform-runner doctor
+runner import: ok
+patch models: ok
+patch safety: ok
+```
+
+This validates that the runner package and its key sub-modules (models, patch)
+are importable and functional. No real network service is started. No ports
+are exposed.
 
 ## Security constraints
 
@@ -91,24 +100,29 @@ PR once a stable service interface exists.
 
 These commands are **manual-only** and must not be added to CI in this PR.
 Automated Docker execution requires a separate PR and explicit human approval.
+Agents must not run Docker commands automatically.
+
+The build uses repository root as context because the Dockerfile copies
+source from ``services/runner/src/runner``.
 
 ```bash
-# Build the image
-docker build -t platform-runner:local docker/platform-runner
+# Build the image (context is repository root)
+docker build -f docker/platform-runner/Dockerfile -t platform-runner:local .
 
-# Verify runner package is importable
-docker run --rm platform-runner:local python -c "import runner; print('runner import ok')"
+# Run the doctor CLI as the container's default command
+docker run --rm platform-runner:local
 
 # Verify non-root user and working directory
 docker run --rm platform-runner:local sh -lc "id && pwd && test \"$(id -u)\" != \"0\""
 ```
 
-Expected output:
+Expected doctor output:
 
-```
-runner import ok
-uid=10002(runner) gid=10002(runner) groups=10002(runner)
-/app
+```text
+platform-runner doctor
+runner import: ok
+patch models: ok
+patch safety: ok
 ```
 
 These commands:
@@ -122,8 +136,7 @@ These commands:
 
 ## Future work
 
-- Real runner service entrypoint when a stable service contract exists
-- GHCR publishing workflow for `platform-runner` (separate PR)
+- Real runner service entrypoint if a stable service contract is defined
 - Image scanning and signing / provenance attestation
 - Multi-architecture build support (amd64 + arm64)
 

@@ -60,6 +60,6 @@ ENV PYTHONPATH=/app
 USER runner
 
 # ---------------------------------------------------------------------------
-# Default command: validate that the runner package is importable
+# Default command: run the doctor CLI to validate runtime readiness
 # ---------------------------------------------------------------------------
-CMD ["python", "-c", "import runner; print('runner image ready')"]
+CMD ["python", "-m", "runner", "doctor"]

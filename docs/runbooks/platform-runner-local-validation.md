@@ -60,24 +60,27 @@ These commands are **manual-only**. They must be run only by a human
 maintainer in an approved local environment. Agents must not run them
 automatically. CI must not run them in this PR.
 
-```bash
-# Build the image
-docker build -t platform-runner:local docker/platform-runner
+The build uses repository root as context because the Dockerfile copies
+source from ``services/runner/src/runner``.
 
-# Verify runner package is importable
-docker run --rm platform-runner:local python -c "import runner; print('runner import ok')"
+```bash
+# Build the image (context is repository root)
+docker build -f docker/platform-runner/Dockerfile -t platform-runner:local .
+
+# Run the doctor CLI as the container's default command
+docker run --rm platform-runner:local
 
 # Verify non-root user, working directory, and non-zero UID
 docker run --rm platform-runner:local sh -lc "id && pwd && test \"$(id -u)\" != \"0\" && test \"$PWD\" = \"/app\""
 ```
 
-Optional manual inspection command (verify module location):
+The default container command runs the doctor CLI. Expected output:
 
-```bash
-docker run --rm platform-runner:local sh -lc "python - <<'PY'
-import runner
-print(runner.__file__)
-PY"
+```text
+platform-runner doctor
+runner import: ok
+patch models: ok
+patch safety: ok
 ```
 
 These commands:
@@ -94,8 +97,7 @@ These commands:
 | Check | Expected result |
 |-------|----------------|
 | Image builds | Exit code 0 |
-| `import runner` succeeds | Prints `runner import ok` |
-| `runner.__file__` (optional) | Points under `/app/runner`, e.g. `/app/runner/__init__.py` |
+| Container default command (doctor) | Prints the 4 doctor lines (see above) |
 | `id` | UID is **not** `0` (output shows `uid=10002(runner) gid=10002(runner)`) |
 | `pwd` | Prints `/app` |
 | Final combined check | Exits successfully (all conditions pass) |
@@ -115,8 +117,7 @@ validation.
 
 - Pass/fail summary
 - Local architecture (e.g. `linux/amd64` or `linux/arm64`)
-- `import runner` success
-- Sanitized `runner.__file__` path, e.g. `/app/runner/__init__.py`
+- Doctor output: all 4 expected lines present in order
 - UID/GID result showing non-root
 - Working directory `/app`
 - Confirmation that no host mounts, `docker.sock`, secrets, registry login,
@@ -139,8 +140,7 @@ Manual local validation completed for `platform-runner`.
 
 - Image: `platform-runner:local`
 - Host architecture: `<linux/amd64 or linux/arm64>`
-- Import check: `import runner` succeeded
-- Runner module path: `/app/runner/__init__.py`
+- Doctor output: all 4 lines present in expected order
 - Container user: non-root UID/GID observed
 - Working directory: `/app`
 - Safety confirmation: no host mounts, no docker.sock mount, no secrets,
