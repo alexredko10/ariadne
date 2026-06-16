@@ -17,6 +17,7 @@ anchors:
   - "agents.final-output.decisions-made"
   - "agents.final-output.deviations"
   - "agents.final-output.context-used"
+  - "agents.context-snapshot.snapshot-verification-fields"
   - "agents.git.read-only-introspection"
 allowed_scan:
   - "agents/*.yml"

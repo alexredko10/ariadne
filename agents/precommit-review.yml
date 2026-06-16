@@ -106,7 +106,9 @@ agents:
       - base_sha:
       - index_version:
       - current_head:
-      - stale_snapshot:
+      - stale_snapshot: true | false | unknown
+      - snapshot_verified: true | false | skipped
+      - snapshot_verified_by: git introspection | not available | filesystem
 
       DECISIONS MADE:
       - None — review followed PLAN.md exactly

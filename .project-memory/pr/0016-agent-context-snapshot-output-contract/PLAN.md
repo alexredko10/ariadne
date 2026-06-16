@@ -123,6 +123,8 @@ FINAL OUTPUT:
 - CONTEXT USED:
   - base_sha:
   - index_version:
+  - snapshot_verified: true | false | skipped
+  - snapshot_verified_by: git introspection | not available | filesystem
   - labels:
   - memory files read:
   - anchors used:
@@ -151,7 +153,9 @@ CONTEXT SNAPSHOT:
 - base_sha:
 - index_version:
 - current_head:
-- stale_snapshot: true | false | unknown
+- stale_snapshot:
+- snapshot_verified:
+- snapshot_verified_by:
 
 DECISIONS MADE:
 - None — review followed PLAN.md exactly
@@ -311,6 +315,25 @@ Do not merge if:
 - `repo.canonical-write.single-gate` is weakened
 - `agents.no-git-mutation` is weakened
 - `agents.no-secrets` is weakened
+
+## Snapshot verification fields
+
+Standardized `snapshot_verified` and `snapshot_verified_by` fields added to
+review-agent and implementation-agent output requirements:
+
+- `snapshot_verified: true | false | skipped`
+  - `true`: current HEAD checked and matched `base_sha`
+  - `false`: current HEAD checked and did not match `base_sha`
+  - `skipped`: verification could not run or `base_sha` was `unknown`
+- `snapshot_verified_by: git introspection | not available | filesystem`
+  - `git introspection`: `git rev-parse --verify HEAD` was used
+  - `not available`: no verification mechanism was available
+  - `filesystem`: reserved for future non-git verification
+
+All three review agents (architect, plan-review, precommit-review) and the
+implementation agent (coder) now include these fields in their output format.
+The project contract was extended with
+`agents.context-snapshot.snapshot-verification-fields`.
 
 ## Context receipt requirement
 

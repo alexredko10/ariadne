@@ -119,6 +119,8 @@ agents:
       - CONTEXT USED:
         - base_sha:
         - index_version:
+        - snapshot_verified: true | false | skipped
+        - snapshot_verified_by: git introspection | not available | filesystem
         - labels:
         - memory files read:
         - anchors used:

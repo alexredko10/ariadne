@@ -46,6 +46,9 @@ protected_behaviors:
   - id: "agents.git.read-only-introspection"
     text: "Agents may run git rev-parse --verify HEAD and git status --short for read-only introspection. All other git commands are forbidden unless explicitly approved."
     severity: "high"
+  - id: "agents.context-snapshot.snapshot-verification-fields"
+    text: "Review outputs must include snapshot_verified and snapshot_verified_by fields with machine-readable enum values (true/false/skipped, git introspection/not available/filesystem)."
+    severity: "high"
 
 validation_commands:
   python:
