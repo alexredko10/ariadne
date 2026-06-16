@@ -1,4 +1,4 @@
-version: "0.1"
+version: "0.2"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
