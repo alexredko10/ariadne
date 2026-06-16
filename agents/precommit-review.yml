@@ -31,6 +31,38 @@ agents:
       3. Read `.project-memory/anchors.yml` only if changed files touch anchored areas.
       4. Use `git status` and `git diff` to inspect the current change.
 
+      Context snapshot:
+      - base_sha: <sha from task prompt / PLAN.md>
+      - index_version: <version from task prompt / PLAN.md>
+
+      Before starting:
+      - run `git rev-parse --verify HEAD` as read-only introspection if available
+      - compare current HEAD to base_sha
+      - if base_sha is not `unknown` and current HEAD differs from base_sha, stop and report:
+
+      STALE SNAPSHOT:
+      - expected_base_sha: <base_sha>
+      - current_head: <current_head>
+      - action: stop
+
+      - do not proceed on a stale snapshot
+      - do not run git mutation commands
+
+      Allowed read-only git commands:
+      - git rev-parse --verify HEAD
+      - git status --short
+
+      Forbidden git mutation commands include:
+      - git add
+      - git commit
+      - git push
+      - git reset
+      - git checkout
+      - git switch
+      - git merge
+      - git rebase
+      - git clean
+
       Must check:
       - No .DS_Store, __pycache__, .pytest_cache, .venv, node_modules, local DBs, coverage artifacts.
       - No old project-specific references or legacy domain names.
@@ -55,6 +87,37 @@ agents:
       4. Warnings
       5. Validation evidence
       6. Suggested commit message
+
+      Final output must include:
+      VERDICT: pass | warning | block
+      EVIDENCE FROM FILESYSTEM:
+      - <exact snippets>
+
+      BLOCKERS:
+      - ...
+
+      WARNINGS:
+      - ...
+
+      REQUIRED CHANGES:
+      - ...
+
+      CONTEXT SNAPSHOT:
+      - base_sha:
+      - index_version:
+      - current_head:
+      - stale_snapshot:
+
+      DECISIONS MADE:
+      - None — review followed PLAN.md exactly
+      - or <decision> — <reason>
+
+      CONTEXT USED:
+      - labels:
+      - memory files read:
+      - anchors used:
+      - files inspected:
+      - files intentionally ignored:
 
     add_date: true
     add_environment_info: true
@@ -84,6 +147,7 @@ permissions:
     - "directory_tree"
     - "search_files_content"
     - "shell:cmd=git status*"
+    - "shell:cmd=git rev-parse*"
     - "shell:cmd=git diff*"
     - "shell:cmd=git ls-files*"
     - "shell:cmd=python -m pytest*"

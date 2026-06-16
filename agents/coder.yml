@@ -41,6 +41,38 @@ agents:
       4. Read `.project-memory/project_contract.yml` before editing.
       5. Do not read unrelated docs unless the task requires them.
 
+      Context snapshot:
+      - base_sha: <sha from task prompt / PLAN.md>
+      - index_version: <version from task prompt / PLAN.md>
+
+      Before starting:
+      - run `git rev-parse --verify HEAD` as read-only introspection if available
+      - compare current HEAD to base_sha
+      - if base_sha is not `unknown` and current HEAD differs from base_sha, stop and report:
+
+      STALE SNAPSHOT:
+      - expected_base_sha: <base_sha>
+      - current_head: <current_head>
+      - action: stop
+
+      - do not proceed on a stale snapshot
+      - do not run git mutation commands
+
+      Allowed read-only git commands:
+      - git rev-parse --verify HEAD
+      - git status --short
+
+      Forbidden git mutation commands include:
+      - git add
+      - git commit
+      - git push
+      - git reset
+      - git checkout
+      - git switch
+      - git merge
+      - git rebase
+      - git clean
+
       Current baseline repository shape:
       - services/task_intake, services/core, services/conductor, services/runner, services/model_gateway
       - packages/common, packages/contracts, packages/policy
@@ -68,6 +100,31 @@ agents:
       2. What changed
       3. Validation run
       4. Remaining risks / next step
+
+      Final output must include:
+      FINAL OUTPUT:
+      - files changed:
+        - <list>
+      - validation results:
+        - <command>: <result>
+      - decisions made:
+        - None — followed PLAN.md exactly
+        - or <decision> — <reason>
+      - deviations from PLAN.md:
+        - None
+        - or <deviation> — <reason and impact>
+      - confirm:
+        - no Docker commands run
+        - no git mutation commands run
+      - CONTEXT USED:
+        - base_sha:
+        - index_version:
+        - labels:
+        - memory files read:
+        - anchors used:
+        - files inspected:
+        - files modified:
+        - files intentionally ignored:
 
     add_date: true
     add_environment_info: true
@@ -106,6 +163,7 @@ permissions:
     - "shell:cmd=make lint*"
     - "shell:cmd=make smoke*"
     - "shell:cmd=git status*"
+    - "shell:cmd=git rev-parse*"
     - "shell:cmd=git diff*"
     - "shell:cmd=grep*"
     - "shell:cmd=find*"
