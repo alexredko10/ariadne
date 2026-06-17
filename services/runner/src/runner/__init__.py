@@ -2,5 +2,6 @@
 
 from runner.apply import ApplyPatch
 from runner.artifacts import ArtifactStore
+from runner.mock_coder import MockCoder
 
-__all__ = ["ApplyPatch", "ArtifactStore"]
+__all__ = ["ApplyPatch", "ArtifactStore", "MockCoder"]
