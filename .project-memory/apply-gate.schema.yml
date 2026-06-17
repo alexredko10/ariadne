@@ -1,0 +1,192 @@
+# Apply Gate Schema v0.1
+# ApplyRequest: machine-readable authorization request for canonical repository writes.
+# ApplyRequest kind: normalized_patch_apply_request
+
+schema_version: "0.1"
+
+# --- Required top-level fields ---
+required_fields:
+  - apply_request_id
+  - apply_request_kind
+  - normalized_patch_id
+  - normalized_patch_source
+  - run_record_path
+  - run_id
+  - base_sha
+  - base_sha_source
+  - current_head
+  - snapshot_verified
+  - snapshot_verified_by
+  - patch_normalized
+  - scope_approved
+  - allowed_paths
+  - forbidden_paths
+  - validation_results
+  - human_approval
+  - apply_decision
+  - post_apply_validation
+  - confirmations
+
+# --- Field reference ---
+# apply_request_id: string, unique identifier for this apply request
+# apply_request_kind: must be "normalized_patch_apply_request"
+# normalized_patch_id: string, references the normalized patch being applied
+# normalized_patch_source: path or run record reference to the normalized patch evidence
+# run_record_path: ".project-memory/pr/<PR-ID>/run_record.yml"
+# run_id: string, matches a run_id in the referenced run_record.yml
+# base_sha: sha from PLAN.md
+# base_sha_source: ".project-memory/pr/<PR-ID>/PLAN.md"
+# current_head: sha from git introspection at request time
+# snapshot_verified: boolean or "skipped"
+# snapshot_verified_by: string from enum
+# patch_normalized: boolean, must be true
+# scope_approved: boolean, must be true
+# allowed_paths: list of repo-relative POSIX paths or globs
+# forbidden_paths: list of repo-relative POSIX paths or globs
+# validation_results: list of validation command entries
+# human_approval: nested approval block (see below)
+# apply_decision: nested apply decision block (see below)
+# post_apply_validation: list of validation command entries
+# confirmations: nested confirmation block (see below)
+
+# --- human_approval fields ---
+human_approval:
+  required: true
+  status: "approved | rejected | changes_requested | waived_validation"
+  approved_by: "<human identifier>"
+  approval_reason: "<string>"
+  approved_at: "<ISO8601 UTC>"
+
+# --- validation waiver fields (when status == waived_validation) ---
+validation_waiver:
+  - field: "human_approver"
+    description: "Human who granted the waiver"
+  - field: "reason"
+    description: "Why validation was waived"
+  - field: "timestamp"
+    description: "ISO8601 UTC when waiver was granted"
+  - field: "waived_validation"
+    description: "Which validation check was waived"
+  - field: "risk_note"
+    description: "Known risks accepted by the waiver"
+
+# --- apply_decision fields ---
+apply_decision:
+  apply_status: "approved | rejected | applied | failed | skipped"
+  applied_by: "<human or controlled apply process identifier>"
+  applied_at: "<ISO8601 UTC or null>"
+  failure_reason: "<string or null>"
+
+# --- post_apply_validation entry fields ---
+# Each entry:
+#   command: "<string>"
+#   result: "passed | failed | skipped | not run"
+#   evidence: "<short sanitized bounded evidence>"
+
+# --- confirmations fields ---
+confirmations:
+  no_forbidden_paths: true
+  no_secrets: true
+  no_agent_git_mutation: true
+  no_agent_docker_commands: true
+  canonical_write_human_approved: true
+
+# --- Run record apply outcome fields ---
+# These are stored in run_record.yml runs[].apply_outcome
+run_record_apply_outcome:
+  apply_request_id: "<string>"
+  apply_status: "approved | rejected | applied | failed | skipped"
+  approved_by: "<human identifier>"
+  approval_reason: "<string>"
+  applied_by: "<human or controlled apply process identifier>"
+  applied_at: "<ISO8601 UTC or null>"
+  post_apply_validation:
+    - command: "<string>"
+      result: "passed | failed | skipped | not run"
+      evidence: "<short sanitized bounded evidence>"
+
+# --- Enum: human_approval.status ---
+# Values:
+#   approved              - Human approved the apply request
+#   rejected              - Human rejected the apply request
+#   changes_requested     - Human requested changes before approval
+#   waived_validation     - Human approved with specific validation waived
+
+# --- Enum: apply_status ---
+# Values:
+#   approved   - Apply request is approved but not yet executed
+#   rejected   - Apply request is rejected
+#   applied    - Canonical write was performed
+#   failed     - Apply attempt failed
+#   skipped    - Apply was skipped (e.g. superseded)
+
+# --- Enum: validation_result ---
+# Values:
+#   passed
+#   failed
+#   skipped
+#   not run
+
+# --- Enum: snapshot_verified_by ---
+# Values:
+#   git introspection
+#   filesystem
+#   not available
+
+# --- Apply allowed only if ---
+# - base_sha == current_head
+# - snapshot_verified == true
+# - patch_normalized == true
+# - scope_approved == true
+# - no forbidden paths are present
+# - no secrets are present
+# - human approval is present
+# - validation passed, or validation was explicitly waived by a human with reason
+# - allowed_paths and forbidden_paths are recorded
+# - ApplyRequest references the originating run_record
+# - ApplyRequest references the normalized_patch_id
+
+# --- Apply must stop / reject if ---
+# - base_sha != current_head
+# - snapshot verification is false or skipped without explicit human handling
+# - patch is not normalized
+# - forbidden paths are present
+# - secrets are detected
+# - human approval is missing
+# - validation failed and no explicit human waiver exists
+# - allowed_paths are absent
+# - forbidden_paths are absent
+# - originating run_record is missing
+# - normalized_patch_id is missing
+
+# --- Agent prohibitions ---
+# Agents must not run:
+# - git apply
+# - git add
+# - git commit
+# - git push
+# - git reset
+# - git checkout
+# - git switch
+# - git merge
+# - git rebase
+# - git clean
+#
+# Agents must not:
+# - directly mutate the canonical repository
+# - apply patches to the canonical repository
+# - perform Docker apply side effects
+# - bypass human/HITL approval
+
+# --- Safety rules ---
+# ApplyRequest is evidence and authorization request, not execution by itself.
+# Apply approval does not imply git commit/push by agents.
+# Canonical repo write remains human/HITL gated.
+# ApplyRequest must not contain secrets.
+# Validation evidence must be sanitized and bounded (max 2000 chars).
+# File paths must be repo-relative POSIX paths.
+# Forbidden path checks must be explicit.
+# Allowed path checks must be explicit.
+# Docker side effects are forbidden for agents.
+# Git mutation is forbidden for agents.
+# Automatic apply is forbidden in this PR.
