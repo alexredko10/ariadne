@@ -1,4 +1,4 @@
-version: "0.3"
+version: "0.4"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -38,6 +38,7 @@ labels:
     preferred_agent: "precommit-review"
     additional_files:
       - ".project-memory/run-record.schema.yml"
+      - ".project-memory/apply-gate.schema.yml"
   agent-config:
     description: "Docker Agent YAML configs and agent operating rules."
     bundles:
@@ -49,6 +50,13 @@ labels:
       - ".project-memory/context-bundles/contracts.yml"
     additional_files:
       - ".project-memory/run-record.schema.yml"
+    preferred_agent: "precommit-review"
+  apply-gate:
+    description: "Apply Gate / Canonical Write Contract for human/HITL-approved repository writes."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - ".project-memory/apply-gate.schema.yml"
     preferred_agent: "precommit-review"
 
 agent_memory_profiles:
