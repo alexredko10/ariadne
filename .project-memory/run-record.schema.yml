@@ -1,0 +1,102 @@
+# Run Record Schema v0.1
+# Canonical per-PR run record path pattern: .project-memory/pr/<PR-ID>/run_record.yml
+# Run record kind: per-PR aggregate with ordered runs: list
+
+schema_version: "0.1"
+
+# --- Top-level fields ---
+# pr_id: string, e.g. "0017"
+# pr_slug: string, e.g. "feature-workspace-run-record-contract"
+# runs: ordered list of run items (append-only)
+
+# --- Per-run-item required fields ---
+required_run_fields:
+  - run_id
+  - agent
+  - mode
+  - author_type
+  - base_sha
+  - base_sha_source
+  - index_version
+  - index_version_source
+  - current_head
+  - stale_snapshot
+  - snapshot_verified
+  - snapshot_verified_by
+  - files_changed
+  - validation_results
+  - decisions_made
+  - deviations_from_plan
+  - confirmations
+  - context_used
+
+# --- Optional fields ---
+optional_run_fields:
+  - created_at
+
+# --- created_at rule ---
+# Optional in schema v0.1.
+# If present, must be ISO8601 UTC.
+# Absence does not invalidate schema v0.1.
+
+# --- run_id rule ---
+# Required.
+# Must be unique within one PR run_record.yml.
+# Recommended format: <PR-ID>-<phase>-<agent>-<sequence>
+# Examples: 0017-plan-coder-001, 0017-review-plan-review-001
+
+# --- Path rule ---
+# All file path fields must be repo-relative POSIX paths.
+# Example: services/runner/src/...
+# Not: /absolute/path or ./relative
+
+# --- Validation evidence rule ---
+# Sanitized: no secrets, credentials, tokens.
+# Bounded: maximum 2000 characters.
+# No full environment dumps or full logs.
+# Prefer short evidence: "72 passed", "compileall clean", "doctor passed"
+
+# --- File path fields (must be repo-relative POSIX) ---
+# files_changed[].path
+# context_used.files_inspected[]
+# context_used.files_modified[]
+# context_used.files_intentionally_ignored[]
+# context_used.memory_files_read[]
+
+# --- Enum: snapshot_verified ---
+# Values:
+#   true       - git rev-parse ran and current_head == base_sha
+#   false      - git rev-parse ran and current_head != base_sha
+#   skipped    - verification could not run or base_sha was unknown
+
+# --- Enum: snapshot_verified_by ---
+# Values:
+#   git introspection  - git rev-parse --verify HEAD was used
+#   filesystem         - reserved for future non-git verification
+#   not available      - no verification mechanism available
+
+# --- Enum: validation_result ---
+# Values:
+#   passed
+#   failed
+#   skipped
+#   not run
+
+# --- Enum: stale_snapshot ---
+# Values:
+#   true      - current_head != base_sha
+#   false     - current_head == base_sha
+#   unknown   - verification could not run
+
+# --- Enum: author_type ---
+# Values:
+#   agent
+#   human
+
+# --- Safety rules ---
+# Run records are evidence, not authority to mutate repo.
+# Run records do not grant patch application rights.
+# Run records must not contain secrets.
+# Run record creation remains human-controlled/manual until automation is explicitly planned.
+# No automatic memory writes in this PR.
+# No backfilling previous PRs in this PR.

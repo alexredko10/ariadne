@@ -1,4 +1,4 @@
-version: "0.2"
+version: "0.3"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -36,11 +36,20 @@ labels:
     bundles:
       - ".project-memory/context-bundles/contracts.yml"
     preferred_agent: "precommit-review"
+    additional_files:
+      - ".project-memory/run-record.schema.yml"
   agent-config:
     description: "Docker Agent YAML configs and agent operating rules."
     bundles:
       - ".project-memory/context-bundles/agent-config.yml"
     preferred_agent: "architect"
+  run-record:
+    description: "Feature Workspace Run Record schema and contract for agent output evidence."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - ".project-memory/run-record.schema.yml"
+    preferred_agent: "precommit-review"
 
 agent_memory_profiles:
   architect:
