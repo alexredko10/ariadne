@@ -169,6 +169,13 @@ protected_behaviors:
   - id: "agents.apply-gate.run-record-apply-outcome"
     text: "Apply outcomes must be recorded in the originating run_record under apply_outcome with all required fields."
     severity: "high"
+  - id: "agents.review.validation-shell-access"
+    text: >
+      plan-review agent may execute read-only validation commands
+      (pytest, compileall, runner doctor, grep) to self-verify
+      implementation PRs without requiring author-supplied evidence.
+      This does not grant write access, git mutation, or Docker access.
+    severity: "medium"
 
 validation_commands:
   python:

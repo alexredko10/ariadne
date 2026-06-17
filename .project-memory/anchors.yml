@@ -52,3 +52,12 @@ anchors:
     paths:
       - "services/task_intake/"
       - "docs/api/TASK_INTAKE_API.md"
+
+  agents.review.validation-shell-access:
+    type: "agent-permission"
+    labels: ["agent-config", "contracts"]
+    description: >
+      plan-review agent has read-only validation shell access.
+      Does not grant write_file, edit_file, git mutation, or Docker.
+    contract_ids:
+      - "agents.review.validation-shell-access"
