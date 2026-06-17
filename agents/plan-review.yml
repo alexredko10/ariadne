@@ -75,6 +75,14 @@ agents:
       - Does it avoid dependency installation unless explicitly approved?
       - Does it include stop conditions?
 
+      Validation commands available (run if author has not attached evidence):
+      - python -m pytest -q
+      - python -m pytest <path> -v
+      - python -m compileall -f services packages
+      - PYTHONPATH=services/runner/src python -m runner doctor
+      - grep -R -n "<pattern>" <paths>
+      These commands are read-only. They do not mutate files or git state.
+
       Output format:
       1. Verdict: approve | revise | block
       2. Scope assessment
@@ -144,6 +152,9 @@ permissions:
     - "shell:cmd=git diff --name-only*"
     - "shell:cmd=grep*"
     - "shell:cmd=find*"
+    - "shell:cmd=python -m pytest*"
+    - "shell:cmd=python -m compileall*"
+    - "shell:cmd=PYTHONPATH=* python*"
   deny:
     - "write_file"
     - "edit_file"
