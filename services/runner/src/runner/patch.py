@@ -12,7 +12,7 @@ import posixpath
 import re
 import string
 
-from services.runner.src.runner.models import NormalizedPatch
+from runner.models import NormalizedPatch
 
 # ---------------------------------------------------------------------------
 # Constants
