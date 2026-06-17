@@ -2,7 +2,7 @@
 
 import pytest
 
-from services.runner.src.runner.models import (
+from runner.models import (
     CommandSpec,
     NormalizedPatch,
     RunArtifact,
