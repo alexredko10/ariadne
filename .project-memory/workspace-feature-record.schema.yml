@@ -1,0 +1,150 @@
+# Workspace Feature Record Schema v0.1
+# Contract artifact — not a runtime implementation.
+#
+# Current storage is schema/contract only in .project-memory/.
+# Actual feature record instances and .ariadne/features/{id}.yml are future work.
+
+schema_version: "0.1"
+
+# --- Top-level required fields ---
+required_fields:
+  - schema_version
+  - feature_workspace_id
+  - title
+  - status
+  - created_at
+  - created_by
+  - source_pr
+  - run_record_links
+  - context_steward
+  - scope
+  - artifacts
+  - decisions
+  - open_questions
+  - handoff
+
+# --- feature_workspace_id rules ---
+# - required
+# - stable string id
+# - repo-unique
+# - lowercase kebab-case recommended
+# - must not contain path separators
+# - must not imply current physical storage under .ariadne/**
+
+# --- status enum ---
+# Values:
+#   planned
+#   active
+#   merged
+#   archived
+#   superseded
+#   abandoned
+
+# --- run_record_links ---
+# Each entry:
+#   run_record_path: ".project-memory/pr/<PR-ID>/run_record.yml"
+#   run_id: "<run_id>"
+#   feature_workspace_id: "<feature_workspace_id>"
+#
+# Rules:
+# - each link must include run_record_path
+# - each link must include run_id
+# - each link must include feature_workspace_id
+# - run_id -> feature_workspace_id relationship must be explicit
+# - run_record_path must follow .project-memory/pr/<PR-ID>/run_record.yml
+# - PR 0024 does not create actual run_record.yml files
+# - PR 0024 does not modify .project-memory/run-record.schema.yml
+
+# --- context_steward contract ---
+# context_steward:
+#   archival_required_after_merge: true
+#   archival_status: "pending | archived | not_required"
+#   archival_note: "<short text>"
+#
+# Rules:
+# - Context Steward archival after merge must be explicitly represented.
+# - A merged feature should not silently disappear into chat history.
+# - Archival means preserving final feature state as project memory.
+# - PR 0024 defines the contract only; it does not implement an archival runner.
+
+# --- scope fields ---
+# scope:
+#   summary: "<short text>"
+#   allowed_paths: []
+#   forbidden_paths: []
+#   changed_paths: []
+
+# --- artifacts fields ---
+# artifacts:
+#   normalized_patch_sha256: "<optional>"
+#   raw_diff_sha256: "<optional>"
+#   apply_request_sha256: "<optional>"
+#   notes: []
+#
+# Rules:
+# - artifact sha256 references are optional in this PR
+# - artifact references do not authorize canonical mutation
+# - Artifact Store remains evidence storage only
+
+# --- decisions and handoff ---
+# decisions:
+#   - decision: "<text>"
+#     reason: "<text>"
+#
+# handoff:
+#   next_action: "<text>"
+#   owner: "<human | agent | context-steward>"
+#   notes: []
+
+# --- Invalid cases ---
+# - missing feature_workspace_id
+# - duplicate feature_workspace_id
+# - invalid status
+# - missing run_id in run_record_links
+# - missing feature_workspace_id in run_record_links
+# - run_record_path outside .project-memory/pr/<PR-ID>/run_record.yml
+# - archival_required_after_merge missing
+# - artifact sha malformed if present
+# - paths using absolute paths or backslashes
+# - references to .ariadne/** as current storage
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# schema_version: "0.1"
+# feature_workspace_id: "run-record-schema-hardening"
+# title: "Run Record Schema Hardening"
+# status: "merged"
+# created_at: "2026-06-18T00:00:00Z"
+# created_by: "coder"
+# source_pr: "0019"
+# run_record_links:
+#   - run_record_path: ".project-memory/pr/0019-run-record-schema-hardening/run_record.yml"
+#     run_id: "0019-plan-coder-001"
+#     feature_workspace_id: "run-record-schema-hardening"
+# context_steward:
+#   archival_required_after_merge: true
+#   archival_status: "pending"
+#   archival_note: "Feature merged, awaiting Context Steward archival."
+# scope:
+#   summary: "Hardened run-record.schema.yml with strict reference semantics."
+#   allowed_paths:
+#     - ".project-memory/run-record.schema.yml"
+#   forbidden_paths:
+#     - ".project-memory/apply-gate.schema.yml"
+#   changed_paths:
+#     - ".project-memory/run-record.schema.yml"
+# artifacts:
+#   normalized_patch_sha256: null
+#   raw_diff_sha256: null
+#   apply_request_sha256: null
+#   notes: []
+# decisions:
+#   - decision: "Use canonical fields decisions/deviations"
+#     reason: "Backward-compatible aliases preserved in schema v0.1"
+# open_questions:
+#   - "None"
+# handoff:
+#   next_action: "Archive feature state via Context Steward after merge."
+#   owner: "context-steward"
+#   notes: []
