@@ -1,4 +1,4 @@
-version: "0.9"
+version: "0.10"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -42,6 +42,7 @@ labels:
       - ".project-memory/workspace-feature-record.schema.yml"
       - "docs/adr/0001-ariadne-namespace.md"
       - ".project-memory/context-steward-archival.schema.yml"
+      - ".project-memory/task-intake-request.schema.yml"
   agent-config:
     description: "Docker Agent YAML configs and agent operating rules."
     bundles:
@@ -86,6 +87,14 @@ labels:
       - ".project-memory/context-steward-archival.schema.yml"
       - ".project-memory/workspace-feature-record.schema.yml"
     preferred_agent: "architect"
+
+  task-intake:
+    description: "Task Intake API Request contract for accepted/rejected intake, task_id, validation boundaries, and future runner handoff."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - ".project-memory/task-intake-request.schema.yml"
+    preferred_agent: "coder"
 
 agent_memory_profiles:
   architect:
