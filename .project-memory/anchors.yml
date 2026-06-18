@@ -103,3 +103,45 @@ anchors:
     description: "Artifact sha256 references in Workspace Feature Records are evidence only and do not authorize canonical mutation."
     contract_ids:
       - "workspace-feature.record.artifact-references-evidence-only"
+
+  ariadne.namespace.required:
+    type: "adr-contract"
+    labels: ["contracts", "ariadne-namespace"]
+    description: ".ariadne/ namespace defined in docs/adr/0001-ariadne-namespace.md. .ariadne/ is runtime/workspace state; .project-memory/ is durable contracts/history/project memory."
+    contract_ids:
+      - "ariadne.namespace.required"
+
+  ariadne.namespace.adr-path:
+    type: "adr-contract"
+    labels: ["contracts", "ariadne-namespace"]
+    description: "ADR: docs/adr/0001-ariadne-namespace.md"
+    contract_ids:
+      - "ariadne.namespace.adr-path"
+
+  ariadne.namespace.features-storage-path:
+    type: "adr-contract"
+    labels: ["contracts", "ariadne-namespace", "workspace-feature"]
+    description: "Future Workspace Feature Record physical storage path: .ariadne/features/{id}.yml"
+    contract_ids:
+      - "ariadne.namespace.features-storage-path"
+
+  ariadne.namespace.no-feature-instances-this-pr:
+    type: "adr-contract"
+    labels: ["contracts", "ariadne-namespace"]
+    description: "PR 0025 defines the .ariadne/ namespace only and does not create actual feature record instances."
+    contract_ids:
+      - "ariadne.namespace.no-feature-instances-this-pr"
+
+  ariadne.namespace.context-steward-writer-future-contract:
+    type: "adr-contract"
+    labels: ["contracts", "ariadne-namespace", "workspace-feature"]
+    description: "Context Steward archival writer for .ariadne/features/{id}.yml requires separate future workflow contract (PR 0026)."
+    contract_ids:
+      - "ariadne.namespace.context-steward-writer-future-contract"
+
+  ariadne.namespace.no-agent-writes-without-contract:
+    type: "adr-contract"
+    labels: ["contracts", "ariadne-namespace"]
+    description: "No agents may write .ariadne/** without an explicit future contract permitting it."
+    contract_ids:
+      - "ariadne.namespace.no-agent-writes-without-contract"
