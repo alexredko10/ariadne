@@ -1,4 +1,4 @@
-version: "0.7"
+version: "0.8"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -40,6 +40,7 @@ labels:
       - ".project-memory/run-record.schema.yml"
       - ".project-memory/apply-gate.schema.yml"
       - ".project-memory/workspace-feature-record.schema.yml"
+      - "docs/adr/0001-ariadne-namespace.md"
   agent-config:
     description: "Docker Agent YAML configs and agent operating rules."
     bundles:
@@ -66,6 +67,14 @@ labels:
     additional_files:
       - ".project-memory/workspace-feature-record.schema.yml"
     preferred_agent: "precommit-review"
+  ariadne-namespace:
+    description: ".ariadne/ namespace ADR and contract for repository-local runtime/workspace state, feature record future storage, and Context Steward archival sequencing."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - "docs/adr/0001-ariadne-namespace.md"
+      - ".project-memory/workspace-feature-record.schema.yml"
+    preferred_agent: "architect"
 
 agent_memory_profiles:
   architect:
