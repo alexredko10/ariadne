@@ -194,3 +194,52 @@ anchors:
     description: "PR 0026 defines the archival workflow contract only. No actual .ariadne/** files are created."
     contract_ids:
       - "context-steward.archival.no-actual-records-this-pr"
+
+  task-intake.request.required:
+    type: "contract"
+    labels: ["contracts", "task-intake"]
+    description: "Task Intake Request contract defined in .project-memory/task-intake-request.schema.yml."
+    contract_ids:
+      - "task-intake.request.required"
+
+  task-intake.request.schema-path:
+    type: "contract"
+    labels: ["contracts", "task-intake"]
+    description: "Schema path: .project-memory/task-intake-request.schema.yml"
+    contract_ids:
+      - "task-intake.request.schema-path"
+
+  task-intake.request.task-id-required-on-acceptance:
+    type: "contract"
+    labels: ["contracts", "task-intake"]
+    description: "Accepted response must include a task_id. Format: task_<bounded-id>."
+    contract_ids:
+      - "task-intake.request.task-id-required-on-acceptance"
+
+  task-intake.request.no-runner-invocation:
+    type: "contract"
+    labels: ["contracts", "task-intake"]
+    description: "Task Intake must not invoke the runner. Accepted intake does not mean execution."
+    contract_ids:
+      - "task-intake.request.no-runner-invocation"
+
+  task-intake.request.no-run-record-creation:
+    type: "contract"
+    labels: ["contracts", "task-intake", "run-record"]
+    description: "Task Intake must not create run_record.yml files."
+    contract_ids:
+      - "task-intake.request.no-run-record-creation"
+
+  task-intake.request.no-ariadne-writes:
+    type: "contract"
+    labels: ["contracts", "task-intake", "ariadne-namespace"]
+    description: "Task Intake must not write .ariadne/**."
+    contract_ids:
+      - "task-intake.request.no-ariadne-writes"
+
+  task-intake.request.runner-handoff-future-contract:
+    type: "contract"
+    labels: ["contracts", "task-intake"]
+    description: "Runner handoff requires a future Task Intake → Runner Handoff Contract. PR 0028 does not define it."
+    contract_ids:
+      - "task-intake.request.runner-handoff-future-contract"

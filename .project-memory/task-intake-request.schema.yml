@@ -1,0 +1,180 @@
+# Task Intake Request Schema v0.1
+# Contract artifact — not a runtime implementation.
+#
+# Defines accepted/rejected task intake request shape, status/enum contracts,
+# task_id rules, validation boundaries, and relationship to future runner handoff.
+
+schema_version: "0.1"
+
+# --- Top-level required fields ---
+required_fields:
+  - schema_version
+  - task_id
+  - request
+  - response
+  - validation
+  - status
+  - error
+  - handoff
+  - forbidden_actions
+
+# --- request contract ---
+# request:
+#   prompt: "<task prompt>"
+#   title: "<optional short title>"
+#   source: "<human | agent | system>"
+#   metadata: {}
+#
+# Rules:
+# - prompt is required
+# - prompt must be non-blank
+# - prompt must have bounded max length
+# - title is optional
+# - metadata is optional and bounded
+# - request must not include secrets
+# - request must not include executable instructions for shell/git/docker
+# - request does not authorize execution
+
+# --- task_id contract ---
+# task_id:
+#   format: "task_<bounded-id>"
+#   deterministic_or_well_bounded: true
+#   source: "intake validation result"
+#
+# Rules:
+# - accepted task returns a task_id
+# - task_id is not a run_id
+# - task_id is not a feature_workspace_id
+# - task_id does not imply execution
+# - future runner handoff may link task_id to run_id
+# - future workspace feature may link task_id to feature_workspace_id
+
+# --- response contract ---
+# response:
+#   accepted:
+#     status: "accepted"
+#     task_id: "<task_id>"
+#   rejected:
+#     status: "rejected"
+#     reason: "<structured reason>"
+#     error_code: "<error code>"
+
+# --- status enum ---
+# Values:
+#   accepted
+#   rejected
+
+# --- error enum ---
+# Values:
+#   blank_prompt
+#   oversized_prompt
+#   invalid_metadata
+#   forbidden_secret
+#   forbidden_execution_instruction
+#   unsupported_request
+
+# --- validation contract ---
+# validation:
+#   blank_prompt_rejected: true
+#   oversized_prompt_rejected: true
+#   structured_rejection_reason_required: true
+#   no_execution_authorization: true
+
+# --- handoff contract ---
+# handoff:
+#   runner_handoff_allowed: false
+#   runner_handoff_contract_required: true
+#   future_contract: "Task Intake → Runner Handoff Contract"
+#
+# Rules:
+# - PR 0028 does not define runner handoff
+# - runner handoff remains future PR
+# - accepted intake request does not invoke runner
+# - accepted intake request does not create run_record.yml
+
+# --- forbidden_actions ---
+# Forbidden:
+# - invoke runner
+# - orchestrate agents
+# - execute task
+# - write .ariadne/**
+# - create run_record.yml
+# - create feature records
+# - modify runner code
+# - modify Run Record schema
+# - modify Workspace Feature Record schema
+# - modify Context Steward archival schema
+# - modify Apply Gate schema
+# - add persistence/database
+# - add Docker/workflow files
+
+# --- Invalid cases ---
+# - blank prompt
+# - oversized prompt
+# - missing prompt
+# - unsupported metadata shape
+# - request containing secret-like fields
+# - request containing shell/git/docker execution instruction
+# - response accepted without task_id
+# - rejected response without structured reason
+# - task_id confused with run_id
+# - task_id confused with feature_workspace_id
+# - request implying runner execution
+# - request implying .ariadne/** write
+# - request implying run_record.yml creation
+
+# ============================================================
+# Minimal valid accepted example:
+# ============================================================
+# schema_version: "0.1"
+# task_id:
+#   format: "task_<bounded-id>"
+#   deterministic_or_well_bounded: true
+#   source: "intake validation result"
+# request:
+#   prompt: "Implement login page"
+#   title: "Login page feature"
+#   source: "human"
+# response:
+#   accepted:
+#     status: "accepted"
+#     task_id: "task_a1b2c3d4e5f6"
+# validation:
+#   blank_prompt_rejected: true
+#   oversized_prompt_rejected: true
+#   structured_rejection_reason_required: true
+#   no_execution_authorization: true
+# status: "accepted"
+# handoff:
+#   runner_handoff_allowed: false
+#   runner_handoff_contract_required: true
+#   future_contract: "Task Intake → Runner Handoff Contract"
+# forbidden_actions: []
+
+# ============================================================
+# Minimal valid rejected example:
+# ============================================================
+# schema_version: "0.1"
+# task_id:
+#   format: "task_<bounded-id>"
+#   deterministic_or_well_bounded: true
+#   source: "intake validation result"
+# request:
+#   prompt: ""
+#   source: "human"
+# response:
+#   rejected:
+#     status: "rejected"
+#     reason: "Prompt must not be blank."
+#     error_code: "blank_prompt"
+# validation:
+#   blank_prompt_rejected: true
+#   oversized_prompt_rejected: true
+#   structured_rejection_reason_required: true
+#   no_execution_authorization: true
+# status: "rejected"
+# handoff:
+#   runner_handoff_allowed: false
+#   runner_handoff_contract_required: true
+#   future_contract: "Task Intake → Runner Handoff Contract"
+# forbidden_actions: []
