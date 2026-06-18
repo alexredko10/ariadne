@@ -1,4 +1,4 @@
-version: "0.6"
+version: "0.7"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -39,6 +39,7 @@ labels:
     additional_files:
       - ".project-memory/run-record.schema.yml"
       - ".project-memory/apply-gate.schema.yml"
+      - ".project-memory/workspace-feature-record.schema.yml"
   agent-config:
     description: "Docker Agent YAML configs and agent operating rules."
     bundles:
@@ -57,6 +58,13 @@ labels:
       - ".project-memory/context-bundles/contracts.yml"
     additional_files:
       - ".project-memory/apply-gate.schema.yml"
+    preferred_agent: "precommit-review"
+  workspace-feature:
+    description: "Workspace Feature Record contract for durable feature/workspace state, run record links, and Context Steward archival."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - ".project-memory/workspace-feature-record.schema.yml"
     preferred_agent: "precommit-review"
 
 agent_memory_profiles:

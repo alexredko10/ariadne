@@ -61,3 +61,45 @@ anchors:
       Does not grant write_file, edit_file, git mutation, or Docker.
     contract_ids:
       - "agents.review.validation-shell-access"
+
+  workspace-feature.record.required:
+    type: "contract"
+    labels: ["contracts", "workspace-feature"]
+    description: "Workspace Feature Record schema is defined in .project-memory/workspace-feature-record.schema.yml."
+    contract_ids:
+      - "workspace-feature.record.required"
+
+  workspace-feature.record.schema-path:
+    type: "contract"
+    labels: ["contracts", "workspace-feature"]
+    description: "Schema path: .project-memory/workspace-feature-record.schema.yml"
+    contract_ids:
+      - "workspace-feature.record.schema-path"
+
+  workspace-feature.record.run-id-to-feature-workspace-id:
+    type: "contract"
+    labels: ["contracts", "workspace-feature", "run-record"]
+    description: "run_id -> feature_workspace_id relationship must be explicit in run_record_links."
+    contract_ids:
+      - "workspace-feature.record.run-id-to-feature-workspace-id"
+
+  workspace-feature.record.context-steward-archival-required:
+    type: "contract"
+    labels: ["contracts", "workspace-feature"]
+    description: "Context Steward archival after merge is required. A merged feature must not silently disappear into chat history."
+    contract_ids:
+      - "workspace-feature.record.context-steward-archival-required"
+
+  workspace-feature.record.no-ariadne-storage-yet:
+    type: "contract"
+    labels: ["contracts", "workspace-feature"]
+    description: "PR 0024 does not introduce .ariadne/** namespace. Actual feature instances are future work."
+    contract_ids:
+      - "workspace-feature.record.no-ariadne-storage-yet"
+
+  workspace-feature.record.artifact-references-evidence-only:
+    type: "contract"
+    labels: ["contracts", "workspace-feature", "artifacts"]
+    description: "Artifact sha256 references in Workspace Feature Records are evidence only and do not authorize canonical mutation."
+    contract_ids:
+      - "workspace-feature.record.artifact-references-evidence-only"
