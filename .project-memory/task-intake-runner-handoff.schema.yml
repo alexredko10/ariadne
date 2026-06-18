@@ -1,0 +1,263 @@
+# Task Intake → Runner Handoff Schema v0.1
+# Contract artifact — not a runtime implementation.
+#
+# Defines how a future accepted Task Intake request may be handed off
+# to the runner layer.  PR 0029 is contract-only.
+
+schema_version: "0.1"
+
+# --- Top-level required fields ---
+required_fields:
+  - schema_version
+  - handoff_id
+  - source
+  - input
+  - output
+  - preconditions
+  - runner_boundary
+  - run_record_boundary
+  - workspace_boundary
+  - validation
+  - status
+  - error
+  - forbidden_actions
+  - future_implementation
+
+# --- source contract ---
+# source:
+#   task_intake_request_schema: ".project-memory/task-intake-request.schema.yml"
+#   run_record_schema: ".project-memory/run-record.schema.yml"
+#   apply_gate_schema: ".project-memory/apply-gate.schema.yml"
+
+# --- input contract ---
+# input:
+#   task_id: "<task_id from accepted intake request>"
+#   prompt: "<validated prompt>"
+#   title: "<optional title>"
+#   source: "<human | agent | system>"
+#   metadata: {}
+#
+# Rules:
+# - task_id is required
+# - task_id must come from accepted Task Intake Request
+# - task_id is not run_id
+# - task_id is not feature_workspace_id
+# - prompt must already satisfy Task Intake Request validation
+# - handoff input does not authorize execution by itself
+# - handoff input must not contain secrets
+# - handoff input must not contain shell/git/docker execution instructions
+
+# --- output contract ---
+# output:
+#   accepted_for_runner:
+#     status: "accepted_for_runner"
+#     task_id: "<task_id>"
+#     handoff_id: "<handoff_id>"
+#   rejected_for_runner:
+#     status: "rejected_for_runner"
+#     task_id: "<task_id>"
+#     reason: "<structured reason>"
+#     error_code: "<error code>"
+
+# --- preconditions ---
+# - task intake request is valid and accepted
+# - task_id is present
+# - prompt is validated and bounded
+# - no secrets detected
+# - no executable shell/git/docker instructions
+# - runner handoff contract exists
+# - human-approved future runtime policy exists before any actual execution
+# - run record must not exist before actual runner execution
+# - .ariadne/** writes are forbidden in this handoff contract
+
+# --- runner_boundary ---
+# runner_boundary:
+#   runner_invocation_allowed_this_pr: false
+#   runner_invocation_future_contract_required: true
+#   runner_request_creation_allowed_this_pr: false
+#   orchestration_allowed_this_pr: false
+#
+# Rules:
+# - PR 0029 does not invoke runner
+# - PR 0029 does not create runner requests
+# - PR 0029 does not implement orchestration
+# - Future runtime may create runner request only under a later implementation contract
+# - Runner execution remains separate from intake and handoff contracts
+
+# --- run_record_boundary ---
+# run_record_boundary:
+#   run_record_creation_allowed_this_pr: false
+#   run_id_creation_allowed_this_pr: false
+#   future_runner_execution_may_create_run_id: true
+#   future_runner_execution_may_link_task_id_to_run_id: true
+#
+# Rules:
+# - task_id may be linked to future run_id
+# - task_id is never itself a run_id
+# - no run_record.yml may be created in PR 0029
+# - run record remains execution evidence, not intake/handoff evidence
+
+# --- workspace_boundary ---
+# workspace_boundary:
+#   feature_workspace_creation_allowed_this_pr: false
+#   future_workspace_flow_may_link_task_id: true
+#
+# Rules:
+# - PR 0029 does not create Workspace Feature Records
+# - PR 0029 does not write .ariadne/**
+# - future workspace flow may link task_id to feature_workspace_id under separate contract
+
+# --- status enum ---
+# Values:
+#   accepted_for_runner
+#   rejected_for_runner
+
+# --- error enum ---
+# Values:
+#   missing_task_id
+#   invalid_task_id
+#   invalid_intake_reference
+#   invalid_prompt
+#   forbidden_secret
+#   forbidden_execution_instruction
+#   runner_contract_missing
+#   unsupported_handoff
+
+# --- validation contract ---
+# validation:
+#   task_id_required: true
+#   task_id_must_not_be_run_id: true
+#   task_id_must_not_be_feature_workspace_id: true
+#   accepted_intake_required: true
+#   prompt_already_validated: true
+#   no_execution_authorization: true
+#   no_runner_invocation: true
+#   no_run_record_creation: true
+#   no_ariadne_writes: true
+
+# --- forbidden_actions ---
+# - invoke runner
+# - create runner request
+# - orchestrate agents
+# - execute task
+# - create run_id
+# - create run_record.yml
+# - write .ariadne/**
+# - create feature records
+# - modify Task Intake service code
+# - modify runner code
+# - modify Run Record schema
+# - modify Task Intake Request schema
+# - modify Workspace Feature Record schema
+# - modify Context Steward archival schema
+# - modify Apply Gate schema
+# - add persistence/database
+# - add Docker/workflow files
+
+# --- Invalid cases ---
+# - missing task_id
+# - task_id confused with run_id
+# - task_id confused with feature_workspace_id
+# - task_id not linked to accepted intake request
+# - invalid prompt
+# - secret-like fields
+# - shell/git/docker execution instruction
+# - request implying immediate runner execution
+# - request implying run_record.yml creation
+# - request implying .ariadne/** write
+# - handoff accepted without handoff_id
+# - rejected handoff without structured reason
+
+# ============================================================
+# Minimal accepted_for_runner example:
+# ============================================================
+# schema_version: "0.1"
+# handoff_id: "handoff_a1b2c3d4"
+# source:
+#   task_intake_request_schema: ".project-memory/task-intake-request.schema.yml"
+#   run_record_schema: ".project-memory/run-record.schema.yml"
+#   apply_gate_schema: ".project-memory/apply-gate.schema.yml"
+# input:
+#   task_id: "task_a1b2c3d4e5f6"
+#   prompt: "Implement login page"
+#   title: "Login page feature"
+#   source: "human"
+# output:
+#   accepted_for_runner:
+#     status: "accepted_for_runner"
+#     task_id: "task_a1b2c3d4e5f6"
+#     handoff_id: "handoff_a1b2c3d4"
+# preconditions: []
+# runner_boundary:
+#   runner_invocation_allowed_this_pr: false
+#   runner_invocation_future_contract_required: true
+#   runner_request_creation_allowed_this_pr: false
+#   orchestration_allowed_this_pr: false
+# run_record_boundary:
+#   run_record_creation_allowed_this_pr: false
+#   run_id_creation_allowed_this_pr: false
+#   future_runner_execution_may_create_run_id: true
+#   future_runner_execution_may_link_task_id_to_run_id: true
+# workspace_boundary:
+#   feature_workspace_creation_allowed_this_pr: false
+#   future_workspace_flow_may_link_task_id: true
+# validation:
+#   task_id_required: true
+#   task_id_must_not_be_run_id: true
+#   task_id_must_not_be_feature_workspace_id: true
+#   accepted_intake_required: true
+#   prompt_already_validated: true
+#   no_execution_authorization: true
+#   no_runner_invocation: true
+#   no_run_record_creation: true
+#   no_ariadne_writes: true
+# status: "accepted_for_runner"
+# forbidden_actions: []
+# future_implementation: []
+
+# ============================================================
+# Minimal rejected_for_runner example:
+# ============================================================
+# schema_version: "0.1"
+# handoff_id: "handoff_rejected_001"
+# source:
+#   task_intake_request_schema: ".project-memory/task-intake-request.schema.yml"
+#   run_record_schema: ".project-memory/run-record.schema.yml"
+#   apply_gate_schema: ".project-memory/apply-gate.schema.yml"
+# input:
+#   task_id: "task_missing_prompt"
+#   prompt: ""
+#   source: "human"
+# output:
+#   rejected_for_runner:
+#     status: "rejected_for_runner"
+#     task_id: "task_missing_prompt"
+#     reason: "Prompt must not be blank after intake validation."
+#     error_code: "invalid_prompt"
+# preconditions: []
+# runner_boundary:
+#   runner_invocation_allowed_this_pr: false
+#   runner_invocation_future_contract_required: true
+#   runner_request_creation_allowed_this_pr: false
+#   orchestration_allowed_this_pr: false
+# run_record_boundary:
+#   run_record_creation_allowed_this_pr: false
+#   run_id_creation_allowed_this_pr: false
+#   future_runner_execution_may_create_run_id: true
+#   future_runner_execution_may_link_task_id_to_run_id: true
+# workspace_boundary:
+#   feature_workspace_creation_allowed_this_pr: false
+#   future_workspace_flow_may_link_task_id: true
+# validation:
+#   task_id_required: true
+#   task_id_must_not_be_run_id: true
+#   task_id_must_not_be_feature_workspace_id: true
+#   accepted_intake_required: true
+#   prompt_already_validated: true
+#   no_execution_authorization: true
+#   no_runner_invocation: true
+#   no_run_record_creation: true
+#   no_ariadne_writes: true
+# status: "rejected_for_runner"
+# forbidden_actions: []
+# future_implementation: []

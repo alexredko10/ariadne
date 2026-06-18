@@ -243,3 +243,52 @@ anchors:
     description: "Runner handoff requires a future Task Intake → Runner Handoff Contract. PR 0028 does not define it."
     contract_ids:
       - "task-intake.request.runner-handoff-future-contract"
+
+  task-intake.runner-handoff.required:
+    type: "contract"
+    labels: ["contracts", "task-intake"]
+    description: "Task Intake → Runner Handoff contract defined in .project-memory/task-intake-runner-handoff.schema.yml."
+    contract_ids:
+      - "task-intake.runner-handoff.required"
+
+  task-intake.runner-handoff.schema-path:
+    type: "contract"
+    labels: ["contracts", "task-intake"]
+    description: "Schema path: .project-memory/task-intake-runner-handoff.schema.yml"
+    contract_ids:
+      - "task-intake.runner-handoff.schema-path"
+
+  task-intake.runner-handoff.input-task-id-required:
+    type: "contract"
+    labels: ["contracts", "task-intake"]
+    description: "Handoff requires task_id from an accepted Task Intake Request."
+    contract_ids:
+      - "task-intake.runner-handoff.input-task-id-required"
+
+  task-intake.runner-handoff.no-runner-invocation-this-pr:
+    type: "contract"
+    labels: ["contracts", "task-intake"]
+    description: "PR 0029 must not invoke the runner."
+    contract_ids:
+      - "task-intake.runner-handoff.no-runner-invocation-this-pr"
+
+  task-intake.runner-handoff.no-run-record-creation:
+    type: "contract"
+    labels: ["contracts", "task-intake", "run-record"]
+    description: "Task Intake → Runner Handoff must not create run_record.yml files."
+    contract_ids:
+      - "task-intake.runner-handoff.no-run-record-creation"
+
+  task-intake.runner-handoff.no-ariadne-writes:
+    type: "contract"
+    labels: ["contracts", "task-intake", "ariadne-namespace"]
+    description: "Task Intake → Runner Handoff must not write .ariadne/**."
+    contract_ids:
+      - "task-intake.runner-handoff.no-ariadne-writes"
+
+  task-intake.runner-handoff.future-runtime-contract-required:
+    type: "contract"
+    labels: ["contracts", "task-intake"]
+    description: "Future runner runtime implementation requires a separate contract beyond PR 0029."
+    contract_ids:
+      - "task-intake.runner-handoff.future-runtime-contract-required"
