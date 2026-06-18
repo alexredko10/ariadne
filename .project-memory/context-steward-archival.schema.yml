@@ -1,0 +1,201 @@
+# Context Steward Archival Workflow Schema v0.1
+# Contract artifact — not a runtime implementation.
+#
+# Defines when, how, and where Context Steward archives completed
+# Workspace Feature Records.
+#
+# Destination path template: .ariadne/features/{feature_workspace_id}.yml
+# PR 0026 defines contract only; no actual .ariadne/** files are created.
+
+schema_version: "0.1"
+
+# --- Top-level required fields ---
+required_fields:
+  - schema_version
+  - workflow_id
+  - workflow_name
+  - trigger
+  - preconditions
+  - source
+  - destination
+  - required_evidence
+  - archival_action
+  - postconditions
+  - forbidden_actions
+  - handoff
+
+# --- trigger contract ---
+# trigger:
+#   event: "after_merge"
+#   source_pr: "<PR-ID>"
+#   required_status: "merged"
+#
+# Rules:
+# - archival starts only after merge
+# - archival must not run for unmerged PRs
+# - archival must not run from chat-only state
+# - source PR must be explicit
+
+# --- preconditions contract ---
+# preconditions:
+#   workspace_feature_record_exists: true
+#   workspace_feature_record_status: "merged"
+#   run_record_links_present: true
+#   human_review_complete: true
+#   validation_evidence_present: true
+#   storage_namespace_contract_present: true
+#
+# Rules:
+# - Workspace Feature Record must exist as valid data before archival
+# - run_record_links must include run_id and feature_workspace_id
+# - .ariadne/ namespace ADR must be present
+# - archival must not invent missing evidence
+
+# --- source contract ---
+# source:
+#   workspace_feature_schema: ".project-memory/workspace-feature-record.schema.yml"
+#   run_record_schema: ".project-memory/run-record.schema.yml"
+#   namespace_adr: "docs/adr/0001-ariadne-namespace.md"
+
+# --- destination contract ---
+# destination:
+#   path_template: ".ariadne/features/{feature_workspace_id}.yml"
+#   path_rules:
+#     repo_relative_posix: true
+#     no_absolute_paths: true
+#     no_path_traversal: true
+#     lowercase_kebab_case_id: true
+#
+# Rules:
+# - destination path is .ariadne/features/{feature_workspace_id}.yml
+# - PR 0026 defines destination only; it does not create destination files
+# - future writer must enforce repo-relative POSIX paths
+# - feature id must not contain path separators
+
+# --- required_evidence ---
+# required_evidence:
+#   - source_pr
+#   - feature_workspace_id
+#   - run_record_links
+#   - validation_summary
+#   - review_summary
+#   - final_decisions
+#   - open_questions
+#   - handoff
+
+# --- archival_action contract ---
+# archival_action:
+#   actor: "context-steward"
+#   writes:
+#     - ".ariadne/features/{feature_workspace_id}.yml"
+#   reads:
+#     - ".project-memory/workspace-feature-record.schema.yml"
+#     - ".project-memory/run-record.schema.yml"
+#     - "docs/adr/0001-ariadne-namespace.md"
+#   mutates_project_memory: false
+#   mutates_runner_code: false
+#   mutates_contract_schemas: false
+#
+# Rules:
+# - Context Steward may write only the final feature record path in future workflow
+# - Context Steward must not modify schemas while archiving
+# - Context Steward must not modify runner code
+# - Context Steward must not create run records
+# - Context Steward archival is not canonical code mutation authorization
+
+# --- postconditions contract ---
+# postconditions:
+#   feature_record_status: "archived"
+#   archival_status: "archived"
+#   destination_exists: true
+#   run_id_to_feature_workspace_id_preserved: true
+
+# --- forbidden_actions ---
+# Forbidden:
+# - modify .project-memory/workspace-feature-record.schema.yml
+# - modify .project-memory/run-record.schema.yml
+# - modify .project-memory/apply-gate.schema.yml
+# - create .project-memory/pr/*/run_record.yml
+# - write outside .ariadne/features/{feature_workspace_id}.yml
+# - write feature records before merge
+# - write feature records without run_id links
+# - invent validation evidence
+# - use Docker
+# - use git mutation commands
+# - modify runner code
+# - create Python dataclasses
+
+# --- Invalid cases ---
+# - archival before merge
+# - missing feature_workspace_id
+# - missing run_record_links
+# - missing run_id
+# - destination outside .ariadne/features/{feature_workspace_id}.yml
+# - destination with absolute path
+# - destination with ../
+# - Context Steward modifying schemas
+# - Context Steward writing run_record.yml
+# - Context Steward inventing validation evidence
+# - .ariadne/ ADR missing
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# schema_version: "0.1"
+# workflow_id: "cs-archival-0019"
+# workflow_name: "Archival of Run Record Schema Hardening"
+# trigger:
+#   event: "after_merge"
+#   source_pr: "0019"
+#   required_status: "merged"
+# preconditions:
+#   workspace_feature_record_exists: true
+#   workspace_feature_record_status: "merged"
+#   run_record_links_present: true
+#   human_review_complete: true
+#   validation_evidence_present: true
+#   storage_namespace_contract_present: true
+# source:
+#   workspace_feature_schema: ".project-memory/workspace-feature-record.schema.yml"
+#   run_record_schema: ".project-memory/run-record.schema.yml"
+#   namespace_adr: "docs/adr/0001-ariadne-namespace.md"
+# destination:
+#   path_template: ".ariadne/features/run-record-schema-hardening.yml"
+#   path_rules:
+#     repo_relative_posix: true
+#     no_absolute_paths: true
+#     no_path_traversal: true
+#     lowercase_kebab_case_id: true
+# required_evidence:
+#   - source_pr: "0019"
+#   - feature_workspace_id: "run-record-schema-hardening"
+#   - run_record_links:
+#       - run_record_path: ".project-memory/pr/0019-run-record-schema-hardening/run_record.yml"
+#         run_id: "0019-plan-coder-001"
+#         feature_workspace_id: "run-record-schema-hardening"
+#   - validation_summary: "233 passed, compileall clean, doctor passed"
+#   - review_summary: "VERDICT: PASS"
+#   - final_decisions: "None — followed PLAN.md exactly"
+#   - open_questions: "None"
+#   - handoff:
+#       next_action: "Archive feature state via Context Steward."
+#       owner: "context-steward"
+#       notes: []
+# archival_action:
+#   actor: "context-steward"
+#   writes:
+#     - ".ariadne/features/run-record-schema-hardening.yml"
+#   reads:
+#     - ".project-memory/workspace-feature-record.schema.yml"
+#     - ".project-memory/run-record.schema.yml"
+#     - "docs/adr/0001-ariadne-namespace.md"
+#   mutates_project_memory: false
+#   mutates_runner_code: false
+#   mutates_contract_schemas: false
+# postconditions:
+#   feature_record_status: "archived"
+#   archival_status: "archived"
+#   destination_exists: true
+#   run_id_to_feature_workspace_id_preserved: true
+# forbidden_actions: []
+# handoff: []

@@ -145,3 +145,52 @@ anchors:
     description: "No agents may write .ariadne/** without an explicit future contract permitting it."
     contract_ids:
       - "ariadne.namespace.no-agent-writes-without-contract"
+
+  context-steward.archival.required:
+    type: "contract"
+    labels: ["contracts", "context-steward"]
+    description: "Context Steward archival workflow schema is defined in .project-memory/context-steward-archival.schema.yml."
+    contract_ids:
+      - "context-steward.archival.required"
+
+  context-steward.archival.schema-path:
+    type: "contract"
+    labels: ["contracts", "context-steward"]
+    description: "Schema path: .project-memory/context-steward-archival.schema.yml"
+    contract_ids:
+      - "context-steward.archival.schema-path"
+
+  context-steward.archival.after-merge-only:
+    type: "contract"
+    labels: ["contracts", "context-steward"]
+    description: "Archival starts only after merge. Must not run for unmerged PRs or chat-only state."
+    contract_ids:
+      - "context-steward.archival.after-merge-only"
+
+  context-steward.archival.destination-path:
+    type: "contract"
+    labels: ["contracts", "context-steward", "ariadne-namespace", "workspace-feature"]
+    description: "Destination path template: .ariadne/features/{feature_workspace_id}.yml"
+    contract_ids:
+      - "context-steward.archival.destination-path"
+
+  context-steward.archival.requires-run-record-links:
+    type: "contract"
+    labels: ["contracts", "context-steward", "run-record"]
+    description: "run_record_links must include run_id and feature_workspace_id before archival."
+    contract_ids:
+      - "context-steward.archival.requires-run-record-links"
+
+  context-steward.archival.no-evidence-invention:
+    type: "contract"
+    labels: ["contracts", "context-steward"]
+    description: "Context Steward must not invent missing validation evidence, review evidence, or decisions."
+    contract_ids:
+      - "context-steward.archival.no-evidence-invention"
+
+  context-steward.archival.no-actual-records-this-pr:
+    type: "contract"
+    labels: ["contracts", "context-steward"]
+    description: "PR 0026 defines the archival workflow contract only. No actual .ariadne/** files are created."
+    contract_ids:
+      - "context-steward.archival.no-actual-records-this-pr"

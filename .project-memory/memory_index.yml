@@ -1,4 +1,4 @@
-version: "0.8"
+version: "0.9"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -41,6 +41,7 @@ labels:
       - ".project-memory/apply-gate.schema.yml"
       - ".project-memory/workspace-feature-record.schema.yml"
       - "docs/adr/0001-ariadne-namespace.md"
+      - ".project-memory/context-steward-archival.schema.yml"
   agent-config:
     description: "Docker Agent YAML configs and agent operating rules."
     bundles:
@@ -73,6 +74,16 @@ labels:
       - ".project-memory/context-bundles/contracts.yml"
     additional_files:
       - "docs/adr/0001-ariadne-namespace.md"
+      - ".project-memory/workspace-feature-record.schema.yml"
+      - ".project-memory/context-steward-archival.schema.yml"
+    preferred_agent: "architect"
+
+  context-steward:
+    description: "Context Steward archival workflow contract for after-merge feature record archival."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - ".project-memory/context-steward-archival.schema.yml"
       - ".project-memory/workspace-feature-record.schema.yml"
     preferred_agent: "architect"
 
