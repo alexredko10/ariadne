@@ -59,3 +59,37 @@ curl -X POST http://localhost:8001/submit \
 - Does **not** write to `.ariadne/**`
 - Does **not** store data persistently
 - Does **not** require Docker
+
+## Smoke demo
+
+A lightweight smoke/demo command is available to verify a running server
+without requiring curl:
+
+```bash
+pip install -e services/task_intake
+uvicorn task_intake.server:app --port 8001
+python -m task_intake.smoke --base-url http://127.0.0.1:8001
+```
+
+Equivalent curl commands:
+
+```bash
+curl -X POST http://127.0.0.1:8001/submit \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Fix the login bug"}'
+
+curl -X POST http://127.0.0.1:8001/submit \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": ""}'
+```
+
+### Smoke/demo limitations
+
+- Smoke/demo is intake-only.
+- Smoke/demo does **not** run tasks.
+- Smoke/demo does **not** invoke the runner.
+- Smoke/demo does **not** create runner requests.
+- Smoke/demo does **not** create `run_record.yml`.
+- Smoke/demo does **not** write to `.ariadne/**`.
+- Smoke/demo requires a local uvicorn server.
+- Smoke/demo does **not** require Docker.
