@@ -1,4 +1,4 @@
-version: "0.11"
+version: "0.12"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -44,6 +44,8 @@ labels:
       - ".project-memory/context-steward-archival.schema.yml"
       - ".project-memory/task-intake-request.schema.yml"
       - ".project-memory/task-intake-runner-handoff.schema.yml"
+      - ".project-memory/model-routing.schema.yml"
+      - "docs/adr/0002-model-selection-methodology.md"
   agent-config:
     description: "Docker Agent YAML configs and agent operating rules."
     bundles:
@@ -103,6 +105,15 @@ labels:
       - ".project-memory/context-bundles/contracts.yml"
     additional_files:
       - ".project-memory/task-intake-runner-handoff.schema.yml"
+    preferred_agent: "architect"
+
+  model-routing:
+    description: "Model selection methodology, routing contracts, and ContextStressProfile schema."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - ".project-memory/model-routing.schema.yml"
+      - "docs/adr/0002-model-selection-methodology.md"
     preferred_agent: "architect"
 
 agent_memory_profiles:
