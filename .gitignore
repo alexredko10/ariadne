@@ -134,3 +134,4 @@ Desktop.ini
 
 run-localstack.sh.gitcommit
 .coverage
+services/task_intake/src/*.egg-info/
