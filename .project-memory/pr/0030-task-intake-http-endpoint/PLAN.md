@@ -1,12 +1,12 @@
 ## Implementation note
 
 PR 0030 implemented:
-- Created `services/task_intake/src/task_intake/server.py` with FastAPI app, GET /health, POST /submit, and POST /task-intake/submit alias
-- Created `services/task_intake/tests/test_task_intake_http.py` with 16+ tests covering health, accepted/rejected responses, alias behavior, malformed input, and no-side-effect guarantees
-- Created `services/task_intake/pyproject.toml` with fastapi and uvicorn dependencies scoped to the service and httpx for test client
+- Created `services/task_intake/src/task_intake/server.py` with stdlib-only ASGI app (no FastAPI), GET /health, POST /submit, and POST /task-intake/submit alias
+- Created `services/task_intake/tests/test_task_intake_http.py` with ASGI test harness and 20+ tests
+- Created `services/task_intake/pyproject.toml` with uvicorn and pytest-asyncio dependencies only (no fastapi)
 - Updated `services/task_intake/README.md` with install instructions, endpoint table, curl examples, and non-goal disclaimers
 
-No runner invocation, no runner request creation, no agent orchestration, no run_record.yml creation, no .ariadne/** writes, no persistence, no Docker. Existing intake core behavior (app.py, models.py, doctor.py) unchanged. No project-memory contracts or schemas modified.# PR 0030: Task Intake HTTP endpoint
+The implementation uses a minimal stdlib ASGI app so root `python -m pytest -q` does not require FastAPI for test collection. No root dependencies changed. No CI/workflow changes. No Docker changes. No project-memory schemas/contracts modified.# PR 0030: Task Intake HTTP endpoint
 
 ## Goal
 

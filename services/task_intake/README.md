@@ -6,6 +6,9 @@ This service **does not execute tasks**, **does not invoke the runner**,
 **does not orchestrate agents**, **does not create run records**, and
 **does not write to `.ariadne/**`**.
 
+The HTTP server is a minimal stdlib ASGI application.  No FastAPI or
+external HTTP framework is required for development or CI.
+
 ## Quick start
 
 ```bash
