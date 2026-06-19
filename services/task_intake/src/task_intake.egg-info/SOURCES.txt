@@ -1,0 +1,17 @@
+README.md
+pyproject.toml
+src/task_intake/__init__.py
+src/task_intake/app.py
+src/task_intake/doctor.py
+src/task_intake/models.py
+src/task_intake/normalizer.py
+src/task_intake/server.py
+src/task_intake.egg-info/PKG-INFO
+src/task_intake.egg-info/SOURCES.txt
+src/task_intake.egg-info/dependency_links.txt
+src/task_intake.egg-info/requires.txt
+src/task_intake.egg-info/top_level.txt
+tests/test_normalizer.py
+tests/test_task_intake.py
+tests/test_task_intake_http.py
+tests/test_task_intake_smoke.py
