@@ -1,0 +1,104 @@
+# Model Routing Schema v0.1
+# Contract artifact — not runtime implementation.
+# Defines ModelProfile, ContextStressProfile, ModelRouterScore,
+# and ModelSelectionResult as machine-readable contracts.
+
+schema_version: "0.1"
+
+# --- ModelProfile ---
+# Runtime data, not contract values.
+# Scores are updated from execution history.
+# No model names hardcoded as contract ids.
+# Fields:
+#   role: "architect | worker_coder | ui_frontend | backend_optimizer | reviewer | dataset_synth"
+#   frontend_ui_quality: float 0.0–1.0
+#   backend_coding_quality: float 0.0–1.0
+#   debugging_quality: float 0.0–1.0
+#   long_repo_handling: float 0.0–1.0
+#   exact_retrieval: float 0.0–1.0
+#   aggregation_strength: float 0.0–1.0
+#   graph_reasoning: float 0.0–1.0
+#   tool_use_stability: float 0.0–1.0
+#   hallucination_risk: float 0.0–1.0
+#   icl_sensitivity: float 0.0–1.0
+#   cost_per_token: float
+#   latency_ms: int
+#   interruptibility: float 0.0–1.0
+#   safety_friction: float 0.0–1.0
+
+# --- ContextStressProfile ---
+# Fields:
+#   retrieval_stress: "low | medium | high"
+#   aggregation_stress: "low | medium | high"
+#   graph_reasoning_stress: "low | medium | high"
+#   long_code_stress: "low | medium | high"
+#   icl_sensitivity: "low | medium | high"
+
+# --- ModelRouterScore ---
+# Fields:
+#   role_fit: float 0.0–1.0
+#   context_fit: float 0.0–1.0
+#   risk_fit: float 0.0–1.0
+#   cost_fit: float 0.0–1.0
+#   latency_fit: float 0.0–1.0
+#   historical_success: float 0.0–1.0
+#   failure_penalty: float 0.0–1.0
+#   availability: float 0.0–1.0
+
+# --- ModelSelectionResult ---
+# Fields:
+#   role: string
+#   task_type: string
+#   risk_level: "low | medium | high | critical"
+#   context_stress: ContextStressProfile
+#   recommended_model: "provider:model"
+#   reviewer_model: "provider:model" (must differ from recommended when risk is high/critical)
+#   reason: string
+#   selection_rules_applied: list of rule ids
+
+# --- Selection rules ---
+# model_not_strongest_by_default
+# strong_for_purpose_cheap_for_execution
+# ui_routing_separate_from_backend
+# long_context_profiled_by_subtask
+# substrate_beats_model_loyalty
+# reviewer_model_differs_from_coder_on_high_risk
+# no_hardcoded_model_vendor_assignments
+# profiles_updated_from_execution_history
+
+# --- Safety rules ---
+# ModelProfile scores are runtime data, not contract values.
+# No actual model names hardcoded as contract ids.
+# ModelSelectionResult is evidence only, not an execution authorization.
+# ModelRouter must not bypass Model Gateway JWT contract.
+# ModelRouter must not bypass data_policy checks.
+# ModelRouter must not bypass apply-gate.schema.yml requirements.
+# ModelProfile scores are updated from execution history, not hardcoded.
+
+# --- Invalid cases ---
+# reviewer_model equals recommended_model on high-risk task
+# hardcoded model vendor name as contract id
+# ModelSelectionResult used to bypass JWT or data_policy
+# context_stress fields missing
+# risk_level outside enum
+# role outside enum
+
+# ============================================================
+# Minimal valid ModelSelectionResult example:
+# ============================================================
+# role: "worker_coder"
+# task_type: "feature_implementation"
+# risk_level: "high"
+# context_stress:
+#   retrieval_stress: "high"
+#   aggregation_stress: "medium"
+#   graph_reasoning_stress: "low"
+#   long_code_stress: "high"
+#   icl_sensitivity: "medium"
+# recommended_model: "provider-a:model-x"
+# reviewer_model: "provider-b:model-y"
+# reason: "High-risk implementation requires strong coder and independent reviewer."
+# selection_rules_applied:
+#   - "strong_for_purpose_cheap_for_execution"
+#   - "reviewer_model_differs_from_coder_on_high_risk"
+#   - "no_hardcoded_model_vendor_assignments"

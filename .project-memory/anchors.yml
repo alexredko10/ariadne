@@ -292,3 +292,66 @@ anchors:
     description: "Future runner runtime implementation requires a separate contract beyond PR 0029."
     contract_ids:
       - "task-intake.runner-handoff.future-runtime-contract-required"
+
+  model-routing.methodology.required:
+    type: "adr-contract"
+    labels: ["contracts", "model-routing", "architecture"]
+    description: >
+      Model selection must follow docs/adr/0002-model-selection-methodology.md.
+      Model is replaceable. Substrate is the product.
+    contract_ids:
+      - "model-routing.methodology.required"
+
+  model-routing.methodology.adr-path:
+    type: "adr-contract"
+    labels: ["contracts", "model-routing"]
+    description: "ADR path — docs/adr/0002-model-selection-methodology.md"
+    contract_ids:
+      - "model-routing.methodology.adr-path"
+
+  model-routing.context-stress-profile.required:
+    type: "contract"
+    labels: ["contracts", "model-routing"]
+    description: >
+      ContextStressProfile required for every model selection.
+      Fields: retrieval, aggregation, graph_reasoning, long_code,
+      icl_sensitivity.
+    contract_ids:
+      - "model-routing.context-stress-profile.required"
+
+  model-routing.reviewer-differs-from-coder-on-high-risk:
+    type: "contract"
+    labels: ["contracts", "model-routing"]
+    description: >
+      Reviewer model must differ from recommended model on high/critical
+      risk tasks. Prevents same-model blind spots.
+    contract_ids:
+      - "model-routing.reviewer-differs-from-coder-on-high-risk"
+
+  model-routing.substrate-beats-model-loyalty:
+    type: "contract"
+    labels: ["contracts", "model-routing", "architecture"]
+    description: >
+      Execution substrate ownership (context packs, graph, invariants,
+      audit logs) makes model choice a configuration decision.
+      Surrendering substrate to a vendor creates platform lock-in.
+    contract_ids:
+      - "model-routing.substrate-beats-model-loyalty"
+
+  model-routing.no-bypass-model-gateway-jwt:
+    type: "contract"
+    labels: ["contracts", "model-routing", "security"]
+    description: >
+      ModelRouter must not bypass Model Gateway JWT.
+      All agent model calls go through Model Gateway.
+    contract_ids:
+      - "model-routing.no-bypass-model-gateway-jwt"
+
+  model-routing.selection-result-evidence-only:
+    type: "contract"
+    labels: ["contracts", "model-routing"]
+    description: >
+      ModelSelectionResult is evidence only.
+      Does not authorize execution, writes, or agent actions.
+    contract_ids:
+      - "model-routing.selection-result-evidence-only"
