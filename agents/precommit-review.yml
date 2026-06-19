@@ -5,13 +5,13 @@ metadata:
   description: "Read-only precommit reviewer for scope, tests, safety, and memory consistency"
   version: "1.0.0"
 
-models:
-  precommit_review_model:
-    provider: openai
-    model: gpt-5-mini
-    token_key: OPENAI_API_KEY
-    max_tokens: 7000
-    thinking_budget: low
+    models:
+      precommit_review_model:
+        provider: openai
+        model: gpt-5-mini
+        token_key: OPENAI_API_KEY
+        max_tokens: 7000
+        thinking_budget: low
 
 agents:
   root:
