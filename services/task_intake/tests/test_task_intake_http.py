@@ -1,11 +1,13 @@
-"""Tests for the Task Intake HTTP endpoint (stdlib ASGI)."""
+"""Tests for the Task Intake HTTP endpoint (stdlib ASGI).
+
+All tests use stdlib-only ``asyncio.run()`` — no pytest-asyncio required.
+"""
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
-
-import pytest
 
 from task_intake.server import app
 
@@ -15,7 +17,7 @@ from task_intake.server import app
 # ---------------------------------------------------------------------------
 
 
-async def _request(
+async def _asgi_request(
     method: str,
     path: str,
     body: bytes | None = None,
@@ -62,18 +64,13 @@ async def _request(
     return response_status, parsed  # type: ignore[return-value]
 
 
-# ---------------------------------------------------------------------------
-# pytest-asyncio fixture integration
-# ---------------------------------------------------------------------------
-
-
-@pytest.fixture
-def event_loop():
-    """Provide an event loop for async tests."""
-    import asyncio
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
+def _request(
+    method: str,
+    path: str,
+    body: bytes | None = None,
+) -> tuple[int, dict[str, object]]:
+    """Synchronous wrapper around :func:`_asgi_request`."""
+    return asyncio.run(_asgi_request(method, path, body=body))
 
 
 # ---------------------------------------------------------------------------
@@ -82,121 +79,106 @@ def event_loop():
 
 
 class TestHealth:
-    @pytest.mark.asyncio
-    async def test_get_health_returns_service_name(self):
-        status, data = await _request("GET", "/health")
+    def test_get_health_returns_service_name(self):
+        status, data = _request("GET", "/health")
         assert status == 200
         assert data["service"] == "task_intake"
 
-    @pytest.mark.asyncio
-    async def test_get_health_returns_ok_status(self):
-        status, data = await _request("GET", "/health")
+    def test_get_health_returns_ok_status(self):
+        status, data = _request("GET", "/health")
         assert status == 200
         assert data["status"] == "ok"
 
 
 class TestSubmitAccepted:
-    @pytest.mark.asyncio
-    async def test_valid_prompt_is_accepted(self):
+    def test_valid_prompt_is_accepted(self):
         body = json.dumps({"prompt": "Fix the login bug"}).encode("utf-8")
-        status, data = await _request("POST", "/submit", body=body)
+        status, data = _request("POST", "/submit", body=body)
         assert status == 200
         assert data["status"] == "accepted"
 
-    @pytest.mark.asyncio
-    async def test_accepted_response_has_task_id(self):
+    def test_accepted_response_has_task_id(self):
         body = json.dumps({"prompt": "Implement rate limiting"}).encode("utf-8")
-        status, data = await _request("POST", "/submit", body=body)
+        status, data = _request("POST", "/submit", body=body)
         assert status == 200
         assert "task_id" in data
         assert data["task_id"].startswith("task_")
 
 
 class TestSubmitAlias:
-    @pytest.mark.asyncio
-    async def test_task_intake_submit_works_like_submit(self):
+    def test_task_intake_submit_works_like_submit(self):
         body = json.dumps({"prompt": "Alias test"}).encode("utf-8")
-        s1, d1 = await _request("POST", "/submit", body=body)
-        s2, d2 = await _request("POST", "/task-intake/submit", body=body)
+        s1, d1 = _request("POST", "/submit", body=body)
+        s2, d2 = _request("POST", "/task-intake/submit", body=body)
         assert s1 == 200 and s2 == 200
         assert d1 == d2
 
-    @pytest.mark.asyncio
-    async def test_task_intake_submit_rejected_blank(self):
+    def test_task_intake_submit_rejected_blank(self):
         body = json.dumps({"prompt": ""}).encode("utf-8")
-        status, data = await _request("POST", "/task-intake/submit", body=body)
+        status, data = _request("POST", "/task-intake/submit", body=body)
         assert status == 200
         assert data["status"] == "rejected"
 
 
 class TestSubmitRejected:
-    @pytest.mark.asyncio
-    async def test_blank_prompt_is_rejected(self):
+    def test_blank_prompt_is_rejected(self):
         body = json.dumps({"prompt": ""}).encode("utf-8")
-        status, data = await _request("POST", "/submit", body=body)
+        status, data = _request("POST", "/submit", body=body)
         assert status == 200
         assert data["status"] == "rejected"
 
-    @pytest.mark.asyncio
-    async def test_rejected_response_has_reason(self):
+    def test_rejected_response_has_reason(self):
         body = json.dumps({"prompt": ""}).encode("utf-8")
-        status, data = await _request("POST", "/submit", body=body)
+        status, data = _request("POST", "/submit", body=body)
         assert status == 200
         assert "reason" in data
         assert len(data["reason"]) > 0
 
-    @pytest.mark.asyncio
-    async def test_rejected_response_has_error_code(self):
+    def test_rejected_response_has_error_code(self):
         body = json.dumps({"prompt": ""}).encode("utf-8")
-        status, data = await _request("POST", "/submit", body=body)
+        status, data = _request("POST", "/submit", body=body)
         assert status == 200
         assert "error_code" in data
         assert data["error_code"] == "blank_prompt"
 
-    @pytest.mark.asyncio
-    async def test_whitespace_only_rejected(self):
+    def test_whitespace_only_rejected(self):
         body = json.dumps({"prompt": "   \t\n  "}).encode("utf-8")
-        status, data = await _request("POST", "/submit", body=body)
+        status, data = _request("POST", "/submit", body=body)
         assert status == 200
         assert data["status"] == "rejected"
         assert data["error_code"] == "blank_prompt"
 
 
 class TestMalformedInput:
-    @pytest.mark.asyncio
-    async def test_missing_prompt_is_rejected(self):
+    def test_missing_prompt_is_rejected(self):
         body = json.dumps({}).encode("utf-8")
-        status, data = await _request("POST", "/submit", body=body)
+        status, data = _request("POST", "/submit", body=body)
         assert status == 400
         assert data["status"] == "rejected"
 
-    @pytest.mark.asyncio
-    async def test_empty_json_body(self):
+    def test_empty_json_body(self):
         body = json.dumps({}).encode("utf-8")
-        status, data = await _request("POST", "/submit", body=body)
+        status, data = _request("POST", "/submit", body=body)
         assert status == 400
         assert data["status"] == "rejected"
 
-    @pytest.mark.asyncio
-    async def test_non_json_body(self):
+    def test_non_json_body(self):
         body = b"not json"
-        status, data = await _request("POST", "/submit", body=body)
+        status, data = _request("POST", "/submit", body=body)
         assert status == 400
         assert data["status"] == "rejected"
 
-    @pytest.mark.asyncio
-    async def test_non_dict_json(self):
+    def test_non_dict_json(self):
         body = json.dumps(["not", "a", "dict"]).encode("utf-8")
-        status, data = await _request("POST", "/submit", body=body)
+        status, data = _request("POST", "/submit", body=body)
         assert status == 400
         assert data["status"] == "rejected"
 
 
 class TestNoSideEffects:
-    @pytest.mark.asyncio
-    async def test_uses_existing_accept_task(self):
+    def test_uses_existing_accept_task(self):
         body = json.dumps({"prompt": "test"}).encode("utf-8")
-        status, data = await _request("POST", "/submit", body=body)
+        status, data = _request("POST", "/submit", body=body)
         assert status == 200
 
     def test_no_forbidden_source_strings(self):
@@ -204,7 +186,6 @@ class TestNoSideEffects:
         import inspect
         path = inspect.getfile(app)
         content = Path(path).read_text(encoding="utf-8")
-        # Allow docstring references to `.ariadne/**` — check for write-like patterns
         assert "subprocess" not in content
         assert "docker" not in content.lower()
         assert "fastapi" not in content

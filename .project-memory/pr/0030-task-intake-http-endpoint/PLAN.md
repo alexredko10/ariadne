@@ -3,7 +3,9 @@
 PR 0030 implemented:
 - Created `services/task_intake/src/task_intake/server.py` with stdlib-only ASGI app (no FastAPI), GET /health, POST /submit, and POST /task-intake/submit alias
 - Created `services/task_intake/tests/test_task_intake_http.py` with ASGI test harness and 20+ tests
-- Created `services/task_intake/pyproject.toml` with uvicorn and pytest-asyncio dependencies only (no fastapi)
+- Created `services/task_intake/pyproject.toml` with uvicorn dependency only (no fastapi, no pytest-asyncio)
+
+HTTP tests use stdlib ``asyncio.run()`` and do not require async pytest plugins. Root ``python -m pytest -q`` passes without service-local dev extras.
 - Updated `services/task_intake/README.md` with install instructions, endpoint table, curl examples, and non-goal disclaimers
 
 The implementation uses a minimal stdlib ASGI app so root `python -m pytest -q` does not require FastAPI for test collection. No root dependencies changed. No CI/workflow changes. No Docker changes. No project-memory schemas/contracts modified.# PR 0030: Task Intake HTTP endpoint
