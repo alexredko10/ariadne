@@ -1,0 +1,67 @@
+schema_version: "0.1"
+pr_id: "0037-review-artifact-adoption-plan"
+review_type: "precommit-review"
+verdict: "block"
+reviewer: "precommit-review"
+timestamp: "2026-06-20T00:10:00Z"
+snapshot_delta:
+  plan_base_sha: "01c0158525aceb472dc8fa927e254e2aaccfee06"
+  current_head: "01c0158525aceb472dc8fa927e254e2aaccfee06"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/review-artifact-workflow.yml"
+    - ".project-memory/context-bundles/contracts.yml"
+    - ".project-memory/memory_index.yml"
+    - ".project-memory/pr/0037-review-artifact-adoption-plan/PLAN.md"
+    - ".project-memory/pr/0037-review-artifact-adoption-plan/reviews/plan-review.yml"
+  actual_files:
+    - ".project-memory/review-artifact-workflow.yml"
+    - ".project-memory/context-bundles/contracts.yml"
+    - ".project-memory/memory_index.yml"
+    - ".project-memory/pr/0037-review-artifact-adoption-plan/PLAN.md"
+    - ".project-memory/pr/0037-review-artifact-adoption-plan/reviews/plan-review.yml"
+    - "agents/plan-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found:
+    - "agents/plan-review.yml"
+  generated_artifacts_found: []
+  scope_status: "blocked"
+files_checked:
+  - ".project-memory/review-artifact-workflow.yml"
+  - ".project-memory/context-bundles/contracts.yml"
+  - ".project-memory/memory_index.yml"
+  - ".project-memory/pr/0037-review-artifact-adoption-plan/PLAN.md"
+  - ".project-memory/pr/0037-review-artifact-adoption-plan/reviews/plan-review.yml"
+validation:
+  - command: "python -m pytest -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "301 passed"
+blockers:
+  - id: "forbidden-agents-change"
+    description: "Unexpected modification under agents/ (agents/plan-review.yml). agents/** is a forbidden path for this PR."
+    severity: "critical"
+    evidence: "git status shows modified file: agents/plan-review.yml"
+    required_fix: "Revert agents/plan-review.yml modification or move it to a separate PR; only the allowed .project-memory files may be changed in PR 0037."
+warnings: []
+decisions_made:
+  - decision: "Block precommit-review due to forbidden agents/ modification"
+    reason: "agents/ is a protected area; changes here must be proposed in a dedicated PR with appropriate justification and contract updates."
+context_used:
+  labels: ["contracts"]
+  memory_files_read:
+    - ".project-memory/memory_index.yml"
+    - ".project-memory/context-bundles/contracts.yml"
+  anchors_used:
+    - "agents.review.validation-shell-access"
+  files_inspected:
+    - ".project-memory/review-artifact-workflow.yml"
+    - ".project-memory/context-bundles/contracts.yml"
+    - ".project-memory/memory_index.yml"
+    - ".project-memory/pr/0037-review-artifact-adoption-plan/reviews/plan-review.yml"
+  files_modified:
+    - ".project-memory/pr/0037-review-artifact-adoption-plan/reviews/precommit-review.yml"
+  files_intentionally_ignored:
+    - ".project-memory/pr/*/reviews/*.yml"

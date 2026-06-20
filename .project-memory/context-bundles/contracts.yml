@@ -1,4 +1,4 @@
-version: "0.12"
+version: "0.13"
 label: "contracts"
 purpose: "Safety, scope and validation contracts shared by all agents."
 read_first:
@@ -16,6 +16,7 @@ read_first:
   - ".project-memory/state-first.schema.yml"
   - "docs/adr/0003-state-first-agent-architecture.md"
   - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/review-artifact-workflow.yml"
 anchors:
   - "repo.canonical-write.single-gate"
   - "agents.no-git-mutation"
@@ -210,3 +211,6 @@ notes:
   - "Review artifacts do not replace run records."
   - "Future PRs should save plan-review.yml and precommit-review.yml under .project-memory/pr/<pr-id>/reviews/."
   - "PR 0036 does not retroactively migrate old reviews."
+  - "Review artifact workflow adopted manually in PR 0037."
+  - "Review artifacts are evidence only, do not bypass apply-gate, and do not replace run records."
+  - "Agents configs are not changed in PR 0037. Future PR may update agents after manual workflow is established."

@@ -1,4 +1,4 @@
-version: "0.14"
+version: "0.15"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -134,6 +134,7 @@ labels:
       - ".project-memory/context-bundles/contracts.yml"
     additional_files:
       - ".project-memory/review-artifact.schema.yml"
+      - ".project-memory/review-artifact-workflow.yml"
     preferred_agent: "plan-review"
 
 agent_memory_profiles:
