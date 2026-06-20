@@ -7,6 +7,7 @@ metadata:
 
 models:
   architect_model:
+    provider: openai
     model: deepseek-chat
     base_url: https://api.deepseek.com
     token_key: DEEPSEEK_API_KEY

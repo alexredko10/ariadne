@@ -556,3 +556,87 @@ anchors:
     description: "Prompt contracts are model-agnostic substrate artifacts."
     contract_ids:
       - "conductor-prompt.model-agnostic-substrate"
+
+  domain-adapter.schema-path:
+    type: "contract"
+    labels: ["contracts", "domain-adapter"]
+    description: "Schema path: .project-memory/domain-adapter.schema.yml"
+    contract_ids:
+      - "domain-adapter.schema-path"
+
+  domain-adapter.adr-path:
+    type: "adr-contract"
+    labels: ["contracts", "domain-adapter"]
+    description: "ADR path: docs/adr/0004-ariadne-is-domain-agnostic.md"
+    contract_ids:
+      - "domain-adapter.adr-path"
+
+  domain-adapter.core-domain-agnostic:
+    type: "contract"
+    labels: ["contracts", "domain-adapter"]
+    description: "Ariadne Core must remain domain-agnostic."
+    contract_ids:
+      - "domain-adapter.core-domain-agnostic"
+
+  domain-adapter.coding-not-core:
+    type: "contract"
+    labels: ["contracts", "domain-adapter"]
+    description: "Coding is a Domain Adapter, not universal Core."
+    contract_ids:
+      - "domain-adapter.coding-not-core"
+
+  domain-adapter.policy-supplies-prompt-contract:
+    type: "contract"
+    labels: ["contracts", "domain-adapter", "conductor-prompt"]
+    description: "Domain Adapter supplies prompt policy sections to Conductor Prompt Contract."
+    contract_ids:
+      - "domain-adapter.policy-supplies-prompt-contract"
+
+  domain-adapter.allowed-write-paths.required:
+    type: "contract"
+    labels: ["contracts", "domain-adapter"]
+    description: "Domain Adapter must define allowed_write_paths."
+    contract_ids:
+      - "domain-adapter.allowed-write-paths.required"
+
+  domain-adapter.validation-policy.required:
+    type: "contract"
+    labels: ["contracts", "domain-adapter"]
+    description: "Domain Adapter must define validation_commands or explicitly mark validation as not supported."
+    contract_ids:
+      - "domain-adapter.validation-policy.required"
+
+  domain-adapter.no-core-git-dependency:
+    type: "contract"
+    labels: ["contracts", "domain-adapter"]
+    description: "Ariadne Core must not depend directly on Git; Git belongs to Coding Adapter."
+    contract_ids:
+      - "domain-adapter.no-core-git-dependency"
+
+  domain-adapter.no-core-pytest-dependency:
+    type: "contract"
+    labels: ["contracts", "domain-adapter"]
+    description: "Ariadne Core must not depend directly on pytest; test tools belong to Coding Adapter."
+    contract_ids:
+      - "domain-adapter.no-core-pytest-dependency"
+
+  domain-adapter.no-secret-material:
+    type: "contract"
+    labels: ["contracts", "domain-adapter", "security"]
+    description: "Domain Adapter contracts must not contain secrets/tokens/credentials."
+    contract_ids:
+      - "domain-adapter.no-secret-material"
+
+  domain-adapter.no-apply-gate-bypass:
+    type: "contract"
+    labels: ["contracts", "domain-adapter"]
+    description: "Domain Adapter must not bypass Apply Gate."
+    contract_ids:
+      - "domain-adapter.no-apply-gate-bypass"
+
+  domain-adapter.no-run-record-bypass:
+    type: "contract"
+    labels: ["contracts", "domain-adapter", "run-record"]
+    description: "Domain Adapter must not bypass or replace Run Record."
+    contract_ids:
+      - "domain-adapter.no-run-record-bypass"

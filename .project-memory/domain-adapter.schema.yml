@@ -1,0 +1,214 @@
+# Domain Adapter Contract Schema v0.1
+# Contract artifact — not runtime implementation.
+# Defines domain-specific execution boundary for Ariadne.
+#
+# Core principle:
+#   Ariadne Core is domain-agnostic.
+#   Conductor is universal.
+#   Domain Adapters are domain-specific.
+#   Coding is only one Domain Adapter, not Ariadne Core.
+
+schema_version: "0.1"
+
+# --- DomainAdapter ---
+# Required fields:
+#   schema_version: string
+#   domain: "coding | document | data | research | custom"
+#   adapter_id: string
+#   description: string
+#   capabilities: list of DomainCapability
+#   allowed_write_paths: list of strings
+#   forbidden_write_paths: list of strings
+#   validation_commands: list of strings or null
+#   execution_environment: string
+#   artifact_types: list of DomainArtifact
+#   apply_mechanism: DomainApplyMechanism
+#   rollback_mechanism: DomainRollbackMechanism
+#   final_output_format: string
+#   risks: list of DomainRisk
+#   stop_conditions: list of DomainStopCondition
+#   human_approval_policy: string
+
+# --- DomainCapability ---
+# Fields:
+#   id: string
+#   description: string
+
+# --- DomainPolicy ---
+# Fields:
+#   allowed_write_paths: list of strings
+#   forbidden_write_paths: list of strings
+
+# --- DomainValidation ---
+# Fields:
+#   validation_commands: list of strings or null
+#   validation_not_supported_explicit: boolean
+
+# --- DomainArtifact ---
+# Fields:
+#   type: string
+#   description: string
+#   path_pattern: string or null
+
+# --- DomainApplyMechanism ---
+# Fields:
+#   mechanism: string
+#   description: string
+#   git_based: boolean
+#   requires_human_apply: boolean
+
+# --- DomainRollbackMechanism ---
+# Fields:
+#   mechanism: string
+#   description: string
+#   git_based: boolean
+#   manual_rollback_required: boolean
+
+# --- DomainRisk ---
+# Fields:
+#   id: string
+#   description: string
+#   severity: string
+
+# --- DomainStopCondition ---
+# Fields:
+#   id: string
+#   description: string
+#   severity: string
+
+# --- DomainOutputFormat ---
+# Fields:
+#   format: string
+#   description: string
+
+# --- DomainAdapterRegistry ---
+# Fields:
+#   adapters: list of DomainAdapter references
+
+# --- Allowed initial domain values ---
+# coding
+# document
+# data
+# research
+# custom
+
+# --- Coding Adapter responsibilities ---
+# - create worktree
+# - apply patch
+# - normalize diff
+# - run tests
+# - detect generated artifacts
+# - map source files to tests
+# - preserve protected paths
+# - report validation evidence
+
+# --- Document Adapter responsibilities ---
+# - structured document edits
+# - document diff/apply
+# - citation preservation
+# - export validation
+# - formatting validation
+
+# --- Data Adapter responsibilities ---
+# - dataset transforms
+# - profiling
+# - schema validation
+# - quality reports
+# - reversible transforms where possible
+
+# --- Research Adapter responsibilities ---
+# - search
+# - synthesis
+# - citation graph
+# - claim verification
+# - source attribution
+# - uncertainty reporting
+
+# --- Custom Adapter responsibilities ---
+# - user-defined execution environment
+# - explicit allowed/forbidden actions
+# - explicit validation policy
+# - explicit artifact policy
+# - explicit human approval boundary
+
+# --- Policies ---
+# Ariadne Core must not depend directly on domain-specific tools.
+# Git/patch/pytest are Coding Adapter concerns, not universal Core concerns.
+# Document transforms are Document Adapter concerns.
+# Dataset validators/profilers are Data Adapter concerns.
+# Search/citation/claim verification tools are Research Adapter concerns.
+# Domain Adapter provides policy inputs to Conductor Prompt Contract.
+# Domain Adapter must provide allowed_write_paths.
+# Domain Adapter must provide forbidden_write_paths.
+# Domain Adapter must provide validation_commands or explicitly mark as not supported.
+# Domain Adapter must define artifact types.
+# Domain Adapter must define apply mechanism.
+# Domain Adapter must define rollback mechanism, even if manual.
+# Domain Adapter must define domain-specific risks.
+# Domain Adapter must define domain-specific stop conditions.
+# Domain Adapter must define human approval policy.
+# Domain Adapter must not bypass Apply Gate.
+# Domain Adapter must not bypass or replace Run Record.
+# Domain Adapter contract must not contain secrets.
+# Protected path changes require human approval.
+
+# --- Relation to Conductor Prompt Contract ---
+# Domain Adapter supplies these Prompt Contract sections:
+#   allowed_write_paths
+#   forbidden_write_paths
+#   validation_commands
+#   final_output_format
+#   domain_specific_stop_conditions
+#   domain_specific_risks
+
+# --- Safety rules ---
+# Domain Adapter contracts are evidence only.
+# Domain Adapter contracts do not authorize canonical writes.
+# Domain Adapter contracts do not replace apply-gate.schema.yml.
+# Domain Adapter contracts do not replace run-record.schema.yml.
+# Domain Adapter contracts must not contain secrets.
+
+# ============================================================
+# Minimal valid example (Coding Adapter):
+# ============================================================
+# schema_version: "0.1"
+# domain: "coding"
+# adapter_id: "coding-v1"
+# description: "Standard coding adapter for source code changes."
+# capabilities:
+#   - id: "apply_patch"
+#     description: "Apply normalized patches to the working tree."
+# allowed_write_paths:
+#   - "services/**"
+#   - "packages/**"
+#   - "tests/**"
+# forbidden_write_paths:
+#   - ".git/**"
+#   - ".env"
+#   - "secrets/**"
+# validation_commands:
+#   - "python -m pytest -q"
+# execution_environment: "worktree"
+# artifact_types:
+#   - type: "normalized_patch"
+#     description: "Normalized patch file for apply."
+# apply_mechanism:
+#   mechanism: "git_apply"
+#   description: "Apply patch via git apply after human approval."
+#   git_based: true
+#   requires_human_apply: true
+# rollback_mechanism:
+#   mechanism: "git_reset"
+#   description: "Reset worktree to snapshot."
+#   git_based: true
+#   manual_rollback_required: false
+# final_output_format: "run_record"
+# risks:
+#   - id: "uncommitted_changes_lost"
+#     description: "Uncommitted changes may be lost on rollback."
+#     severity: "medium"
+# stop_conditions:
+#   - id: "validation_failed"
+#     description: "Validation must pass before apply."
+#     severity: "critical"
+# human_approval_policy: "Apply requires explicit human approval. Rollback may be automatic for recoverable states."

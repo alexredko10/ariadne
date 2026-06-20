@@ -1,4 +1,4 @@
-version: "0.16"
+version: "0.17"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -15,6 +15,16 @@ labels:
     description: "System architecture, trust zones, boundaries, ADRs."
     bundles:
       - ".project-memory/context-bundles/architecture.yml"
+    preferred_agent: "architect"
+
+  domain-adapter:
+    description: "Domain Adapter Contract for separating Ariadne Core from domain-specific execution environments."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - ".project-memory/domain-adapter.schema.yml"
+      - "docs/DOMAIN_ADAPTER_CONTRACT.md"
+      - "docs/adr/0004-ariadne-is-domain-agnostic.md"
     preferred_agent: "architect"
   sprint-0:
     description: "Repository skeleton, package layout, smoke tests, CI, Makefile."
@@ -136,6 +146,9 @@ labels:
       - ".project-memory/conductor-prompt-contract.schema.yml"
       - ".project-memory/prompt-artifact.schema.yml"
       - "docs/CONDUCTOR_PROMPT_CONTRACT.md"
+      - ".project-memory/domain-adapter.schema.yml"
+      - "docs/DOMAIN_ADAPTER_CONTRACT.md"
+      - "docs/adr/0004-ariadne-is-domain-agnostic.md"
     preferred_agent: "architect"
 
   review-artifacts:
