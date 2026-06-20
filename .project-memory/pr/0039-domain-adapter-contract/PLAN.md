@@ -1,4 +1,15 @@
-# PR 0039: Domain Adapter Contract
+## Implementation note
+
+PR 0039 implemented:
+- Created `.project-memory/domain-adapter.schema.yml` with DomainAdapter, DomainCapability, DomainPolicy, DomainValidation, DomainArtifact, DomainApplyMechanism, DomainRollbackMechanism, DomainRisk, DomainStopCondition, DomainOutputFormat, DomainAdapterRegistry definitions, allowed domains, domain responsibilities, policies, Conductor Prompt Contract relationship, safety rules, and minimal valid Coding Adapter example
+- Created `docs/adr/0004-ariadne-is-domain-agnostic.md` — decision that Ariadne Core is domain-agnostic and Coding is a Domain Adapter, not Core
+- Created `docs/DOMAIN_ADAPTER_CONTRACT.md` documenting architecture, adapter responsibilities, examples for all 5 domains, and relationship to Conductor/Apply Gate/Run Record/Review Artifacts/State-First
+- Added 19 `domain-adapter.*` contract entries to `.project-memory/project_contract.yml`
+- Added 12 domain-adapter anchors to `.project-memory/anchors.yml`
+- Updated `.project-memory/context-bundles/contracts.yml` to version 0.15 with schema/ADR/docs in read_first, anchors, and notes
+- Bumped `.project-memory/memory_index.yml` to version 0.17 with new `domain-adapter` label
+
+No runtime Domain Adapter implementation. No Coding Adapter execution. No apply/rollback implementation. No changes to agents, services, or existing schemas.# PR 0039: Domain Adapter Contract
 
 ## Goal
 
