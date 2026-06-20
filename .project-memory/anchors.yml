@@ -745,3 +745,66 @@ anchors:
     description: "Anchors are context/evidence, not execution authorization."
     contract_ids:
       - "ariadne-anchor.not-authorization"
+
+  purpose.schema-path:
+    type: "contract"
+    labels: ["contracts", "purpose"]
+    description: "Schema path for Purpose (PCAM) record: schemas/purpose.schema.yml"
+    contract_ids:
+      - "purpose.schema-path"
+
+  pbs.schema-path:
+    type: "contract"
+    labels: ["contracts", "pbs"]
+    description: "Schema path for Purpose Breakdown Structure: schemas/pbs.schema.yml"
+    contract_ids:
+      - "pbs.schema-path"
+
+  state-model.schema-path:
+    type: "contract"
+    labels: ["contracts", "state-model"]
+    description: "Schema path for State Model: schemas/state-model.schema.yml"
+    contract_ids:
+      - "state-model.schema-path"
+
+  transition-graph.schema-path:
+    type: "contract"
+    labels: ["contracts", "transition-graph"]
+    description: "Schema path for Transition Graph: schemas/transition-graph.schema.yml"
+    contract_ids:
+      - "transition-graph.schema-path"
+
+  rubric-pack.schema-path:
+    type: "contract"
+    labels: ["contracts", "rubric"]
+    description: "Schema path for Rubric Pack: schemas/rubric-pack.schema.yml"
+    contract_ids:
+      - "rubric-pack.schema-path"
+
+  rubric-judge-result.schema-path:
+    type: "contract"
+    labels: ["contracts", "rubric"]
+    description: "Schema path for Rubric Judge Result: schemas/rubric-judge-result.schema.yml"
+    contract_ids:
+      - "rubric-judge-result.schema-path"
+
+  model-capability-profile.schema-path:
+    type: "contract"
+    labels: ["contracts", "model-routing"]
+    description: "Schema path for Model Capability Profile: schemas/model-capability-profile.schema.yml"
+    contract_ids:
+      - "model-capability-profile.schema-path"
+
+  agent-execution-contract.schema-path:
+    type: "contract"
+    labels: ["contracts", "agent-runtime"]
+    description: "Schema path for Agent Execution Contract: schemas/agent-execution-contract.schema.yml"
+    contract_ids:
+      - "agent-execution-contract.schema-path"
+
+  long-context-stress-profile.schema-path:
+    type: "contract"
+    labels: ["contracts", "model-routing"]
+    description: "Schema path for Long-Context Stress Profile: schemas/long-context-stress-profile.schema.yml"
+    contract_ids:
+      - "long-context-stress-profile.schema-path"
