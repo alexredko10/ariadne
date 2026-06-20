@@ -1,0 +1,119 @@
+# Context Pack Schema v0.1
+# Contract artifact — not runtime implementation.
+# Defines structured agent context assembled by Context Compiler.
+#
+# Core principle:
+#   Ariadne must not feed raw repository dumps into agents.
+#   Good context is more structure, labels, relationships, and evidence.
+#   Good context is not more tokens.
+
+schema_version: "0.1"
+
+# --- ContextPack ---
+# Required fields:
+#   schema_version: string
+#   context_pack_id: string
+#   task_id: string
+#   domain: string
+#   purpose: PurposeContext
+#   pbs_node: PBSNodeContext
+#   repository_context: RepositoryContext
+#   semantic_context: SemanticContext
+#   state_first_context: StateFirstContext
+#   rubric_context: RubricContext or null
+#   domain_adapter_context: DomainAdapterContext or null
+#   validation_context: ValidationContext
+#   source_trace: list of ContextPackSourceTrace
+#   created_at: ISO8601 UTC
+
+# --- PurposeContext ---
+# Fields:
+#   root_purpose: string
+#   business_goal: string
+#   technical_goal: string
+#   non_goals: list of strings
+#   constraints: list of strings
+#   risk_level: string
+
+# --- PBSNodeContext ---
+# Fields:
+#   id: string
+#   title: string
+#   parent_id: string or null
+#   local_goal: string
+
+# --- RepositoryContext ---
+# Fields:
+#   relevant_files: list of strings
+#   relevant_symbols: list of strings
+#   related_tests: list of strings
+#   configs: list of strings
+#   recent_changes: list of strings
+#   suggested_entry_points: list of strings
+
+# --- SemanticContext ---
+# Fields:
+#   anchors: list of AriadneAnchor references
+#   invariants: list of invariant references
+#   risks: list of risk descriptions
+#   known_bad_patterns: list of strings
+#   architectural_notes: list of strings
+
+# --- StateFirstContext ---
+# Fields:
+#   state_entities: list of state entity names
+#   transitions: list of transition ids
+#   derived_views: list of derived view names
+#   transaction_boundaries: list of strings
+#   state_traces: list of state trace references
+
+# --- RubricContext ---
+# Fields:
+#   rubric_id: string
+#   essential: list of strings
+#   important: list of strings
+#   optional: list of strings
+#   pitfalls: list of strings
+#   evidence: list of strings
+#   stop_conditions: list of strings
+
+# --- DomainAdapterContext ---
+# Fields:
+#   domain: string
+#   adapter_id: string
+#   allowed_write_paths: list of strings
+#   forbidden_write_paths: list of strings
+#   validation_commands: list of strings or null
+#   artifact_types: list of artifact type descriptions
+#   risks: list of risk descriptions
+#   stop_conditions: list of strings
+
+# --- ValidationContext ---
+# Fields:
+#   commands: list of strings
+#   expected_evidence: list of strings
+#   not_run_policy: string
+
+# --- ContextPackSourceTrace ---
+# Fields:
+#   source: string
+#   source_id: string or null
+#   source_hash: string or null
+#   section: string
+#   required: boolean
+#   present: boolean
+
+# --- Policies ---
+# Context Pack must not contain raw unbounded repository dumps.
+# Context Pack must identify source traces.
+# Missing required sources must be represented as missing/blocked, not invented.
+# Context Pack must include anchors when relevant.
+# Context Pack must include invariants when relevant.
+# Context Pack must include domain adapter policy when relevant.
+# Context Pack must include state-first context when relevant.
+# Context Pack must include rubric context when relevant.
+# Context Pack must preserve validation commands from Domain Adapter.
+# Context Pack must not contain secrets.
+# Context Pack is context/evidence, not execution authorization.
+# Context Pack does not bypass Apply Gate.
+# Context Pack does not replace Run Record.

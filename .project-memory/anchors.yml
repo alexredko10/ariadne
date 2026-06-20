@@ -640,3 +640,108 @@ anchors:
     description: "Domain Adapter must not bypass or replace Run Record."
     contract_ids:
       - "domain-adapter.no-run-record-bypass"
+
+  context-pack.schema-path:
+    type: "contract"
+    labels: ["contracts", "context-pack"]
+    description: "Schema path: .project-memory/context-pack.schema.yml"
+    contract_ids:
+      - "context-pack.schema-path"
+
+  context-pack.required-structure:
+    type: "contract"
+    labels: ["contracts", "context-pack"]
+    description: "Context Pack must include all required context sections."
+    contract_ids:
+      - "context-pack.required-structure"
+
+  context-pack.no-raw-repository-dump:
+    type: "contract"
+    labels: ["contracts", "context-pack"]
+    description: "Context Pack must not be an unbounded raw repository dump."
+    contract_ids:
+      - "context-pack.no-raw-repository-dump"
+
+  context-pack.no-invented-context:
+    type: "contract"
+    labels: ["contracts", "context-pack"]
+    description: "Context Compiler must not invent missing context."
+    contract_ids:
+      - "context-pack.no-invented-context"
+
+  context-pack.source-trace.required:
+    type: "contract"
+    labels: ["contracts", "context-pack"]
+    description: "Context Pack must include source trace for context sections."
+    contract_ids:
+      - "context-pack.source-trace.required"
+
+  context-pack.domain-adapter-context.required:
+    type: "contract"
+    labels: ["contracts", "context-pack", "domain-adapter"]
+    description: "Context Pack must include Domain Adapter policy when relevant."
+    contract_ids:
+      - "context-pack.domain-adapter-context.required"
+
+  context-pack.validation-context.required:
+    type: "contract"
+    labels: ["contracts", "context-pack"]
+    description: "Context Pack must include validation context."
+    contract_ids:
+      - "context-pack.validation-context.required"
+
+  context-pack.no-secret-material:
+    type: "contract"
+    labels: ["contracts", "context-pack", "security"]
+    description: "Context Pack must not contain secrets/tokens/credentials."
+    contract_ids:
+      - "context-pack.no-secret-material"
+
+  ariadne-anchor.schema-path:
+    type: "contract"
+    labels: ["contracts", "ariadne-anchors"]
+    description: "Schema path: .project-memory/ariadne-anchor.schema.yml"
+    contract_ids:
+      - "ariadne-anchor.schema-path"
+
+  ariadne-anchor.indexable:
+    type: "contract"
+    labels: ["contracts", "ariadne-anchors"]
+    description: "Anchors must be indexable."
+    contract_ids:
+      - "ariadne-anchor.indexable"
+
+  ariadne-anchor.context-pack-visible:
+    type: "contract"
+    labels: ["contracts", "ariadne-anchors", "context-pack"]
+    description: "Relevant anchors must be included in Context Packs."
+    contract_ids:
+      - "ariadne-anchor.context-pack-visible"
+
+  ariadne-anchor.conductor-visible:
+    type: "contract"
+    labels: ["contracts", "ariadne-anchors"]
+    description: "Anchors must be visible to Conductor."
+    contract_ids:
+      - "ariadne-anchor.conductor-visible"
+
+  ariadne-anchor.rubric-visible:
+    type: "contract"
+    labels: ["contracts", "ariadne-anchors"]
+    description: "Anchors must be available to future Rubric Generator/Judge."
+    contract_ids:
+      - "ariadne-anchor.rubric-visible"
+
+  ariadne-anchor.canonical-prefix:
+    type: "contract"
+    labels: ["contracts", "ariadne-anchors"]
+    description: "Canonical prefix is @ariadne-*."
+    contract_ids:
+      - "ariadne-anchor.canonical-prefix"
+
+  ariadne-anchor.not-authorization:
+    type: "contract"
+    labels: ["contracts", "ariadne-anchors"]
+    description: "Anchors are context/evidence, not execution authorization."
+    contract_ids:
+      - "ariadne-anchor.not-authorization"
