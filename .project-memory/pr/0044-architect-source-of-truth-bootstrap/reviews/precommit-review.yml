@@ -1,0 +1,61 @@
+schema_version: "0.1"
+pr_id: "0044-architect-source-of-truth-bootstrap"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-06-20T01:25:00Z"
+snapshot_delta:
+  plan_base_sha: "<from PLAN.md>"
+  current_head: "2f0fa0a383dc0f0011cd2cc1a8b2edf930f709a5"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "agents/architect.yml"
+  actual_files:
+    - "agents/architect.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - "agents/architect.yml"
+validation:
+  - command: "python - <<'PY'\nfrom pathlib import Path\nimport yaml\nPath('agents/architect.yml')\n# YAML parse not run: yaml module not available in review environment\nprint('not_run')\nPY"
+    result: "not_run"
+    reason: "PyYAML not available in reviewer environment; content was inspected manually."
+    evidence:
+      - "agents/architect.yml first lines: 'version: 8'"
+      - "agents/architect.yml metadata.description contains: 'Read-only architecture controller for the Ariadne execution substrate'"
+  - command: "grep -n forbidden phrases in agents/architect.yml"
+    result: "passed"
+    evidence:
+      - "agents/architect.yml contains prohibition list for narrating tool usage and explicit phrases to avoid; it does not instruct the agent to use those phrases."
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Approve architect config update"
+    reason: "Change limited to agents/architect.yml; content aligns architect agent to use .project-memory as source-of-truth, remains read-only, preserves forbidden git mutation commands and Docker restrictions, and retains output discipline."
+context_used:
+  labels: ["agents","contracts","architecture"]
+  files_read:
+    - "agents/architect.yml"
+    - ".project-memory/memory_index.yml"
+    - ".project-memory/project_contract.yml"
+    - ".project-memory/context-bundles/contracts.yml"
+    - ".project-memory/anchors.yml"
+    - ".project-memory/pr/0044-architect-source-of-truth-bootstrap/PLAN.md"
+  files_modified:
+    - ".project-memory/pr/0044-architect-source-of-truth-bootstrap/reviews/precommit-review.yml"
+  files_intentionally_ignored:
+    - "services/**"
+    - "agents/** except agents/architect.yml"
+extra_evidence:
+  git_status_short:
+    - "M agents/architect.yml"
+  git_diff_name_only:
+    - "agents/architect.yml"
+  scope_relevant_diff:
+    - "agents/architect.yml: updated description and bootstrap sequence to read .project-memory/memory_index.yml, project_contract.yml, context-bundles/contracts.yml, anchors.yml (when relevant), and phase-0-contracts.yml if present; enforces read-only default and forbids narration of tooling usage."
+  blocking_diff: []
+  rationale: "Only agents/architect.yml changed; change adheres to repository policies and improves architect's bootstrap to use operational .project-memory files as source of truth. YAML parse not run due to environment limitation."
