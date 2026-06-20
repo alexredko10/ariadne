@@ -90,6 +90,7 @@ class StepStatus(enum.Enum):
     RUNNING = "running"
     COMPLETED = "completed"
     FAILED = "failed"
+    BLOCKED = "blocked"
 
 
 class RubricVerdict(enum.Enum):

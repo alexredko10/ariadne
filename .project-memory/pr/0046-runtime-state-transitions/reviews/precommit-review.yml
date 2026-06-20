@@ -1,0 +1,91 @@
+schema_version: v1
+pr_id: "0046-runtime-state-transitions"
+review_type: "precommit-review"
+verdict: pass
+reviewer: "precommit-review"
+timestamp: "2026-06-20T18:42:05Z"
+
+snapshot_delta:
+  current_head_sha: "6f66c4343011a8ac8b15af63430a00ddd4331d36"
+  git_status_short: |
+    M services/core/src/core/runtime_substrate.py
+    ?? services/core/src/core/runtime/
+    ?? services/core/tests/test_runtime_transitions.py
+  git_diff_name_only: |
+    services/core/src/core/runtime_substrate.py
+  scope_relevant_diff: |
+    services/core/src/core/runtime/transitions.py
+    services/core/tests/test_runtime_transitions.py
+    services/core/src/core/runtime_substrate.py
+  blocking_diff: ""
+  rationale: >
+    The working tree contains only PLAN-approved runtime transition implementation
+    and tests. TransitionError includes the required fields; validators are pure
+    functions and enforce the stated rules. Focused tests pass. No I/O, network,
+    persistence, model calls, provider hardcoding, Docker behavior, or git mutation
+    behavior was added.
+
+scope:
+  allowed_paths:
+    - services/core/src/core/runtime/transitions.py
+    - services/core/src/core/runtime_substrate.py
+    - services/core/tests/test_runtime_transitions.py
+    - .project-memory/pr/0046-runtime-state-transitions/reviews/precommit-review.yml
+  forbidden_paths_touched: []
+
+files_checked:
+  - services/core/src/core/runtime/transitions.py
+  - services/core/tests/test_runtime_transitions.py
+  - services/core/src/core/runtime_substrate.py
+  - services/core/tests/test_runtime_substrate.py
+
+validation:
+  - command: "python -m pytest services/core/tests/test_runtime_transitions.py -v"
+    result: passed
+    evidence: "43 passed"
+  - command: "python -m pytest services/core/tests/test_runtime_substrate.py -q"
+    result: passed
+    evidence: "47 passed"
+  - command: "python -m pytest -q"
+    result: not_run
+    reason: "Full test suite not executed; precommit review ran focused tests per instructions."
+  - command: "python -m compileall -f services packages"
+    result: not_run
+    reason: "Not required for this focused precommit review."
+  - command: "PYTHONPATH=services/runner/src python -m runner doctor"
+    result: not_run
+    reason: "Not required for this focused precommit review."
+
+blockers: []
+
+warnings: []
+
+decisions_made:
+  - decision: "pass precommit review"
+    reason: "Focused transition and substrate tests passed; implementation stayed within approved Core runtime scope."
+
+context_used:
+  files_read:
+    - .project-memory/review-artifact.schema.yml
+    - .project-memory/pr/0046-runtime-state-transitions/PLAN.md
+    - .project-memory/pr/0046-runtime-state-transitions/reviews/plan-review.yml
+    - .project-memory/pr/0044-runtime-substrate-skeleton/PLAN.md
+    - .project-memory/pr/0044-runtime-substrate-skeleton/reviews/plan-review.yml
+    - .project-memory/pr/0044-runtime-substrate-skeleton/reviews/precommit-review.yml
+    - .project-memory/pr/0045-runtime-substrate-serialization/PLAN.md
+    - .project-memory/pr/0045-runtime-substrate-serialization/reviews/plan-review.yml
+    - .project-memory/pr/0045-runtime-substrate-serialization/reviews/precommit-review.yml
+    - .project-memory/memory_index.yml
+    - .project-memory/project_contract.yml
+    - .project-memory/context-bundles/contracts.yml
+    - .project-memory/anchors.yml
+    - ROADMAP_PHASE_0_PR_PLAN.md
+    - PHASE_0_DECOMPOSITION.md
+    - ARIADNE_ARCHITECTURE.md
+    - ROADMAP.md
+    - services/core/src/core/runtime/transitions.py
+    - services/core/tests/test_runtime_transitions.py
+    - services/core/src/core/runtime_substrate.py
+    - services/core/tests/test_runtime_substrate.py
+  files_modified:
+    - .project-memory/pr/0046-runtime-state-transitions/reviews/precommit-review.yml
