@@ -1,4 +1,13 @@
-# PR 0035: State-First Agent Architecture Contract
+## Implementation note — commit 2
+
+PR 0035 commit 2 implemented:
+- Created `.project-memory/state-first.schema.yml` with StateEntity, Transition, InvariantEntry, StateTrace, StateFirstContextPack definitions, annotation extensions, agent rules, event exception policy, safety rules, minimal valid Transition example, and invalid cases list
+- Added 14 `state-first.*` contract entries to `.project-memory/project_contract.yml`
+- Added 8 state-first anchors to `.project-memory/anchors.yml`
+- Updated `.project-memory/context-bundles/contracts.yml` to version 0.11 with state-first schema and ADR in read_first, anchors, and notes
+- Bumped `.project-memory/memory_index.yml` to version 0.13 with new `state-first` label and schema/ADR references
+
+No services/** changes. No agents/** changes. No .ariadne/** writes. No run_record.yml. No state_core/ implementation. No runtime artifacts generated. No event-driven ban. Existing @ariadne-* annotation semantics preserved.# PR 0035: State-First Agent Architecture Contract
 
 ## Goal
 

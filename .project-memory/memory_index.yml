@@ -1,4 +1,4 @@
-version: "0.12"
+version: "0.13"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -46,6 +46,8 @@ labels:
       - ".project-memory/task-intake-runner-handoff.schema.yml"
       - ".project-memory/model-routing.schema.yml"
       - "docs/adr/0002-model-selection-methodology.md"
+      - ".project-memory/state-first.schema.yml"
+      - "docs/adr/0003-state-first-agent-architecture.md"
   agent-config:
     description: "Docker Agent YAML configs and agent operating rules."
     bundles:
@@ -114,6 +116,15 @@ labels:
     additional_files:
       - ".project-memory/model-routing.schema.yml"
       - "docs/adr/0002-model-selection-methodology.md"
+    preferred_agent: "architect"
+
+  state-first:
+    description: "State-First Agent Architecture contracts, transition graph schema, invariant registry, and state trace schema."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - ".project-memory/state-first.schema.yml"
+      - "docs/adr/0003-state-first-agent-architecture.md"
     preferred_agent: "architect"
 
 agent_memory_profiles:

@@ -355,3 +355,71 @@ anchors:
       Does not authorize execution, writes, or agent actions.
     contract_ids:
       - "model-routing.selection-result-evidence-only"
+
+  state-first.architecture.required:
+    type: "adr-contract"
+    labels: ["contracts", "state-first", "architecture"]
+    description: >
+      State-First Agent Architecture adopted as default principle.
+      State → Transition → State. Events at boundary. State at core.
+    contract_ids:
+      - "state-first.architecture.required"
+
+  state-first.adr-path:
+    type: "adr-contract"
+    labels: ["contracts", "state-first"]
+    description: "ADR path — docs/adr/0003-state-first-agent-architecture.md"
+    contract_ids:
+      - "state-first.adr-path"
+
+  state-first.named-transitions.required:
+    type: "contract"
+    labels: ["contracts", "state-first"]
+    description: >
+      All durable state changes must use named transitions with
+      preconditions, postconditions, and invariants.
+    contract_ids:
+      - "state-first.named-transitions.required"
+
+  state-first.invariant-check.required:
+    type: "contract"
+    labels: ["contracts", "state-first"]
+    description: >
+      Transitions must check invariants. Invariant bypass is CRITICAL.
+    contract_ids:
+      - "state-first.invariant-check.required"
+
+  state-first.events-at-boundary-only:
+    type: "contract"
+    labels: ["contracts", "state-first"]
+    description: >
+      Events appropriate at system boundaries. Inside logic, events
+      must fold into state transitions.
+    contract_ids:
+      - "state-first.events-at-boundary-only"
+
+  state-first.event-subsystem-high-risk:
+    type: "contract"
+    labels: ["contracts", "state-first"]
+    description: >
+      Event-driven subsystem without state projection is HIGH RISK
+      for AI modification.
+    contract_ids:
+      - "state-first.event-subsystem-high-risk"
+
+  state-first.state-trace-evidence-only:
+    type: "contract"
+    labels: ["contracts", "state-first"]
+    description: >
+      StateTrace is evidence of transition execution. Does not authorize
+      canonical writes or agent actions.
+    contract_ids:
+      - "state-first.state-trace-evidence-only"
+
+  state-first.no-bypass-apply-gate:
+    type: "contract"
+    labels: ["contracts", "state-first"]
+    description: >
+      State transitions must not bypass apply-gate.schema.yml.
+    contract_ids:
+      - "state-first.no-bypass-apply-gate"
