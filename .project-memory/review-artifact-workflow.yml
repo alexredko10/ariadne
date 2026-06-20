@@ -1,0 +1,56 @@
+# Review Artifact Workflow Guide v0.1
+# Manual workflow guide for adopting the Review Artifact Contract (PR 0036).
+# Defines when and how future PRs save:
+#   .project-memory/pr/<pr-id>/reviews/plan-review.yml
+#   .project-memory/pr/<pr-id>/reviews/precommit-review.yml
+#
+# Schema source: .project-memory/review-artifact.schema.yml
+
+schema_version: "0.1"
+
+workflow_stages:
+  - plan_created
+  - plan_review_completed
+  - implementation_completed
+  - precommit_review_completed
+  - pr_opened
+
+artifact_paths:
+  plan_review: ".project-memory/pr/<pr-id>/reviews/plan-review.yml"
+  precommit_review: ".project-memory/pr/<pr-id>/reviews/precommit-review.yml"
+
+writer_policy:
+  plan_review_agent_may_write:
+    - ".project-memory/pr/<pr-id>/reviews/plan-review.yml"
+  precommit_review_agent_may_write:
+    - ".project-memory/pr/<pr-id>/reviews/precommit-review.yml"
+  human_may_save_from_agent_output:
+    - "Allowed when agent has no write access to the target path"
+  artifact_must_be_committed_with_pr: true
+
+validation_policy:
+  passed_skipped_not_run_distinct: true
+  fake_validation_forbidden: true
+  validation_evidence_required:
+    - command
+    - result
+    - exit_code
+    - evidence
+
+snapshot_policy:
+  report_delta: true
+  do_not_block_solely_on_stale_base_sha: true
+  block_only_on_unrelated_or_forbidden_scope_evidence: true
+
+safety_policy:
+  evidence_only: true
+  no_apply_gate_bypass: true
+  no_run_record_bypass: true
+  no_runtime_authorization: true
+  no_secrets: true
+
+adoption_boundary:
+  pr_0037_starts_manual_adoption: true
+  no_old_pr_migration: true
+  no_agents_config_change_in_pr_0037: true
+  future_pr_may_update_agents_after_manual_workflow_established: true
