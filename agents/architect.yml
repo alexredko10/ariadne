@@ -7,10 +7,10 @@ metadata:
 
 models:
   architect_model:
-    provider: openai
-    model: gpt-5-mini
-    token_key: OPENAI_API_KEY
-    max_tokens: 7000
+    model: deepseek-chat
+    base_url: https://api.deepseek.com
+    token_key: DEEPSEEK_API_KEY
+    max_tokens: 10000
     thinking_budget: low
 
 agents:

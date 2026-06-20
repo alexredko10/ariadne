@@ -1,0 +1,148 @@
+# Conductor Prompt Contract Schema v0.1
+# Contract artifact — not runtime implementation.
+# Defines how Conductor assembles prompts from known Ariadne substrate sources.
+#
+# Core principle:
+#   Model is replaceable. Substrate is Ariadne.
+#   Conductor must not invent context.
+#   Missing required source must be represented as missing/blocked.
+
+schema_version: "0.1"
+
+# --- ConductorPromptContract ---
+# Defines the contract for prompt assembly by the Conductor.
+# Fields:
+#   sections: list of PromptSection
+#   generation_policy: PromptGenerationPolicy
+#   validation_policy: PromptValidationPolicy
+#   hash_policy: PromptHashPolicy
+
+# --- PromptSection ---
+# Fields:
+#   id: string, section identifier
+#   description: string
+#   required: boolean
+#   source: PromptSectionSource or null
+
+# --- PromptSectionSource ---
+# Fields:
+#   name: string, source name from the known source registry
+#   source_id: string or null
+#   source_hash: string or null
+#   required: boolean
+#   present: boolean
+
+# --- Required prompt sections ---
+# task_description
+# agent_role
+# mode
+# cold_read_protocol
+# context_snapshot
+# purpose
+# pbs_node
+# rubric
+# allowed_write_paths
+# forbidden_write_paths
+# required_behavior
+# stop_conditions
+# validation_commands
+# final_output_format
+
+# --- Required artifact fields exposed by prompt contract ---
+# task_id: string
+# prompt_id: string
+# agent_id: string
+# domain: string
+# model_profile: string
+# context_bundle_ids: list of strings
+# memory_snapshot_hash: string
+# generated_prompt_hash: string
+# created_at: ISO8601 UTC
+# prompt_contract_version: string
+
+# --- Required section sources ---
+# task_description:       task_intake
+# context_snapshot:       context_compiler
+# purpose:                pcam.purpose_extractor
+# pbs_node:               pcam.pbs_builder
+# rubric:                 pcam.rubric_generator
+# allowed_write_paths:    domain_adapter.policy
+# forbidden_write_paths:  domain_adapter.policy
+# validation_commands:    domain_adapter.validation
+# final_output_format:    agent_contract
+
+# --- Known source registry ---
+# Conductor may assemble context only from known sources:
+# task_intake
+# project_contract
+# anchors
+# memory_index
+# context_bundles
+# repository_graph
+# semantic_index
+# domain_adapter
+# pcam_purpose
+# pbs_node
+# rubric_pack
+# agent_contract
+# state_first_context
+# review_artifact_contract
+
+# --- PromptGenerationPolicy ---
+# - Conductor must not invent context.
+# - Missing required source must be represented as missing/blocked.
+# - Generated prompt must be reproducible from Prompt Artifact.
+# - Prompt generation is evidence-producing, not write authorization.
+
+# --- PromptValidationPolicy ---
+# - Prompt sections must be traceable to section_sources.
+# - Prompt contract version must be explicit.
+# - Generated prompt hash must change when any section changes.
+
+# --- PromptHashPolicy ---
+# - generated_prompt_hash: hash of assembled prompt sections
+# - memory_snapshot_hash: hash of memory snapshot components
+# - Hash change when any component changes
+# - Required for replay and audit
+
+# --- Policies ---
+# Conductor must not invent context.
+# Missing required source must be represented as missing/blocked, not silently fabricated.
+# Generated prompt must be reproducible from Prompt Artifact.
+# Prompt contract version must be explicit.
+# Prompt sections must be traceable to section sources.
+# Prompt generation is evidence-producing, not write authorization.
+# Prompt artifact does not bypass apply-gate.
+# Prompt artifact does not replace run-record.
+# Prompt artifact must not contain secrets.
+# Prompt artifact must not contain raw unbounded repository dumps.
+# Prompt artifact should reference structured context packs rather than embedding noisy raw context.
+
+# --- Safety rules ---
+# Prompt artifacts are evidence only.
+# Prompt artifacts do not authorize canonical writes.
+# Prompt artifacts do not replace apply-gate.schema.yml.
+# Prompt artifacts do not replace run-record.schema.yml.
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# prompt_contract_version: "0.1"
+# task_id: "task_a1b2c3d4"
+# prompt_id: "prompt_001"
+# agent_id: "worker_coder"
+# domain: "backend"
+# model_profile: "provider:model-x"
+# context_bundle_ids:
+#   - "task_description"
+#   - "context_snapshot"
+# memory_snapshot_hash: "abc123"
+# generated_prompt_hash: "def456"
+# created_at: "2026-06-20T00:00:00Z"
+# sections:
+#   - id: "task_description"
+#     required: true
+#   - id: "agent_role"
+#     required: true
+#   - id: "context_snapshot"
+#     required: true

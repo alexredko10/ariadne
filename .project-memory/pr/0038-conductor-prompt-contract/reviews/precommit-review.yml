@@ -1,0 +1,88 @@
+schema_version: "0.1"
+pr_id: "0038-conductor-prompt-contract"
+review_type: "precommit-review"
+verdict: "warning"
+reviewer: "precommit-review"
+timestamp: "2026-06-20T00:20:00Z"
+snapshot_delta:
+  plan_base_sha: "80c2bdc7ac0f3768341852a14385a991d148f0da"
+  current_head: "2b4a34bc2b1dc44fea7f797a024d428ba70b642e"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/conductor-prompt-contract.schema.yml"
+    - ".project-memory/prompt-artifact.schema.yml"
+    - ".project-memory/project_contract.yml"
+    - ".project-memory/anchors.yml"
+    - ".project-memory/context-bundles/contracts.yml"
+    - ".project-memory/memory_index.yml"
+    - ".project-memory/pr/0038-conductor-prompt-contract/PLAN.md"
+    - ".project-memory/pr/0038-conductor-prompt-contract/reviews/plan-review.yml"
+    - "docs/CONDUCTOR_PROMPT_CONTRACT.md"
+  actual_files:
+    - ".project-memory/conductor-prompt-contract.schema.yml"
+    - ".project-memory/prompt-artifact.schema.yml"
+    - ".project-memory/project_contract.yml"
+    - ".project-memory/anchors.yml"
+    - ".project-memory/context-bundles/contracts.yml"
+    - ".project-memory/memory_index.yml"
+    - ".project-memory/pr/0038-conductor-prompt-contract/PLAN.md"
+    - ".project-memory/pr/0038-conductor-prompt-contract/reviews/plan-review.yml"
+    - "docs/CONDUCTOR_PROMPT_CONTRACT.md"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/conductor-prompt-contract.schema.yml"
+  - ".project-memory/prompt-artifact.schema.yml"
+  - ".project-memory/project_contract.yml"
+  - ".project-memory/anchors.yml"
+  - ".project-memory/context-bundles/contracts.yml"
+  - ".project-memory/memory_index.yml"
+  - ".project-memory/pr/0038-conductor-prompt-contract/PLAN.md"
+  - ".project-memory/pr/0038-conductor-prompt-contract/reviews/plan-review.yml"
+validation:
+  - command: "python -m pytest -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "301 passed"
+  - command: "python -m compileall -f services packages"
+    result: "passed"
+    exit_code: 0
+    evidence: "compiled without errors"
+  - command: "PYTHONPATH=services/runner/src python -m runner doctor"
+    result: "passed"
+    exit_code: 0
+    evidence: "runner doctor ok"
+blockers: []
+warnings:
+  - id: "docs-allowed-exception"
+    description: "docs/CONDUCTOR_PROMPT_CONTRACT.md was added. docs/** is generally forbidden for PR implementations, but this PLAN allowed a single docs file per PLAN."
+    evidence: "git status shows docs/CONDUCTOR_PROMPT_CONTRACT.md untracked"
+    recommendation: "Confirm that adding this docs file aligns with the project documentation policy; consider moving to .project-memory if docs must remain forbidden."
+decisions_made:
+  - decision: "Adopt conductor prompt and prompt-artifact schemas with documentation exception"
+    reason: "Documentation was added intentionally for human readers; schema and contracts remain in .project-memory"
+context_used:
+  labels: ["contracts"]
+  memory_files_read:
+    - ".project-memory/project_contract.yml"
+    - ".project-memory/anchors.yml"
+  anchors_used:
+    - "review-artifact.schema-path"
+    - "review-artifact.precommit-review.required"
+  files_inspected:
+    - ".project-memory/conductor-prompt-contract.schema.yml"
+    - ".project-memory/prompt-artifact.schema.yml"
+    - ".project-memory/project_contract.yml"
+    - ".project-memory/anchors.yml"
+    - ".project-memory/context-bundles/contracts.yml"
+    - ".project-memory/memory_index.yml"
+    - ".project-memory/pr/0038-conductor-prompt-contract/PLAN.md"
+    - ".project-memory/pr/0038-conductor-prompt-contract/reviews/plan-review.yml"
+  files_modified:
+    - ".project-memory/pr/0038-conductor-prompt-contract/reviews/precommit-review.yml"
+  files_intentionally_ignored:
+    - ".project-memory/pr/*/reviews/*.yml"

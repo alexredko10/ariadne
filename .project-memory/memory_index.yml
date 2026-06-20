@@ -1,4 +1,4 @@
-version: "0.15"
+version: "0.16"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -128,6 +128,16 @@ labels:
       - "docs/adr/0003-state-first-agent-architecture.md"
     preferred_agent: "architect"
 
+  conductor-prompt:
+    description: "Conductor Prompt Contract and Prompt Artifact schema for reproducible model-agnostic prompt generation."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - ".project-memory/conductor-prompt-contract.schema.yml"
+      - ".project-memory/prompt-artifact.schema.yml"
+      - "docs/CONDUCTOR_PROMPT_CONTRACT.md"
+    preferred_agent: "architect"
+
   review-artifacts:
     description: "Durable review artifact contract for plan-review and precommit-review evidence."
     bundles:
@@ -135,6 +145,9 @@ labels:
     additional_files:
       - ".project-memory/review-artifact.schema.yml"
       - ".project-memory/review-artifact-workflow.yml"
+      - ".project-memory/conductor-prompt-contract.schema.yml"
+      - ".project-memory/prompt-artifact.schema.yml"
+      - "docs/CONDUCTOR_PROMPT_CONTRACT.md"
     preferred_agent: "plan-review"
 
 agent_memory_profiles:
