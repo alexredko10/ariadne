@@ -423,3 +423,73 @@ anchors:
       State transitions must not bypass apply-gate.schema.yml.
     contract_ids:
       - "state-first.no-bypass-apply-gate"
+
+  review-artifact.schema-path:
+    type: "contract"
+    labels: ["contracts", "review-artifacts"]
+    description: "Schema path: .project-memory/review-artifact.schema.yml"
+    contract_ids:
+      - "review-artifact.schema-path"
+
+  review-artifact.plan-review.required:
+    type: "contract"
+    labels: ["contracts", "review-artifacts"]
+    description: "Future PR workflows must persist plan-review artifacts after plan-review approval/block."
+    contract_ids:
+      - "review-artifact.plan-review.required"
+
+  review-artifact.precommit-review.required:
+    type: "contract"
+    labels: ["contracts", "review-artifacts"]
+    description: "Future PR workflows must persist precommit-review artifacts after precommit review."
+    contract_ids:
+      - "review-artifact.precommit-review.required"
+
+  review-artifact.path.required:
+    type: "contract"
+    labels: ["contracts", "review-artifacts"]
+    description: "Review artifacts must live under .project-memory/pr/<pr-id>/reviews/."
+    contract_ids:
+      - "review-artifact.path.required"
+
+  review-artifact.snapshot-delta.required:
+    type: "contract"
+    labels: ["contracts", "review-artifacts"]
+    description: "Review artifacts must include snapshot_delta and stale snapshot policy."
+    contract_ids:
+      - "review-artifact.snapshot-delta.required"
+
+  review-artifact.validation-evidence.required:
+    type: "contract"
+    labels: ["contracts", "review-artifacts"]
+    description: "Review artifacts must record validation commands and results."
+    contract_ids:
+      - "review-artifact.validation-evidence.required"
+
+  review-artifact.no-fake-validation:
+    type: "contract"
+    labels: ["contracts", "review-artifacts"]
+    description: "Validation must be marked passed only when evidence exists."
+    contract_ids:
+      - "review-artifact.no-fake-validation"
+
+  review-artifact.evidence-only:
+    type: "contract"
+    labels: ["contracts", "review-artifacts"]
+    description: "Review artifacts are evidence only and do not authorize writes."
+    contract_ids:
+      - "review-artifact.evidence-only"
+
+  review-artifact.no-apply-gate-bypass:
+    type: "contract"
+    labels: ["contracts", "review-artifacts"]
+    description: "Review artifacts must not bypass apply-gate.schema.yml."
+    contract_ids:
+      - "review-artifact.no-apply-gate-bypass"
+
+  review-artifact.no-secrets:
+    type: "contract"
+    labels: ["contracts", "review-artifacts", "security"]
+    description: "Review artifacts must not contain secrets, tokens, API keys, or credentials."
+    contract_ids:
+      - "review-artifact.no-secrets"

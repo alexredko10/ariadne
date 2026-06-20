@@ -1,0 +1,236 @@
+# Review Artifact Schema v0.1
+# Contract artifact — not runtime implementation.
+# Defines durable review artifact format for Ariadne PR workflows.
+#
+# Core doctrine:
+#   ReviewArtifact is evidence only.
+#   ReviewArtifact does not authorize canonical writes.
+#   ReviewArtifact does not replace apply-gate.schema.yml.
+#   ReviewArtifact does not replace run-record.schema.yml.
+#
+# Future review artifact paths:
+#   .project-memory/pr/<pr-id>/reviews/plan-review.yml
+#   .project-memory/pr/<pr-id>/reviews/precommit-review.yml
+
+schema_version: "0.1"
+
+# --- ReviewArtifact ---
+# Required fields:
+#   schema_version: string "0.1"
+#   pr_id: string, e.g. "0036"
+#   review_type: "plan-review | precommit-review | security-review | ci-review | manual-review"
+#   verdict: "approve | pass | warning | block"
+#   reviewer: string, agent or human identifier
+#   timestamp: ISO8601 UTC
+#   snapshot_delta: SnapshotDelta
+#   scope: ScopeCheck
+#   files_checked: list of file paths
+#   validation: list of ValidationCommand entries
+#   blockers: list of ReviewBlocker entries (may be empty)
+#   warnings: list of ReviewWarning entries (may be empty)
+#   decisions_made: list of ReviewDecision entries
+#   context_used: ReviewContextUsed
+# Optional fields:
+#   summary: string
+#   recommendations: list of strings
+#   related_plan: string, path to PLAN.md
+#   related_commit: string, commit hash
+
+# --- Verdict rules ---
+# plan-review may use: approve, warning, block
+# precommit-review may use: pass, warning, block
+# block requires at least one blocker
+# warning requires at least one warning or explicit rationale
+# approve and pass require blockers to be empty
+# validation failures must not be hidden
+# not_run / skipped validation must not be represented as passed
+
+# --- SnapshotDelta ---
+# Required fields:
+#   plan_base_sha: string
+#   current_head: string
+#   action: string, e.g. "continue" or "stop"
+#   stale_snapshot: boolean
+# Policy:
+#   Report delta.
+#   Do not block solely on PLAN base_sha mismatch.
+#   Block only if scope evidence shows unrelated or forbidden changes.
+
+# --- ScopeCheck ---
+# Required fields:
+#   expected_files: list of strings
+#   actual_files: list of strings
+#   forbidden_paths_checked: boolean
+#   forbidden_paths_found: list of strings
+#   generated_artifacts_found: list of strings
+#   scope_status: "in_scope | warning | blocked"
+
+# --- ValidationCommand ---
+# Required fields:
+#   command: string, e.g. "python -m pytest -q"
+#   result: "passed | failed | skipped | not_run"
+#   exit_code: int or null
+#   evidence: string, sanitized short evidence
+
+# --- ReviewBlocker ---
+# Required fields:
+#   id: string, unique blocker identifier
+#   description: string
+#   severity: "critical | high | medium"
+#   evidence: string
+#   required_fix: string
+
+# --- ReviewWarning ---
+# Required fields:
+#   id: string, unique warning identifier
+#   description: string
+#   evidence: string
+#   recommendation: string
+
+# --- ReviewDecision ---
+# Required fields:
+#   decision: string
+#   reason: string
+
+# --- ReviewContextUsed ---
+# Required fields:
+#   labels: list of strings
+#   memory_files_read: list of file paths
+#   anchors_used: list of anchor ids
+#   files_inspected: list of file paths
+#   files_modified: list of file paths (may be empty)
+#   files_intentionally_ignored: list of file paths or globs
+
+# --- Safety rules ---
+# ReviewArtifact is evidence only.
+# ReviewArtifact does not authorize canonical writes.
+# ReviewArtifact does not replace apply-gate.schema.yml.
+# ReviewArtifact does not replace run-record.schema.yml.
+# ReviewArtifact does not create runtime state.
+# ReviewArtifact must not contain secrets.
+# ReviewArtifact must not invent validation evidence.
+# ReviewArtifact must distinguish not_run / skipped from passed.
+# ReviewArtifact must include blockers and warnings, even when empty.
+# ReviewArtifact must include files_modified, even when empty.
+
+# --- Artifact path rules ---
+# plan-review path: .project-memory/pr/<pr-id>/reviews/plan-review.yml
+# precommit-review path: .project-memory/pr/<pr-id>/reviews/precommit-review.yml
+# Exactly one canonical artifact per review type per PR.
+# Path must remain under the same PR directory.
+# Review artifact must not be stored in .ariadne/**.
+# PR 0036 defines the contract only. No actual review artifacts are created.
+
+# --- Invalid cases ---
+# block verdict with empty blockers
+# pass verdict with blockers
+# validation failure marked as passed
+# skipped validation marked as passed
+# missing snapshot_delta
+# missing files_checked
+# review artifact outside .project-memory/pr/<pr-id>/reviews/
+# review artifact used as write authorization
+# secret/API key included in review evidence
+
+# ============================================================
+# Minimal valid plan-review example:
+# ============================================================
+# schema_version: "0.1"
+# pr_id: "0036"
+# review_type: "plan-review"
+# verdict: "approve"
+# reviewer: "plan-review"
+# timestamp: "2026-06-19T00:00:00Z"
+# snapshot_delta:
+#   plan_base_sha: "65b57564d7581942bf4aa285779c8de3e75032e2"
+#   current_head: "65b57564d7581942bf4aa285779c8de3e75032e2"
+#   action: "continue"
+#   stale_snapshot: false
+# scope:
+#   expected_files:
+#     - ".project-memory/review-artifact.schema.yml"
+#     - ".project-memory/project_contract.yml"
+#     - ".project-memory/anchors.yml"
+#     - ".project-memory/context-bundles/contracts.yml"
+#     - ".project-memory/memory_index.yml"
+#   actual_files:
+#     - ".project-memory/review-artifact.schema.yml"
+#     - ".project-memory/project_contract.yml"
+#     - ".project-memory/anchors.yml"
+#     - ".project-memory/context-bundles/contracts.yml"
+#     - ".project-memory/memory_index.yml"
+#   forbidden_paths_checked: true
+#   forbidden_paths_found: []
+#   generated_artifacts_found: []
+#   scope_status: "in_scope"
+# files_checked:
+#   - ".project-memory/review-artifact.schema.yml"
+# validation:
+#   - command: "python -m pytest -q"
+#     result: "passed"
+#     exit_code: 0
+#     evidence: "314 passed"
+# blockers: []
+# warnings: []
+# decisions_made:
+#   - decision: "Do not create ADR 0004 in PR 0036"
+#     reason: "Resolves plan-review warning and keeps docs/** forbidden."
+# context_used:
+#   labels:
+#     - contracts
+#   memory_files_read:
+#     - ".project-memory/memory_index.yml"
+#   anchors_used: []
+#   files_inspected:
+#     - ".project-memory/project_contract.yml"
+#   files_modified:
+#     - ".project-memory/review-artifact.schema.yml"
+#   files_intentionally_ignored:
+#     - ".project-memory/pr/*/reviews/*.yml"
+
+# ============================================================
+# Minimal valid precommit-review example:
+# ============================================================
+# schema_version: "0.1"
+# pr_id: "0036"
+# review_type: "precommit-review"
+# verdict: "pass"
+# reviewer: "precommit-review"
+# timestamp: "2026-06-19T00:00:00Z"
+# snapshot_delta:
+#   plan_base_sha: "65b57564d7581942bf4aa285779c8de3e75032e2"
+#   current_head: "65b57564d7581942bf4aa285779c8de3e75032e2"
+#   action: "continue"
+#   stale_snapshot: false
+# scope:
+#   expected_files:
+#     - ".project-memory/review-artifact.schema.yml"
+#   actual_files:
+#     - ".project-memory/review-artifact.schema.yml"
+#   forbidden_paths_checked: true
+#   forbidden_paths_found: []
+#   generated_artifacts_found: []
+#   scope_status: "in_scope"
+# files_checked:
+#   - ".project-memory/review-artifact.schema.yml"
+# validation:
+#   - command: "python -m pytest -q"
+#     result: "passed"
+#     exit_code: 0
+#     evidence: "314 passed"
+# blockers: []
+# warnings: []
+# decisions_made:
+#   - decision: "No deviations — followed PLAN.md exactly"
+#     reason: ""
+# context_used:
+#   labels:
+#     - contracts
+#   memory_files_read:
+#     - ".project-memory/memory_index.yml"
+#   anchors_used: []
+#   files_inspected:
+#     - ".project-memory/project_contract.yml"
+#   files_modified: []
+#   files_intentionally_ignored:
+#     - ".project-memory/pr/*/reviews/*.yml"
