@@ -1,4 +1,4 @@
-version: "0.13"
+version: "0.14"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -48,6 +48,7 @@ labels:
       - "docs/adr/0002-model-selection-methodology.md"
       - ".project-memory/state-first.schema.yml"
       - "docs/adr/0003-state-first-agent-architecture.md"
+      - ".project-memory/review-artifact.schema.yml"
   agent-config:
     description: "Docker Agent YAML configs and agent operating rules."
     bundles:
@@ -126,6 +127,14 @@ labels:
       - ".project-memory/state-first.schema.yml"
       - "docs/adr/0003-state-first-agent-architecture.md"
     preferred_agent: "architect"
+
+  review-artifacts:
+    description: "Durable review artifact contract for plan-review and precommit-review evidence."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - ".project-memory/review-artifact.schema.yml"
+    preferred_agent: "plan-review"
 
 agent_memory_profiles:
   architect:
