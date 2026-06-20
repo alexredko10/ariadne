@@ -1,0 +1,179 @@
+# State-First Agent Architecture Schema v0.1
+# Contract artifact — not runtime implementation.
+# Defines StateEntity, Transition, InvariantEntry, StateTrace,
+# StateFirstContextPack, and related contracts.
+#
+# Core doctrine:
+#   State(t) → Transition(Command/Event) → State(t+1) → Verification
+#   Events at the boundary. State at the core.
+#   Events must produce a state projection before agents reason about behavior.
+
+schema_version: "0.1"
+
+# --- StateEntity ---
+# Required fields:
+#   name: unique entity name
+#   storage: "sql_table | key_value | document | in_memory | register"
+#   table_or_key: optional storage-specific identifier
+#   fields: list of field names
+#   description: short purpose statement
+#
+# Example:
+#   name: "Invoice"
+#   storage: "sql_table"
+#   table_or_key: "invoices"
+#   fields:
+#     - "id"
+#     - "status"
+#     - "amount_cents"
+#     - "created_at"
+#     - "posted_at"
+#   description: "Represents a financial invoice in the system."
+
+# --- Transition ---
+# Required fields:
+#   id: "<context>.<action>" format, e.g. "invoice.post"
+#   input: list of input command/event names
+#   reads: list of StateEntity names read by the transition
+#   writes: list of StateEntity names mutated by the transition
+#   preconditions: list of precondition expressions
+#   postconditions: list of postcondition expressions
+#   invariants: list of invariant ids that must hold before and after
+#   transaction_boundary: "required | not_required | saga"
+#   idempotent: "true | false | conditional"
+#   side_effects: list of side-effect descriptions (if any)
+#   rollback_behavior: string describing how to undo on failure
+#
+# Example:
+#   id: "invoice.post"
+#   input:
+#     - "PostInvoiceCommand"
+#   reads:
+#     - "Invoice"
+#   writes:
+#     - "Invoice"
+#     - "LedgerRegister"
+#   preconditions:
+#     - "invoice.status == draft"
+#   postconditions:
+#     - "invoice.status == posted"
+#   invariants:
+#     - "ledger.balanced"
+#   transaction_boundary: "required"
+#   idempotent: "conditional"
+#   side_effects:
+#     - "outbox.invoice_posted"
+#   rollback_behavior: "Rollback invoice and ledger register mutations in the same transaction."
+
+# --- InvariantEntry ---
+# Required fields:
+#   id: unique invariant identifier
+#   description: what the invariant enforces
+#   severity: "critical | high | medium"
+#   applies_to: list of transition ids or StateEntity names
+#   verifiable_by: "test | runtime_check | static_analysis | manual"
+#
+# Example:
+#   id: "ledger.balanced"
+#   description: "Total debits must equal total credits in the ledger."
+#   severity: "critical"
+#   applies_to:
+#     - "invoice.post"
+#     - "ledger.reconcile"
+#   verifiable_by: "runtime_check"
+
+# --- StateTrace ---
+# Required fields:
+#   transition_id: the transition that produced this trace
+#   timestamp: ISO8601 UTC
+#   before_snapshot: snapshot of relevant state before transition
+#   after_snapshot: snapshot of relevant state after transition
+#   invariants_checked: list of invariant ids checked
+#   invariants_passed: list of invariant ids that passed
+#   invariants_failed: list of invariant ids that failed
+#   outcome: "success | rollback | partial"
+
+# --- StateFirstContextPack ---
+# Fields:
+#   state_entities: list of StateEntity definitions
+#   transitions: list of Transition definitions
+#   invariants: list of InvariantEntry definitions
+#   derived_views: list of derived view descriptions
+#   event_sources: list of external event sources
+#   side_effects: list of side-effect descriptions
+#   transaction_boundaries: list of transaction boundary descriptions
+#   state_traces: list of StateTrace entries
+
+# --- Annotation extensions ---
+# @ariadne-state <EntityName>
+# @ariadne-transition <transition.id>
+# @ariadne-invariant <invariant.id>
+# @ariadne-register <register.name>
+# @ariadne-derived-view <view.name>
+#
+# @ariadne-invariant already exists; reuse and extend documentation only.
+# Do not replace existing annotation semantics.
+
+# --- Agent rules ---
+# 1. Do not hide durable state inside algorithms.
+# 2. Do not create implicit persistent state without declaring it.
+# 3. Do not introduce async event chains when a state transition suffices.
+# 4. Do not mutate state outside named transitions.
+# 5. Do not bypass invariant checks.
+# 6. Do not implement business behavior only as side effects.
+# 7. Prefer explicit transition functions with testable pre/postconditions.
+
+# --- Event exception policy ---
+# Events are appropriate for:
+# - external integrations
+# - message queues
+# - notifications
+# - outbox patterns
+# - event sourcing
+# - audit streams
+# - cross-service propagation
+# - eventual consistency
+# - long-running sagas
+#
+# Required projection:
+#   Event Log → State Projection → Transition Graph → Invariant Verification
+#
+# Event-driven subsystem without state projection = HIGH RISK for AI modification.
+
+# --- Safety rules ---
+# StateTrace is evidence only, not execution authorization.
+# Transitions must not bypass apply-gate.schema.yml.
+# Transitions must not bypass Model Gateway JWT.
+# State mutations outside named transitions are contract violations.
+# Invariant bypass is a CRITICAL severity contract violation.
+
+# --- Invalid cases ---
+# state mutation outside named transition
+# transition without preconditions
+# transition without invariants on high-risk entity
+# event-driven subsystem with no state projection
+# StateTrace used to authorize canonical write
+
+# ============================================================
+# Minimal valid Transition example:
+# ============================================================
+# example_transition:
+#   id: "invoice.post"
+#   input:
+#     - "PostInvoiceCommand"
+#   reads:
+#     - "Invoice"
+#   writes:
+#     - "Invoice"
+#     - "LedgerRegister"
+#   preconditions:
+#     - "invoice.status == draft"
+#   postconditions:
+#     - "invoice.status == posted"
+#   invariants:
+#     - "ledger.balanced"
+#   transaction_boundary: "required"
+#   idempotent: "conditional"
+#   side_effects:
+#     - "outbox.invoice_posted"
+#   rollback_behavior: "Rollback invoice and ledger register mutations in the same transaction."
