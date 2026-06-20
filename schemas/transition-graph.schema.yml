@@ -1,0 +1,54 @@
+# Transition Graph Schema v0.1
+# Named state transitions extracted from @ariadne-transition annotations.
+
+schema_version: "0.1"
+
+# --- Required fields ---
+# transition_graph_id: string, unique identifier
+# bounded_context: string, domain boundary name
+# transitions: list of Transition
+
+# --- Transition ---
+# Fields:
+#   id: string, "<context>.<action>" format
+#   title: string, short description
+#   input: list of string, input command/event names
+#   reads: list of string, StateEntity names read
+#   writes: list of string, StateEntity names written
+#   preconditions: list of string, precondition expressions
+#   postconditions: list of string, postcondition expressions
+#   invariants: list of string, invariant IDs
+#   side_effects: list of string, side effect descriptions
+#   emitted_events: list of string, event names emitted
+#   transaction_boundary: "required | not_required | saga"
+#   idempotency: "true | false | conditional"
+#   rollback_behavior: string
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# transition_graph_id: "tg-001"
+# bounded_context: "auth"
+# transitions:
+#   - id: "user.register"
+#     title: "Register a new user"
+#     input:
+#       - "RegisterUserCommand"
+#     reads:
+#       - "User"
+#     writes:
+#       - "User"
+#     preconditions:
+#       - "user.email not in registered set"
+#     postconditions:
+#       - "user exists"
+#       - "user.status == active"
+#     invariants:
+#       - "auth.user.email.unique"
+#     side_effects:
+#       - "Send welcome email"
+#     emitted_events:
+#       - "UserRegistered"
+#     transaction_boundary: "required"
+#     idempotency: "conditional"
+#     rollback_behavior: "Delete created user record from users table."

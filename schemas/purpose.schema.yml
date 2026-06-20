@@ -1,0 +1,53 @@
+# Purpose Schema v0.1
+# Purpose record for Purpose-Centred Agent Methodology (PCAM).
+# Every agent task references a purpose_id.
+
+schema_version: "0.1"
+
+# --- Required fields ---
+# purpose_id: string, unique identifier
+# root_purpose: string, why this work exists
+# task_type: "bugfix | feature | refactor | test | docs | review | security | support | research | custom"
+# business_goal: string, business impact
+# technical_goal: string, technical outcome
+# non_goals: list of strings, explicitly excluded scope
+# constraints: list of strings, boundaries and limitations
+# risk_level: "low | medium | high | critical"
+# requires_human_approval: boolean
+# success_definition: string, how completion is measured
+# human_owner: string, human responsible for purpose
+# created_at: ISO8601 UTC
+
+# --- Relationships ---
+# Pbs.purpose references this purpose_id
+
+# --- Storage path convention ---
+# .ariadne/purposes/<purpose_id>.json (future)
+
+# --- Safety rules ---
+# Root purpose changes require human approval.
+# Agents may propose purpose changes but must not silently change purpose.
+
+# --- Invalid cases ---
+# purpose_id reused with different root_purpose
+# task_type outside enum
+# human_owner empty
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# purpose_id: "p-001"
+# root_purpose: "Add user authentication to the API"
+# task_type: "feature"
+# business_goal: "Users must authenticate before accessing protected resources"
+# technical_goal: "Implement JWT-based authentication middleware"
+# non_goals:
+#   - "Do not implement OAuth provider integration"
+#   - "Do not redesign existing user model"
+# constraints:
+#   - "Must use existing token storage"
+# risk_level: "medium"
+# requires_human_approval: false
+# success_definition: "All auth endpoints pass integration tests"
+# human_owner: "architect"
+# created_at: "2026-06-20T00:00:00Z"

@@ -1,0 +1,45 @@
+# PBS Schema v0.1
+# Purpose Breakdown Structure: tree of purpose nodes.
+
+schema_version: "0.1"
+
+# --- Required fields ---
+# pbs_id: string, unique identifier
+# root_purpose_id: string, references purpose.schema.yml purpose_id
+# root: PBSNode (the root node of the PBS tree)
+
+# --- PBSNode ---
+# Fields:
+#   id: string, unique node id
+#   title: string, short description
+#   purpose: string, local purpose for this node
+#   rubric_id: string or null, references rubric pack
+#   children: list of PBSNode, sub-nodes
+
+# --- Relationships ---
+# pbs_id root_purpose_id references purpose.purpose_id
+# Each PBSNode.rubric_id references rubric_pack.rubric_pack_id
+
+# --- Storage path convention ---
+# .ariadne/pbs/<pbs_id>.json (future)
+
+# --- Rules ---
+# Every agent task references a purpose_id from the PBS.
+# Root purpose changes require human approval.
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# pbs_id: "pbs-001"
+# root_purpose_id: "p-001"
+# root:
+#   id: "node-001"
+#   title: "User Authentication"
+#   purpose: "Implement user authentication for the API"
+#   rubric_id: null
+#   children:
+#     - id: "node-002"
+#       title: "JWT Middleware"
+#       purpose: "Create JWT authentication middleware"
+#       rubric_id: "rp-001"
+#       children: []

@@ -1,0 +1,41 @@
+# State Model Schema v0.1
+# Durable state entities extracted from @ariadne-state annotations.
+
+schema_version: "0.1"
+
+# --- Required fields ---
+# state_model_id: string, unique identifier
+# bounded_context: string, domain boundary name
+# state_entities: list of StateEntity
+# derived_views: list of string, derived view names
+
+# --- StateEntity ---
+# Fields:
+#   name: string, entity name
+#   storage: "sql_table | graph_node | document | key_value | memory_cache | register"
+#   location: string, path or table name
+#   fields: list of string, field names
+#   owner_module: string, module path
+#   invariants: list of string, invariant IDs
+
+# --- Relationships ---
+# TransitionGraph.transitions.reads/writes reference StateEntity.name
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# state_model_id: "sm-001"
+# bounded_context: "auth"
+# state_entities:
+#   - name: "User"
+#     storage: "sql_table"
+#     location: "users"
+#     fields:
+#       - "id"
+#       - "email"
+#       - "password_hash"
+#     owner_module: "src/auth/models.py"
+#     invariants:
+#       - "auth.user.email.unique"
+# derived_views:
+#   - "UserPublicProfile"

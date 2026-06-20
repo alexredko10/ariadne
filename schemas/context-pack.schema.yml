@@ -1,0 +1,65 @@
+# Context Pack Schema v0.1
+# Structured agent context assembled by Context Compiler.
+
+schema_version: "0.1"
+
+# --- Required fields ---
+# context_pack_id: string, unique identifier
+# repo_id: string, repository identifier
+# task: string, task description
+# purpose_id: string, references purpose.purpose_id
+# domain: string, domain name
+# risk_level: string
+# base_sha: string, git base SHA at pack creation time
+# index_version: string, memory index version at pack creation time
+# task_subgraph: list of strings, relevant dependency subgraph
+# relevant_files: list of strings, file paths
+# relevant_symbols: list of strings, symbol names
+# related_tests: list of strings, test file paths
+# configs: list of strings, configuration file paths
+# invariants: list of strings, invariant IDs
+# risks: list of strings, risk descriptions
+# recent_changes: list of strings, recent commit descriptions
+# suggested_entry_points: list of strings, entry point suggestions
+# stable_prompt_blocks: list of strings, hashable prompt blocks
+# state_first_context: StateFirstContext or null
+# anchors: list of anchor IDs
+
+# --- Rules ---
+# Context Pack must not contain secrets.
+# base_sha required.
+# index_version required.
+# Missing required sources must be represented as missing/blocked.
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# context_pack_id: "cp-001"
+# repo_id: "ariadne"
+# task: "Implement JWT authentication middleware"
+# purpose_id: "p-001"
+# domain: "coding"
+# risk_level: "medium"
+# base_sha: "abc123"
+# index_version: "0.18"
+# task_subgraph:
+#   - "auth/middleware.py"
+#   - "auth/token.py"
+# relevant_files:
+#   - "src/auth/middleware.py"
+# relevant_symbols:
+#   - "JWTMiddleware"
+# related_tests:
+#   - "tests/test_auth_middleware.py"
+# configs: []
+# invariants:
+#   - "auth.token.rotation.atomic"
+# risks:
+#   - "Token leakage if exception path not handled"
+# recent_changes:
+#   - "Added auth base classes"
+# suggested_entry_points:
+#   - "src/auth/middleware.py"
+# stable_prompt_blocks: []
+# state_first_context: null
+# anchors: []

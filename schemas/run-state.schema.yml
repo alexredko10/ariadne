@@ -1,0 +1,57 @@
+# Run State Schema v0.1
+# Orchestrator run state with step-level checkpoint support.
+
+schema_version: "0.1"
+
+# --- Required fields ---
+# run_id: string, unique identifier
+# task_id: string
+# purpose_id: string
+# domain: string
+# status: "pending | running | paused | completed | failed | cancelled"
+# current_step_id: string or null
+# steps: list of StepRecord
+# created_at: ISO8601 UTC
+# updated_at: ISO8601 UTC
+
+# --- StepRecord ---
+# Fields:
+#   step_id: string
+#   agent_role: string
+#   status: string, "pending | running | completed | failed"
+#   started_at: ISO8601 UTC or null
+#   completed_at: ISO8601 UTC or null
+#   model_used: string or null
+#   cost: float or null
+#   artifact_ids: list of string
+#   checkpoint_id: string or null
+#   failure_mode: string or null
+
+# --- Rules ---
+# Every step has a checkpoint.
+# Run must be resumable from any completed step.
+# Run state must not contain secrets.
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# run_id: "run-001"
+# task_id: "task-001"
+# purpose_id: "p-001"
+# domain: "coding"
+# status: "running"
+# current_step_id: "step-002"
+# steps:
+#   - step_id: "step-001"
+#     agent_role: "worker_coder"
+#     status: "completed"
+#     started_at: "2026-06-20T00:00:00Z"
+#     completed_at: "2026-06-20T00:30:00Z"
+#     model_used: "provider:model-x"
+#     cost: 0.05
+#     artifact_ids:
+#       - "artifact-001"
+#     checkpoint_id: "cp-001"
+#     failure_mode: null
+# created_at: "2026-06-20T00:00:00Z"
+# updated_at: "2026-06-20T00:30:00Z"

@@ -1,0 +1,68 @@
+# Agent Execution Contract Schema v0.1
+# Defines what every agent receives and must return.
+
+schema_version: "0.1"
+
+# --- Required fields ---
+# contract_id: string, unique identifier
+# run_id: string
+# step_id: string
+# role: "architect | planner | lead_coder | worker_coder | tester | reviewer | security | verifier | custom"
+# purpose: string, purpose context
+# pbs_node: string, PBS node ID
+# context_pack: string, context pack ID
+# state_model: string or null, state model ID
+# transition_graph: string or null, transition graph ID
+# rubric: string or null, rubric pack ID
+# domain: string, domain name
+# domain_adapter: string or null, domain adapter ID
+# allowed_actions: list of string
+# forbidden_actions: list of string
+# tools: list of string, available tools
+# stop_conditions: list of string
+# human_approval_policy: string
+
+# --- Agent output required fields ---
+# run_id: string
+# step_id: string
+# agent: string, agent identifier
+# purpose_id: string
+# actions_taken: list of string
+# files_changed: list of string
+# claims: list of string, claims made
+# evidence: list of string, evidence URLs or paths
+# uncertainties: list of string
+# stop_condition_triggered: string or null
+# next_recommended_step: string
+
+# --- Rules ---
+# No silent purpose mutation.
+# No stop bypass.
+# No rubric gaming.
+# No domain adapter bypass.
+# Evidence required for all claims.
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# contract_id: "ec-001"
+# run_id: "run-001"
+# step_id: "step-002"
+# role: "worker_coder"
+# purpose: "Implement JWT authentication middleware"
+# pbs_node: "node-002"
+# context_pack: "cp-001"
+# state_model: null
+# transition_graph: null
+# rubric: "rp-001"
+# domain: "coding"
+# domain_adapter: "coding-v1"
+# allowed_actions:
+#   - "write files under src/"
+# forbidden_actions:
+#   - "modify .env"
+# tools:
+#   - "python"
+# stop_conditions:
+#   - "Security scan failure"
+# human_approval_policy: "Protected path changes require approval"

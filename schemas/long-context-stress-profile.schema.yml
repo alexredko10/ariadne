@@ -1,0 +1,43 @@
+# Long-Context Stress Profile Schema v0.1
+# Context stress profile for model routing decisions.
+
+schema_version: "0.1"
+
+# --- Required fields ---
+# profile_id: string, unique identifier
+# task_id: string, references task
+# categories: CategoryMap
+
+# --- CategoryMap ---
+# Keys: retrieval, aggregation, graph_reasoning, qa, icl_sensitivity, long_code, memory_use
+# Each value: CategoryStress
+
+# --- CategoryStress ---
+# Fields:
+#   stress: "low | medium | high"
+#   model_risk: string, description of model risk at this stress level
+#   mitigations: list of string, mitigation strategies
+#   required_context_structure: string, required context structure description
+
+# --- Rules ---
+# Profiling runs before model selection.
+# High stress requires explicit mitigation.
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# profile_id: "csp-001"
+# task_id: "task-001"
+# categories:
+#   retrieval:
+#     stress: "high"
+#     model_risk: "May miss exact file location in large context"
+#     mitigations:
+#       - "Provide exact file paths in context"
+#       - "Anchor symbols for retrieval"
+#     required_context_structure: "Explicit file and symbol references"
+#   aggregation:
+#     stress: "medium"
+#     model_risk: ""
+#     mitigations: []
+#     required_context_structure: "Summarized combining fragments"

@@ -1,0 +1,62 @@
+# Final Report Schema v0.1
+# Comprehensive run report showing why changes satisfy root purpose.
+
+schema_version: "0.1"
+
+# --- Required fields ---
+# report_id: string, unique identifier
+# run_id: string
+# purpose_id: string
+# domain: string
+# root_purpose: string
+# pbs_summary: string
+# model_routing_summary: string
+# context_used: string
+# state_model_id: string or null
+# transition_graph_id: string or null
+# rubric_pack_id: string or null
+# changes: list of string, change descriptions
+# tests_summary: string
+# verification_summary: string
+# rubric_judge_results: list of string, judge result IDs
+# security_summary: string
+# risks: list of string
+# human_approval_required: boolean
+# human_approval_reason: string or null
+# cost_summary: string
+# next_steps: list of string
+# generated_at: ISO8601 UTC
+
+# --- Rules ---
+# Report must explain why changes satisfy purpose, not only what changed.
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# report_id: "fr-001"
+# run_id: "run-001"
+# purpose_id: "p-001"
+# domain: "coding"
+# root_purpose: "Add user authentication to the API"
+# pbs_summary: "Implemented JWT middleware under node-002"
+# model_routing_summary: "Worker coder used provider:model-x, reviewer used provider:model-y"
+# context_used: "Context pack cp-001 with 5 files and 3 symbols"
+# state_model_id: null
+# transition_graph_id: null
+# rubric_pack_id: "rp-001"
+# changes:
+#   - "Created src/auth/middleware.py"
+#   - "Added JWT verification logic"
+# tests_summary: "18 tests passed, 0 failed"
+# verification_summary: "Static analysis clean, security scan clean"
+# rubric_judge_results:
+#   - "jr-001"
+# security_summary: "No security findings"
+# risks:
+#   - "None identified"
+# human_approval_required: false
+# human_approval_reason: null
+# cost_summary: "$0.12 total (2 model calls)"
+# next_steps:
+#   - "Merge to main"
+# generated_at: "2026-06-20T01:00:00Z"

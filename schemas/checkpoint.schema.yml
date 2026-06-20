@@ -1,0 +1,37 @@
+# Checkpoint Schema v0.1
+# Immutable checkpoint for step-level recovery.
+
+schema_version: "0.1"
+
+# --- Required fields ---
+# checkpoint_id: string, unique identifier
+# run_id: string, references run state ID
+# step_id: string, references step record ID
+# captured_at: ISO8601 UTC
+# run_state_hash: string, hash of run state at capture
+# artifact_ids: list of string, artifact IDs produced by this step
+# context_pack_id: string or null, context pack used
+# memory_snapshot_hash: string or null
+# resumable: boolean
+# resume_instructions: string or null
+
+# --- Rules ---
+# Checkpoint captured after every completed step.
+# Checkpoint immutable after capture.
+# Resume must replay from checkpoint without model context.
+# Checkpoint must not contain secrets.
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# checkpoint_id: "cp-001"
+# run_id: "run-001"
+# step_id: "step-001"
+# captured_at: "2026-06-20T00:30:00Z"
+# run_state_hash: "abc123"
+# artifact_ids:
+#   - "artifact-001"
+# context_pack_id: "cp-001"
+# memory_snapshot_hash: "def456"
+# resumable: true
+# resume_instructions: "Replay step-001 from checkpoint without model context."
