@@ -493,3 +493,66 @@ anchors:
     description: "Review artifacts must not contain secrets, tokens, API keys, or credentials."
     contract_ids:
       - "review-artifact.no-secrets"
+
+  conductor-prompt.contract.schema-path:
+    type: "contract"
+    labels: ["contracts", "conductor-prompt"]
+    description: "Schema path: .project-memory/conductor-prompt-contract.schema.yml"
+    contract_ids:
+      - "conductor-prompt.contract.schema-path"
+
+  conductor-prompt.artifact.schema-path:
+    type: "contract"
+    labels: ["contracts", "conductor-prompt"]
+    description: "Schema path: .project-memory/prompt-artifact.schema.yml"
+    contract_ids:
+      - "conductor-prompt.artifact.schema-path"
+
+  conductor-prompt.required-sections:
+    type: "contract"
+    labels: ["contracts", "conductor-prompt"]
+    description: "Generated prompts must include all required prompt sections."
+    contract_ids:
+      - "conductor-prompt.required-sections"
+
+  conductor-prompt.section-sources.required:
+    type: "contract"
+    labels: ["contracts", "conductor-prompt"]
+    description: "Every prompt section must trace to a known source."
+    contract_ids:
+      - "conductor-prompt.section-sources.required"
+
+  conductor-prompt.no-invented-context:
+    type: "contract"
+    labels: ["contracts", "conductor-prompt"]
+    description: "Conductor must not invent context or silently fill missing required sources."
+    contract_ids:
+      - "conductor-prompt.no-invented-context"
+
+  conductor-prompt.replayable-artifact.required:
+    type: "contract"
+    labels: ["contracts", "conductor-prompt"]
+    description: "Generated prompt must be reproducible from Prompt Artifact."
+    contract_ids:
+      - "conductor-prompt.replayable-artifact.required"
+
+  conductor-prompt.no-secret-material:
+    type: "contract"
+    labels: ["contracts", "conductor-prompt", "security"]
+    description: "Prompt artifacts must not include secrets/tokens/credentials."
+    contract_ids:
+      - "conductor-prompt.no-secret-material"
+
+  conductor-prompt.no-apply-gate-bypass:
+    type: "contract"
+    labels: ["contracts", "conductor-prompt"]
+    description: "Prompt artifacts do not authorize writes or bypass apply-gate."
+    contract_ids:
+      - "conductor-prompt.no-apply-gate-bypass"
+
+  conductor-prompt.model-agnostic-substrate:
+    type: "contract"
+    labels: ["contracts", "conductor-prompt"]
+    description: "Prompt contracts are model-agnostic substrate artifacts."
+    contract_ids:
+      - "conductor-prompt.model-agnostic-substrate"

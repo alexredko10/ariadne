@@ -1,0 +1,134 @@
+# Prompt Artifact Schema v0.1
+# Contract artifact — not runtime implementation.
+# Defines replayable, auditable prompt artifacts for model-agnostic execution.
+#
+# Core principle:
+#   Generated prompt must be reproducible from Prompt Artifact.
+#   generated_prompt_hash must change when any section changes.
+#   memory_snapshot_hash must change when any memory snapshot component changes.
+
+schema_version: "0.1"
+
+# --- PromptArtifact ---
+# Required fields:
+#   prompt_id: string
+#   task_id: string
+#   agent_id: string
+#   agent_role: string
+#   domain: string
+#   mode: string
+#   model_profile: string
+#   prompt_contract_version: string
+#   memory_snapshot: PromptMemorySnapshot
+#   sections: PromptSections
+#   audit: PromptAudit
+
+# --- PromptMemorySnapshot ---
+# Required fields:
+#   memory_snapshot_hash: string
+#   context_bundle_ids: list of strings
+#   anchors_hash: string
+#   project_contract_hash: string
+#   memory_index_hash: string
+#   domain_adapter_hash: string
+#   rubric_pack_hash: string
+#   state_first_context_hash: string
+
+# --- PromptSections ---
+# Required fields:
+#   task_description: string
+#   agent_role: string
+#   mode: string
+#   cold_read_protocol: string
+#   context_snapshot: string
+#   purpose: string
+#   pbs_node: string
+#   rubric: string
+#   allowed_write_paths: list of strings
+#   forbidden_write_paths: list of strings
+#   required_behavior: list of strings
+#   stop_conditions: list of strings
+#   validation_commands: list of strings
+#   final_output_format: string
+
+# --- PromptAudit ---
+# Required fields:
+#   created_at: ISO8601 UTC
+#   generated_by: string
+#   generated_prompt_hash: string
+#   source_trace: list of PromptSourceTrace entries
+
+# --- PromptSourceTrace ---
+# Required fields:
+#   section: string
+#   source: string
+#   source_id: string or null
+#   source_hash: string or null
+#   required: boolean
+#   present: boolean
+
+# --- Required rules ---
+# Generated prompt must be reproducible from artifact.
+# Hash must change when any section changes.
+# Hash must change when any memory snapshot component changes.
+# Source trace must identify missing required sources.
+# Prompt artifact must not contain secrets.
+# Prompt artifact must not contain unbounded repository dumps.
+# Prompt artifact must reference context packs where possible.
+
+# --- Safety rules ---
+# Prompt artifact is evidence only.
+# Prompt artifact does not authorize canonical writes.
+# Prompt artifact does not replace apply-gate.schema.yml.
+# Prompt artifact does not replace run-record.schema.yml.
+# Prompt artifact must not contain secrets or credentials.
+# Prompt artifact must not contain raw unbounded repository dumps.
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# prompt_id: "prompt_001"
+# task_id: "task_a1b2c3d4"
+# agent_id: "worker_coder"
+# agent_role: "coder"
+# domain: "backend"
+# mode: "scoped_implementation"
+# model_profile: "provider:model-x"
+# prompt_contract_version: "0.1"
+# memory_snapshot:
+#   memory_snapshot_hash: "abc123"
+#   context_bundle_ids:
+#     - "task_description"
+#     - "context_snapshot"
+#   anchors_hash: "def456"
+#   project_contract_hash: "ghi789"
+#   memory_index_hash: "jkl012"
+#   domain_adapter_hash: ""
+#   rubric_pack_hash: ""
+#   state_first_context_hash: ""
+# sections:
+#   task_description: "Implement login page"
+#   agent_role: "worker_coder"
+#   mode: "scoped_implementation"
+#   cold_read_protocol: "Read from filesystem."
+#   context_snapshot: "Task ingested and validated."
+#   purpose: "Feature implementation"
+#   pbs_node: ""
+#   rubric: ""
+#   allowed_write_paths: []
+#   forbidden_write_paths: []
+#   required_behavior: []
+#   stop_conditions: []
+#   validation_commands: []
+#   final_output_format: ""
+# audit:
+#   created_at: "2026-06-20T00:00:00Z"
+#   generated_by: "conductor"
+#   generated_prompt_hash: "def456"
+#   source_trace:
+#     - section: "task_description"
+#       source: "task_intake"
+#       source_id: "task_a1b2c3d4"
+#       source_hash: "abc123"
+#       required: true
+#       present: true
