@@ -44,11 +44,45 @@ PYTHONPATH=services/model_gateway/src python -m model_gateway.model_selection_dr
   --reviewer-model provider:same-model
 ```
 
-Expected output:
+### Model Selection Dry-Run CLI (simplified smoke)
+
+A simplified CLI smoke interface for quick demos:
+
+```bash
+PYTHONPATH=services/model_gateway/src python -m model_gateway.model_selection_dry_run \
+  --role coder \
+  --task-type long-context-code-review \
+  --context-stress high \
+  --failure-mode hallucinated-diff \
+  --cost-sensitivity medium \
+  --verification required
+```
+
+Expected output shape (abbreviated):
 
 ```json
-{"error": "reviewer_model (provider:same-model) must differ from recommended_model (provider:same-model) when risk_level is high"}
+{
+  "role": "worker_coder",
+  "task_type": "long-context-code-review",
+  "risk_level": "critical",
+  "context_stress": { ... },
+  "recommended_model": "provider:worker_coder-recommended",
+  "reviewer_model": "provider:worker_coder-reviewer-independent",
+  "failure_mode": "hallucinated-diff",
+  "reason": "...",
+  "selection_rules_applied": [
+    "reviewer_model_differs_from_coder_on_high_risk",
+    "strong_for_purpose_cheap_for_execution",
+    "long_context_profiled_by_subtask",
+    "substrate_beats_model_loyalty"
+  ]
+}
 ```
+
+The simplified CLI maps `--role` values like `coder`, `architect`, `reviewer`,
+`ui`, `backend`, `dataset` to the detailed role identifiers from PR 0033.
+
+This is a **PR 0034** addition on top of the **PR 0033** detailed decision record.
 
 ### Evidence-only boundary
 
