@@ -1,4 +1,16 @@
-# PR 0040: Context Pack + Ariadne Anchors + Semantic Context Decomposition
+## Implementation note
+
+PR 0040 implemented:
+- Created `.project-memory/context-pack.schema.yml` with ContextPack, PurposeContext, PBSNodeContext, RepositoryContext, SemanticContext, StateFirstContext, RubricContext, DomainAdapterContext, ValidationContext, ContextPackSourceTrace definitions and policies
+- Created `.project-memory/ariadne-anchor.schema.yml` with AriadneAnchor, AnchorKind, AnchorLocation, AnchorScope, AnchorRisk, AnchorIndexRecord, AnchorAliasPolicy definitions, canonical prefix policy, supported annotation spellings, compatibility aliases, and examples
+- Created `docs/CONTEXT_COMPILER.md` documenting purpose, source inputs, relationship to Conductor Prompt Contract/Prompt Artifact/Review, missing source handling, and policies
+- Created `docs/ARIADNE_ANCHORS.md` documenting anchors as semantic landmarks, canonical prefix, compatibility aliases, anchor kinds, indexing, Context Pack inclusion, and authorization boundary
+- Added 20 contract entries to `.project-memory/project_contract.yml` (10 context-pack.* + 10 ariadne-anchor.*)
+- Added 16 anchors to `.project-memory/anchors.yml` (8 context-pack.* + 8 ariadne-anchor.*)
+- Updated `.project-memory/context-bundles/contracts.yml` to version 0.16 with schemas and docs in read_first, anchors, and notes
+- Bumped `.project-memory/memory_index.yml` to version 0.18 with new `context-pack` and `ariadne-anchors` labels
+
+No runtime Context Compiler implementation. No anchor scanner. No AST/symbol extraction. No semantic search. No changes to agents, services, or existing schemas.# PR 0040: Context Pack + Ariadne Anchors + Semantic Context Decomposition
 
 ## Goal
 

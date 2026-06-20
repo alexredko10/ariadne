@@ -1,0 +1,126 @@
+# Ariadne Anchor Schema v0.1
+# Contract artifact — not runtime implementation.
+# Defines machine-readable semantic landmarks for Context Compiler,
+# Conductor, Rubric Generator, and Rubric Judge.
+#
+# Core principle:
+#   Anchors are semantic landmarks, not runtime mutation permission.
+#   Anchors are evidence/context, not execution authorization.
+
+schema_version: "0.1"
+
+# --- AnchorKind ---
+# Values:
+#   domain
+#   risk
+#   invariant
+#   owner
+#   state
+#   transition
+#   register
+#   derived-view
+#   purpose
+#   non-goal
+#   stop-condition
+
+# --- Canonical prefix policy ---
+# Canonical project prefix: @ariadne-*
+# Accept legacy/source-doc alias: @ariadna-* only as compatibility
+#   input if already present in source materials.
+# Do not replace existing @ariadne-* semantics.
+# Do not weaken existing @ariadne-invariant semantics.
+# Normalized anchor records should use canonical kind names without prefix.
+
+# --- Supported annotation spellings ---
+# @ariadne-domain
+# @ariadne-risk
+# @ariadne-invariant
+# @ariadne-owner
+# @ariadne-state
+# @ariadne-transition
+# @ariadne-register
+# @ariadne-derived-view
+# @pcam-purpose
+# @pcam-non-goal
+# @pcam-stop-condition
+
+# --- Compatibility aliases (if present in source materials) ---
+# @ariadna-domain
+# @ariadna-risk
+# @ariadna-invariant
+# @ariadna-owner
+# @ariadna-state
+# @ariadna-transition
+# @ariadna-register
+# @ariadna-derived-view
+
+# --- AriadneAnchor ---
+# Required fields:
+#   schema_version: string
+#   anchor_id: string
+#   raw_text: string
+#   prefix: string
+#   kind: string
+#   value: string
+#   normalized_kind: string
+#   normalized_value: string
+#   location: AnchorLocation
+#   scope: string
+#   source_hash: string
+#   risk_level: string
+#   indexed: boolean
+
+# --- AnchorLocation ---
+# Fields:
+#   path: string
+#   line_start: int
+#   line_end: int
+#   symbol: string or null
+
+# --- AnchorScope ---
+# Fields:
+#   scope: string
+
+# --- AnchorRisk ---
+# Fields:
+#   risk_level: string
+
+# --- AnchorIndexRecord ---
+# Fields:
+#   anchor_id: string
+#   kind: string
+#   value: string
+#   path: string
+#   symbol: string
+#   source_hash: string
+#   context_pack_ids: list of strings
+
+# --- AnchorAliasPolicy ---
+# Fields:
+#   canonical_prefix: "@ariadne-*"
+#   legacy_aliases: list of strings
+#   acceptance_rule: "only if present in source materials"
+
+# --- Policies ---
+# Anchors must be indexable.
+# Anchors must be included in Context Packs when relevant.
+# Anchors must be visible to Conductor.
+# Anchors must be available to future Rubric Generator and Rubric Judge.
+# Anchors must not contain secrets.
+# Anchors must not be treated as execution authorization.
+# Anchors are semantic landmarks, not runtime mutation permission.
+
+# ============================================================
+# Examples:
+# ============================================================
+# @ariadne-domain auth
+# @ariadne-risk security
+# @ariadne-invariant auth.refresh_token.rotation.atomic
+# @ariadne-owner auth-session
+# @ariadne-state Invoice
+# @ariadne-transition invoice.post
+# @ariadne-register stock
+# @ariadne-derived-view invoice.total
+# @pcam-purpose preserve-session-security
+# @pcam-non-goal do-not-weaken-token-validation
+# @pcam-stop-condition protected-file-change-requires-approval

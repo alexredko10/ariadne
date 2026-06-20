@@ -1,4 +1,4 @@
-version: "0.17"
+version: "0.18"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -15,6 +15,24 @@ labels:
     description: "System architecture, trust zones, boundaries, ADRs."
     bundles:
       - ".project-memory/context-bundles/architecture.yml"
+    preferred_agent: "architect"
+
+  context-pack:
+    description: "Context Pack schema and Semantic Context Decomposition contract for structured agent context."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - ".project-memory/context-pack.schema.yml"
+      - "docs/CONTEXT_COMPILER.md"
+    preferred_agent: "architect"
+
+  ariadne-anchors:
+    description: "Ariadne Anchor schema and documentation for machine-readable semantic landmarks."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - ".project-memory/ariadne-anchor.schema.yml"
+      - "docs/ARIADNE_ANCHORS.md"
     preferred_agent: "architect"
 
   domain-adapter:
