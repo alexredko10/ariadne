@@ -1,0 +1,85 @@
+# Model Capability Profile Schema v0.1
+# Runtime data model for model capability profiles.
+# Scores are updated from execution history, not hardcoded.
+
+schema_version: "0.1"
+
+# --- Required fields ---
+# model_id: string, unique model identifier
+# provider: string, provider name
+# display_name: string, human-readable name
+# roles: RoleScores
+# context_capabilities: ContextCapabilityScores
+# operational: OperationalProfile
+# last_updated: ISO8601 UTC
+# evidence: string, evidence source
+
+# --- RoleScores ---
+# All scores 0.0–1.0
+# Fields:
+#   architect: float
+#   worker_coder: float
+#   frontend_ui: float
+#   backend: float
+#   debugger: float
+#   reviewer: float
+#   security: float
+#   dataset_generator: float
+
+# --- ContextCapabilityScores ---
+# All scores 0.0–1.0
+# Fields:
+#   retrieval: float
+#   aggregation: float
+#   graph_reasoning: float
+#   qa: float
+#   icl_sensitivity: float
+#   long_code: float
+#   memory_use: float
+
+# --- OperationalProfile ---
+# Fields:
+#   cost_level: float, 0.0–1.0
+#   latency_level: float, 0.0–1.0
+#   interruptibility: float, 0.0–1.0
+#   zombie_mode_risk: float, 0.0–1.0
+#   tool_use_stability: float, 0.0–1.0
+#   availability: float, 0.0–1.0
+
+# --- Rules ---
+# No vendor hardcoding in contracts.
+# Profiles updated from execution history, not defaults.
+# All scores in 0.0–1.0 range.
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# model_id: "model-001"
+# provider: "provider-x"
+# display_name: "Provider X Model Y"
+# roles:
+#   architect: 0.8
+#   worker_coder: 0.7
+#   frontend_ui: 0.6
+#   backend: 0.75
+#   debugger: 0.7
+#   reviewer: 0.8
+#   security: 0.6
+#   dataset_generator: 0.5
+# context_capabilities:
+#   retrieval: 0.8
+#   aggregation: 0.7
+#   graph_reasoning: 0.6
+#   qa: 0.75
+#   icl_sensitivity: 0.5
+#   long_code: 0.7
+#   memory_use: 0.6
+# operational:
+#   cost_level: 0.5
+#   latency_level: 0.3
+#   interruptibility: 0.8
+#   zombie_mode_risk: 0.2
+#   tool_use_stability: 0.7
+#   availability: 0.9
+# last_updated: "2026-06-20T00:00:00Z"
+# evidence: "Execution history from 1000+ runs"

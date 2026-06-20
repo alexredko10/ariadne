@@ -1,0 +1,69 @@
+# Rubric Pack Schema v0.1
+# Machine-readable rubrics as runtime contracts for agent evaluation.
+
+schema_version: "0.1"
+
+# --- Required fields ---
+# rubric_pack_id: string, unique identifier
+# root_purpose_id: string, references purpose.purpose_id
+# pbs_version: string, PBS version at generation time
+# context_pack_id: string or null
+# state_model_id: string or null
+# transition_graph_id: string or null
+# rubrics: list of Rubric
+# generated_at: ISO8601 UTC
+# generated_by: string, generator identifier
+
+# --- Rubric ---
+# Fields:
+#   purpose_id: string, references PBS node id
+#   title: string, rubric short title
+#   scope: string, scope description
+#   essential: list of string, must-pass criteria
+#   important: list of string, should-pass criteria
+#   optional: list of string, nice-to-have criteria
+#   pitfalls: list of string, must-not-trigger conditions
+#   evidence: list of string, required evidence types
+#   stop_conditions: list of string, pipeline stop triggers
+#   related_invariants: list of string, invariant IDs
+#   related_context_nodes: list of string, context node IDs
+#   human_approval_triggers: list of string, conditions requiring human approval
+
+# --- Size guideline ---
+# One rubric ≤ 2000 tokens (~150 lines)
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# rubric_pack_id: "rp-001"
+# root_purpose_id: "p-001"
+# pbs_version: "1.0"
+# context_pack_id: "cp-001"
+# state_model_id: null
+# transition_graph_id: null
+# generated_at: "2026-06-20T00:00:00Z"
+# generated_by: "rubric-generator-v1"
+# rubrics:
+#   - purpose_id: "node-002"
+#     title: "JWT Middleware Implementation"
+#     scope: "Auth middleware"
+#     essential:
+#       - "JWT token is verified on every request"
+#       - "Invalid tokens return 401"
+#     important:
+#       - "Token expiry is configurable"
+#     optional:
+#       - "Token refresh endpoint available"
+#     pitfalls:
+#       - "Token secret hardcoded in source"
+#       - "Sensitive data in token payload"
+#     evidence:
+#       - "Test results"
+#       - "Diff output"
+#     stop_conditions:
+#       - "Security scan finds credential exposure"
+#     related_invariants:
+#       - "auth.token.rotation.atomic"
+#     related_context_nodes: []
+#     human_approval_triggers:
+#       - "Protected path change"

@@ -1,0 +1,50 @@
+# Rubric Judge Result Schema v0.1
+# Structured verdict from rubric judge evaluation.
+
+schema_version: "0.1"
+
+# --- Required fields ---
+# judge_result_id: string, unique identifier
+# purpose_id: string, references purpose.purpose_id
+# rubric_id: string, references rubric pack ID
+# run_id: string, references run state ID
+# step_id: string, references step record ID
+# verdict: "pass | warning | fail | needs_human_review"
+# score: float, 0.0–1.0
+# essential_passed: list of string, essential criteria that passed
+# important_passed: list of string, important criteria that passed
+# pitfalls_triggered: list of string, pitfalls that were triggered
+# evidence_summary: string, summary of evidence evaluated
+# required_fixes: list of string, required correction descriptions
+# human_approval_required: boolean
+# reviewed_at: ISO8601 UTC
+
+# --- Verdict rules ---
+# pass: all essential passed, no critical pitfalls
+# warning: important failed or non-critical pitfalls
+# fail: essential failed
+# needs_human_review: insufficient evidence
+# essential fail = task not complete
+# critical pitfall = pipeline stops
+# insufficient evidence = needs_human_review
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# judge_result_id: "jr-001"
+# purpose_id: "p-001"
+# rubric_id: "rp-001"
+# run_id: "run-001"
+# step_id: "step-002"
+# verdict: "pass"
+# score: 0.95
+# essential_passed:
+#   - "JWT token is verified on every request"
+#   - "Invalid tokens return 401"
+# important_passed:
+#   - "Token expiry is configurable"
+# pitfalls_triggered: []
+# evidence_summary: "All auth tests pass. No security findings."
+# required_fixes: []
+# human_approval_required: false
+# reviewed_at: "2026-06-20T01:00:00Z"
