@@ -1,4 +1,4 @@
-version: "0.18"
+version: "0.19"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -15,6 +15,55 @@ labels:
     description: "System architecture, trust zones, boundaries, ADRs."
     bundles:
       - ".project-memory/context-bundles/architecture.yml"
+    preferred_agent: "architect"
+
+  purpose:
+    description: "Purpose (PCAM) schema and contract for agent task purpose decomposition."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - "schemas/purpose.schema.yml"
+    preferred_agent: "architect"
+
+  pbs:
+    description: "Purpose Breakdown Structure schema and contract for decomposing root purpose into agent-executable nodes."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - "schemas/pbs.schema.yml"
+    preferred_agent: "architect"
+
+  state-model:
+    description: "State Model schema and State-First contract extension for durable state entities and derived views."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - "schemas/state-model.schema.yml"
+    preferred_agent: "architect"
+
+  transition-graph:
+    description: "Transition Graph schema for named state transitions with preconditions, postconditions, and invariants."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - "schemas/transition-graph.schema.yml"
+    preferred_agent: "architect"
+
+  rubric:
+    description: "Rubric Pack and Rubric Judge Result schemas for runtime contract evaluation."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - "schemas/rubric-pack.schema.yml"
+      - "schemas/rubric-judge-result.schema.yml"
+    preferred_agent: "architect"
+
+  agent-runtime:
+    description: "Agent Execution Contract schema defining what agents receive and must return."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - "schemas/agent-execution-contract.schema.yml"
     preferred_agent: "architect"
 
   context-pack:
