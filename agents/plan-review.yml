@@ -2,16 +2,15 @@ version: 8
 
 metadata:
   author: local
-  description: Plan review agent with strict write scope and enhanced validation (writes automatically)
-  version: "0.6.0"
+  description: Plan review agent with Gemini 3.1 Light (OpenRouter)
+  version: "0.7.4"
 
 models:
   plan_reviewer:
     provider: openai
-    model: google/gemini-2.5-flash
+    model: google/gemini-3.1-flash-lite
     base_url: https://openrouter.ai/api/v1
     token_key: OPENROUTER_API_KEY
-    thinking_budget: low
     max_tokens: 10000
 
 agents:
@@ -23,53 +22,49 @@ agents:
       Your job is to review the PLAN.md of a PR and produce a plan-review artifact.
 
       ## Workflow
-      1. Read the required memory and schema files (list provided in the task).
-      2. Run allowed git commands to check current state (git status, rev-parse, diff --name-only).
-      3. Before reviewing the plan:
-         - If PLAN.md is YAML, validate its syntax with `yq eval . PLAN.md` (if yq available).
-         - Check existence of referenced mandatory files, e.g.:
-           `test -f .project-memory/review-artifact.schema.yml || echo "MISSING: review-artifact.schema.yml"`
-         - Grep for mandatory sections in PLAN.md:
-           `grep -E '^## (Goal|Non-goals|Adoption policy|Future allowed|Future forbidden|Workflow file plan|Bundle/index plan|Relationship to existing)' PLAN.md`
-         - Report any missing sections.
-      4. Review the plan against all criteria given in the user's task (goal, non-goals, adoption policy, scope, etc.).
-      5. Produce the review report in the required output format.
-      6. **Write the review artifact YAML automatically** to the exact permitted path:
+      1. **Determine environment capabilities** (run once):
+         - `which yq` or `command -v yq` → note if YAML CLI is available.
+         - `python -c "import yaml"` → note if PyYAML is available.
+         - `git rev-parse --verify HEAD` → always record current_head.
+      2. Read the required memory and schema files (list provided in the task).
+      3. Run `git status --short` and `git diff --name-only` to see changed files.
+      4. **Validate PLAN.md structure** (do NOT block solely on missing tools):
+         - If `yq` available: `yq eval . PLAN.md`
+         - Else if PyYAML available: `python -c "import yaml; yaml.safe_load(open('PLAN.md'))"`
+         - If both missing: visually inspect PLAN.md for obvious YAML errors. Mark as `warning: yq and PyYAML not available, manual YAML check performed`.
+      5. Check mandatory sections with grep (always available):
+         `grep -E '^## (Goal|Non-goals|Adoption policy|...)' PLAN.md`
+         Report missing sections.
+      6. Review the plan against all criteria given in the user's task.
+      7. Produce the review report in the required output format.
+      8. **Write the review artifact YAML automatically** to:
          `.project-memory/pr/<pr-id>/reviews/plan-review.yml`
-         You have permission to write this file – use it.
-      7. After writing, validate the artifact structure:
-         `yq eval '. | keys' .project-memory/pr/<pr-id>/reviews/plan-review.yml`
-         or at least check that all required fields are present.
+      9. After writing, read the artifact back and verify top-level keys with `yq` or `python` if available; otherwise note manual verification is advised.
 
       ## Writing the artifact
       - Follow the schema in `.project-memory/review-artifact.schema.yml` exactly.
       - Required fields: `schema_version`, `pr_id`, `review_type`, `verdict`, `reviewer`, `timestamp`, `snapshot_delta`, `scope`, `files_checked`, `validation`, `blockers`, `warnings`, `decisions_made`, `context_used`.
-      - Verdict must be `approve`, `warning`, or `block` with corresponding rules (blockers/warnings non-empty as appropriate).
+      - Verdict must be `approve`, `warning`, or `block` with corresponding rules.
 
       ## Constraints
       - Only write to `.project-memory/pr/*/reviews/plan-review.yml`. Do not touch any other file.
-      - Do not edit or delete any existing file.
+      - Do not edit or delete existing files.
       - Do not run git commit, push, reset, restore, checkout, add, rm, or mv.
       - Do not install packages, use docker, or modify environment.
-      - If write_file unexpectedly fails, report the error and output the artifact content in your response as a fallback.
+      - If write_file fails, output the artifact content as a fallback.
 
       ## Output format
-      Follow the exact output format specified in the user's task (VERDICT line, REVIEW ARTIFACT section, SNAPSHOT DELTA, SCOPE CHECK, PLAN CHECK, VALIDATION, BLOCKERS, WARNINGS, etc.).
+      Follow the exact output format specified in the user's task (VERDICT, SNAPSHOT DELTA, SCOPE CHECK, PLAN CHECK, VALIDATION, BLOCKERS, WARNINGS, etc.).
 
     add_date: true
     add_environment_info: true
     redact_secrets: true
-    max_iterations: 12
+    max_iterations: 14
 
     toolsets:
       - type: filesystem
         allow_list:
-          - ".project-memory"
-          - "services"
-          - "packages"
-          - "agents"
-          - "pyproject.toml"
-          - "Makefile"
+          - "."
         deny_list:
           - ".git"
           - ".venv"
@@ -78,6 +73,7 @@ agents:
           - ".pytest_cache"
           - ".mypy_cache"
           - ".ruff_cache"
+          - "node_modules"
       - type: shell
       - type: think
 
@@ -87,21 +83,20 @@ permissions:
     - "list_directory"
     - "directory_tree"
     - "search_files_content"
-    # Запись только плановых ревью-артефактов – без глобального deny на запись
     - "write_file:path=.project-memory/pr/*/reviews/plan-review.yml"
     - "edit_file:path=.project-memory/pr/*/reviews/plan-review.yml"
-    # Git (read-only)
     - "shell:cmd=git status*"
     - "shell:cmd=git rev-parse*"
     - "shell:cmd=git diff --name-only*"
-    # Поиск и базовые проверки
+    - "shell:cmd=which*"
+    - "shell:cmd=command*"
     - "shell:cmd=grep*"
     - "shell:cmd=find*"
     - "shell:cmd=test*"
     - "shell:cmd=yq*"
-    # Валидация (можно запускать)
     - "shell:cmd=python -m pytest*"
     - "shell:cmd=python -m compileall*"
+    - "shell:cmd=python -c*"
     - "shell:cmd=PYTHONPATH=* python*"
 
   deny:
