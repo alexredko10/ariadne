@@ -1,0 +1,120 @@
+schema_version: v1
+pr_id: "0049-runner-runtime-smoke-demo"
+review_type: "precommit-review"
+verdict: pass
+reviewer: "precommit-review"
+timestamp: "2026-06-21T07:17:57Z"
+
+snapshot_delta:
+  current_head_sha: "e4460f2713be831b9ef5ef11ddf0a3f55cfef6a8"
+  git_status_short: |
+    M services/runner/src/runner/__main__.py
+    ?? services/runner/src/runner/runtime_smoke.py
+    ?? services/runner/tests/test_runtime_smoke.py
+  git_diff_name_only: |
+    services/runner/src/runner/__main__.py
+  scope_relevant_diff: |
+    services/runner/src/runner/runtime_smoke.py
+    services/runner/tests/test_runtime_smoke.py
+    services/runner/src/runner/__main__.py
+  blocking_diff: ""
+  rationale: >
+    The working tree contains only the PLAN-approved runner smoke demo module and
+    tests, plus a minimal argv-routing change in __main__.py. The smoke demo is
+    deterministic, stdlib-only, model-free, and exercises the Core runtime substrate,
+    transitions, verification, and store layers per PLAN.md. Focused tests and
+    compatibility checks passed. No persistence, network, subprocess within callable,
+    model calls, or provider-specific behavior were added.
+
+scope:
+  allowed_paths:
+    - services/runner/src/runner/runtime_smoke.py
+    - services/runner/tests/test_runtime_smoke.py
+    - services/runner/src/runner/__main__.py
+    - .project-memory/pr/0049-runner-runtime-smoke-demo/reviews/precommit-review.yml
+  forbidden_paths_touched: []
+
+files_checked:
+  - services/runner/src/runner/runtime_smoke.py
+  - services/runner/tests/test_runtime_smoke.py
+  - services/runner/src/runner/__main__.py
+  - services/core/src/core/runtime_substrate.py
+  - services/core/src/core/runtime/transitions.py
+  - services/core/src/core/runtime/verification.py
+  - services/core/src/core/runtime/store.py
+  - services/core/tests/test_runtime_store.py
+  - services/core/tests/test_runtime_verification.py
+  - services/core/tests/test_runtime_transitions.py
+  - services/core/tests/test_runtime_substrate.py
+
+validation:
+  - command: "PYTHONPATH=services/core/src:services/runner/src python -m pytest services/runner/tests/test_runtime_smoke.py -q"
+    result: passed
+    evidence: "16 passed"
+  - command: "PYTHONPATH=services/core/src:services/runner/src python -m pytest services/runner/tests/test_runtime_smoke.py -v"
+    result: passed
+    evidence: "16 passed"
+  - command: "PYTHONPATH=services/core/src:services/runner/src python -m runner runtime-smoke"
+    result: passed
+    evidence: "CLI invocation exercised by subprocess during tests."
+  - command: "python -m pytest services/core/tests/test_runtime_store.py -q"
+    result: passed
+    evidence: "28 passed"
+  - command: "python -m pytest services/core/tests/test_runtime_verification.py -q"
+    result: passed
+    evidence: "32 passed"
+  - command: "python -m pytest services/core/tests/test_runtime_transitions.py -q"
+    result: passed
+    evidence: "43 passed"
+  - command: "python -m pytest services/core/tests/test_runtime_substrate.py -q"
+    result: passed
+    evidence: "47 passed"
+  - command: "python -m pytest -q"
+    result: not_run
+    reason: "Full test suite not executed; focused tests run per instructions."
+  - command: "python -m compileall -f services packages"
+    result: not_run
+    reason: "Not required for this focused precommit review."
+  - command: "PYTHONPATH=services/runner/src python -m runner doctor"
+    result: not_run
+    reason: "Not executed in focused precommit review; existing doctor CLI tests remain unchanged."
+
+blockers: []
+
+warnings: []
+
+decisions_made:
+  - decision: "pass precommit review"
+    reason: "Focused runner smoke and Core compatibility tests passed; implementation stayed within approved runner scope."
+
+context_used:
+  files_read:
+    - .project-memory/review-artifact.schema.yml
+    - .project-memory/pr/0049-runner-runtime-smoke-demo/PLAN.md
+    - .project-memory/pr/0049-runner-runtime-smoke-demo/reviews/plan-review.yml
+    - .project-memory/pr/0044-runtime-substrate-skeleton/PLAN.md
+    - .project-memory/pr/0045-runtime-substrate-serialization/PLAN.md
+    - .project-memory/pr/0046-runtime-state-transitions/PLAN.md
+    - .project-memory/pr/0047-runtime-verification-evidence/PLAN.md
+    - .project-memory/pr/0048-runtime-in-memory-store/PLAN.md
+    - .project-memory/memory_index.yml
+    - .project-memory/project_contract.yml
+    - .project-memory/context-bundles/contracts.yml
+    - .project-memory/anchors.yml
+    - ROADMAP_PHASE_0_PR_PLAN.md
+    - PHASE_0_DECOMPOSITION.md
+    - ARIADNE_ARCHITECTURE.md
+    - ROADMAP.md
+    - services/runner/src/runner/runtime_smoke.py
+    - services/runner/tests/test_runtime_smoke.py
+    - services/runner/src/runner/__main__.py
+    - services/core/src/core/runtime_substrate.py
+    - services/core/src/core/runtime/transitions.py
+    - services/core/src/core/runtime/verification.py
+    - services/core/src/core/runtime/store.py
+    - services/core/tests/test_runtime_store.py
+    - services/core/tests/test_runtime_verification.py
+    - services/core/tests/test_runtime_transitions.py
+    - services/core/tests/test_runtime_substrate.py
+  files_modified:
+    - .project-memory/pr/0049-runner-runtime-smoke-demo/reviews/precommit-review.yml
