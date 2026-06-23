@@ -1,4 +1,4 @@
-version: "0.17"
+version: "0.18"
 label: "contracts"
 purpose: "Safety, scope and validation contracts shared by all agents."
 read_first:
@@ -41,6 +41,11 @@ read_first:
   - "schemas/cache-policy.schema.yml"
   - "docs/CACHE_CONTRACTS.md"
   - "docs/adr/0008-cache-keys-are-substrate-contracts.md"
+  - "schemas/context-steward.schema.yml"
+  - "schemas/feature-workspace-memory.schema.yml"
+  - "schemas/qa-evidence-record.schema.yml"
+  - "docs/CONTEXT_STEWARD.md"
+  - "docs/adr/0009-context-steward-owns-context-memory.md"
 anchors:
   - "repo.canonical-write.single-gate"
   - "agents.no-git-mutation"
@@ -334,3 +339,7 @@ notes:
   - "Cache keys are substrate contracts — backend-agnostic, deterministic, no secrets, no timestamps."
   - "Cache contracts are schema/docs only. No cache backend, no runtime integration."
   - "Cache contracts may be referenced by future PR 0053 (distributed cache) and PR 0054 (cached repository understanding)."
+  - "Context Steward contract defined in schemas/context-steward.schema.yml."
+  - "Context Steward owns context integrity, not code changes."
+  - "Workspace memory at .project-memory/pr/<pr-id>/workspace.yml follows feature-workspace-memory.schema.yml."
+  - "QA evidence at .project-memory/pr/<pr-id>/qa-evidence.yml follows qa-evidence-record.schema.yml."

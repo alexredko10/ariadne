@@ -1,0 +1,117 @@
+# Context Steward Schema v0.1
+# Role contract for Ariadne context memory stewardship.
+#
+# Context Steward is the role responsible for preserving project memory
+# integrity, maintaining PR/feature workspace memory, recording QA evidence,
+# preparing context-pack inputs, and facilitating handoffs between agents.
+#
+# Context Steward does NOT:
+# - Write application code
+# - Modify runtime/conductor/runner/adapter behavior
+# - Perform cache backend operations
+# - Perform repository scanning
+# - Write .ariadne/** (deferred)
+
+schema_version: "0.1"
+
+# --- Required fields ---
+# schema_version: string
+# role_id: string, e.g. "context-steward-v1"
+# role_name: string, "Context Steward"
+# purpose: string, role purpose description
+# lifecycle_hooks: list of strings
+# read_boundaries: list of strings
+# write_boundaries: list of strings
+# forbidden_boundaries: list of strings
+# owned_artifacts: list of artifact kind references
+# handoff_inputs: list of handoff input descriptions
+# handoff_outputs: list of handoff output descriptions
+# invalidation_responsibilities: list of strings
+# evidence_responsibilities: list of strings
+# context_pack_responsibilities: list of strings
+# cache_contract_relationship: string
+# review_requirements: list of strings
+# stop_conditions: list of strings
+
+# --- Lifecycle hooks ---
+# before_plan: steward prepares workspace memory and context for planner
+# after_plan_review: steward records plan decision in workspace memory
+# after_implementation: steward records implementation summary
+# after_precommit_review: steward records precommit review evidence
+# after_qa: steward records QA evidence
+# after_merge: steward archives workspace memory, prepares for next PR
+
+# --- Operational namespace ---
+# Current: .project-memory/**
+# Long-term canonical: .ariadne/** (deferred — not created in this PR)
+
+# --- Read boundaries ---
+# steward may read: project contracts, memory index, anchors, context packs,
+# cache contracts, runtime state, workspace memories, review artifacts
+
+# --- Write boundaries ---
+# steward may write:
+# - .project-memory/pr/<pr-id>/workspace.yml (PR workspace memory)
+# - .project-memory/pr/<pr-id>/qa-evidence.yml (QA evidence records)
+# - approved registry updates to .project-memory/**
+
+# --- Forbidden boundaries ---
+# steward must NOT write:
+# - application code
+# - runtime/conductor/runner/adapter configuration
+# - cache backend state
+# - .ariadne/** (deferred)
+# - .project-memory/anchors.yml or project_contract.yml (deferred)
+
+# --- Owned artifacts ---
+# - feature_workspace_memory (.project-memory/pr/<pr-id>/workspace.yml)
+# - qa_evidence_record (.project-memory/pr/<pr-id>/qa-evidence.yml)
+# - context_pack_inputs (future, schema deferred)
+
+# --- Invalidation responsibilities ---
+# steward records invalidation decisions as machine-readable records:
+# - changed_paths
+# - affected_context_packs
+# - affected_workspace_memories
+# - affected_cache_key_refs
+# - stale_context_markers
+# - manual_refresh_required
+# steward does NOT compute repo graph, scan repo, or auto-invalidate cache
+
+# --- Evidence responsibilities ---
+# steward records QA evidence after review/QA steps:
+# - commands_run list with results
+# - commands_not_run list with reasons
+# - every expected command must appear in commands_run or commands_not_run
+
+# --- Context pack responsibilities ---
+# steward prepares inputs for Context Compiler but does NOT compile in this PR:
+# - task goal (from planner)
+# - source contracts used
+# - relevant anchors
+# - allowed/forbidden paths (from domain adapter)
+# - cache key refs (from PR 0052)
+# - prior PR refs
+# - QA evidence refs
+# - known risks
+# - manual checks required
+# - context freshness status
+
+# --- Cache contract relationship (PR 0052) ---
+# steward references cache keys (cache_key_refs in workspace memory)
+# steward references cache entries (evidence_refs in QA evidence)
+# steward records invalidation inputs without implementing cache backend
+# steward uses namespace/artifact_kind taxonomy from PR 0052
+# steward does NOT look up, store, or implement a cache backend
+
+# --- Safety rules ---
+# No secrets, credentials, or tokens.
+# No raw private file dumps.
+# No raw repository dumps.
+# No absolute local paths in portable artifacts.
+# No machine-specific paths.
+# No silent validation claims.
+# No invented command results.
+# No broad memory writes (scoped to exact allowed paths).
+# No .ariadne/** writes in this PR.
+# No old project names/examples.

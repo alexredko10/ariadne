@@ -1,4 +1,4 @@
-version: "0.20"
+version: "0.21"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -15,6 +15,18 @@ labels:
     description: "System architecture, trust zones, boundaries, ADRs."
     bundles:
       - ".project-memory/context-bundles/architecture.yml"
+    preferred_agent: "architect"
+
+  context-steward:
+    description: "Context Steward contract for context memory, PR workspace memory, and QA evidence stewardship."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - "schemas/context-steward.schema.yml"
+      - "schemas/feature-workspace-memory.schema.yml"
+      - "schemas/qa-evidence-record.schema.yml"
+      - "docs/CONTEXT_STEWARD.md"
+      - "docs/adr/0009-context-steward-owns-context-memory.md"
     preferred_agent: "architect"
 
   cache-contracts:
