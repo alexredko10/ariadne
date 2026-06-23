@@ -1,0 +1,47 @@
+# Cache Policy Schema v0.1
+# Backend-agnostic cache behavior policy.
+#
+# Defines which namespaces, artifact kinds, and invalidation policies
+# are allowed for a cache backend.
+
+schema_version: "0.1"
+
+# --- CachePolicy ---
+# Required fields:
+#   schema_version: string
+#   allowed_namespaces: list of strings
+#   allowed_artifact_kinds: list of strings
+#
+# Optional fields:
+#   ttl_policy: map (default_ttl_seconds, kind_specific_ttls)
+#   invalidation_policy: map (strategy, allowed_triggers)
+#   replayable: boolean (default false)
+#   deterministic_requirement: string (e.g. "strict", "relaxed")
+#   cacheability_decisions: list of maps (kind, cacheable, rationale)
+#   privacy_class: string (e.g. "public", "internal", "restricted")
+
+# --- Backend-agnostic ---
+# Policy does not name Redis, SQLite, filesystem, or any specific backend.
+# Backend implementation is a separate concern.
+
+# --- Initial namespaces ---
+# core.runtime
+# conductor
+# runner
+# domain_adapter.coding
+# context
+# repository_understanding
+# rubric
+# model_capability
+
+# --- Initial artifact kinds ---
+# context_pack
+# repository_snapshot_summary
+# repository_understanding
+# adapter_preview
+# rubric_pack
+# rubric_judge_result
+# verification_summary
+# final_report_inputs
+# model_capability_profile
+# long_context_stress_profile
