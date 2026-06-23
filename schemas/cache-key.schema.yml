@@ -1,0 +1,71 @@
+# Cache Key Schema v0.1
+# Backend-agnostic deterministic cache key contract.
+#
+# The cache key is a substrate contract, not a backend-specific key format.
+# It must be serializable, deterministic across machines, agents, and time.
+
+schema_version: "0.1"
+
+# --- CacheKey ---
+# Required fields:
+#   schema_version: string
+#   namespace: string
+#   artifact_kind: string
+#   input_digest: string (sha256 hex)
+#   contract_versions: map of string keys to string versions
+#   producer: string (adapter/service identifier)
+#
+# Optional fields:
+#   source_refs: list of strings (digests of source artifacts)
+#   environment_class: string (e.g. "production", "test")
+#   created_from: map (references to source artifacts/contracts)
+
+# --- Deterministic normalization requirements ---
+# 1. All map keys must be sorted lexicographically.
+# 2. input_digest must be hex-encoded SHA-256.
+# 3. Lists must be sorted iteratively (recursive for nested structures).
+# 4. Empty strings and null values are serialized consistently:
+#    - absent optional fields: omitted
+#    - empty strings: omitted
+#    - empty lists: omitted
+#    - null values: omitted
+# 5. Timestamps must not be part of cache key (provided by entry, not key).
+# 6. Random ids must not be part of cache key.
+
+# --- Input digest computation rules ---
+# input_digest is a hex-encoded SHA-256 hash of the canonical JSON
+# representation of key inputs.  Inputs are serialised with sorted keys
+# and JSON-serialisable values only.
+#
+# Examples of input compositions:
+#   Context pack: {"base_sha": "...", "index_version": "...", "repo_id": "...", "purpose_id": "..."}
+#   Adapter preview: {"task_id": "...", "intent": "...", "target_paths": [...], "constraints": [...]}
+#   Repository understanding: {"content_hash": "...", "graph_version": "...", "policy_hash": "..."}
+
+# --- Safety rules ---
+# Cache keys must not contain:
+# - absolute local paths
+# - current timestamp
+# - random ids
+# - machine-specific values
+# - secrets, tokens, credentials
+# - raw repository dumps
+# - old project names/examples
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# schema_version: "0.1"
+# namespace: "context"
+# artifact_kind: "context_pack"
+# input_digest: "abc123def456..."
+# contract_versions:
+#   context_pack_schema: "0.1"
+#   state_first_schema: "0.1"
+# producer: "context_compiler"
+# source_refs:
+#   - "def789..."
+# environment_class: "test"
+# created_from:
+#   base_sha: "abc123"
+#   index_version: "0.19"

@@ -1,0 +1,112 @@
+schema_version: v1
+pr_id: "0052-cache-contracts-and-keys"
+review_type: "precommit-review"
+verdict: pass
+reviewer: "precommit-review"
+timestamp: "2026-06-23T23:00:33Z"
+
+snapshot_delta:
+  current_head_sha: "3959a6318c0033a3599cfe96a82261ba05c46811"
+  git_status_short: |
+    M .project-memory/context-bundles/contracts.yml
+    M .project-memory/memory_index.yml
+    ?? docs/CACHE_CONTRACTS.md
+    ?? docs/adr/0008-cache-keys-are-substrate-contracts.md
+    ?? schemas/cache-entry.schema.yml
+    ?? schemas/cache-key.schema.yml
+    ?? schemas/cache-policy.schema.yml
+  git_diff_name_only: |
+    .project-memory/context-bundles/contracts.yml
+    .project-memory/memory_index.yml
+  scope_relevant_diff: |
+    schemas/cache-key.schema.yml
+    schemas/cache-entry.schema.yml
+    schemas/cache-policy.schema.yml
+    docs/CACHE_CONTRACTS.md
+    docs/adr/0008-cache-keys-are-substrate-contracts.md
+    .project-memory/context-bundles/contracts.yml
+    .project-memory/memory_index.yml
+  blocking_diff: ""
+  rationale: >
+    The working tree contains only backend-agnostic cache contract schemas,
+    cache contract documentation, the approved cache ADR, approved project-memory
+    registry updates, and this precommit review artifact. No runtime code,
+    services, packages, agents, apps, pyproject, backend implementation, cache
+    storage, repository scanning, or integration behavior was modified.
+
+scope:
+  allowed_paths:
+    - schemas/cache-key.schema.yml
+    - schemas/cache-entry.schema.yml
+    - schemas/cache-policy.schema.yml
+    - docs/CACHE_CONTRACTS.md
+    - docs/adr/0008-cache-keys-are-substrate-contracts.md
+    - .project-memory/context-bundles/contracts.yml
+    - .project-memory/memory_index.yml
+    - .project-memory/pr/0052-cache-contracts-and-keys/reviews/precommit-review.yml
+  forbidden_paths_touched: []
+
+files_checked:
+  - .project-memory/review-artifact.schema.yml
+  - .project-memory/pr/0052-cache-contracts-and-keys/PLAN.md
+  - .project-memory/pr/0052-cache-contracts-and-keys/reviews/plan-review.yml
+  - .project-memory/memory_index.yml
+  - .project-memory/project_contract.yml
+  - .project-memory/context-bundles/contracts.yml
+  - .project-memory/anchors.yml
+  - ROADMAP_PHASE_0_PR_PLAN.md
+  - PHASE_0_DECOMPOSITION.md
+  - ARIADNE_ARCHITECTURE.md
+  - ROADMAP.md
+  - schemas/cache-key.schema.yml
+  - schemas/cache-entry.schema.yml
+  - schemas/cache-policy.schema.yml
+  - docs/CACHE_CONTRACTS.md
+  - docs/adr/0008-cache-keys-are-substrate-contracts.md
+
+validation:
+  - command: "python snippet checking presence of required files"
+    result: passed
+    evidence: "cache contract files present"
+  - command: "grep for forbidden backend/runtime patterns in schemas/docs"
+    result: passed
+    evidence: "no forbidden patterns found in schemas/docs"
+  - command: "python -m compileall -f services packages"
+    result: not_run
+    reason: "Not required for schema/docs-only PR in focused review."
+  - command: "python -m pytest -q"
+    result: not_run
+    reason: "Full test suite not run; PR is schema/docs only."
+
+blockers: []
+
+warnings: []
+
+decisions_made:
+  - decision: "pass precommit review"
+    reason: "The PR adds backend-agnostic cache contracts and deterministic cache key normalization rules as schema and documentation only."
+  - decision: "allow approved registry updates"
+    reason: "The implementation updates project-memory registry files needed to include cache contracts in context bundles and memory index."
+  - decision: "exclude anchors and project contract from final scope"
+    reason: "The cache contracts PR should not modify Ariadne anchors or the global project contract unless explicitly replanned."
+
+context_used:
+  files_read:
+    - .project-memory/review-artifact.schema.yml
+    - .project-memory/pr/0052-cache-contracts-and-keys/PLAN.md
+    - .project-memory/pr/0052-cache-contracts-and-keys/reviews/plan-review.yml
+    - .project-memory/memory_index.yml
+    - .project-memory/project_contract.yml
+    - .project-memory/context-bundles/contracts.yml
+    - .project-memory/anchors.yml
+    - ROADMAP_PHASE_0_PR_PLAN.md
+    - PHASE_0_DECOMPOSITION.md
+    - ARIADNE_ARCHITECTURE.md
+    - ROADMAP.md
+    - schemas/cache-key.schema.yml
+    - schemas/cache-entry.schema.yml
+    - schemas/cache-policy.schema.yml
+    - docs/CACHE_CONTRACTS.md
+    - docs/adr/0008-cache-keys-are-substrate-contracts.md
+  files_modified:
+    - .project-memory/pr/0052-cache-contracts-and-keys/reviews/precommit-review.yml

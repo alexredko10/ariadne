@@ -1,4 +1,4 @@
-version: "0.19"
+version: "0.20"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -15,6 +15,18 @@ labels:
     description: "System architecture, trust zones, boundaries, ADRs."
     bundles:
       - ".project-memory/context-bundles/architecture.yml"
+    preferred_agent: "architect"
+
+  cache-contracts:
+    description: "Cache contracts for backend-agnostic deterministic keys, entries, and policies."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - "schemas/cache-key.schema.yml"
+      - "schemas/cache-entry.schema.yml"
+      - "schemas/cache-policy.schema.yml"
+      - "docs/CACHE_CONTRACTS.md"
+      - "docs/adr/0008-cache-keys-are-substrate-contracts.md"
     preferred_agent: "architect"
 
   purpose:
