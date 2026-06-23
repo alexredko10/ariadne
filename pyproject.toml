@@ -20,7 +20,8 @@ pythonpath = [
   "services/core/src",
   "services/conductor/src",
   "services/runner/src",
-  "services/model_gateway/src"
+  "services/model_gateway/src",
+  "services/domain_adapters/src"
 ]
 
 [tool.ruff]

@@ -1,0 +1,117 @@
+schema_version: v1
+pr_id: "0051-coding-domain-adapter-minimal"
+review_type: "precommit-review"
+verdict: pass
+reviewer: "precommit-review"
+timestamp: "2026-06-22T22:18:37Z"
+
+snapshot_delta:
+  current_head_sha: "6d02d36ff86fb703e587e6bb2ce239ce73ad9f50"
+  git_status_short: |
+    ?? services/domain_adapters/
+  git_diff_name_only: ""
+  scope_relevant_diff: |
+    services/domain_adapters/src/domain_adapters/coding.py
+    services/domain_adapters/src/domain_adapters/__init__.py
+    services/domain_adapters/tests/test_coding_adapter.py
+  blocking_diff: ""
+  rationale: >
+    The working tree contains only the PLAN-approved domain adapter implementation
+    and tests under services/domain_adapters. The adapter is deterministic, stateless,
+    does not import Core runtime modules, and has comprehensive tests validating
+    identity, capabilities, request validation, deterministic planning, and safety
+    constraints. Focused adapter and compatibility tests passed.
+
+scope:
+  allowed_paths:
+    - services/domain_adapters/src/domain_adapters/coding.py
+    - services/domain_adapters/src/domain_adapters/__init__.py
+    - services/domain_adapters/tests/test_coding_adapter.py
+    - .project-memory/pr/0051-coding-domain-adapter-minimal/reviews/precommit-review.yml
+  forbidden_paths_touched: []
+
+files_checked:
+  - services/domain_adapters/src/domain_adapters/coding.py
+  - services/domain_adapters/src/domain_adapters/__init__.py
+  - services/domain_adapters/tests/test_coding_adapter.py
+  - services/conductor/src/conductor/dry_run.py
+  - services/conductor/tests/test_dry_run.py
+  - services/runner/src/runner/runtime_smoke.py
+  - services/runner/tests/test_runtime_smoke.py
+  - services/core/src/core/runtime_substrate.py
+  - services/core/src/core/runtime/transitions.py
+  - services/core/src/core/runtime/verification.py
+  - services/core/src/core/runtime/store.py
+  - services/core/tests/test_runtime_store.py
+  - services/core/tests/test_runtime_verification.py
+  - services/core/tests/test_runtime_transitions.py
+  - services/core/tests/test_runtime_substrate.py
+
+validation:
+  - command: "PYTHONPATH=services/domain_adapters/src python -m pytest services/domain_adapters/tests/test_coding_adapter.py -v"
+    result: passed
+    evidence: "46 passed"
+  - command: "PYTHONPATH=services/core/src:services/conductor/src python -m pytest services/conductor/tests/test_dry_run.py -q"
+    result: passed
+    evidence: "22 passed"
+  - command: "PYTHONPATH=services/core/src:services/runner/src python -m pytest services/runner/tests/test_runtime_smoke.py -q"
+    result: passed
+    evidence: "16 passed"
+  - command: "python -m pytest services/core/tests/test_runtime_store.py -q"
+    result: passed
+    evidence: "28 passed"
+  - command: "python -m pytest services/core/tests/test_runtime_verification.py -q"
+    result: passed
+    evidence: "32 passed"
+  - command: "python -m pytest services/core/tests/test_runtime_transitions.py -q"
+    result: passed
+    evidence: "43 passed"
+  - command: "python -m pytest services/core/tests/test_runtime_substrate.py -q"
+    result: passed
+    evidence: "47 passed"
+  - command: "python -m pytest -q"
+    result: not_run
+    reason: "Full test suite not executed; focused tests run per instructions."
+  - command: "python -m compileall -f services packages"
+    result: not_run
+    reason: "Not required for focused precommit review."
+
+blockers: []
+
+warnings: []
+
+decisions_made:
+  - decision: "pass precommit review"
+    reason: "Focused adapter and compatibility tests passed; implementation stayed within approved adapter scope."
+
+context_used:
+  files_read:
+    - .project-memory/review-artifact.schema.yml
+    - .project-memory/pr/0051-coding-domain-adapter-minimal/PLAN.md
+    - .project-memory/pr/0051-coding-domain-adapter-minimal/reviews/plan-review.yml
+    - .project-memory/pr/0039-domain-adapter-contract/PLAN.md
+    - .project-memory/pr/0050-conductor-dry-run-pipeline/PLAN.md
+    - .project-memory/pr/0049-runner-runtime-smoke-demo/PLAN.md
+    - .project-memory/pr/0048-runtime-in-memory-store/PLAN.md
+    - .project-memory/memory_index.yml
+    - .project-memory/project_contract.yml
+    - .project-memory/context-bundles/contracts.yml
+    - .project-memory/anchors.yml
+    - docs/DOMAIN_ADAPTER_CONTRACT.md
+    - docs/adr/0004-ariadne-is-domain-agnostic.md
+    - services/domain_adapters/src/domain_adapters/coding.py
+    - services/domain_adapters/tests/test_coding_adapter.py
+    - services/conductor/src/conductor/dry_run.py
+    - services/conductor/tests/test_dry_run.py
+    - services/runner/src/runner/runtime_smoke.py
+    - services/runner/tests/test_runtime_smoke.py
+    - services/core/src/core/runtime_substrate.py
+    - services/core/src/core/runtime/transitions.py
+    - services/core/src/core/runtime/verification.py
+    - services/core/src/core/runtime/store.py
+    - services/core/tests/test_runtime_store.py
+    - services/core/tests/test_runtime_verification.py
+    - services/core/tests/test_runtime_transitions.py
+    - services/core/tests/test_runtime_substrate.py
+  files_modified:
+    - .project-memory/pr/0051-coding-domain-adapter-minimal/reviews/precommit-review.yml
