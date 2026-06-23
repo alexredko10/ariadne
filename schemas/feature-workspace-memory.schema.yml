@@ -1,0 +1,88 @@
+# Feature / PR Workspace Memory Schema v0.1
+# Short-term workspace memory for one PR or feature.
+#
+# Created and maintained by Context Steward.
+# Stored at: .project-memory/pr/<pr-id>/workspace.yml
+
+schema_version: "0.1"
+
+# --- Required fields ---
+# schema_version: string
+# pr_id: string
+# feature_id: string (optional, for non-PR features)
+# title: string
+# status: string (see status enum below)
+# goal: string, PR goal
+# scope: list of strings, scope boundaries
+# allowed_write_paths: list of strings, from domain adapter
+# forbidden_paths: list of strings, from domain adapter
+# source_contracts: list of contract references
+# relevant_anchors: list of strings, anchor references
+# context_pack_refs: list of strings, context pack references
+# cache_key_refs: list of cache key references
+# decisions: list of decision records (append-only)
+# implementation_summary: string
+# validation_summary: string
+# qa_summary: string
+# risks: list of risk descriptions
+# open_questions: list of question records
+# handoff_notes: string
+# created_from: source reference
+# updated_by: list of update records
+
+# --- Status values ---
+# proposed
+# planned
+# plan_approved
+# implementing
+# implemented
+# precommit_passed
+# qa_passed
+# merged
+# archived
+# blocked
+
+# --- Determinism rules ---
+# Timestamps must be caller-supplied or evidence-supplied.
+# No current-time generation by the steward.
+# Decision records are append-only.
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# schema_version: "0.1"
+# pr_id: "0053"
+# feature_id: null
+# title: "Context Steward Contract"
+# status: "plan_approved"
+# goal: "Define Context Steward contract and workspace memory schema"
+# scope:
+#   - "schema definitions"
+#   - "documentation"
+#   - "registry updates"
+# allowed_write_paths:
+#   - "schemas/context-steward.schema.yml"
+#   - "docs/CONTEXT_STEWARD.md"
+# forbidden_paths:
+#   - "services/**"
+#   - ".ariadne/**"
+# source_contracts:
+#   - ".project-memory/run-record.schema.yml"
+#   - ".project-memory/context-pack.schema.yml"
+# relevant_anchors:
+#   - "context-steward.role"
+# context_pack_refs: []
+# cache_key_refs: []
+# decisions:
+#   - decision: "Use .project-memory/ as operational namespace"
+#     reason: ".ariadne/ is deferred until runtime implementation exists"
+# implementation_summary: ""
+# validation_summary: ""
+# qa_summary: ""
+# risks: []
+# open_questions: []
+# handoff_notes: ""
+# created_from:
+#   source: "planner"
+#   pr_id: "0053"
+# updated_by: []

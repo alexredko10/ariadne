@@ -1,0 +1,87 @@
+# QA Evidence Record Schema v0.1
+# QA evidence for a PR or feature workflow stage.
+#
+# Created by Context Steward after review/QA steps.
+# Aligned with but does not replace .project-memory/review-artifact.schema.yml.
+#
+# Stored at: .project-memory/pr/<pr-id>/qa-evidence.yml
+
+schema_version: "0.1"
+
+# --- Required fields ---
+# schema_version: string
+# pr_id: string
+# review_type: string ("plan-review" | "precommit-review" | "security-review" | "ci-review" | "manual-review")
+# verdict: string (from review artifact)
+# reviewer: string, reviewer agent id
+# snapshot: string, snapshot description or SHA reference
+# commands_run: list of CommandResult
+# commands_not_run: list of CommandNotRun
+# manual_checks: list of ManualCheck
+# risks: list of risk descriptions
+# blockers: list of blocker descriptions
+# warnings: list of warning descriptions
+# accepted_risks: list of accepted risk descriptions
+# files_checked: list of strings, files inspected
+# files_changed: list of strings, files modified
+# context_used: ContextUsed reference
+# evidence_refs: list of strings, evidence artifact references
+# created_from: source reference
+
+# --- CommandResult ---
+# command: string, the validation command that was run
+# result: "passed | failed | skipped"
+# exit_code: int or null
+# evidence: string, sanitized short evidence
+
+# --- CommandNotRun ---
+# command: string, the validation command that was NOT run
+# reason: string, why the command was not run
+# mark: "not_run" (explicit, cannot be silent)
+
+# --- ManualCheck ---
+# check_name: string
+# passed: boolean
+# notes: string
+
+# --- Key policy ---
+# Every validation command that was expected must appear in either
+# commands_run or commands_not_run. It must be impossible to silently
+# claim validation without running a command.
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# schema_version: "0.1"
+# pr_id: "0053"
+# review_type: "plan-review"
+# verdict: "approve"
+# reviewer: "plan-review"
+# snapshot: "plan_base_sha abc123, current_head def456"
+# commands_run:
+#   - command: "python -m pytest -q"
+#     result: "passed"
+#     exit_code: 0
+#     evidence: "548 passed"
+# commands_not_run:
+#   - command: "python -m compileall -f services packages"
+#     reason: "Not applicable — no runtime code changed"
+#     mark: "not_run"
+# manual_checks:
+#   - check_name: "File presence check"
+#     passed: true
+#     notes: "All 5 schema/doc files present"
+# risks: []
+# blockers: []
+# warnings: []
+# accepted_risk: []
+# files_checked:
+#   - "schemas/context-steward.schema.yml"
+# files_changed: []
+# context_used:
+#   labels:
+#     - contracts
+# evidence_refs: []
+# created_from:
+#   source: "context-steward"
+#   pr_id: "0053"
