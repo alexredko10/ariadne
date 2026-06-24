@@ -1,0 +1,55 @@
+# Context Steward Prompt Template Schema v0.1
+# Reusable prompt template for a Context Steward lifecycle hook.
+#
+# Each template defines purpose, inputs, reads, writes, outputs,
+# validation rules, anti-fabrication rules, and stop conditions.
+#
+# Context Steward does NOT write application code, modify runtime behavior,
+# or perform cache backend operations per the Context Steward contract.
+
+schema_version: "0.1"
+
+# --- Required fields ---
+# template_id: string, e.g. "context-steward.before_plan.v1"
+# lifecycle_hook: string (one of: before_plan, after_plan_review,
+#   after_implementation, after_precommit_review, after_qa, after_merge)
+# purpose: string
+# required_inputs: list of InputSpec
+# allowed_reads: list of strings
+# allowed_writes: list of strings (exact write paths)
+# forbidden_writes: list of strings
+# required_outputs: list of OutputSpec
+# validation_rules: list of strings
+# anti_fabrication_rules: list of strings
+# stop_conditions: list of strings
+# final_output_format: string
+# context_used_policy: string
+
+# --- InputSpec ---
+# field: string, input name
+# description: string, input description
+
+# --- OutputSpec ---
+# field: string, output name
+# description: string, output description
+
+# --- Anti-fabrication rules (must be in every template) ---
+# Do not invent command results.
+# Do not invent changed files.
+# Do not invent timestamps.
+# Do not invent SHAs.
+# If a command was not run, mark not_run with reason.
+# context_used.files_modified must exactly match actual writes.
+# No shell placeholders in artifacts.
+# No strings containing "$(" in artifacts.
+
+# --- Safety rules ---
+# No application code writes.
+# No services/**, packages/**, apps/** changes.
+# No runtime/conductor/runner/adapter changes.
+# No cache backend.
+# No repository scanning.
+# No context compiler implementation.
+# No .ariadne/** writes.
+# No .grace/** writes.
+# No .project-memory/anchors.yml or project_contract.yml changes.

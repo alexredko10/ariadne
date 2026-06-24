@@ -1,0 +1,107 @@
+schema_version: v1
+pr_id: "0054-context-steward-prompt-templates"
+review_type: "precommit-review"
+verdict: pass
+reviewer: "precommit-review"
+timestamp: "2026-06-24T20:29:54Z"
+
+snapshot_delta:
+  current_head_sha: "eef7907426c2c2ec5bf933b98b486b596ca77f4f"
+  git_status_short: |
+    M .project-memory/context-bundles/contracts.yml
+    M .project-memory/memory_index.yml
+    ?? docs/CONTEXT_STEWARD_PROMPTS.md
+    ?? schemas/context-steward-prompt-template.schema.yml
+  git_diff_name_only: |
+    .project-memory/context-bundles/contracts.yml
+    .project-memory/memory_index.yml
+  scope_relevant_diff: |
+    docs/CONTEXT_STEWARD_PROMPTS.md
+    schemas/context-steward-prompt-template.schema.yml
+    .project-memory/context-bundles/contracts.yml
+    .project-memory/memory_index.yml
+  blocking_diff: ""
+  rationale: >
+    The working tree contains the PLAN-approved Context Steward prompt template
+    schema and documentation, approved registry updates in project-memory context
+    bundles and memory index, and this precommit review artifact. The changes are
+    docs/schema only and do not introduce runtime behavior, service implementation,
+    prompt execution engine, context compiler implementation, repository scanning,
+    cache backend, UI, CLI, provider integration, network calls, subprocess calls,
+    or application code changes.
+
+scope:
+  allowed_paths:
+    - docs/CONTEXT_STEWARD_PROMPTS.md
+    - schemas/context-steward-prompt-template.schema.yml
+    - .project-memory/context-bundles/contracts.yml
+    - .project-memory/memory_index.yml
+    - .project-memory/pr/0054-context-steward-prompt-templates/reviews/precommit-review.yml
+  forbidden_paths_touched: []
+
+files_checked:
+  - .project-memory/pr/0054-context-steward-prompt-templates/PLAN.md
+  - .project-memory/pr/0054-context-steward-prompt-templates/reviews/plan-review.yml
+  - .project-memory/memory_index.yml
+  - .project-memory/context-bundles/contracts.yml
+  - .project-memory/anchors.yml
+  - docs/CONTEXT_STEWARD.md
+  - docs/adr/0009-context-steward-owns-context-memory.md
+  - schemas/context-steward.schema.yml
+  - schemas/feature-workspace-memory.schema.yml
+  - schemas/qa-evidence-record.schema.yml
+  - docs/CACHE_CONTRACTS.md
+  - docs/adr/0008-cache-keys-are-substrate-contracts.md
+  - schemas/cache-key.schema.yml
+  - schemas/cache-entry.schema.yml
+  - schemas/cache-policy.schema.yml
+  - schemas/context-pack.schema.yml
+  - docs/CONTEXT_STEWARD_PROMPTS.md
+  - schemas/context-steward-prompt-template.schema.yml
+
+validation:
+  - command: "Python script verifying presence of docs and schema files"
+    result: passed
+    evidence: "context steward prompt template files present"
+  - command: "grep for legacy/back-end/subprocess patterns in docs/schema"
+    result: passed
+    evidence: "no forbidden patterns found in prompt docs/schema"
+  - command: "python -m compileall -f services packages"
+    result: not_run
+    reason: "Not required for docs/schema-only PR."
+  - command: "python -m pytest -q"
+    result: not_run
+    reason: "No runtime tests required for this PR."
+
+blockers: []
+
+warnings: []
+
+decisions_made:
+  - decision: "pass precommit review"
+    reason: "The PR adds Context Steward prompt template schema and documentation only, with approved registry updates and no runtime or service behavior changes."
+  - decision: "preserve strict scope"
+    reason: "No services, packages, apps, agents, pyproject, .ariadne, .grace, anchors, or project_contract files were modified."
+
+context_used:
+  files_read:
+    - .project-memory/pr/0054-context-steward-prompt-templates/PLAN.md
+    - .project-memory/pr/0054-context-steward-prompt-templates/reviews/plan-review.yml
+    - .project-memory/memory_index.yml
+    - .project-memory/context-bundles/contracts.yml
+    - .project-memory/anchors.yml
+    - docs/CONTEXT_STEWARD.md
+    - docs/adr/0009-context-steward-owns-context-memory.md
+    - schemas/context-steward.schema.yml
+    - schemas/feature-workspace-memory.schema.yml
+    - schemas/qa-evidence-record.schema.yml
+    - docs/CACHE_CONTRACTS.md
+    - docs/adr/0008-cache-keys-are-substrate-contracts.md
+    - schemas/cache-key.schema.yml
+    - schemas/cache-entry.schema.yml
+    - schemas/cache-policy.schema.yml
+    - schemas/context-pack.schema.yml
+    - docs/CONTEXT_STEWARD_PROMPTS.md
+    - schemas/context-steward-prompt-template.schema.yml
+  files_modified:
+    - .project-memory/pr/0054-context-steward-prompt-templates/reviews/precommit-review.yml
