@@ -1,4 +1,4 @@
-version: "0.18"
+version: "0.19"
 label: "contracts"
 purpose: "Safety, scope and validation contracts shared by all agents."
 read_first:
@@ -46,6 +46,8 @@ read_first:
   - "schemas/qa-evidence-record.schema.yml"
   - "docs/CONTEXT_STEWARD.md"
   - "docs/adr/0009-context-steward-owns-context-memory.md"
+  - "schemas/context-steward-prompt-template.schema.yml"
+  - "docs/CONTEXT_STEWARD_PROMPTS.md"
 anchors:
   - "repo.canonical-write.single-gate"
   - "agents.no-git-mutation"
@@ -343,3 +345,5 @@ notes:
   - "Context Steward owns context integrity, not code changes."
   - "Workspace memory at .project-memory/pr/<pr-id>/workspace.yml follows feature-workspace-memory.schema.yml."
   - "QA evidence at .project-memory/pr/<pr-id>/qa-evidence.yml follows qa-evidence-record.schema.yml."
+  - "Context Steward prompt templates defined in schemas/context-steward-prompt-template.schema.yml."
+  - "Six lifecycle hook prompt templates documented in docs/CONTEXT_STEWARD_PROMPTS.md."
