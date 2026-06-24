@@ -1,0 +1,35 @@
+# QA Evidence Record Template
+# Copy to .project-memory/pr/<pr-id>/qa-evidence.yml and fill.
+# Conforms to schemas/qa-evidence-record.schema.yml
+
+schema_version: "0.1"
+pr_id: "<pr-id>"
+review_type: "<plan-review|precommit-review|qa>"
+verdict: "pass"
+reviewer: "<agent-id>"
+snapshot: "<sha-or-description>"
+commands_run:
+  - command: "python -m pytest -q"
+    exit_code: 0
+    output: ""
+commands_not_run:
+  - command: "<command>"
+    reason: "<reason-for-not-running>"
+    mark: "not_run"
+manual_checks: []
+risks: []
+blockers: []
+warnings: []
+accepted_risks: []
+files_checked: []
+files_changed: []
+context_used:
+  labels: []
+  memory_files_read: []
+  files_modified: []
+  files_inspected: []
+evidence_refs: []
+created_from:
+  agent: "<context-steward-agent>"
+  hook: "<hook-name>"
+  template: "<template-id>"

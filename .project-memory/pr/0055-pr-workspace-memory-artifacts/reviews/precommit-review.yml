@@ -1,0 +1,123 @@
+schema_version: v1
+pr_id: "0055-pr-workspace-memory-artifacts"
+review_type: "precommit-review"
+verdict: pass
+reviewer: "precommit-review"
+timestamp: "2026-06-24T21:57:40Z"
+
+snapshot_delta:
+  current_head_sha: "205416a57fe832b73d18af7e2ebec30e2701a82b"
+  git_status_short: |
+    M .project-memory/context-bundles/contracts.yml
+    M .project-memory/memory_index.yml
+    ?? .project-memory/templates/
+    ?? docs/PR_WORKSPACE_MEMORY.md
+    ?? schemas/context-pack-inputs.schema.yml
+  git_diff_name_only: |
+    .project-memory/context-bundles/contracts.yml
+    .project-memory/memory_index.yml
+  scope_relevant_diff: |
+    schemas/context-pack-inputs.schema.yml
+    docs/PR_WORKSPACE_MEMORY.md
+    .project-memory/templates/pr-workspace.yml
+    .project-memory/templates/qa-evidence.yml
+    .project-memory/templates/context-pack-inputs.yml
+    .project-memory/context-bundles/contracts.yml
+    .project-memory/memory_index.yml
+  blocking_diff: ""
+  rationale: >
+    The working tree contains the PLAN-approved PR workspace memory artifact
+    templates, context-pack-inputs schema, documentation, approved project-memory
+    registry updates, and this precommit review artifact. No runtime or service
+    code was changed. Templates avoid shell placeholders, follow anti-fabrication
+    rules, and do not introduce forbidden patterns.
+
+scope:
+  allowed_paths:
+    - docs/PR_WORKSPACE_MEMORY.md
+    - schemas/context-pack-inputs.schema.yml
+    - .project-memory/templates/pr-workspace.yml
+    - .project-memory/templates/qa-evidence.yml
+    - .project-memory/templates/context-pack-inputs.yml
+    - .project-memory/context-bundles/contracts.yml
+    - .project-memory/memory_index.yml
+    - .project-memory/pr/0055-pr-workspace-memory-artifacts/reviews/precommit-review.yml
+  forbidden_paths_touched: []
+
+files_checked:
+  - .project-memory/review-artifact.schema.yml
+  - .project-memory/pr/0055-pr-workspace-memory-artifacts/PLAN.md
+  - .project-memory/pr/0055-pr-workspace-memory-artifacts/reviews/plan-review.yml
+  - .project-memory/memory_index.yml
+  - .project-memory/context-bundles/contracts.yml
+  - .project-memory/anchors.yml
+  - docs/CONTEXT_STEWARD.md
+  - docs/CONTEXT_STEWARD_PROMPTS.md
+  - schemas/context-steward.schema.yml
+  - schemas/context-steward-prompt-template.schema.yml
+  - schemas/feature-workspace-memory.schema.yml
+  - schemas/qa-evidence-record.schema.yml
+  - docs/CACHE_CONTRACTS.md
+  - schemas/cache-key.schema.yml
+  - schemas/cache-entry.schema.yml
+  - schemas/cache-policy.schema.yml
+  - schemas/context-pack.schema.yml
+  - docs/PR_WORKSPACE_MEMORY.md
+  - schemas/context-pack-inputs.schema.yml
+  - .project-memory/templates/pr-workspace.yml
+  - .project-memory/templates/qa-evidence.yml
+  - .project-memory/templates/context-pack-inputs.yml
+
+validation:
+  - command: "Python script verifying presence of required docs/schema/templates"
+    result: passed
+    evidence: "PR workspace memory artifact files present"
+  - command: "grep for \"$\" followed by \"(\" in docs and templates"
+    result: passed
+    evidence: "no shell placeholders found in templates/docs"
+  - command: "grep for legacy/backends/subprocess patterns"
+    result: passed
+    evidence: "no forbidden legacy or backend patterns found"
+  - command: "python -m compileall -f services packages"
+    result: not_run
+    reason: "Not required for templates/schema PR."
+  - command: "python -m pytest -q"
+    result: not_run
+    reason: "PR is templates/schema only; no runtime tests executed."
+
+blockers: []
+
+warnings: []
+
+decisions_made:
+  - decision: "pass precommit review"
+    reason: "The PR adds PR workspace memory templates, context-pack-inputs schema, and documentation only."
+  - decision: "preserve strict scope"
+    reason: "No services, packages, apps, agents, pyproject, .ariadne, .grace, anchors, or project_contract files were modified."
+
+context_used:
+  files_read:
+    - .project-memory/review-artifact.schema.yml
+    - .project-memory/pr/0055-pr-workspace-memory-artifacts/PLAN.md
+    - .project-memory/pr/0055-pr-workspace-memory-artifacts/reviews/plan-review.yml
+    - .project-memory/memory_index.yml
+    - .project-memory/context-bundles/contracts.yml
+    - .project-memory/anchors.yml
+    - docs/CONTEXT_STEWARD.md
+    - docs/CONTEXT_STEWARD_PROMPTS.md
+    - schemas/context-steward.schema.yml
+    - schemas/context-steward-prompt-template.schema.yml
+    - schemas/feature-workspace-memory.schema.yml
+    - schemas/qa-evidence-record.schema.yml
+    - docs/CACHE_CONTRACTS.md
+    - schemas/cache-key.schema.yml
+    - schemas/cache-entry.schema.yml
+    - schemas/cache-policy.schema.yml
+    - schemas/context-pack.schema.yml
+    - docs/PR_WORKSPACE_MEMORY.md
+    - schemas/context-pack-inputs.schema.yml
+    - .project-memory/templates/pr-workspace.yml
+    - .project-memory/templates/qa-evidence.yml
+    - .project-memory/templates/context-pack-inputs.yml
+  files_modified:
+    - .project-memory/pr/0055-pr-workspace-memory-artifacts/reviews/precommit-review.yml
