@@ -1,0 +1,37 @@
+# PR Workspace Memory Template
+# Copy to .project-memory/pr/<pr-id>/workspace.yml and fill.
+# Conforms to schemas/feature-workspace-memory.schema.yml
+
+schema_version: "0.1"
+pr_id: "<pr-id>"
+feature_id: "<feature-id>"
+title: "<fill-me>"
+status: "proposed"
+goal: "<fill-me>"
+scope:
+  - "<fill-me>"
+allowed_write_paths:
+  - "services/**"
+  - "packages/**"
+  - "tests/**"
+forbidden_paths:
+  - ".git/**"
+  - ".env"
+  - "secrets/**"
+source_contracts:
+  - "<contract-id>"
+relevant_anchors: []
+context_pack_refs: []
+cache_key_refs: []
+decisions: []
+implementation_summary: ""
+validation_summary: ""
+qa_summary: ""
+risks: []
+open_questions: []
+handoff_notes: ""
+created_from:
+  agent: "<context-steward-agent>"
+  hook: "before_plan"
+  template: "context-steward.before_plan.v1"
+updated_by: []
