@@ -1,4 +1,4 @@
-version: "0.19"
+version: "0.20"
 label: "contracts"
 purpose: "Safety, scope and validation contracts shared by all agents."
 read_first:
@@ -48,6 +48,11 @@ read_first:
   - "docs/adr/0009-context-steward-owns-context-memory.md"
   - "schemas/context-steward-prompt-template.schema.yml"
   - "docs/CONTEXT_STEWARD_PROMPTS.md"
+  - "docs/PR_WORKSPACE_MEMORY.md"
+  - "schemas/context-pack-inputs.schema.yml"
+  - ".project-memory/templates/pr-workspace.yml"
+  - ".project-memory/templates/qa-evidence.yml"
+  - ".project-memory/templates/context-pack-inputs.yml"
 anchors:
   - "repo.canonical-write.single-gate"
   - "agents.no-git-mutation"
@@ -347,3 +352,5 @@ notes:
   - "QA evidence at .project-memory/pr/<pr-id>/qa-evidence.yml follows qa-evidence-record.schema.yml."
   - "Context Steward prompt templates defined in schemas/context-steward-prompt-template.schema.yml."
   - "Six lifecycle hook prompt templates documented in docs/CONTEXT_STEWARD_PROMPTS.md."
+  - "PR workspace memory artifact templates defined in .project-memory/templates/."
+  - "Context pack inputs schema defined in schemas/context-pack-inputs.schema.yml."

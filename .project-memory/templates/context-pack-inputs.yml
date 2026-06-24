@@ -1,0 +1,35 @@
+# Context Pack Inputs Template
+# Copy to .project-memory/pr/<pr-id>/context-pack-inputs.yml and fill.
+# Conforms to schemas/context-pack-inputs.schema.yml
+
+schema_version: "0.1"
+pr_id: "<pr-id>"
+feature_id: "<feature-id>"
+task_goal: "<fill-me>"
+source_contracts:
+  - "<contract-id>"
+relevant_anchors: []
+allowed_paths:
+  - "services/**"
+  - "packages/**"
+  - "tests/**"
+forbidden_paths:
+  - ".git/**"
+  - ".env"
+  - "secrets/**"
+cache_key_refs: []
+prior_pr_refs: []
+qa_evidence_refs: []
+known_risks: []
+manual_checks_required: []
+context_freshness:
+  status: "fresh"
+  last_verified_hook: "none"
+invalidation_inputs: {}
+requested_context_sections: []
+output_preferences: {}
+created_from:
+  agent: "<context-steward-agent>"
+  hook: "before_plan"
+  template: "context-steward.before_plan.v1"
+updated_by: []

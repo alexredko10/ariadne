@@ -1,4 +1,4 @@
-version: "0.22"
+version: "0.23"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -15,6 +15,18 @@ labels:
     description: "System architecture, trust zones, boundaries, ADRs."
     bundles:
       - ".project-memory/context-bundles/architecture.yml"
+    preferred_agent: "architect"
+
+  pr-workspace-memory:
+    description: "PR workspace memory artifacts, templates, and context-pack inputs schema for Context Steward workflows."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - "docs/PR_WORKSPACE_MEMORY.md"
+      - "schemas/context-pack-inputs.schema.yml"
+      - ".project-memory/templates/pr-workspace.yml"
+      - ".project-memory/templates/qa-evidence.yml"
+      - ".project-memory/templates/context-pack-inputs.yml"
     preferred_agent: "architect"
 
   context-steward-prompts:
