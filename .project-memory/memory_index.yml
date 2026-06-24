@@ -1,4 +1,4 @@
-version: "0.21"
+version: "0.22"
 description: "Shared memory index for controlled Docker Agents. Agents read this first, then only the bundles matching task labels."
 
 rules:
@@ -15,6 +15,15 @@ labels:
     description: "System architecture, trust zones, boundaries, ADRs."
     bundles:
       - ".project-memory/context-bundles/architecture.yml"
+    preferred_agent: "architect"
+
+  context-steward-prompts:
+    description: "Context Steward prompt template schema and reusable lifecycle hook prompt documentation."
+    bundles:
+      - ".project-memory/context-bundles/contracts.yml"
+    additional_files:
+      - "schemas/context-steward-prompt-template.schema.yml"
+      - "docs/CONTEXT_STEWARD_PROMPTS.md"
     preferred_agent: "architect"
 
   context-steward:
