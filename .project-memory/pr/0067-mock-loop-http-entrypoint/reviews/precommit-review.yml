@@ -1,0 +1,85 @@
+schema_version: "1.0"
+pr_id: "0067-mock-loop-http-entrypoint"
+review_type: "precommit-review"
+reviewer: "precommit-review"
+timestamp: "2026-06-26T01:10:00Z"
+snapshot_delta:
+  current_head_sha: "b4dc67231633a572bab8ce9760316fba8fa5421f"
+  plan_md_base_sha: "b4dc67231633a572bab8ce9760316fba8fa5421f"
+  index_version: "0.33"
+  git_status_short: |
+    M services/task_intake/src/task_intake/server.py
+    M services/task_intake/tests/test_task_intake_http.py
+    ?? .project-memory/pr/0067-mock-loop-http-entrypoint/
+  git_diff_name_only: |
+    services/task_intake/src/task_intake/server.py
+    services/task_intake/tests/test_task_intake_http.py
+  scope_relevant_diff: |
+    services/task_intake/src/task_intake/server.py (modified)
+    services/task_intake/tests/test_task_intake_http.py (modified)
+  blocking_diff: ""
+  rationale: "Planned small route addition exposing run_mock_loop via POST /mock-loop. Changes limited to server.py and existing HTTP test file per approved PLAN.md."
+
+scope:
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/tests/test_task_intake_http.py"
+
+files_checked:
+  - ".project-memory/pr/0067-mock-loop-http-entrypoint/PLAN.md"
+  - ".project-memory/pr/0067-mock-loop-http-entrypoint/reviews/plan-review.yml"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/tests/test_task_intake_http.py"
+  - "services/task_intake/src/task_intake/mock_loop.py"
+  - "services/task_intake/tests/test_mock_loop.py"
+  - "services/task_intake/src/task_intake/normalize.py"
+  - "services/task_intake/src/task_intake/context_preview.py"
+  - "services/task_intake/src/task_intake/runs.py"
+
+validation:
+  git_rev_parse_head: passed
+  git_status_short: observed
+  git_diff_name_only: observed
+  forbidden_pattern_grep: passed
+  shell_placeholder_grep: passed
+  pytest_task_intake_http: passed
+  pytest_mock_loop: passed
+  pytest_runs: passed
+  pytest_context_preview: passed
+  pytest_normalize: passed
+  compileall: not_run
+  full_pytest: not_run
+
+files_read:
+  - ".project-memory/pr/0067-mock-loop-http-entrypoint/PLAN.md"
+  - ".project-memory/pr/0067-mock-loop-http-entrypoint/reviews/plan-review.yml"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/tests/test_task_intake_http.py"
+  - "services/task_intake/src/task_intake/mock_loop.py"
+  - "services/task_intake/tests/test_mock_loop.py"
+  - "services/task_intake/src/task_intake/normalize.py"
+  - "services/task_intake/src/task_intake/context_preview.py"
+  - "services/task_intake/src/task_intake/runs.py"
+
+files_written:
+  - ".project-memory/pr/0067-mock-loop-http-entrypoint/reviews/precommit-review.yml"
+
+blockers: []
+warnings: []
+
+decisions_made:
+  - "Expose POST /mock-loop as thin ASGI adapter that delegates to run_mock_loop. No business logic duplicated."
+
+context_used:
+  labels:
+    - "http-integration"
+  memory files read:
+    - ".project-memory/pr/0067-mock-loop-http-entrypoint/PLAN.md"
+    - ".project-memory/pr/0067-mock-loop-http-entrypoint/reviews/plan-review.yml"
+  anchors used: []
+  files_inspected:
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_task_intake_http.py"
+    - "services/task_intake/src/task_intake/mock_loop.py"
+  files_modified:
+    - ".project-memory/pr/0067-mock-loop-http-entrypoint/reviews/precommit-review.yml"
+
