@@ -29,6 +29,18 @@ T4 = datetime.datetime(2026, 6, 21, 12, 20, 0, tzinfo=datetime.timezone.utc)
 
 
 # ---------------------------------------------------------------------------
+# Deterministic compiler constants
+# ---------------------------------------------------------------------------
+
+REPO_ID = "ariadne"
+PURPOSE_ID = "dry-run-purpose"
+DOMAIN = "dry-run"
+RISK_LEVEL = "low"
+BASE_SHA = "dry-run-abc123"
+INDEX_VERSION = "0.24"
+
+
+# ---------------------------------------------------------------------------
 # Phase context
 # ---------------------------------------------------------------------------
 
@@ -41,6 +53,8 @@ class _PhaseContext:
         self.store = InMemoryRuntimeStore()
         self.run_id = "dry-run-001"
         self.report: Any = None
+        self.inputs: dict[str, Any] | None = None
+        self.context_pack: dict[str, Any] | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -173,12 +187,62 @@ def _phase_complete_run(ctx: _PhaseContext, ts: dict[str, Any]) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Context pack phases
+# ---------------------------------------------------------------------------
+
+
+def _phase_generate_context_pack_inputs(
+    ctx: _PhaseContext,
+    ts: dict[str, Any],
+) -> None:
+    from conductor.context_pack_inputs import build_context_pack_inputs
+    ctx.inputs = build_context_pack_inputs(
+        pr_id=ctx.run_id,
+        task_goal="Dry-run context pack integration",
+        source_contracts=["contract-a", "contract-b"],
+        relevant_anchors=["anchor-001", "anchor-002"],
+        allowed_paths=["services/**", "packages/**"],
+        forbidden_paths=[".git/**", ".env"],
+        cache_key_refs=[{"namespace": "context", "artifact_kind": "context_pack"}],
+        known_risks=[
+            {"id": "risk-001", "description": "Example risk", "severity": "low"},
+        ],
+        manual_checks_required=["Verify context pack fields"],
+        context_freshness_status="fresh",
+        context_freshness_last_verified="plan_steps",
+        created_from_agent="conductor-dry-run",
+        created_from_hook="before_plan",
+        created_from_template="context-steward.before_plan.v1",
+    )
+
+
+def _phase_compile_context_pack(
+    ctx: _PhaseContext,
+    ts: dict[str, Any],
+) -> None:
+    from conductor.context_compiler import compile_context_pack
+    ctx.context_pack = compile_context_pack(
+        context_pack_inputs=ctx.inputs,
+        repo_id=REPO_ID,
+        purpose_id=PURPOSE_ID,
+        domain=DOMAIN,
+        risk_level=RISK_LEVEL,
+        base_sha=BASE_SHA,
+        index_version=INDEX_VERSION,
+        task_subgraph=["services/conductor/src/conductor/dry_run.py"],
+        relevant_files=["services/conductor/src/conductor/dry_run.py"],
+    )
+
+
+# ---------------------------------------------------------------------------
 # Phase registry
 # ---------------------------------------------------------------------------
 
 _PHASES: list[tuple[str, Callable[[_PhaseContext, dict[str, Any]], None]]] = [
     ("initialize_run", _phase_initialize_run),
     ("plan_steps", _phase_plan_steps),
+    ("generate_context_pack_inputs", _phase_generate_context_pack_inputs),
+    ("compile_context_pack", _phase_compile_context_pack),
     ("start_run", _phase_start_run),
     ("start_step:step-001", _phase_start_step),
     ("complete_step:step-001", _phase_complete_step),
@@ -242,6 +306,17 @@ def _build_output(ctx: _PhaseContext, events: list[str]) -> dict[str, Any]:
         "final_report_present": True,
         "final_report_id": report.report_id,
         "conductor_events": events,
+        "context_pack_summary": {
+            "present": ctx.context_pack is not None,
+            "context_pack_id": ctx.context_pack.get("context_pack_id") if ctx.context_pack else None,
+            "task": ctx.context_pack.get("task") if ctx.context_pack else None,
+            "domain": ctx.context_pack.get("domain") if ctx.context_pack else None,
+            "risk_level": ctx.context_pack.get("risk_level") if ctx.context_pack else None,
+            "risks": ctx.context_pack.get("risks", []) if ctx.context_pack else [],
+            "anchors": ctx.context_pack.get("anchors", []) if ctx.context_pack else [],
+            "invariants": ctx.context_pack.get("invariants", []) if ctx.context_pack else [],
+            "section_count": len(ctx.context_pack) if ctx.context_pack else 0,
+        },
     }
 
 

@@ -65,7 +65,7 @@ class TestRunConductorDryRun:
 
     def test_conductor_events_count(self):
         result = run_conductor_dry_run()
-        assert len(result["conductor_events"]) == 12
+        assert len(result["conductor_events"]) == 14
 
     def test_conductor_events_order(self):
         result = run_conductor_dry_run()
@@ -97,6 +97,48 @@ class TestRunConductorDryRun:
     def test_evidence_summary_total(self):
         result = run_conductor_dry_run()
         assert result["evidence_summary"]["total"] == 2
+
+
+# ---------------------------------------------------------------------------
+# Context pack integration
+# ---------------------------------------------------------------------------
+
+
+class TestContextPackIntegration:
+    def test_dry_run_output_includes_context_pack_summary(self):
+        result = run_conductor_dry_run()
+        assert "context_pack_summary" in result
+        assert result["context_pack_summary"]["present"] is True
+
+    def test_context_pack_key_fields(self):
+        result = run_conductor_dry_run()
+        summary = result["context_pack_summary"]
+        assert summary["context_pack_id"] == "cp-dry-run-001-ariadne"
+        assert summary["domain"] == "dry-run"
+        assert summary["risk_level"] == "low"
+        assert len(summary["risks"]) > 0
+        assert len(summary["anchors"]) > 0
+        assert len(summary["invariants"]) > 0
+        assert summary["section_count"] > 0
+
+    def test_context_pack_deterministic(self):
+        result1 = run_conductor_dry_run()
+        result2 = run_conductor_dry_run()
+        assert result1["context_pack_summary"] == result2["context_pack_summary"]
+
+    def test_conductor_events_include_context_phases(self):
+        result = run_conductor_dry_run()
+        events = result["conductor_events"]
+        assert "generate_context_pack_inputs" in events
+        assert "compile_context_pack" in events
+
+    def test_existing_output_fields_preserved(self):
+        result = run_conductor_dry_run()
+        assert result["dry_run"] == "conductor"
+        assert result["run_status"] == "completed"
+        assert result["planned_step_count"] == 2
+        assert result["checkpoint_count"] == 2
+        assert result["final_report_present"] is True
 
 
 # ---------------------------------------------------------------------------
