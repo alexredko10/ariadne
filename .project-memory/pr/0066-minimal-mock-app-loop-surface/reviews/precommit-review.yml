@@ -1,0 +1,106 @@
+schema_version: "1.0"
+pr_id: "0066-minimal-mock-app-loop-surface"
+review_type: "precommit-review"
+reviewer: "precommit-review"
+timestamp: "2026-06-26T00:45:00Z"
+snapshot_delta:
+  current_head_sha: "3da183305b4cfb044b1007270338ece5f640eb4a"
+  plan_base_sha: "336bc584cc7ac0975e4619d6be71c6db8d3c160f"
+  index_version: "0.32"
+  git_status_short: |
+    ?? services/task_intake/src/task_intake/mock_loop.py
+    ?? services/task_intake/tests/test_mock_loop.py
+  git_diff_name_only: |
+    services/task_intake/src/task_intake/mock_loop.py
+    services/task_intake/tests/test_mock_loop.py
+  scope_relevant_diff: |
+    services/task_intake/src/task_intake/mock_loop.py (new)
+    services/task_intake/tests/test_mock_loop.py (new)
+  blocking_diff: ""
+  rationale: "Per PLAN.md snapshot policy, base_sha mismatch treated as informational. Continuing focused precommit checks. Changes introduce a new pure composition module and tests limited to task_intake per PLAN."
+
+scope:
+  - "services/task_intake/src/task_intake/mock_loop.py"
+  - "services/task_intake/tests/test_mock_loop.py"
+
+files_checked:
+  - ".project-memory/pr/0066-minimal-mock-app-loop-surface/PLAN.md"
+  - ".project-memory/pr/0066-minimal-mock-app-loop-surface/reviews/plan-review.yml"
+  - ".project-memory/pr/0065-runs-mock-status/PLAN.md"
+  - ".project-memory/pr/0064-context-preview-mock/PLAN.md"
+  - ".project-memory/pr/0063-task-intake-normalize-mock/PLAN.md"
+  - "services/task_intake/src/task_intake/normalize.py"
+  - "services/task_intake/src/task_intake/context_preview.py"
+  - "services/task_intake/src/task_intake/runs.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/mock_loop.py"
+  - "services/task_intake/tests/test_mock_loop.py"
+  - "services/task_intake/tests/test_runs.py"
+  - "services/task_intake/tests/test_context_preview.py"
+  - "services/task_intake/tests/test_normalize.py"
+
+validation:
+  git_status_short: "observed"
+  git_diff_name_only: "observed"
+  forbidden_pattern_grep: "passed"
+  shell_placeholder_grep: "passed"
+  pytest_mock_loop: "passed"
+  pytest_runs: "passed"
+  pytest_context_preview: "passed"
+  pytest_normalize: "passed"
+  pytest_task_intake_http: "passed"
+  compileall: "not_run"
+  full_pytest: "not_run"
+
+files_read:
+  - ".project-memory/memory_index.yml"
+  - ".project-memory/project_contract.yml"
+  - ".project-memory/context-bundles/contracts.yml"
+  - ".project-memory/anchors.yml"
+  - ".project-memory/pr/0066-minimal-mock-app-loop-surface/PLAN.md"
+  - ".project-memory/pr/0066-minimal-mock-app-loop-surface/reviews/plan-review.yml"
+  - ".project-memory/pr/0065-runs-mock-status/PLAN.md"
+  - ".project-memory/pr/0064-context-preview-mock/PLAN.md"
+  - ".project-memory/pr/0063-task-intake-normalize-mock/PLAN.md"
+  - "services/task_intake/src/task_intake/normalize.py"
+  - "services/task_intake/src/task_intake/context_preview.py"
+  - "services/task_intake/src/task_intake/runs.py"
+  - "services/task_intake/src/task_intake/mock_loop.py"
+  - "services/task_intake/tests/test_mock_loop.py"
+
+files_written:
+  - ".project-memory/pr/0066-minimal-mock-app-loop-surface/reviews/precommit-review.yml"
+
+blockers: []
+warnings:
+  - "stale_snapshot: PLAN.md base_sha does not match current HEAD; treated as warning per repo policy"
+
+required_changes:
+  - "None required: changes are within PLAN-approved scope and focused tests passed."
+
+decisions_made:
+  - "Implement run_mock_loop as a pure composition of normalize, context_preview, and runs. Do not wire HTTP route in this PR (kept minimal)."
+
+context_used:
+  labels:
+    - "task-intake"
+  memory files read:
+    - ".project-memory/pr/0066-minimal-mock-app-loop-surface/PLAN.md"
+    - ".project-memory/pr/0065-runs-mock-status/PLAN.md"
+    - ".project-memory/pr/0064-context-preview-mock/PLAN.md"
+    - ".project-memory/pr/0063-task-intake-normalize-mock/PLAN.md"
+  anchors used: []
+  files_inspected:
+    - "services/task_intake/src/task_intake/mock_loop.py"
+    - "services/task_intake/src/task_intake/normalize.py"
+    - "services/task_intake/src/task_intake/context_preview.py"
+    - "services/task_intake/src/task_intake/runs.py"
+  files_modified:
+    - ".project-memory/pr/0066-minimal-mock-app-loop-surface/reviews/precommit-review.yml"
+  files_intentionally_ignored:
+    - ".ariadne/**"
+    - ".github/**"
+    - "docker/**"
+    - "__pycache__/**"
+    - "*.pyc"
+
