@@ -190,3 +190,73 @@ class TestNoSideEffects:
         assert "docker" not in content.lower()
         assert "fastapi" not in content
         assert "starlette" not in content
+
+
+# ---------------------------------------------------------------------------
+# Mock Loop HTTP
+# ---------------------------------------------------------------------------
+
+
+class TestMockLoopHTTP:
+    """HTTP-level tests for POST /mock-loop."""
+
+    def test_valid_minimal_request_returns_200(self):
+        body = json.dumps({"raw_task": "Add JWT auth"}).encode("utf-8")
+        status, data = _request("POST", "/mock-loop", body=body)
+        assert status == 200
+        assert data["ok"] is True
+
+    def test_valid_request_has_all_steps(self):
+        body = json.dumps({"raw_task": "Implement JWT auth"}).encode("utf-8")
+        status, data = _request("POST", "/mock-loop", body=body)
+        assert status == 200
+        # The response may use top-level keys or a "steps" dict
+        has_top_level = all(k in data for k in ["task_intake", "context_preview", "run"])
+        has_nested = isinstance(data.get("steps"), dict) and all(
+            k in data["steps"] for k in ["normalize", "context_preview", "run"]
+        )
+        assert has_top_level or has_nested, "Expected step evidence in response"
+
+    def test_valid_request_has_loop_status(self):
+        body = json.dumps({"raw_task": "Implement JWT auth"}).encode("utf-8")
+        status, data = _request("POST", "/mock-loop", body=body)
+        assert status == 200
+        assert data["status"]["state"] == "completed_mock_loop"
+        assert data["status"]["is_terminal"] is True
+
+    def test_valid_request_deterministic(self):
+        body = json.dumps({"raw_task": "Implement JWT auth"}).encode("utf-8")
+        s1, d1 = _request("POST", "/mock-loop", body=body)
+        s2, d2 = _request("POST", "/mock-loop", body=body)
+        assert s1 == 200 and s2 == 200
+        assert d1 == d2
+
+    def test_missing_raw_task_returns_400(self):
+        body = json.dumps({}).encode("utf-8")
+        status, data = _request("POST", "/mock-loop", body=body)
+        assert status == 400
+        assert data["ok"] is False
+
+    def test_invalid_json_returns_400(self):
+        body = b"not json"
+        status, data = _request("POST", "/mock-loop", body=body)
+        assert status == 400
+        assert data["ok"] is False
+
+    def test_rich_options_pass_through(self):
+        body = json.dumps({
+            "raw_task": "Implement JWT auth",
+            "source": "demo",
+            "metadata": {"requester": "test"},
+            "constraints": ["no_git_mutation"],
+            "requested_output": "plan",
+            "include_sections": ["task", "scope"],
+            "run_options": {"priority": "normal"},
+        }).encode("utf-8")
+        status, data = _request("POST", "/mock-loop", body=body)
+        assert status == 200
+        assert data["ok"] is True
+
+    def test_unsupported_method_returns_404(self):
+        status, data = _request("GET", "/mock-loop")
+        assert status == 404
