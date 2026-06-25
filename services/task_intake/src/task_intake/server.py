@@ -14,6 +14,7 @@ from task_intake.app import accept_task
 from task_intake.doctor import doctor
 from task_intake.models import TaskIntakeRequest
 from task_intake.normalize import normalize_task_intake
+from task_intake.context_preview import generate_context_preview
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -131,6 +132,43 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
             return
 
         result = normalize_task_intake(data)
+
+        if result.get("ok") is True:
+            body = json.dumps(result, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        else:
+            body = json.dumps(result, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 400, body)
+        return
+
+    if method == "POST" and path == "/context/preview":
+        # Read body
+        body_bytes = b""
+        more_body = True
+        while more_body:
+            event = await receive()
+            if event["type"] == "http.request":
+                body_bytes += event.get("body", b"")
+                more_body = event.get("more_body", False)
+
+        # Parse JSON
+        try:
+            data = json.loads(body_bytes) if body_bytes else {}
+        except json.JSONDecodeError:
+            await _send_json(
+                send, 400,
+                json.dumps({
+                    "ok": False,
+                    "validation": {
+                        "valid": False,
+                        "errors": ["Invalid JSON body."],
+                        "warnings": [],
+                    },
+                }, ensure_ascii=False).encode("utf-8"),
+            )
+            return
+
+        result = generate_context_preview(data)
 
         if result.get("ok") is True:
             body = json.dumps(result, ensure_ascii=False).encode("utf-8")
