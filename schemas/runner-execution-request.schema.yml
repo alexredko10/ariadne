@@ -1,0 +1,57 @@
+# Runner Execution Request Schema v0.1
+# Contract between the application layer and a runner adapter.
+#
+# This is the boundary between the mock app loop (task-intake) and a future
+# runner adapter.  The request carries all context the adapter needs to
+# execute a run task.
+#
+# The runner is a replaceable execution adapter boundary.
+# The adapter is not part of the mock app loop.
+# Docker is one possible future adapter, not the contract itself.
+
+schema_version: "0.1"
+
+# --- RunnerExecutionRequest ---
+# Required fields:
+#   execution_request_id: string, unique request identifier
+#   run_id: string, references the run this execution belongs to
+#   task_intake_id: string, references the normalized task intake
+#   context_preview_id: string, references the context preview
+#   requested_adapter: string, adapter kind identifier (e.g. "noop", "local-process", "docker-coder-v1")
+#   execution_mode: string, one of "dry_run", "execute", "preview"
+#   inputs: dict, adapter-specific execution inputs
+#   constraints: list of strings, execution constraints
+#
+# Optional fields:
+#   expected_outputs: list of strings, expected output descriptions
+#   metadata: dict, request metadata
+#   approval: dict, approval state (if human approval is required)
+
+# --- Design rules ---
+# requested_adapter is a string identifier, not an import path.
+# execution_mode allows dry-run without real execution.
+# inputs is an adapter-specific dict — the contract is a wrapper.
+# No absolute paths.
+# No Docker-specific fields.
+# No model/provider-specific fields.
+# No timestamps — timestamps belong in the result.
+# JSON serializable.
+
+# ============================================================
+# Minimal valid example:
+# ============================================================
+# schema_version: "0.1"
+# execution_request_id: "er-001"
+# run_id: "run-001"
+# task_intake_id: "task_a1b2c3d4e5f6"
+# context_preview_id: "ctxpreview_a1b2c3d4e5f6"
+# requested_adapter: "noop-v1"
+# execution_mode: "dry_run"
+# inputs:
+#   note: "No-op dry-run adapter returns immediately without execution."
+# constraints:
+#   - "no_git_mutation"
+# expected_outputs:
+#   - "plan"
+# metadata:
+#   source: "demo"
