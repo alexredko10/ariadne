@@ -1,0 +1,106 @@
+schema_version: "1.0"
+pr_id: "0065-runs-mock-status"
+review_type: "precommit-review"
+reviewer: "precommit-review"
+timestamp: "2026-06-26T00:10:00Z"
+snapshot_delta:
+  current_head_sha: "1570c61c71383506705061324845dce72f57ad5b"
+  plan_base_sha: "5b0c860c35e0bfd6dd3e15b17d5f524b2e45c42e"
+  index_version: "0.31"
+  git_status_short: |
+    M services/task_intake/src/task_intake/server.py
+    ?? services/task_intake/src/task_intake/runs.py
+    ?? services/task_intake/tests/test_runs.py
+  git_diff_name_only: |
+    services/task_intake/src/task_intake/server.py
+  scope_relevant_diff: |
+    services/task_intake/src/task_intake/runs.py (untracked, new)
+    services/task_intake/tests/test_runs.py (untracked, new)
+    services/task_intake/src/task_intake/server.py (modified)
+  blocking_diff: ""
+  rationale: "Per PLAN.md snapshot policy, base_sha mismatch is informational. Continued focused precommit checks. Changes are limited to task_intake runs module, tests, and server route modification as planned."
+
+scope:
+  - "services/task_intake/src/task_intake/runs.py"
+  - "services/task_intake/tests/test_runs.py"
+  - "services/task_intake/src/task_intake/server.py"
+
+files_checked:
+  - ".project-memory/pr/0065-runs-mock-status/PLAN.md"
+  - ".project-memory/pr/0064-context-preview-mock/PLAN.md"
+  - ".project-memory/pr/0063-task-intake-normalize-mock/PLAN.md"
+  - "services/task_intake/src/task_intake/runs.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/tests/test_runs.py"
+  - "services/task_intake/tests/test_context_preview.py"
+  - "services/task_intake/tests/test_normalize.py"
+  - "services/task_intake/tests/test_task_intake_http.py"
+  - "services/task_intake/tests/test_task_intake.py"
+
+validation:
+  git_status_short: "observed"
+  git_diff_name_only: "observed"
+  forbidden_pattern_grep: "passed"
+  shell_placeholder_grep: "passed"
+  pytest_runs: "passed"
+  pytest_context_preview: "passed"
+  pytest_normalize: "passed"
+  pytest_task_intake_http: "passed"
+  pytest_task_intake_unit: "passed"
+  compileall: "not_run"
+  full_pytest: "not_run"
+
+files_read:
+  - ".project-memory/memory_index.yml"
+  - ".project-memory/project_contract.yml"
+  - ".project-memory/context-bundles/contracts.yml"
+  - ".project-memory/anchors.yml"
+  - ".project-memory/pr/0065-runs-mock-status/PLAN.md"
+  - ".project-memory/pr/0065-runs-mock-status/reviews/plan-review.yml"
+  - ".project-memory/pr/0064-context-preview-mock/PLAN.md"
+  - ".project-memory/pr/0063-task-intake-normalize-mock/PLAN.md"
+  - "services/task_intake/src/task_intake/runs.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/tests/test_runs.py"
+  - "services/task_intake/tests/test_context_preview.py"
+  - "services/task_intake/tests/test_normalize.py"
+  - "services/task_intake/tests/test_task_intake_http.py"
+  - "services/task_intake/tests/test_task_intake.py"
+
+files_written:
+  - ".project-memory/pr/0065-runs-mock-status/reviews/precommit-review.yml"
+
+blockers: []
+warnings:
+  - "stale_snapshot: PLAN.md base_sha does not match current HEAD; treated as warning per repo policy"
+
+required_changes:
+  - "None required: changes are within PLAN-approved scope and focused tests passed."
+
+decisions_made:
+  - "Approved mock-run strategy: new runs.py, tests, and server route. No dependencies, persistence, Docker, or runner behavior added."
+
+context_used:
+  labels:
+    - "task-intake"
+  memory files read:
+    - ".project-memory/memory_index.yml"
+    - ".project-memory/project_contract.yml"
+    - ".project-memory/pr/0065-runs-mock-status/PLAN.md"
+    - ".project-memory/pr/0065-runs-mock-status/reviews/plan-review.yml"
+  anchors used: []
+  files_inspected:
+    - "services/task_intake/src/task_intake/runs.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_runs.py"
+    - "services/task_intake/src/task_intake/context_preview.py"
+    - "services/task_intake/src/task_intake/normalize.py"
+  files_modified:
+    - ".project-memory/pr/0065-runs-mock-status/reviews/precommit-review.yml"
+  files_intentionally_ignored:
+    - ".ariadne/**"
+    - ".github/**"
+    - "docker/**"
+    - "__pycache__/**"
+    - "*.pyc"
+
