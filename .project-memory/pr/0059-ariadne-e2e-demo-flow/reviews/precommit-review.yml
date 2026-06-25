@@ -1,0 +1,91 @@
+schema_version: v1
+pr_id: "0059-ariadne-e2e-demo-flow"
+review_type: "precommit-review"
+verdict: pass
+reviewer: "precommit-review"
+timestamp: "2026-06-25T10:18:50Z"
+
+snapshot_delta:
+  current_head_sha: "f5d9c1a87ceca235096828fa3ecfab52ec122d7e"
+  git_status_short: |
+    ?? docs/ARIADNE_E2E_DEMO_FLOW.md
+    ?? services/conductor/tests/test_ariadne_e2e_demo_flow.py
+    ?? .project-memory/pr/0059-ariadne-e2e-demo-flow/reviews/precommit-review.yml
+  git_diff_name_only: |
+    docs/ARIADNE_E2E_DEMO_FLOW.md
+    services/conductor/tests/test_ariadne_e2e_demo_flow.py
+    .project-memory/pr/0059-ariadne-e2e-demo-flow/reviews/precommit-review.yml
+  scope_relevant_diff: |
+    docs/ARIADNE_E2E_DEMO_FLOW.md
+    services/conductor/tests/test_ariadne_e2e_demo_flow.py
+    .project-memory/pr/0059-ariadne-e2e-demo-flow/reviews/precommit-review.yml
+  blocking_diff: ""
+  rationale: >
+    The working tree contains only the PLAN-approved Ariadne E2E demo flow
+    documentation, focused E2E test, and this precommit review artifact.
+    Focused validation passed.
+
+scope:
+  allowed_paths:
+    - docs/ARIADNE_E2E_DEMO_FLOW.md
+    - services/conductor/tests/test_ariadne_e2e_demo_flow.py
+    - .project-memory/pr/0059-ariadne-e2e-demo-flow/reviews/precommit-review.yml
+  forbidden_paths_touched: []
+
+files_checked:
+  - .project-memory/pr/0059-ariadne-e2e-demo-flow/PLAN.md
+  - .project-memory/pr/0059-ariadne-e2e-demo-flow/reviews/plan-review.yml
+  - services/conductor/tests/test_ariadne_e2e_demo_flow.py
+  - docs/ARIADNE_E2E_DEMO_FLOW.md
+  - services/conductor/src/conductor/dry_run.py
+  - services/conductor/src/conductor/context_pack_inputs.py
+  - services/conductor/src/conductor/context_compiler.py
+  - services/conductor/tests/test_dry_run.py
+  - services/conductor/tests/test_context_pack_inputs.py
+  - services/conductor/tests/test_context_compiler.py
+  - schemas/context-pack-inputs.schema.yml
+  - schemas/context-pack.schema.yml
+
+validation:
+  - command: "PYTHONPATH=services/core/src:services/conductor/src python -m pytest services/conductor/tests/test_ariadne_e2e_demo_flow.py -q"
+    result: passed
+    evidence: "focused Ariadne E2E demo flow test passed"
+  - command: "PYTHONPATH=services/core/src:services/conductor/src python -m pytest services/conductor/tests/test_dry_run.py -q"
+    result: passed
+    evidence: "conductor dry-run compatibility tests passed"
+  - command: "PYTHONPATH=services/conductor/src python -m pytest services/conductor/tests/test_context_pack_inputs.py -q"
+    result: passed
+    evidence: "context-pack input generator tests passed"
+  - command: "PYTHONPATH=services/conductor/src python -m pytest services/conductor/tests/test_context_compiler.py -q"
+    result: passed
+    evidence: "context compiler tests passed"
+  - command: "python -m compileall -f services packages"
+    result: not_run
+    reason: "Not required for this focused demo-flow PR."
+  - command: "python -m pytest -q"
+    result: not_run
+    reason: "Full test suite not executed; focused tests were run."
+
+blockers: []
+warnings: []
+
+decisions_made:
+  - decision: "pass precommit review"
+    reason: "The PR adds only the planned demo doc and focused E2E test, and focused validation passed."
+
+context_used:
+  files_read:
+    - .project-memory/pr/0059-ariadne-e2e-demo-flow/PLAN.md
+    - .project-memory/pr/0059-ariadne-e2e-demo-flow/reviews/plan-review.yml
+    - services/conductor/tests/test_ariadne_e2e_demo_flow.py
+    - docs/ARIADNE_E2E_DEMO_FLOW.md
+    - services/conductor/src/conductor/dry_run.py
+    - services/conductor/src/conductor/context_pack_inputs.py
+    - services/conductor/src/conductor/context_compiler.py
+    - services/conductor/tests/test_dry_run.py
+    - services/conductor/tests/test_context_pack_inputs.py
+    - services/conductor/tests/test_context_compiler.py
+    - schemas/context-pack-inputs.schema.yml
+    - schemas/context-pack.schema.yml
+  files_modified:
+    - .project-memory/pr/0059-ariadne-e2e-demo-flow/reviews/precommit-review.yml
