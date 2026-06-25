@@ -1,0 +1,81 @@
+schema_version: "1.0"
+pr_id: "0062-demo-output-evolution-rule"
+review_type: "precommit-review"
+reviewer: "precommit-review"
+timestamp: "2026-06-25T20:30:00Z"
+snapshot_delta:
+  current_head_sha: "130abd4fbae0f886b98630b441859e19c6e32efd"
+  plan_base_sha: "44b651cd0c5644c0eee5fe7dfce164b5ad7895c7"
+  index_version: "0.28"
+  git_status_short: |
+    M docs/ARIADNE_E2E_DEMO_FLOW.md
+  git_diff_name_only: |
+    docs/ARIADNE_E2E_DEMO_FLOW.md
+  scope_relevant_diff: |
+    docs/ARIADNE_E2E_DEMO_FLOW.md
+  blocking_diff: ""
+  rationale: "PLAN.md base_sha differs from current HEAD; treated as warning per snapshot policy. Proceeding with focused doc-only precommit checks." 
+
+scope:
+  - "docs/ARIADNE_E2E_DEMO_FLOW.md"
+
+files_checked:
+  - ".project-memory/pr/0062-demo-output-evolution-rule/PLAN.md"
+  - "docs/ARIADNE_E2E_DEMO_FLOW.md"
+  - "services/conductor/tests/fixtures/ariadne_demo_output.json"
+  - "services/conductor/tests/test_demo_output_contract.py"
+
+validation:
+  git_status_short: "observed"
+  git_diff_name_only: "observed"
+  doc_grep_evolution_rules: "passed"
+  forbidden_pattern_grep: "passed"
+  shell_placeholder_grep: "passed"
+  pytest_demo_output_contract: "passed"
+  pytest_demo_flow: "passed"
+  cli_demo_command: "passed"
+  compileall: "not_run"
+  full_pytest: "not_run"
+
+files_read:
+  - ".project-memory/memory_index.yml"
+  - ".project-memory/project_contract.yml"
+  - ".project-memory/pr/0062-demo-output-evolution-rule/PLAN.md"
+  - ".project-memory/pr/0062-demo-output-evolution-rule/reviews/plan-review.yml"
+  - "docs/ARIADNE_E2E_DEMO_FLOW.md"
+  - "services/conductor/tests/fixtures/ariadne_demo_output.json"
+  - "services/conductor/tests/test_demo_output_contract.py"
+
+files_written:
+  - ".project-memory/pr/0062-demo-output-evolution-rule/reviews/precommit-review.yml"
+
+blockers: []
+warnings:
+  - "stale_snapshot: PLAN.md base_sha does not match current HEAD; treated as warning per repo policy"
+
+required_changes:
+  - "None required: change is docs-only and within PLAN-approved scope; focused checks passed."
+
+decisions_made:
+  - "Evolution rule added to ARIADNE_E2E_DEMO_FLOW.md as documentation; no fixture or test changes."
+
+context_used:
+  labels:
+    - "contracts"
+  memory files read:
+    - ".project-memory/pr/0062-demo-output-evolution-rule/PLAN.md"
+    - ".project-memory/pr/0062-demo-output-evolution-rule/reviews/plan-review.yml"
+  anchors used: []
+  files_inspected:
+    - "docs/ARIADNE_E2E_DEMO_FLOW.md"
+    - "services/conductor/tests/fixtures/ariadne_demo_output.json"
+    - "services/conductor/tests/test_demo_output_contract.py"
+  files_modified:
+    - ".project-memory/pr/0062-demo-output-evolution-rule/reviews/precommit-review.yml"
+  files_intentionally_ignored:
+    - ".ariadne/**"
+    - ".github/**"
+    - "docker/**"
+    - "__pycache__/**"
+    - "*.pyc"
+
