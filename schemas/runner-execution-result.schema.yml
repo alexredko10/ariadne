@@ -1,0 +1,89 @@
+# Runner Execution Result Schema v0.1
+# What a runner adapter returns after execution.
+#
+# The result carries status, produced artifacts, and evidence from one
+# execution request.  The adapter is responsible for populating this
+# structure.
+
+schema_version: "0.1"
+
+# --- RunnerExecutionResult ---
+# Required fields:
+#   execution_result_id: string, unique result identifier
+#   execution_request_id: string, references the execution request
+#   run_id: string, references the run
+#   status: string (ExecutionStatus — see values below)
+#   adapter: string, adapter kind identifier that produced this result
+#   artifacts: list of RunnerArtifact
+#   evidence: list of EvidenceRecord
+#
+# Optional fields:
+#   started: string, ISO 8601 (adapter-provided)
+#   completed: string, ISO 8601 (adapter-provided)
+#   errors: list of ErrorRecord
+#   warnings: list of strings
+#   review_required: bool
+#   next: string, suggested next step
+
+# --- ExecutionStatus values ---
+# accepted:      adapter accepted the request but hasn't started (non-terminal)
+# running:       execution is in progress (non-terminal)
+# completed:     execution completed successfully (terminal)
+# failed:        execution failed (terminal)
+# cancelled:     execution was cancelled (terminal)
+# blocked:       execution is blocked, e.g. pending human approval (non-terminal)
+# requires_review: execution completed but requires human review (non-terminal)
+#
+# These are future/runtime states produced by runner adapters.
+# Not all are used in the mock app loop.
+
+# --- RunnerArtifact ---
+# Fields:
+#   artifact_id: string, unique artifact identifier
+#   artifact_kind: string, artifact type
+#   relative_path: string, relative path (no absolute paths)
+#   digest: string or null, SHA-256 hex (optional)
+#   producing_step: string, step ID
+#   summary: string, human-readable summary
+
+# --- EvidenceRecord ---
+# Fields:
+#   evidence_id: string, unique evidence identifier
+#   evidence_kind: string, evidence type
+#   summary: string, human-readable evidence summary
+#   status: string, one of "passed", "failed", "warning", "skipped", "not_run"
+#   validation_ref: string or null, reference to the validation that produced this
+#   artifact_ref: string or null, reference to a produced artifact
+
+# --- ErrorRecord ---
+# Fields:
+#   code: string, error code
+#   message: string, error message
+#   details: string or null, additional error details
+
+# --- Design rules ---
+# Timestamps are adapter-provided, not contract-required for determinism.
+# No absolute paths in artifact references.
+# No model/provider-specific fields.
+# No Docker-specific fields.
+# Supports dry-run/no-op — evidence may be empty or contain a single note.
+
+# ============================================================
+# Minimal valid example (dry-run / no-op):
+# ============================================================
+# schema_version: "0.1"
+# execution_result_id: "er-001-result"
+# execution_request_id: "er-001"
+# run_id: "run-001"
+# status: "completed"
+# adapter: "noop-v1"
+# artifacts: []
+# evidence:
+#   - evidence_id: "ev-noop-001"
+#     evidence_kind: "execution_note"
+#     summary: "No-op adapter completed successfully. No real execution was performed."
+#     status: "passed"
+#     validation_ref: null
+#     artifact_ref: null
+# warnings: []
+# review_required: false
