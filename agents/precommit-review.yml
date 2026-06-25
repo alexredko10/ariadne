@@ -3,27 +3,28 @@ version: 8
 metadata:
   author: local
   description: "Read-only precommit reviewer for scope, tests, safety, and memory consistency"
-  version: "1.0.0"
+  version: "1.1.0"
 
 models:
-      precommit_review_model:
-        provider: openai
-        model: gpt-5-mini
-        token_key: OPENAI_API_KEY
-        max_tokens: 7000
-        thinking_budget: low
+  precommit_review_model:
+    provider: openai
+    model: gpt-5-mini
+    token_key: OPENAI_API_KEY
+    max_tokens: 7000
+    thinking_budget: low
 
 agents:
   root:
     model: precommit_review_model
-    description: "Precommit Review: read-only diff gate"
+    description: "Precommit Review: read-only diff gate with artifact write"
     instruction: |
       You are the Precommit Review agent for this universal platform.
 
       Mission:
       - Review the current working tree before a human commits.
       - Check scope, safety contracts, tests, generated files, and old project leakage.
-      - Do not edit files. Do not commit. Do not push. Do not reset or restore.
+      - Write the review artifact to .project-memory/pr/<pr-id>/reviews/precommit-review.yml.
+      - Do not edit implementation files. Do not commit. Do not push. Do not reset or restore.
 
       Required memory bootstrap:
       1. Read `.project-memory/memory_index.yml`.
@@ -70,7 +71,7 @@ agents:
       - No secrets or API keys.
       - Docker Agent configs remain controlled and separate.
       - Coder config cannot commit/push/reset/restore/checkout.
-      - Read-only agents cannot write files.
+      - Read-only agents cannot write files outside .project-memory/pr/*/reviews/precommit-review.yml.
       - Tests relevant to changed code are present or explicitly not needed.
       - Validation commands were run or the reason they were not run is stated.
 
@@ -148,6 +149,9 @@ permissions:
     - "list_directory"
     - "directory_tree"
     - "search_files_content"
+    - "create_directory"
+    # review artifact write — единственный разрешённый write path
+    - "write_file:.project-memory/pr/*/reviews/precommit-review.yml"
     - "shell:cmd=git status*"
     - "shell:cmd=git rev-parse*"
     - "shell:cmd=git diff*"
@@ -159,9 +163,29 @@ permissions:
     - "shell:cmd=make lint*"
     - "shell:cmd=grep*"
     - "shell:cmd=find*"
+    - "shell:cmd=mkdir*"
   deny:
-    - "write_file"
-    - "edit_file"
+    # реализация — полный запрет на запись
+    - "write_file:services/**"
+    - "write_file:packages/**"
+    - "write_file:schemas/**"
+    - "write_file:agents/**"
+    - "write_file:apps/**"
+    - "write_file:docs/**"
+    - "write_file:examples/**"
+    - "write_file:.ariadne/**"
+    - "write_file:.github/**"
+    - "write_file:docker/**"
+    - "write_file:Dockerfile*"
+    - "write_file:pyproject.toml"
+    - "write_file:package.json"
+    - "write_file:Makefile"
+    - "write_file:.project-memory/pr/*/PLAN.md"
+    - "write_file:.project-memory/pr/*/reviews/plan-review.yml"
+    - "write_file:.project-memory/memory_index.yml"
+    - "write_file:.project-memory/project_contract.yml"
+    - "write_file:.project-memory/anchors.yml"
+    - "write_file:.project-memory/templates/**"
     - "shell:cmd=git commit*"
     - "shell:cmd=git push*"
     - "shell:cmd=git reset*"
