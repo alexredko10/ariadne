@@ -1,0 +1,90 @@
+schema_version: "1.0"
+pr_id: "0069-minimal-noop-runner-adapter"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-06-26T03:00:00Z"
+snapshot_delta:
+  current_head_sha: "517fa0a2f72d3bf76f4e3150e727159295534e1a"
+  git_status_short: |
+    ?? services/runner/src/runner/noop_adapter.py
+    ?? services/runner/tests/test_noop_adapter.py
+  git_diff_name_only: |
+    services/runner/src/runner/noop_adapter.py
+    services/runner/tests/test_noop_adapter.py
+  plan_md_base_sha: "f31e1badc5639d974d80da05436ac9d18b5fac02"
+  scope_relevant_diff: |
+    New files: services/runner/src/runner/noop_adapter.py, services/runner/tests/test_noop_adapter.py
+  blocking_diff: "None"
+  rationale: "Changes are limited to the PLAN-approved implementation and tests for a deterministic no-op adapter. No forbidden patterns or external side-effects detected in the adapter source or tests."
+
+scope:
+  - "services/runner/src/runner/noop_adapter.py"
+  - "services/runner/tests/test_noop_adapter.py"
+  - ".project-memory/pr/0069-minimal-noop-runner-adapter/reviews/precommit-review.yml"
+
+files_checked:
+  - ".project-memory/pr/0069-minimal-noop-runner-adapter/PLAN.md"
+  - ".project-memory/pr/0069-minimal-noop-runner-adapter/reviews/plan-review.yml"
+  - "schemas/runner-execution-request.schema.yml"
+  - "schemas/runner-execution-result.schema.yml"
+  - "services/runner/src/runner/noop_adapter.py"
+  - "services/runner/tests/test_noop_adapter.py"
+
+validation:
+  git_rev_parse_head:
+    status: passed
+    detail: "517fa0a2f72d3bf76f4e3150e727159295534e1a"
+  git_status_short:
+    status: passed
+    detail: |
+      ?? services/runner/src/runner/noop_adapter.py
+      ?? services/runner/tests/test_noop_adapter.py
+  git_diff_name_only:
+    status: passed
+    detail: |
+      services/runner/src/runner/noop_adapter.py
+      services/runner/tests/test_noop_adapter.py
+  pytest_noop_tests:
+    status: passed
+    detail: "All tests in services/runner/tests/test_noop_adapter.py passed locally."
+  python_compileall:
+    status: passed
+    detail: "services/runner/src compiled successfully."
+  forbidden_pattern_grep:
+    status: passed
+    detail: "No forbidden patterns (subprocess, docker, socket, requests, httpx, sqlite, redis, os.system, popen) found in adapter or tests."
+  shell_placeholder_grep:
+    status: passed
+    detail: "No shell placeholder markers ($() ect.) found in adapter or tests."
+
+blockers: []
+
+warnings: []
+
+decisions_made:
+  - "Implementation followed PLAN.md: added noop_adapter.py and focused tests."
+  - "No changes outside allowed runner implementation and tests detected."
+
+context_used:
+  labels: []
+  memory files read:
+    - ".project-memory/memory_index.yml"
+    - ".project-memory/project_contract.yml"
+    - ".project-memory/context-bundles/contracts.yml"
+    - ".project-memory/anchors.yml"
+    - ".project-memory/pr/0069-minimal-noop-runner-adapter/PLAN.md"
+    - ".project-memory/pr/0069-minimal-noop-runner-adapter/reviews/plan-review.yml"
+    - ".project-memory/pr/0068-runner-execution-contract/PLAN.md"
+  anchors used: []
+  files inspected:
+    - "services/runner/src/runner/noop_adapter.py"
+    - "services/runner/tests/test_noop_adapter.py"
+  files_intentionally_ignored:
+    - ".ariadne/**"
+    - "node_modules/**"
+    - "__pycache__/**"
+
+files_modified:
+  - ".project-memory/pr/0069-minimal-noop-runner-adapter/reviews/precommit-review.yml"
+
