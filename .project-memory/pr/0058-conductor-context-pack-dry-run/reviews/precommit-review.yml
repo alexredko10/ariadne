@@ -1,0 +1,82 @@
+schema_version: v1
+pr_id: "0058-conductor-context-pack-dry-run"
+review_type: "precommit-review"
+verdict: pass
+reviewer: "precommit-review"
+timestamp: "2026-06-25T10:05:48Z"
+
+snapshot_delta:
+  current_head_sha: "0aae43fec799cd60a8353d44b789a2a9d7075d2e"
+  git_status_short: |
+    M services/conductor/src/conductor/dry_run.py
+    M services/conductor/tests/test_dry_run.py
+    ?? .project-memory/pr/0058-conductor-context-pack-dry-run/reviews/precommit-review.yml
+  git_diff_name_only: |
+    services/conductor/src/conductor/dry_run.py
+    services/conductor/tests/test_dry_run.py
+    .project-memory/pr/0058-conductor-context-pack-dry-run/reviews/precommit-review.yml
+  scope_relevant_diff: |
+    services/conductor/src/conductor/dry_run.py
+    services/conductor/tests/test_dry_run.py
+    .project-memory/pr/0058-conductor-context-pack-dry-run/reviews/precommit-review.yml
+  blocking_diff: ""
+  rationale: >
+    The working tree contains only the PLAN-approved conductor dry-run
+    integration files and this precommit review artifact. Focused dry-run,
+    context-pack-inputs, and context compiler tests passed.
+
+scope:
+  allowed_paths:
+    - services/conductor/src/conductor/dry_run.py
+    - services/conductor/tests/test_dry_run.py
+    - .project-memory/pr/0058-conductor-context-pack-dry-run/reviews/precommit-review.yml
+  forbidden_paths_touched: []
+
+files_checked:
+  - .project-memory/review-artifact.schema.yml
+  - .project-memory/pr/0058-conductor-context-pack-dry-run/PLAN.md
+  - .project-memory/pr/0058-conductor-context-pack-dry-run/reviews/plan-review.yml
+  - services/conductor/src/conductor/dry_run.py
+  - services/conductor/tests/test_dry_run.py
+  - services/conductor/src/conductor/context_pack_inputs.py
+  - services/conductor/tests/test_context_pack_inputs.py
+  - services/conductor/src/conductor/context_compiler.py
+  - services/conductor/tests/test_context_compiler.py
+
+validation:
+  - command: "PYTHONPATH=services/core/src:services/conductor/src python -m pytest services/conductor/tests/test_dry_run.py -q"
+    result: passed
+    evidence: "focused conductor dry-run compatibility tests completed successfully"
+  - command: "PYTHONPATH=services/conductor/src python -m pytest services/conductor/tests/test_context_pack_inputs.py -q"
+    result: passed
+    evidence: "context-pack-inputs tests passed"
+  - command: "PYTHONPATH=services/conductor/src python -m pytest services/conductor/tests/test_context_compiler.py -q"
+    result: passed
+    evidence: "context compiler tests passed"
+  - command: "python -m compileall -f services packages"
+    result: not_run
+    reason: "Not required for this focused precommit review."
+  - command: "python -m pytest -q"
+    result: not_run
+    reason: "Full test suite not executed; focused tests were used."
+
+blockers: []
+warnings: []
+
+decisions_made:
+  - decision: "pass precommit review"
+    reason: "The integration uses existing generator/compiler modules and focused validation passed."
+
+context_used:
+  files_read:
+    - .project-memory/review-artifact.schema.yml
+    - .project-memory/pr/0058-conductor-context-pack-dry-run/PLAN.md
+    - .project-memory/pr/0058-conductor-context-pack-dry-run/reviews/plan-review.yml
+    - services/conductor/src/conductor/dry_run.py
+    - services/conductor/tests/test_dry_run.py
+    - services/conductor/src/conductor/context_pack_inputs.py
+    - services/conductor/tests/test_context_pack_inputs.py
+    - services/conductor/src/conductor/context_compiler.py
+    - services/conductor/tests/test_context_compiler.py
+  files_modified:
+    - .project-memory/pr/0058-conductor-context-pack-dry-run/reviews/precommit-review.yml
