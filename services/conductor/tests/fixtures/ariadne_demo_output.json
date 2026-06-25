@@ -1,0 +1,139 @@
+{
+  "conductor_dry_run_summary": {
+    "checkpoint_count": 2,
+    "context_pack_summary": {
+      "anchors": [
+        "anchor-001",
+        "anchor-002"
+      ],
+      "context_pack_id": "cp-dry-run-001-ariadne",
+      "domain": "dry-run",
+      "invariants": [
+        "contract-a",
+        "contract-b"
+      ],
+      "present": true,
+      "risk_level": "low",
+      "risks": [
+        "Example risk"
+      ],
+      "section_count": 13,
+      "task": "Dry-run context pack integration"
+    },
+    "dry_run": "conductor",
+    "evidence_summary": {
+      "failed": 0,
+      "passed": 2,
+      "total": 2,
+      "warning": 0
+    },
+    "final_report_present": true,
+    "run_id": "dry-run-001",
+    "run_status": "completed",
+    "step_count": 2
+  },
+  "context_pack": {
+    "anchors": [
+      "@ariadne-domain demo",
+      "@ariadne-risk low"
+    ],
+    "context_pack_id": "cp-demo-0059-ariadne",
+    "domain": "demo",
+    "invariants": [
+      "context-pack-inputs.schema",
+      "context-pack.schema"
+    ],
+    "repo_id": "ariadne",
+    "risk_level": "low",
+    "risks": [
+      "Demo risk for demonstration purposes"
+    ],
+    "task": "Demonstrate deterministic context-pack dry-run flow"
+  },
+  "context_pack_inputs": {
+    "allowed_paths": [
+      "docs/**",
+      "services/**"
+    ],
+    "cache_key_refs": [
+      {
+        "artifact_kind": "context_pack",
+        "namespace": "context"
+      },
+      {
+        "artifact_kind": "repository_snapshot_summary",
+        "namespace": "context"
+      }
+    ],
+    "context_freshness": {
+      "last_verified_hook": "demo",
+      "status": "fresh"
+    },
+    "created_from": {
+      "agent": "e2e-demo",
+      "hook": "demo",
+      "template": "context-steward.before_plan.v1"
+    },
+    "feature_id": "demo-context-pack-flow",
+    "forbidden_paths": [
+      ".env",
+      ".git/**",
+      "secrets/**"
+    ],
+    "known_risks": [
+      {
+        "description": "Demo risk for demonstration purposes",
+        "id": "demo-risk-001",
+        "severity": "low"
+      }
+    ],
+    "manual_checks_required": [
+      "Verify demo output determinism",
+      "Verify no model calls occurred",
+      "Verify no repository scan occurred"
+    ],
+    "output_preferences": {
+      "format": "compact",
+      "include_anchors": true
+    },
+    "pr_id": "demo-0059",
+    "prior_pr_refs": [
+      {
+        "pr_id": "0057",
+        "title": "Minimal context compiler"
+      },
+      {
+        "pr_id": "0058",
+        "title": "Conductor context-pack dry-run"
+      }
+    ],
+    "qa_evidence_refs": [
+      "ev-pass-001",
+      "ev-pass-002"
+    ],
+    "relevant_anchors": [
+      "@ariadne-domain demo",
+      "@ariadne-risk low"
+    ],
+    "requested_context_sections": [
+      "anchors",
+      "risks",
+      "scope",
+      "task"
+    ],
+    "schema_version": "0.1",
+    "source_contracts": [
+      "context-pack-inputs.schema",
+      "context-pack.schema"
+    ],
+    "task_goal": "Demonstrate deterministic context-pack dry-run flow"
+  },
+  "demo_name": "Ariadne E2E Substrate Demo",
+  "demo_version": "0.1",
+  "deterministic": true,
+  "feature_id": "demo-context-pack-flow",
+  "model_free": true,
+  "pr_id": "demo-0059",
+  "repository_scan_free": true,
+  "task_goal": "Demonstrate deterministic context-pack dry-run flow"
+}

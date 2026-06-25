@@ -39,6 +39,24 @@ PYTHONPATH=services/core/src:services/conductor/src python -m pytest \
 
 Expected: 8 tests pass.
 
+### Output contract tests
+
+```bash
+PYTHONPATH=services/core/src:services/conductor/src python -m pytest \
+  services/conductor/tests/test_demo_output_contract.py -v
+```
+
+Expected: 12 tests pass.
+
+This test validates that the demo output matches a committed JSON snapshot
+at `services/conductor/tests/fixtures/ariadne_demo_output.json`.  If the
+output intentionally changes (e.g. new features add fields), regenerate:
+
+```bash
+PYTHONPATH=services/core/src:services/conductor/src python -m conductor ariadne-demo \
+  > services/conductor/tests/fixtures/ariadne_demo_output.json
+```
+
 ## What it proves
 
 - The substrate path works end-to-end: explicit inputs → context-pack inputs
