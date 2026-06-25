@@ -1,0 +1,95 @@
+schema_version: "1.0"
+pr_id: "0063-task-intake-normalize-mock"
+review_type: "precommit-review"
+reviewer: "precommit-review"
+timestamp: "2026-06-25T21:10:00Z"
+snapshot_delta:
+  current_head_sha: "d576b4b3f298d5d2d14e343ea6dffc71025a410a"
+  plan_base_sha: "d576b4b"
+  index_version: "0.29"
+  git_status_short: |
+    M services/task_intake/src/task_intake/server.py
+    ?? .project-memory/pr/0063-task-intake-normalize-mock/
+    ?? services/task_intake/src/task_intake/normalize.py
+    ?? services/task_intake/tests/test_normalize.py
+  git_diff_name_only: |
+    services/task_intake/src/task_intake/server.py
+  scope_relevant_diff: |
+    services/task_intake/src/task_intake/normalize.py (untracked, new)
+    services/task_intake/tests/test_normalize.py (untracked, new)
+    services/task_intake/src/task_intake/server.py (modified)
+  blocking_diff: ""
+  rationale: "Per PLAN.md snapshot policy, base_sha mismatch is informational. Proceeding with focused precommit checks. Changes are limited to the task_intake service and match PLAN-approved intent (new normalize module, tests, and server route)."
+
+scope:
+  - "services/task_intake/src/task_intake/normalize.py"
+  - "services/task_intake/tests/test_normalize.py"
+  - "services/task_intake/src/task_intake/server.py"
+
+files_checked:
+  - ".project-memory/pr/0063-task-intake-normalize-mock/PLAN.md"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/normalize.py"
+  - "services/task_intake/tests/test_normalize.py"
+  - "services/task_intake/src/task_intake/models.py"
+  - "services/task_intake/tests/test_task_intake.py"
+
+validation:
+  git_status_short: "observed"
+  git_diff_name_only: "observed"
+  forbidden_pattern_grep: "passed"
+  shell_placeholder_grep: "passed"
+  pytest_task_intake_normalize: "passed"
+  pytest_task_intake_http: "passed"
+  pytest_task_intake_unit: "passed"
+  compileall: "not_run"
+  full_pytest: "not_run"
+
+files_read:
+  - ".project-memory/memory_index.yml"
+  - ".project-memory/project_contract.yml"
+  - ".project-memory/pr/0063-task-intake-normalize-mock/PLAN.md"
+  - ".project-memory/pr/0063-task-intake-normalize-mock/reviews/plan-review.yml"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/normalize.py"
+  - "services/task_intake/src/task_intake/models.py"
+  - "services/task_intake/tests/test_normalize.py"
+  - "services/task_intake/tests/test_task_intake.py"
+
+files_written:
+  - ".project-memory/pr/0063-task-intake-normalize-mock/reviews/precommit-review.yml"
+
+blockers: []
+warnings:
+  - "stale_snapshot: PLAN.md base_sha noted but treated as informational per policy"
+
+required_changes:
+  - "None required: changes are within PLAN-approved scope and focused tests passed."
+
+decisions_made:
+  - "Accepted docs/PLAN design: new normalize.py, tests, and server route. No dependencies, persistence, model calls, or network behavior added."
+
+context_used:
+  labels:
+    - "task-intake"
+  memory files read:
+    - ".project-memory/memory_index.yml"
+    - ".project-memory/project_contract.yml"
+    - ".project-memory/pr/0063-task-intake-normalize-mock/PLAN.md"
+    - ".project-memory/pr/0063-task-intake-normalize-mock/reviews/plan-review.yml"
+  anchors used: []
+  files_inspected:
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/normalize.py"
+    - "services/task_intake/tests/test_normalize.py"
+    - "services/task_intake/src/task_intake/models.py"
+    - "services/task_intake/tests/test_task_intake.py"
+  files_modified:
+    - ".project-memory/pr/0063-task-intake-normalize-mock/reviews/precommit-review.yml"
+  files_intentionally_ignored:
+    - ".ariadne/**"
+    - ".github/**"
+    - "docker/**"
+    - "__pycache__/**"
+    - "*.pyc"
+
