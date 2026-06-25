@@ -1,0 +1,100 @@
+schema_version: "1.0"
+pr_id: "0060-minimal-local-demo-command"
+review_type: "precommit-review"
+reviewer: "precommit-review"
+timestamp: "2026-06-25T18:30:00Z"
+snapshot_delta:
+  current_head_sha: "2786b70e7a79556a835a2b3b9b99bb4f3363cd23"
+  plan_base_sha: "d014753623d167befe3610446a0c8da48587953c"
+  index_version: "0.26"
+  git_status_short: |
+    M docs/ARIADNE_E2E_DEMO_FLOW.md
+     M services/conductor/src/conductor/__main__.py
+     M services/conductor/tests/test_ariadne_e2e_demo_flow.py
+    ?? services/conductor/src/conductor/demo_flow.py
+    ?? services/conductor/tests/test_demo_flow.py
+  git_diff_name_only: |
+    docs/ARIADNE_E2E_DEMO_FLOW.md
+    services/conductor/src/conductor/__main__.py
+    services/conductor/tests/test_ariadne_e2e_demo_flow.py
+  scope_relevant_diff: |
+    docs/ARIADNE_E2E_DEMO_FLOW.md
+    services/conductor/src/conductor/__main__.py
+    services/conductor/tests/test_ariadne_e2e_demo_flow.py
+  blocking_diff: "" 
+  rationale: "Plan base_sha differs from current HEAD. Treating as stale-snapshot warning per human instruction; continuing with focused precommit checks." 
+
+scope:
+  - "services/conductor/src/conductor/demo_flow.py"
+  - "services/conductor/src/conductor/__main__.py"
+  - "services/conductor/tests/test_demo_flow.py"
+  - "docs/ARIADNE_E2E_DEMO_FLOW.md"
+
+files_checked:
+  - ".project-memory/pr/0060-minimal-local-demo-command/PLAN.md"
+  - "services/conductor/src/conductor/demo_flow.py"
+  - "services/conductor/src/conductor/__main__.py"
+  - "services/conductor/tests/test_ariadne_e2e_demo_flow.py"
+  - "services/conductor/tests/test_demo_flow.py"
+  - "docs/ARIADNE_E2E_DEMO_FLOW.md"
+
+validation:
+  git_status_short: "observed"
+  git_diff_name_only: "observed"
+  forbidden_pattern_grep: "passed"
+  shell_placeholder_grep: "passed"
+  pytest_demo_flow: "passed"
+  pytest_dry_run: "passed"
+  pytest_context_pack_inputs: "passed"
+  pytest_context_compiler: "passed"
+  cli_demo_command: "passed"
+  compileall: "not_run"
+  full_pytest: "not_run"
+
+files_read:
+  - ".project-memory/memory_index.yml"
+  - ".project-memory/project_contract.yml"
+  - ".project-memory/pr/0060-minimal-local-demo-command/PLAN.md"
+  - ".project-memory/pr/0060-minimal-local-demo-command/reviews/plan-review.yml"
+  - "services/conductor/src/conductor/demo_flow.py"
+  - "services/conductor/src/conductor/__main__.py"
+  - "services/conductor/tests/test_ariadne_e2e_demo_flow.py"
+  - "docs/ARIADNE_E2E_DEMO_FLOW.md"
+
+files_written:
+  - ".project-memory/pr/0060-minimal-local-demo-command/reviews/precommit-review.yml"
+
+blockers: []
+warnings:
+  - "stale_snapshot: PLAN.md base_sha does not match current HEAD; treated as warning per user instruction"
+  - "untracked_files: demo_flow.py and test_demo_flow.py are untracked but within allowed scope for this PR"
+
+required_changes:
+  - "None required: changed files are within PLAN-approved scope and focused tests passed."
+
+decisions_made:
+  - "Treat base_sha mismatch as a warning rather than a blocker per human instruction. Continued validation and produced review artifact."
+
+context_used:
+  labels:
+    - "contracts"
+  memory files read:
+    - ".project-memory/memory_index.yml"
+    - ".project-memory/project_contract.yml"
+    - ".project-memory/pr/0060-minimal-local-demo-command/PLAN.md"
+    - ".project-memory/pr/0060-minimal-local-demo-command/reviews/plan-review.yml"
+  anchors used: []
+  files_inspected:
+    - "services/conductor/src/conductor/demo_flow.py"
+    - "services/conductor/src/conductor/__main__.py"
+    - "services/conductor/tests/test_ariadne_e2e_demo_flow.py"
+    - "docs/ARIADNE_E2E_DEMO_FLOW.md"
+  files_modified:
+    - ".project-memory/pr/0060-minimal-local-demo-command/reviews/precommit-review.yml"
+  files_intentionally_ignored:
+    - ".ariadne/**"
+    - ".github/**"
+    - "docker/**"
+    - "__pycache__/**"
+    - "*.pyc"
+

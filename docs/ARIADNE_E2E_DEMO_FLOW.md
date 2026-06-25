@@ -13,12 +13,31 @@ No cache backend. No filesystem writes. No subprocess. No network.
 
 ## How to run
 
+### Local demo command
+
+```bash
+PYTHONPATH=services/core/src:services/conductor/src python -m conductor ariadne-demo
+```
+
+Expected: deterministic JSON output on stdout, exit code 0.
+
+### E2E tests
+
 ```bash
 PYTHONPATH=services/core/src:services/conductor/src python -m pytest \
   services/conductor/tests/test_ariadne_e2e_demo_flow.py -v
 ```
 
-Expected output: 9 tests pass.
+Expected: 8 tests pass.
+
+### CLI integration tests
+
+```bash
+PYTHONPATH=services/core/src:services/conductor/src python -m pytest \
+  services/conductor/tests/test_demo_flow.py -v
+```
+
+Expected: 8 tests pass.
 
 ## What it proves
 
