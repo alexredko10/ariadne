@@ -1,0 +1,39 @@
+schema_version: "1.0"
+pr_id: "0061-demo-output-contract-snapshot"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-06-25T19:00:00Z"
+snapshot_delta:
+  current_head_sha: "226f665a5057c48f95968c5cd2b2bf29df767ed2"
+  git_status_short: "??"
+  git_diff_name_only: ""
+  plan_md_base_sha: "226f665a5057c48f95968c5cd2b2bf29df767ed2"
+  scope_relevant_diff: "None - initial plan"
+  blocking_diff: "None"
+  rationale: "Plan defines a deterministic output contract/fixture for the Ariadne local demo command, ensuring future stability of substrate outputs. Adheres to all project constraints and safety rules."
+scope:
+  - "services/conductor/tests/fixtures/ariadne_demo_output.json"
+  - "services/conductor/tests/test_demo_output_contract.py"
+  - "docs/ARIADNE_E2E_DEMO_FLOW.md"
+files_checked:
+  - ".project-memory/pr/0061-demo-output-contract-snapshot/PLAN.md"
+  - "services/conductor/src/conductor/demo_flow.py"
+  - "services/conductor/tests/test_demo_flow.py"
+validation:
+  schema_presence_check: "passed"
+  schema_content_verification: "passed"
+  registry_pattern_check: "passed"
+  safety_check: "passed"
+blockers: []
+warnings: []
+decisions_made:
+  - "Approved combined fixture/contract test strategy."
+  - "Confirmed no behavioral changes to existing demo infrastructure."
+  - "Verified stability of the contract via snapshot and shape checking."
+context_used:
+  files_read:
+    - ".project-memory/pr/0061-demo-output-contract-snapshot/PLAN.md"
+    - "services/conductor/src/conductor/demo_flow.py"
+    - "services/conductor/tests/test_demo_flow.py"
+  files_modified: [".project-memory/pr/0061-demo-output-contract-snapshot/reviews/plan-review.yml"]

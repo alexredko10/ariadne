@@ -1,0 +1,90 @@
+schema_version: "1.0"
+pr_id: "0061-demo-output-contract-snapshot"
+review_type: "precommit-review"
+reviewer: "precommit-review"
+timestamp: "2026-06-25T19:20:00Z"
+snapshot_delta:
+  current_head_sha: "365f2895f096e04ff2a54bf34026487ecd5569d7"
+  plan_base_sha: "226f665a5057c48f95968c5cd2b2bf29df767ed2"
+  index_version: "0.27"
+  git_status_short: |
+    M docs/ARIADNE_E2E_DEMO_FLOW.md
+    ?? services/conductor/tests/fixtures/
+    ?? services/conductor/tests/test_demo_output_contract.py
+  git_diff_name_only: |
+    docs/ARIADNE_E2E_DEMO_FLOW.md
+  scope_relevant_diff: |
+    services/conductor/tests/fixtures/ariadne_demo_output.json (untracked)
+    services/conductor/tests/test_demo_output_contract.py (untracked)
+    docs/ARIADNE_E2E_DEMO_FLOW.md (modified)
+  blocking_diff: ""
+  rationale: "PLAN.md base_sha differs from current HEAD; treated as warning per project snapshot policy. Continuing focused precommit checks." 
+
+scope:
+  - "services/conductor/tests/fixtures/ariadne_demo_output.json"
+  - "services/conductor/tests/test_demo_output_contract.py"
+  - "docs/ARIADNE_E2E_DEMO_FLOW.md"
+
+files_checked:
+  - ".project-memory/pr/0061-demo-output-contract-snapshot/PLAN.md"
+  - "services/conductor/tests/fixtures/ariadne_demo_output.json"
+  - "services/conductor/tests/test_demo_output_contract.py"
+  - "docs/ARIADNE_E2E_DEMO_FLOW.md"
+
+validation:
+  git_status_short: "observed"
+  git_diff_name_only: "observed"
+  forbidden_pattern_grep: "passed"
+  shell_placeholder_grep: "passed"
+  pytest_demo_output_contract: "passed"
+  pytest_demo_flow: "passed"
+  pytest_ariadne_e2e_demo_flow: "passed"
+  pytest_dry_run: "passed"
+  compileall: "not_run"
+  full_pytest: "not_run"
+
+files_read:
+  - ".project-memory/memory_index.yml"
+  - ".project-memory/project_contract.yml"
+  - ".project-memory/pr/0061-demo-output-contract-snapshot/PLAN.md"
+  - ".project-memory/pr/0061-demo-output-contract-snapshot/reviews/plan-review.yml"
+  - "services/conductor/tests/fixtures/ariadne_demo_output.json"
+  - "services/conductor/tests/test_demo_output_contract.py"
+  - "docs/ARIADNE_E2E_DEMO_FLOW.md"
+
+files_written:
+  - ".project-memory/pr/0061-demo-output-contract-snapshot/reviews/precommit-review.yml"
+
+blockers: []
+warnings:
+  - "stale_snapshot: PLAN.md base_sha does not match current HEAD; treated as warning per repo policy"
+  - "untracked_fixture: fixture file and test file are untracked in git status but are within PLAN-approved scope"
+
+required_changes:
+  - "None required: changed files are within PLAN-approved scope and focused tests passed."
+
+decisions_made:
+  - "Treat base_sha mismatch as warning and proceed with focused checks per human instruction."
+
+context_used:
+  labels:
+    - "contracts"
+  memory files read:
+    - ".project-memory/memory_index.yml"
+    - ".project-memory/project_contract.yml"
+    - ".project-memory/pr/0061-demo-output-contract-snapshot/PLAN.md"
+    - ".project-memory/pr/0061-demo-output-contract-snapshot/reviews/plan-review.yml"
+  anchors used: []
+  files_inspected:
+    - "services/conductor/tests/fixtures/ariadne_demo_output.json"
+    - "services/conductor/tests/test_demo_output_contract.py"
+    - "docs/ARIADNE_E2E_DEMO_FLOW.md"
+  files_modified:
+    - ".project-memory/pr/0061-demo-output-contract-snapshot/reviews/precommit-review.yml"
+  files_intentionally_ignored:
+    - ".ariadne/**"
+    - ".github/**"
+    - "docker/**"
+    - "__pycache__/**"
+    - "*.pyc"
+
