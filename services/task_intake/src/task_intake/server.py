@@ -17,6 +17,7 @@ from task_intake.normalize import normalize_task_intake
 from task_intake.context_preview import generate_context_preview
 from task_intake.runs import create_mock_run
 from task_intake.mock_loop import run_mock_loop
+from task_intake.execution_handoff import run_mock_execution_handoff
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -216,6 +217,39 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
             return
 
         result = create_mock_run(data)
+
+        if result.get("ok") is True:
+            body = json.dumps(result, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        else:
+            body = json.dumps(result, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 400, body)
+        return
+
+    if method == "POST" and path == "/runs/execute":
+        # Read body
+        body_bytes = b""
+        more_body = True
+        while more_body:
+            event = await receive()
+            if event["type"] == "http.request":
+                body_bytes += event.get("body", b"")
+                more_body = event.get("more_body", False)
+
+        # Parse JSON
+        try:
+            data = json.loads(body_bytes) if body_bytes else {}
+        except json.JSONDecodeError:
+            await _send_json(
+                send, 400,
+                json.dumps({
+                    "ok": False,
+                    "errors": [{"code": "invalid_json", "message": "Invalid JSON body."}],
+                }, ensure_ascii=False).encode("utf-8"),
+            )
+            return
+
+        result = run_mock_execution_handoff(data)
 
         if result.get("ok") is True:
             body = json.dumps(result, ensure_ascii=False).encode("utf-8")

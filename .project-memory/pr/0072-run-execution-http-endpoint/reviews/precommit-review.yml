@@ -1,0 +1,98 @@
+schema_version: "1.0"
+pr_id: "0072-run-execution-http-endpoint"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-06-26T22:39:41Z"
+snapshot_delta:
+  current_head_sha: "f712873cce28109d8e00544720f394a62864ef86"
+  git_status_short: |
+    M services/task_intake/src/task_intake/server.py
+    ?? services/task_intake/tests/test_execution_handoff_http.py
+  git_diff_name_only: |
+    services/task_intake/src/task_intake/server.py
+    services/task_intake/tests/test_execution_handoff_http.py
+  plan_md_base_sha: "689847464eaf4252c9f66bd083a6bd7d2b809544"
+  scope_relevant_diff: |
+    Modified: services/task_intake/src/task_intake/server.py
+    New: services/task_intake/tests/test_execution_handoff_http.py
+  blocking_diff: "None"
+  rationale: "Changes are limited to the PLAN-approved HTTP endpoint and test. server.py delegates to run_mock_execution_handoff and does not call adapters directly. All tests passed." 
+
+scope:
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/tests/test_execution_handoff_http.py"
+  - ".project-memory/pr/0072-run-execution-http-endpoint/reviews/precommit-review.yml"
+
+files_checked:
+  - ".project-memory/pr/0072-run-execution-http-endpoint/PLAN.md"
+  - ".project-memory/pr/0072-run-execution-http-endpoint/reviews/plan-review.yml"
+  - ".project-memory/pr/0071-mock-run-runner-handoff/PLAN.md"
+  - ".project-memory/pr/0071-mock-run-runner-handoff/reviews/precommit-review.yml"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/execution_handoff.py"
+  - "services/task_intake/tests/test_execution_handoff_http.py"
+  - "services/task_intake/tests/test_execution_handoff.py"
+  - "services/runner/src/runner/adapter_registry.py"
+  - "services/runner/src/runner/noop_adapter.py"
+
+validation:
+  git_rev_parse_head:
+    status: passed
+    detail: "f712873cce28109d8e00544720f394a62864ef86"
+  git_status_short:
+    status: passed
+    detail: |
+      M services/task_intake/src/task_intake/server.py
+      ?? services/task_intake/tests/test_execution_handoff_http.py
+  git_diff_name_only:
+    status: passed
+    detail: |
+      services/task_intake/src/task_intake/server.py
+      services/task_intake/tests/test_execution_handoff_http.py
+  pytest_http_tests:
+    status: passed
+    detail: "All service tests passed: 68 passed in 0.04s"
+  python_compileall:
+    status: passed
+    detail: "services/task_intake/src and services/runner/src compiled successfully."
+  forbidden_pattern_grep:
+    status: passed
+    detail: "No forbidden patterns (run_noop_execution, noop_adapter, subprocess, docker, socket, requests, httpx, sqlite, redis, os.system, popen, importlib, pkg_resources, entry_points, open(), write(), Path()) found in server.py or tests."
+  shell_placeholder_grep:
+    status: passed
+    detail: "No shell placeholder markers ($() ect.) found in server.py or tests."
+
+blockers: []
+
+warnings: []
+
+decisions_made:
+  - "Implementation followed PLAN.md: added POST /runs/execute route delegating to run_mock_execution_handoff."
+  - "Server delegates to handoff; no adapter calls or business logic duplication present."
+
+context_used:
+  labels: []
+  memory files read:
+    - ".project-memory/memory_index.yml"
+    - ".project-memory/project_contract.yml"
+    - ".project-memory/context-bundles/contracts.yml"
+    - ".project-memory/anchors.yml"
+    - ".project-memory/pr/0072-run-execution-http-endpoint/PLAN.md"
+    - ".project-memory/pr/0072-run-execution-http-endpoint/reviews/plan-review.yml"
+    - ".project-memory/pr/0067-mock-loop-http-entrypoint/PLAN.md"
+    - ".project-memory/pr/0071-mock-run-runner-handoff/PLAN.md"
+    - ".project-memory/pr/0071-mock-run-runner-handoff/reviews/precommit-review.yml"
+  anchors used: []
+  files inspected:
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/execution_handoff.py"
+    - "services/task_intake/tests/test_execution_handoff_http.py"
+  files_intentionally_ignored:
+    - ".ariadne/**"
+    - "node_modules/**"
+    - "__pycache__/**"
+
+files_modified:
+  - ".project-memory/pr/0072-run-execution-http-endpoint/reviews/precommit-review.yml"
+
