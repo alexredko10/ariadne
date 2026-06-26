@@ -1,0 +1,91 @@
+schema_version: "1.0"
+pr_id: "0070-runner-adapter-dispatcher"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-06-26T04:00:00Z"
+snapshot_delta:
+  current_head_sha: "7bfb6068679e9c99632611559b9d1c664243b13c"
+  git_status_short: |
+    ?? services/runner/src/runner/adapter_registry.py
+    ?? services/runner/tests/test_adapter_registry.py
+  git_diff_name_only: |
+    services/runner/src/runner/adapter_registry.py
+    services/runner/tests/test_adapter_registry.py
+  plan_md_base_sha: "8b34fc9e69f7f735ce98f9d084a517fd0de6e0c7"
+  scope_relevant_diff: |
+    New files: services/runner/src/runner/adapter_registry.py, services/runner/tests/test_adapter_registry.py
+  blocking_diff: "None"
+  rationale: "Changes are limited to the PLAN-approved adapter registry and tests. Dispatcher delegates to noop adapter from PR 0069 and does not perform dynamic loading or real execution. All validation tests passed."
+
+scope:
+  - "services/runner/src/runner/adapter_registry.py"
+  - "services/runner/tests/test_adapter_registry.py"
+  - ".project-memory/pr/0070-runner-adapter-dispatcher/reviews/precommit-review.yml"
+
+files_checked:
+  - ".project-memory/pr/0070-runner-adapter-dispatcher/PLAN.md"
+  - ".project-memory/pr/0070-runner-adapter-dispatcher/reviews/plan-review.yml"
+  - ".project-memory/pr/0069-minimal-noop-runner-adapter/reviews/precommit-review.yml"
+  - "schemas/runner-execution-request.schema.yml"
+  - "schemas/runner-execution-result.schema.yml"
+  - "services/runner/src/runner/adapter_registry.py"
+  - "services/runner/tests/test_adapter_registry.py"
+
+validation:
+  git_rev_parse_head:
+    status: passed
+    detail: "7bfb6068679e9c99632611559b9d1c664243b13c"
+  git_status_short:
+    status: passed
+    detail: |
+      ?? services/runner/src/runner/adapter_registry.py
+      ?? services/runner/tests/test_adapter_registry.py
+  git_diff_name_only:
+    status: passed
+    detail: |
+      services/runner/src/runner/adapter_registry.py
+      services/runner/tests/test_adapter_registry.py
+  pytest_dispatcher_tests:
+    status: passed
+    detail: "Services runner tests passed: 37 passed in 0.02s"
+  python_compileall:
+    status: passed
+    detail: "services/runner/src compiled successfully."
+  forbidden_pattern_grep:
+    status: passed
+    detail: "No forbidden patterns (subprocess, docker, socket, requests, httpx, sqlite, redis, os.system, popen, importlib, pkg_resources, entry_points) found in adapter_registry or tests."
+  shell_placeholder_grep:
+    status: passed
+    detail: "No shell placeholder markers ($() ect.) found in adapter_registry or tests."
+
+blockers: []
+
+warnings: []
+
+decisions_made:
+  - "Implementation followed PLAN.md: added adapter_registry.py and focused tests."
+  - "Dispatcher delegates to noop adapter and does not perform dynamic loading or discovery."
+
+context_used:
+  labels: []
+  memory files read:
+    - ".project-memory/memory_index.yml"
+    - ".project-memory/project_contract.yml"
+    - ".project-memory/context-bundles/contracts.yml"
+    - ".project-memory/anchors.yml"
+    - ".project-memory/pr/0070-runner-adapter-dispatcher/PLAN.md"
+    - ".project-memory/pr/0070-runner-adapter-dispatcher/reviews/plan-review.yml"
+    - ".project-memory/pr/0069-minimal-noop-runner-adapter/reviews/precommit-review.yml"
+  anchors used: []
+  files inspected:
+    - "services/runner/src/runner/adapter_registry.py"
+    - "services/runner/tests/test_adapter_registry.py"
+  files_intentionally_ignored:
+    - ".ariadne/**"
+    - "node_modules/**"
+    - "__pycache__/**"
+
+files_modified:
+  - ".project-memory/pr/0070-runner-adapter-dispatcher/reviews/precommit-review.yml"
+
