@@ -1,0 +1,101 @@
+schema_version: "1.0"
+pr_id: "0073-execution-artifact-envelope"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-06-26T23:00:00Z"
+snapshot_delta:
+  current_head_sha: "12795362b22995220dfca162e34e14f5d7489c47"
+  git_status_short: |
+    ?? services/runner/src/runner/execution_envelope.py
+    ?? services/runner/tests/test_execution_envelope.py
+  git_diff_name_only: |
+    services/runner/src/runner/execution_envelope.py
+    services/runner/tests/test_execution_envelope.py
+  plan_md_base_sha: "18654c3ef8b506764b874564ee9378be1ba26c46"
+  scope_relevant_diff: |
+    New: services/runner/src/runner/execution_envelope.py, services/runner/tests/test_execution_envelope.py
+  blocking_diff: "None"
+  rationale: "Changes are limited to the PLAN-approved runner envelope implementation and tests. The envelope normalizes artifacts/evidence deterministically without touching filesystem or performing IO. All tests passed."
+
+scope:
+  - "services/runner/src/runner/execution_envelope.py"
+  - "services/runner/tests/test_execution_envelope.py"
+  - ".project-memory/pr/0073-execution-artifact-envelope/reviews/precommit-review.yml"
+
+files_checked:
+  - ".project-memory/pr/0073-execution-artifact-envelope/PLAN.md"
+  - ".project-memory/pr/0073-execution-artifact-envelope/reviews/plan-review.yml"
+  - ".project-memory/pr/0068-runner-execution-contract/PLAN.md"
+  - ".project-memory/pr/0069-minimal-noop-runner-adapter/reviews/precommit-review.yml"
+  - ".project-memory/pr/0070-runner-adapter-dispatcher/reviews/precommit-review.yml"
+  - ".project-memory/pr/0071-mock-run-runner-handoff/reviews/precommit-review.yml"
+  - ".project-memory/pr/0072-run-execution-http-endpoint/reviews/precommit-review.yml"
+  - "services/runner/src/runner/execution_envelope.py"
+  - "services/runner/tests/test_execution_envelope.py"
+  - "services/runner/src/runner/artifacts.py"
+  - "services/runner/src/runner/models.py"
+
+validation:
+  git_rev_parse_head:
+    status: passed
+    detail: "12795362b22995220dfca162e34e14f5d7489c47"
+  git_status_short:
+    status: passed
+    detail: |
+      ?? services/runner/src/runner/execution_envelope.py
+      ?? services/runner/tests/test_execution_envelope.py
+  git_diff_name_only:
+    status: passed
+    detail: |
+      services/runner/src/runner/execution_envelope.py
+      services/runner/tests/test_execution_envelope.py
+  pytest_envelope_tests:
+    status: passed
+    detail: "Runner tests passed: 68 passed in 0.04s"
+  python_compileall:
+    status: passed
+    detail: "services/runner/src compiled successfully."
+  forbidden_pattern_grep:
+    status: passed
+    detail: "No forbidden patterns (open(, write(, Path(, read_text, write_text, subprocess, os.system, popen, docker, requests, httpx, sqlite, redis, importlib, pkg_resources, entry_points, git, uuid, datetime.now, time.time, random) found in execution_envelope or tests."
+  shell_placeholder_grep:
+    status: passed
+    detail: "No shell placeholder markers ($() ect.) found in execution_envelope or tests."
+
+blockers: []
+
+warnings: []
+
+decisions_made:
+  - "Implementation followed PLAN.md: added execution_envelope.py and focused tests."
+  - "Envelope normalizes artifacts/evidence deterministically and remains metadata-only."
+
+context_used:
+  labels: []
+  memory files read:
+    - ".project-memory/memory_index.yml"
+    - ".project-memory/project_contract.yml"
+    - ".project-memory/context-bundles/contracts.yml"
+    - ".project-memory/anchors.yml"
+    - ".project-memory/pr/0073-execution-artifact-envelope/PLAN.md"
+    - ".project-memory/pr/0073-execution-artifact-envelope/reviews/plan-review.yml"
+    - ".project-memory/pr/0068-runner-execution-contract/PLAN.md"
+    - ".project-memory/pr/0069-minimal-noop-runner-adapter/reviews/precommit-review.yml"
+    - ".project-memory/pr/0070-runner-adapter-dispatcher/reviews/precommit-review.yml"
+    - ".project-memory/pr/0071-mock-run-runner-handoff/reviews/precommit-review.yml"
+    - ".project-memory/pr/0072-run-execution-http-endpoint/reviews/precommit-review.yml"
+  anchors used: []
+  files inspected:
+    - "services/runner/src/runner/execution_envelope.py"
+    - "services/runner/tests/test_execution_envelope.py"
+    - "services/runner/src/runner/artifacts.py"
+    - "services/runner/src/runner/models.py"
+  files_intentionally_ignored:
+    - ".ariadne/**"
+    - "node_modules/**"
+    - "__pycache__/**"
+
+files_modified:
+  - ".project-memory/pr/0073-execution-artifact-envelope/reviews/precommit-review.yml"
+
