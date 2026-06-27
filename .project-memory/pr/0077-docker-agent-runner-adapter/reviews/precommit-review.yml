@@ -1,0 +1,97 @@
+schema_version: "0.1"
+pr_id: "0077-docker-agent-runner-adapter"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-06-27T21:01:20Z"
+snapshot_delta:
+  plan_base_sha: "8a731aa140fa3a60758a9e55da68748c66eb4a38"
+  current_head: "4ad4247c315461c40e5542785de6465e87ac03ec"
+  action: "continue"
+  stale_snapshot: false
+  git_status_short: "M services/runner/src/runner/adapter_registry.py\n M services/runner/tests/test_adapter_registry.py\n M services/task_intake/tests/test_execution_handoff.py\n?? services/runner/src/runner/docker_agent_adapter.py\n?? services/runner/tests/test_docker_agent_adapter.py"
+  git_diff_name_only: "services/runner/src/runner/adapter_registry.py\nservices/runner/tests/test_adapter_registry.py\nservices/task_intake/tests/test_execution_handoff.py"
+  plan_md_base_sha: "8a731aa140fa3a60758a9e55da68748c66eb4a38"
+  scope_relevant_diff: "Adapter registry modified and new docker adapter + tests added as per PLAN.md."
+  blocking_diff: ""
+  rationale: "Changes are limited to PLAN-approved files. Docker adapter is opt-in and safe; tests pass."
+
+scope:
+  expected_files:
+    - "services/runner/src/runner/docker_agent_adapter.py"
+    - "services/runner/tests/test_docker_agent_adapter.py"
+    - "services/runner/src/runner/adapter_registry.py"
+    - "services/runner/tests/test_adapter_registry.py"
+  actual_files:
+    - "services/runner/src/runner/docker_agent_adapter.py"
+    - "services/runner/tests/test_docker_agent_adapter.py"
+    - "services/runner/src/runner/adapter_registry.py"
+    - "services/runner/tests/test_adapter_registry.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+
+files_checked:
+  - ".project-memory/pr/0077-docker-agent-runner-adapter/PLAN.md"
+  - ".project-memory/pr/0077-docker-agent-runner-adapter/reviews/plan-review.yml"
+  - "services/runner/src/runner/docker_agent_adapter.py"
+  - "services/runner/tests/test_docker_agent_adapter.py"
+  - "services/runner/src/runner/adapter_registry.py"
+  - "services/runner/src/runner/noop_adapter.py"
+  - "services/runner/src/runner/local_harness.py"
+  - "services/task_intake/src/task_intake/test_mode.py"
+
+validation:
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/runner/tests/test_docker_agent_adapter.py services/runner/tests/test_adapter_registry.py services/runner/tests/test_local_harness.py services/task_intake/tests/test_test_mode.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "66 passed"
+  - command: "python -m compileall -f services/runner/src services/task_intake/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "byte-compiled modules"
+
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "None — review followed PLAN.md exactly"
+    reason: "Implementation matches the approved plan and tests."
+
+context_used:
+  labels:
+    - "precommit"
+  memory_files_read:
+    - ".project-memory/pr/0077-docker-agent-runner-adapter/PLAN.md"
+    - ".project-memory/pr/0077-docker-agent-runner-adapter/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+  anchors_used: []
+  files_inspected:
+    - "services/runner/src/runner/docker_agent_adapter.py"
+    - "services/runner/tests/test_docker_agent_adapter.py"
+    - "services/runner/src/runner/adapter_registry.py"
+    - "services/runner/src/runner/noop_adapter.py"
+    - "services/runner/src/runner/local_harness.py"
+    - "services/task_intake/src/task_intake/test_mode.py"
+  files_modified:
+    - ".project-memory/pr/0077-docker-agent-runner-adapter/reviews/precommit-review.yml"
+  files_intentionally_ignored:
+    - ".project-memory/pr/*/reviews/*.yml"
+
+files_read:
+  - ".project-memory/pr/0077-docker-agent-runner-adapter/PLAN.md"
+  - ".project-memory/pr/0077-docker-agent-runner-adapter/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - "services/runner/src/runner/docker_agent_adapter.py"
+  - "services/runner/tests/test_docker_agent_adapter.py"
+  - "services/runner/src/runner/adapter_registry.py"
+  - "services/runner/src/runner/noop_adapter.py"
+  - "services/runner/src/runner/local_harness.py"
+  - "services/task_intake/src/task_intake/test_mode.py"
+
+files_written:
+  - ".project-memory/pr/0077-docker-agent-runner-adapter/reviews/precommit-review.yml"
+
+required_changes: []
+
+summary: "Precommit review passed: Docker adapter is opt-in, deterministic, tests pass, and no unsafe changes detected."
