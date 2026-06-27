@@ -79,6 +79,22 @@ class TestValidHandoff:
         assert r1["handoff_id"] == r2["handoff_id"]
         assert r1["handoff_id"].startswith("handoff_")
 
+    def test_handoff_contains_execution_envelope(self):
+        result = run_mock_execution_handoff(_valid_raw())
+        assert "execution_envelope" in result
+        assert result["execution_envelope"]["envelope_id"].startswith("env_")
+
+    def test_handoff_contains_review_boundary(self):
+        result = run_mock_execution_handoff(_valid_raw())
+        assert "review_boundary" in result
+        assert "decision" in result["review_boundary"]
+
+    def test_handoff_runtime_status(self):
+        result = run_mock_execution_handoff(_valid_raw())
+        assert "runtime_status" in result
+        assert result["runtime_status"] == "completed"
+        assert result["runtime_status"] == result["review_boundary"]["decision"]
+
 
 # ---------------------------------------------------------------------------
 # Approval
