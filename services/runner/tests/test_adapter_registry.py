@@ -79,13 +79,13 @@ class TestDispatchNoop:
 
 class TestUnsupportedAdapter:
     def test_unsupported_adapter_returns_failed(self):
-        result = dispatch_execution(_noop_request(requested_adapter="docker-coder-v1"))
+        result = dispatch_execution(_noop_request(requested_adapter="unknown-v1"))
         assert result["status"] == "failed"
         errors = result.get("errors", [])
         assert any("unsupported_adapter" in e.get("code", "") for e in errors)
 
     def test_unsupported_adapter_error_message_includes_supported(self):
-        result = dispatch_execution(_noop_request(requested_adapter="docker-coder-v1"))
+        result = dispatch_execution(_noop_request(requested_adapter="unknown-v1"))
         errors = result.get("errors", [])
         assert any("noop" in e.get("message", "").lower() for e in errors)
 
@@ -140,6 +140,18 @@ class TestGetSupportedAdapters:
         dumped = json.dumps(adapters, sort_keys=True)
         loaded = json.loads(dumped)
         assert loaded == adapters
+
+    def test_includes_docker_agent(self):
+        adapters = get_supported_adapters()
+        assert "docker-agent" in adapters
+
+    def test_docker_agent_spec(self):
+        adapters = get_supported_adapters()
+        da = adapters["docker-agent"]
+        assert da["version"] == "v1"
+        assert "execute" in da["modes"]
+        assert "dry_run" in da["modes"]
+        assert "preview" in da["modes"]
 
 
 # ---------------------------------------------------------------------------

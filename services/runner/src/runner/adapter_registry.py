@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import Any
 
 from runner.noop_adapter import run_noop_execution
+from runner.docker_agent_adapter import run_docker_agent_execution
 
 
 # ---------------------------------------------------------------------------
@@ -23,6 +24,7 @@ from runner.noop_adapter import run_noop_execution
 # Selection checks if requested_adapter.lower() contains the key.
 _ADAPTERS: list[tuple[str, Any]] = [
     ("noop", run_noop_execution),
+    ("docker", run_docker_agent_execution),
 ]
 
 
@@ -74,6 +76,10 @@ def get_supported_adapters() -> dict:
         "noop": {
             "version": "v1",
             "modes": ["dry_run", "preview"],
+        },
+        "docker-agent": {
+            "version": "v1",
+            "modes": ["dry_run", "execute", "preview"],
         },
     }
 

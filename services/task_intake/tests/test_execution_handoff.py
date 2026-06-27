@@ -142,7 +142,7 @@ class TestInvalidInput:
 
     def test_unsupported_adapter_returns_failed_result(self):
         result = run_mock_execution_handoff(
-            _valid_raw(requested_adapter="docker-coder-v1"),
+            _valid_raw(requested_adapter="unknown-v1"),
         )
         # Handoff itself succeeded — dispatcher returned failed result
         assert result["ok"] is True
