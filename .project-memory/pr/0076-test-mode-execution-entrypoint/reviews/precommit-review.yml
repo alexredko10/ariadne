@@ -1,0 +1,90 @@
+schema_version: "0.1"
+pr_id: "0076-test-mode-execution-entrypoint"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-06-27T09:31:14Z"
+snapshot_delta:
+  plan_base_sha: "75ea588aa30aab6adb14c92c068ec5a7f3466ed9"
+  current_head: "dc000e5de8e37b1372ecf33444fd2bba050993fc"
+  action: "continue"
+  stale_snapshot: false
+  git_status_short: "?? services/task_intake/src/task_intake/test_mode.py\n?? services/task_intake/tests/test_test_mode.py"
+  git_diff_name_only: "services/task_intake/src/task_intake/test_mode.py\nservices/task_intake/tests/test_test_mode.py"
+  plan_md_base_sha: "75ea588aa30aab6adb14c92c068ec5a7f3466ed9"
+  scope_relevant_diff: "Only PLAN-approved files added: test_mode.py and its tests."
+  blocking_diff: ""
+  rationale: "Changes match PLAN.md and approved plan-review.yml. Tests pass locally."
+
+scope:
+  expected_files:
+    - "services/task_intake/src/task_intake/test_mode.py"
+    - "services/task_intake/tests/test_test_mode.py"
+  actual_files:
+    - "services/task_intake/src/task_intake/test_mode.py"
+    - "services/task_intake/tests/test_test_mode.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+
+files_checked:
+  - ".project-memory/pr/0076-test-mode-execution-entrypoint/PLAN.md"
+  - ".project-memory/pr/0076-test-mode-execution-entrypoint/reviews/plan-review.yml"
+  - "services/task_intake/src/task_intake/test_mode.py"
+  - "services/task_intake/tests/test_test_mode.py"
+  - "services/task_intake/src/task_intake/execution_handoff.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/runner/src/runner/local_harness.py"
+
+validation:
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_test_mode.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "17 passed"
+  - command: "python -m compileall -f services/task_intake/src services/runner/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "byte-compiled modules"
+
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "None — review followed PLAN.md exactly"
+    reason: "Implementation matches the approved plan and tests."
+
+context_used:
+  labels:
+    - "precommit"
+  memory_files_read:
+    - ".project-memory/pr/0076-test-mode-execution-entrypoint/PLAN.md"
+    - ".project-memory/pr/0076-test-mode-execution-entrypoint/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+  anchors_used: []
+  files_inspected:
+    - "services/task_intake/src/task_intake/test_mode.py"
+    - "services/task_intake/tests/test_test_mode.py"
+    - "services/task_intake/src/task_intake/execution_handoff.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/runner/src/runner/local_harness.py"
+  files_modified:
+    - ".project-memory/pr/0076-test-mode-execution-entrypoint/reviews/precommit-review.yml"
+  files_intentionally_ignored:
+    - ".project-memory/pr/*/reviews/*.yml"
+
+files_read:
+  - ".project-memory/pr/0076-test-mode-execution-entrypoint/PLAN.md"
+  - ".project-memory/pr/0076-test-mode-execution-entrypoint/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - "services/task_intake/src/task_intake/test_mode.py"
+  - "services/task_intake/tests/test_test_mode.py"
+  - "services/task_intake/src/task_intake/execution_handoff.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/runner/src/runner/local_harness.py"
+
+files_written:
+  - ".project-memory/pr/0076-test-mode-execution-entrypoint/reviews/precommit-review.yml"
+
+required_changes: []
+
+summary: "Precommit review passed: implementation matches PLAN.md, tests pass locally, no unsafe changes detected."
