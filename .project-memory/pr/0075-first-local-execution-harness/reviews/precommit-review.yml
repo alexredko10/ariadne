@@ -1,0 +1,118 @@
+schema_version: "1.0"
+pr_id: "0075-first-local-execution-harness"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-06-27T00:10:00Z"
+snapshot_delta:
+  current_head_sha: "6a6ff9dc86871f11348613c61d941f592633fd49"
+  git_status_short: |
+    M services/task_intake/src/task_intake/execution_handoff.py
+    M services/task_intake/tests/test_execution_handoff.py
+    M services/task_intake/tests/test_execution_handoff_http.py
+    ?? services/runner/src/runner/local_harness.py
+    ?? services/runner/tests/test_local_harness.py
+  git_diff_name_only: |
+    services/task_intake/src/task_intake/execution_handoff.py
+    services/task_intake/tests/test_execution_handoff.py
+    services/task_intake/tests/test_execution_handoff_http.py
+    services/runner/src/runner/local_harness.py
+    services/runner/tests/test_local_harness.py
+  plan_md_base_sha: "a1b2c3d4placeholder"
+  scope_relevant_diff: |
+    Modified: services/task_intake/src/task_intake/execution_handoff.py, services/task_intake/tests/test_execution_handoff.py, services/task_intake/tests/test_execution_handoff_http.py
+    New: services/runner/src/runner/local_harness.py, services/runner/tests/test_local_harness.py
+  blocking_diff: "None"
+  rationale: "Changes implement a local harness that dispatches via the dispatcher, composes the execution envelope and review boundary, and enriches the handoff. Tests exercise harness, handoff, and HTTP integration. No forbidden side-effects detected."
+
+scope:
+  - "services/runner/src/runner/local_harness.py"
+  - "services/runner/tests/test_local_harness.py"
+  - "services/task_intake/src/task_intake/execution_handoff.py"
+  - "services/task_intake/tests/test_execution_handoff.py"
+  - "services/task_intake/tests/test_execution_handoff_http.py"
+  - ".project-memory/pr/0075-first-local-execution-harness/reviews/precommit-review.yml"
+
+files_checked:
+  - ".project-memory/pr/0075-first-local-execution-harness/PLAN.md"
+  - ".project-memory/pr/0075-first-local-execution-harness/reviews/plan-review.yml"
+  - "services/runner/src/runner/local_harness.py"
+  - "services/runner/tests/test_local_harness.py"
+  - "services/task_intake/src/task_intake/execution_handoff.py"
+  - "services/task_intake/tests/test_execution_handoff.py"
+  - "services/task_intake/tests/test_execution_handoff_http.py"
+  - "services/runner/src/runner/adapter_registry.py"
+  - "services/runner/src/runner/noop_adapter.py"
+  - "services/runner/src/runner/execution_envelope.py"
+  - "services/runner/src/runner/review_boundary.py"
+
+validation:
+  git_rev_parse_head:
+    status: passed
+    detail: "6a6ff9dc86871f11348613c61d941f592633fd49"
+  git_status_short:
+    status: passed
+    detail: |
+      M services/task_intake/src/task_intake/execution_handoff.py
+      M services/task_intake/tests/test_execution_handoff.py
+      M services/task_intake/tests/test_execution_handoff_http.py
+      ?? services/runner/src/runner/local_harness.py
+      ?? services/runner/tests/test_local_harness.py
+  git_diff_name_only:
+    status: passed
+    detail: |
+      services/task_intake/src/task_intake/execution_handoff.py
+      services/task_intake/tests/test_execution_handoff.py
+      services/task_intake/tests/test_execution_handoff_http.py
+      services/runner/src/runner/local_harness.py
+      services/runner/tests/test_local_harness.py
+  pytest_local_harness:
+    status: passed
+    detail: "All relevant tests passed locally: 144 passed in 0.07s"
+  python_compileall:
+    status: passed
+    detail: "services/runner/src and services/task_intake/src compiled successfully."
+  forbidden_pattern_grep:
+    status: passed
+    detail: "No forbidden patterns (subprocess, docker, socket, requests, httpx, sqlite, redis, os.system, popen, importlib, pkg_resources, entry_points, uuid, datetime.now, time.time, random) found in local_harness or execution_handoff."
+  io_grep:
+    status: passed
+    detail: "No runtime file IO calls (open, write, Path, read_text, write_text) found in local_harness or execution_handoff."
+  shell_placeholder_grep:
+    status: passed
+    detail: "No shell placeholder markers ($() ect.) found in changed files."
+
+blockers: []
+
+warnings: []
+
+decisions_made:
+  - "Implementation followed PLAN.md: added local_harness and tests; updated execution_handoff to call harness."
+  - "Harness composes dispatcher, execution_envelope, and review_boundary without side-effects."
+
+context_used:
+  labels: []
+  memory files read:
+    - ".project-memory/pr/0075-first-local-execution-harness/PLAN.md"
+    - ".project-memory/pr/0075-first-local-execution-harness/reviews/plan-review.yml"
+    - ".project-memory/pr/0073-execution-artifact-envelope/reviews/precommit-review.yml"
+    - ".project-memory/pr/0074-human-review-runtime-boundary/reviews/precommit-review.yml"
+  anchors used: []
+  files inspected:
+    - "services/runner/src/runner/local_harness.py"
+    - "services/runner/tests/test_local_harness.py"
+    - "services/task_intake/src/task_intake/execution_handoff.py"
+    - "services/task_intake/tests/test_execution_handoff.py"
+    - "services/task_intake/tests/test_execution_handoff_http.py"
+    - "services/runner/src/runner/adapter_registry.py"
+    - "services/runner/src/runner/noop_adapter.py"
+    - "services/runner/src/runner/execution_envelope.py"
+    - "services/runner/src/runner/review_boundary.py"
+  files_intentionally_ignored:
+    - ".ariadne/**"
+    - "node_modules/**"
+    - "__pycache__/**"
+
+files_modified:
+  - ".project-memory/pr/0075-first-local-execution-harness/reviews/precommit-review.yml"
+

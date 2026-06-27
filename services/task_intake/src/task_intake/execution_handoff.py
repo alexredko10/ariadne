@@ -2,8 +2,7 @@
 Mock-run to runner-dispatcher handoff — deterministic composition.
 
 Calls the existing mock loop, builds a RunnerExecutionRequest,
-dispatches it through the runner adapter dispatcher, and returns
-a combined deterministic result.
+runs the local execution harness, and returns a combined result.
 
 No HTTP route changes, no mock-loop logic changes, no real execution.
 """
@@ -14,7 +13,7 @@ import hashlib
 from typing import Any
 
 from task_intake.mock_loop import run_mock_loop
-from runner.adapter_registry import dispatch_execution
+from runner.local_harness import run_local_execution_harness
 
 
 # ---------------------------------------------------------------------------
@@ -27,7 +26,6 @@ def _make_handoff_id(
     context_preview_id: str,
     loop_id: str,
 ) -> str:
-    """Generate a deterministic handoff ID from mock loop output fields."""
     digest = hashlib.sha256(
         f"{task_goal}{context_preview_id}{loop_id}".encode("utf-8")
     ).hexdigest()
@@ -39,16 +37,10 @@ def _make_execution_request_id(
     context_preview_id: str,
     loop_id: str,
 ) -> str:
-    """Generate a deterministic execution request ID."""
     digest = hashlib.sha256(
         f"{task_goal}{context_preview_id}{loop_id}".encode("utf-8")
     ).hexdigest()
     return f"er_{digest[:12]}"
-
-
-# ---------------------------------------------------------------------------
-# Execution request builder
-# ---------------------------------------------------------------------------
 
 
 def _build_execution_request(
@@ -66,9 +58,7 @@ def _build_execution_request(
     loop_id = mock_result.get("loop_id", "")
 
     return {
-        "execution_request_id": _make_execution_request_id(
-            task_goal, cp_id, loop_id
-        ),
+        "execution_request_id": _make_execution_request_id(task_goal, cp_id, loop_id),
         "run_id": run.get("run_id", "") or loop_id,
         "task_intake_id": ti.get("task_intake_id", ""),
         "context_preview_id": cp_id,
@@ -80,18 +70,13 @@ def _build_execution_request(
             "inferred_mode": normalized.get("inferred_mode", "unknown"),
             "inferred_domains": normalized.get("inferred_domains", []),
             "context_sections_included": list(
-                context_preview.get("preview", {})
-                .get("context_sections", {})
-                .keys()
+                context_preview.get("preview", {}).get("context_sections", {}).keys()
             ),
         },
         "constraints": normalized.get("constraints", []),
         "expected_outputs": [normalized.get("requested_output", "plan")],
         "approval": raw.get("execution_approval"),
-        "metadata": {
-            "source": "mock-execution-handoff",
-            "handoff_via": "run_mock_execution_handoff",
-        },
+        "metadata": {"source": "mock-execution-handoff", "handoff_via": "run_mock_execution_handoff"},
     }
 
 
@@ -111,9 +96,7 @@ def run_mock_execution_handoff(raw: Any) -> dict:
     Returns
     -------
     dict
-        A combined handoff response with keys: ok, handoff_id,
-        mock_loop_result, execution_request, execution_result,
-        errors, warnings, next.
+        A combined handoff response.
     """
     if not isinstance(raw, dict):
         return {
@@ -122,6 +105,9 @@ def run_mock_execution_handoff(raw: Any) -> dict:
             "mock_loop_result": None,
             "execution_request": None,
             "execution_result": None,
+            "execution_envelope": None,
+            "review_boundary": None,
+            "runtime_status": "",
             "errors": [{"code": "invalid_request", "message": "Request must be a dict."}],
             "warnings": [],
             "next": "",
@@ -136,6 +122,9 @@ def run_mock_execution_handoff(raw: Any) -> dict:
             "mock_loop_result": mock_result,
             "execution_request": None,
             "execution_result": None,
+            "execution_envelope": None,
+            "review_boundary": None,
+            "runtime_status": "",
             "errors": mock_result.get("validation", {}).get("errors", []),
             "warnings": mock_result.get("warnings", []),
             "next": "",
@@ -149,26 +138,28 @@ def run_mock_execution_handoff(raw: Any) -> dict:
     cp_id = cp.get("context_preview_id", "")
     loop_id = mock_result.get("loop_id", "")
     run_id = run.get("run_id", "")
-
     handoff_id = _make_handoff_id(task_goal, cp_id, loop_id)
 
     # Step 2: Build execution request
     execution_request = _build_execution_request(mock_result, raw)
 
-    # Step 3: Dispatch through runner adapter
-    execution_result = dispatch_execution(execution_request)
+    # Step 3: Run local execution harness (dispatcher → envelope → review boundary)
+    harness_result = run_local_execution_harness(execution_request)
 
     # Step 4: Combine
     errors: list = []
     warnings: list = []
+    har_errors = harness_result.get("errors", [])
+    execution_result = harness_result.get("execution_result", {})
+    envelope = harness_result.get("execution_envelope", {})
+    boundary = harness_result.get("review_boundary", {})
 
     if execution_result.get("status") == "failed":
         errors.extend(execution_result.get("errors", []))
-    if execution_result.get("status") == "blocked":
-        warnings.extend(execution_result.get("warnings", []))
-
+    errors.extend(har_errors)
     errors.extend(mock_result.get("validation", {}).get("errors", []))
     warnings.extend(mock_result.get("warnings", []))
+    warnings.extend(harness_result.get("warnings", []))
 
     return {
         "ok": True,
@@ -182,6 +173,9 @@ def run_mock_execution_handoff(raw: Any) -> dict:
         },
         "execution_request": execution_request,
         "execution_result": execution_result,
+        "execution_envelope": envelope,
+        "review_boundary": boundary,
+        "runtime_status": harness_result.get("runtime_status", ""),
         "errors": errors,
         "warnings": warnings,
         "next": f"/runs/{run_id}/status" if run_id else "",

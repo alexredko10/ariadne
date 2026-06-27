@@ -180,3 +180,23 @@ class TestSafety:
         content = Path(path).read_text(encoding="utf-8")
         assert "subprocess" not in content
         assert "docker" not in content.lower()
+
+
+class TestHarnessFields:
+    def test_response_contains_execution_envelope(self):
+        body = json.dumps({"raw_task": "Add JWT auth"}).encode("utf-8")
+        _, data = _request("POST", "/runs/execute", body=body)
+        assert "execution_envelope" in data
+        assert data["execution_envelope"]["envelope_id"].startswith("env_")
+
+    def test_response_contains_review_boundary(self):
+        body = json.dumps({"raw_task": "Add JWT auth"}).encode("utf-8")
+        _, data = _request("POST", "/runs/execute", body=body)
+        assert "review_boundary" in data
+        assert "decision" in data["review_boundary"]
+
+    def test_response_runtime_status(self):
+        body = json.dumps({"raw_task": "Add JWT auth"}).encode("utf-8")
+        _, data = _request("POST", "/runs/execute", body=body)
+        assert "runtime_status" in data
+        assert data["runtime_status"] == "completed"
