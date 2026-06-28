@@ -352,9 +352,15 @@ _HTML_PAGE = r"""<!DOCTYPE html>
 <style>
 body { font-family: sans-serif; margin: 2rem; }
 pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
-.status-completed { color: #0a0; }
-.status-requires_review, .status-blocked { color: #a50; }
-.status-failed, .status-error { color: #a00; }
+.status-completed { color: #0a0; font-weight: bold; }
+.status-requires_review, .status-blocked { color: #a50; font-weight: bold; }
+.status-failed, .status-error { color: #a00; font-weight: bold; }
+.ok-true { color: #0a0; }
+.ok-false { color: #a00; }
+.section { margin-top: 1rem; border: 1px solid #ddd; padding: 0.5rem; }
+.section h3 { margin: 0 0 0.5rem; cursor: pointer; }
+.section-content { margin-left: 1rem; }
+.fade { opacity: 0.5; }
 </style>
 </head>
 <body>
@@ -363,16 +369,116 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 <textarea id="task" rows="4" cols="60" placeholder="Describe your task…">Implement JWT authentication middleware</textarea>
 <br>
 <button id="submit">Submit</button>
+<div id="status-bar" style="margin-top:0.5rem;"></div>
 <div id="result">
 <h2>Result</h2>
-<div id="status"></div>
+<div id="structured-view"></div>
+<h3>Raw JSON</h3>
 <pre id="json"></pre>
 </div>
 <script>
+function get(obj, path, def) {
+    try {
+        var parts = path.split(".");
+        var cur = obj;
+        for (var i = 0; i < parts.length; i++) {
+            if (cur == null || typeof cur === "undefined") return def;
+            cur = cur[parts[i]];
+        }
+        return cur != null ? cur : def;
+    } catch (e) { return def; }
+}
+function val(v, def) { return (v != null && v !== undefined) ? v : (def != null ? def : "—"); }
+function boolSpan(v) { return "<span class=\"" + (v ? "ok-true\">true" : "ok-false\">false") + "</span>"; }
+function listItems(arr) {
+    if (!arr || arr.length === 0) return "<em>none</em>";
+    var html = "<ul>";
+    for (var i = 0; i < arr.length; i++) {
+        var item = arr[i];
+        if (typeof item === "object") {
+            html += "<li>" + JSON.stringify(item) + "</li>";
+        } else {
+            html += "<li>" + val(item) + "</li>";
+        }
+    }
+    html += "</ul>";
+    return html;
+}
+function keyValue(key, value) {
+    return "<p><strong>" + key + ":</strong> " + value + "</p>";
+}
+function section(title, content) {
+    return "<div class=\"section\">"
+        + "<h3 onclick=\"var n=this.nextElementSibling; n.style.display=n.style.display==='none'?'':'none';\">"
+        + title + "</h3>"
+        + "<div class=\"section-content\">" + content + "</div></div>";
+}
+function renderStructured(data) {
+    var html = "";
+    var status = get(data, "runtime_status", "unknown");
+    var ok = get(data, "ok", false);
+    // 1. Status summary
+    html += section("Status",
+        keyValue("OK", boolSpan(ok))
+        + "<p><strong>Runtime status:</strong> <span class=\"status-" + status + "\">" + val(status) + "</span></p>"
+    );
+    // 2. Execution request
+    var er = get(data, "execution_request", {});
+    html += section("Execution Request",
+        keyValue("Execution request ID", val(get(er, "execution_request_id")))
+        + keyValue("Run ID", val(get(er, "run_id")))
+        + keyValue("Requested adapter", val(get(er, "requested_adapter")))
+        + keyValue("Execution mode", val(get(er, "execution_mode")))
+        + keyValue("Task goal", val(get(er, "inputs.task_goal"), ""))
+    );
+    // 3. Execution result
+    var eres = get(data, "execution_result", {});
+    html += section("Execution Result",
+        keyValue("Result ID", val(get(eres, "execution_result_id")))
+        + "<p><strong>Status:</strong> <span class=\"status-" + get(eres, "status", "") + "\">" + val(get(eres, "status")) + "</span></p>"
+        + keyValue("Adapter", val(get(eres, "adapter")))
+        + keyValue("Review required", boolSpan(get(eres, "review_required", false)))
+        + keyValue("Evidence count", val(get(eres, "evidence", []).length))
+    );
+    // 4. Execution envelope
+    var env = get(data, "execution_envelope", {});
+    html += section("Execution Envelope",
+        keyValue("Envelope ID", val(get(env, "envelope_id")))
+        + "<p><strong>Status:</strong> <span class=\"status-" + get(env, "status", "") + "\">" + val(get(env, "status")) + "</span></p>"
+        + keyValue("Schema version", val(get(env, "schema_version")))
+        + keyValue("Artifact count", val(get(env, "artifacts", []).length))
+        + keyValue("Evidence count", val(get(env, "evidence", []).length))
+    );
+    // 5. Review boundary
+    var rb = get(data, "review_boundary", {});
+    html += section("Review Boundary",
+        "<p><strong>Decision:</strong> <span class=\"status-" + get(rb, "decision", "") + "\">" + val(get(rb, "decision")) + "</span></p>"
+        + keyValue("Completed", boolSpan(get(rb, "completed", false)))
+        + keyValue("Requires review", boolSpan(get(rb, "requires_review", false)))
+        + keyValue("Blocked", boolSpan(get(rb, "blocked", false)))
+        + keyValue("Failed", boolSpan(get(rb, "failed", false)))
+        + keyValue("Reason code", val(get(rb, "reason_code")))
+        + "<p><strong>Reasons:</strong></p>" + listItems(get(rb, "reasons", []))
+    );
+    // 6. Warnings and errors (only if non-empty)
+    var warns = get(data, "warnings", []);
+    var errs = get(data, "errors", []);
+    if (warns.length > 0 || errs.length > 0) {
+        var weHtml = "";
+        if (warns.length > 0) {
+            weHtml += "<h4>Warnings</h4>" + listItems(warns);
+        }
+        if (errs.length > 0) {
+            weHtml += "<h4>Errors</h4>" + listItems(errs);
+        }
+        html += section("Warnings &amp; Errors", weHtml);
+    }
+    return html;
+}
 document.getElementById("submit").addEventListener("click", async function () {
     var task = document.getElementById("task").value;
     if (!task) { alert("Task text is required."); return; }
-    document.getElementById("status").textContent = "Running…";
+    document.getElementById("status-bar").textContent = "Running…";
     try {
         var resp = await fetch("/runs/execute", {
             method: "POST",
@@ -380,13 +486,14 @@ document.getElementById("submit").addEventListener("click", async function () {
             body: JSON.stringify({task: task}),
         });
         var data = await resp.json();
-        var status = data.runtime_status || "unknown";
-        document.getElementById("status").innerHTML =
-            "<span class=\"status-" + status + "\">" + status + "</span>";
+        document.getElementById("status-bar").innerHTML =
+            "<span class=\"status-" + (get(data, "runtime_status", "unknown")) + "\">"
+            + (get(data, "runtime_status", "unknown")) + "</span>";
+        document.getElementById("structured-view").innerHTML = renderStructured(data);
         document.getElementById("json").textContent =
             JSON.stringify(data, null, 2);
     } catch (e) {
-        document.getElementById("status").textContent = "Error: " + e.message;
+        document.getElementById("status-bar").textContent = "Error: " + e.message;
     }
 });
 </script>
