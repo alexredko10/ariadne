@@ -249,6 +249,11 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
             )
             return
 
+        # Map "task" field to "raw_task" if raw_task is not set
+        if isinstance(data, dict) and "task" in data and not data.get("raw_task"):
+            data = dict(data)
+            data["raw_task"] = data.pop("task")
+
         result = run_mock_execution_handoff(data)
 
         if result.get("ok") is True:
@@ -296,6 +301,19 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
             await _send_json(send, 400, body)
         return
 
+    if method == "GET" and path == "/":
+        html = _HTML_PAGE.encode("utf-8")
+        await send({
+            "type": "http.response.start",
+            "status": 200,
+            "headers": [
+                (b"content-type", b"text/html; charset=utf-8"),
+                (b"content-length", str(len(html)).encode("utf-8")),
+            ],
+        })
+        await send({"type": "http.response.body", "body": html})
+        return
+
     # --- 404 ---
     body = json.dumps({"error": "Not Found"}, ensure_ascii=False).encode("utf-8")
     await _send_json(send, 404, body)
@@ -320,6 +338,61 @@ async def _send_json(send: callable, status: int, body: bytes) -> None:
         "type": "http.response.body",
         "body": body,
     })
+
+
+# ---------------------------------------------------------------------------
+# HTML page for local interaction at GET /
+# ---------------------------------------------------------------------------
+
+_HTML_PAGE = r"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ariadne — Local Interaction</title>
+<style>
+body { font-family: sans-serif; margin: 2rem; }
+pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
+.status-completed { color: #0a0; }
+.status-requires_review, .status-blocked { color: #a50; }
+.status-failed, .status-error { color: #a00; }
+</style>
+</head>
+<body>
+<h1>Ariadne — Local Interaction</h1>
+<label for="task">Task:</label>
+<textarea id="task" rows="4" cols="60" placeholder="Describe your task…">Implement JWT authentication middleware</textarea>
+<br>
+<button id="submit">Submit</button>
+<div id="result">
+<h2>Result</h2>
+<div id="status"></div>
+<pre id="json"></pre>
+</div>
+<script>
+document.getElementById("submit").addEventListener("click", async function () {
+    var task = document.getElementById("task").value;
+    if (!task) { alert("Task text is required."); return; }
+    document.getElementById("status").textContent = "Running…";
+    try {
+        var resp = await fetch("/runs/execute", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({task: task}),
+        });
+        var data = await resp.json();
+        var status = data.runtime_status || "unknown";
+        document.getElementById("status").innerHTML =
+            "<span class=\"status-" + status + "\">" + status + "</span>";
+        document.getElementById("json").textContent =
+            JSON.stringify(data, null, 2);
+    } catch (e) {
+        document.getElementById("status").textContent = "Error: " + e.message;
+    }
+});
+</script>
+</body>
+</html>
+"""
 
 
 # ---------------------------------------------------------------------------
