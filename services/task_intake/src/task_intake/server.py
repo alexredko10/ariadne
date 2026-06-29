@@ -362,6 +362,11 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 .section-content { margin-left: 1rem; }
 #explanation { background: #e8f4f8; padding: 0.5rem 1rem; margin-bottom: 1rem; border-left: 4px solid #4a90d9; }
 #explanation p { margin: 0.3rem 0; }
+.trace-step { display: flex; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid #eee; }
+.trace-step:last-child { border-bottom: none; }
+.trace-indicator { font-size: 1.2rem; width: 2rem; text-align: center; }
+.trace-label { flex: 1; margin-left: 0.5rem; }
+.trace-detail { color: #555; font-size: 0.9rem; margin-left: 0.5rem; }
 </style>
 </head>
 <body>
@@ -386,11 +391,25 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 <div id="status-bar" style="margin-top:0.5rem;"></div>
 <div id="result">
 <h2>Result</h2>
+<div id="execution-trace-section">
+<h3>Execution Trace</h3>
+<div id="trace-steps"></div>
+</div>
 <div id="structured-view"></div>
 <h3>Raw JSON</h3>
 <pre id="json"></pre>
 </div>
 <script>
+var TRACE_STEPS = [
+    {label: "Task received", field: null, complete: true},
+    {label: "Execution request built", field: "execution_request.execution_request_id"},
+    {label: "Handoff prepared", field: "handoff_id"},
+    {label: "Local harness invoked", field: "execution_envelope.envelope_id"},
+    {label: "Runner selected: ", field: "execution_result.adapter"},
+    {label: "Execution result returned", field: "execution_result.status"},
+    {label: "Execution envelope created", field: "execution_envelope.envelope_id"},
+    {label: "Review boundary derived", field: "review_boundary.decision"},
+];
 function get(obj, path, def) {
     try {
         var parts = path.split(".");
@@ -409,11 +428,8 @@ function listItems(arr) {
     var html = "<ul>";
     for (var i = 0; i < arr.length; i++) {
         var item = arr[i];
-        if (typeof item === "object") {
-            html += "<li>" + JSON.stringify(item) + "</li>";
-        } else {
-            html += "<li>" + val(item) + "</li>";
-        }
+        if (typeof item === "object") html += "<li>" + JSON.stringify(item) + "</li>";
+        else html += "<li>" + val(item) + "</li>";
     }
     return html + "</ul>";
 }
@@ -425,6 +441,36 @@ function section(title, content) {
         + "<h3 onclick=\"var n=this.nextElementSibling; n.style.display=n.style.display==='none'?'':'none';\">"
         + title + "</h3>"
         + "<div class=\"section-content\">" + content + "</div></div>";
+}
+function renderTrace(data) {
+    var html = "";
+    for (var i = 0; i < TRACE_STEPS.length; i++) {
+        var step = TRACE_STEPS[i];
+        var indicator = "\u2b1c";
+        var detail = "";
+        if (data) {
+            if (i === 4) {
+                var adapter = get(data, step.field, "");
+                detail = adapter ? adapter : "";
+                indicator = detail ? "\u2705" : "\u274c";
+            } else if (i === 0) {
+                indicator = "\u2705";
+            } else if (step.field) {
+                var value = get(data, step.field, null);
+                indicator = value ? "\u2705" : "\u274c";
+                if (i === 7 && value) detail = value;
+            }
+        }
+        var label = step.label;
+        if (i === 4 && detail) label = "Runner selected: <strong>" + detail + "</strong>";
+        var detailHtml = detail && i !== 4 && i !== 7 ? "<span class=\"trace-detail\">" + detail + "</span>" : "";
+        if (i === 7 && detail) detailHtml = "<span class=\"trace-detail\">" + detail + "</span>";
+        html += "<div class=\"trace-step\">"
+            + "<span class=\"trace-indicator\">" + indicator + "</span>"
+            + "<span class=\"trace-label\">" + label + "</span>"
+            + detailHtml + "</div>";
+    }
+    return html;
 }
 function renderStructured(data) {
     var html = "";
@@ -484,6 +530,7 @@ document.getElementById("submit").addEventListener("click", async function () {
     var runner = document.querySelector('input[name="runner"]:checked');
     var runnerValue = runner ? runner.value : "noop";
     document.getElementById("status-bar").textContent = "Running…";
+    document.getElementById("trace-steps").innerHTML = renderTrace(null);
     try {
         var body = {task: task, requested_adapter: runnerValue};
         var resp = await fetch("/runs/execute", {
@@ -495,6 +542,7 @@ document.getElementById("submit").addEventListener("click", async function () {
         document.getElementById("status-bar").innerHTML =
             "<span class=\"status-" + (get(data, "runtime_status", "unknown")) + "\">"
             + (get(data, "runtime_status", "unknown")) + "</span>";
+        document.getElementById("trace-steps").innerHTML = renderTrace(data);
         document.getElementById("structured-view").innerHTML = renderStructured(data);
         document.getElementById("json").textContent = JSON.stringify(data, null, 2);
     } catch (e) {
