@@ -407,6 +407,43 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 <h3>Raw JSON</h3>
 <pre id="json"></pre>
 </div>
+<div id="feedback-panel">
+<h2>User Test Feedback</h2>
+<fieldset>
+<legend>1. Did you understand what Ariadne does?</legend>
+<label><input type="radio" name="q_understood" value="yes"> Yes</label>
+<label><input type="radio" name="q_understood" value="no"> No</label>
+</fieldset>
+<fieldset>
+<legend>2. Was runner selection clear?</legend>
+<label><input type="radio" name="q_runner_clear" value="yes"> Yes</label>
+<label><input type="radio" name="q_runner_clear" value="no"> No</label>
+</fieldset>
+<fieldset>
+<legend>3. Was the summary card clear?</legend>
+<label><input type="radio" name="q_summary_clear" value="yes"> Yes</label>
+<label><input type="radio" name="q_summary_clear" value="no"> No</label>
+</fieldset>
+<fieldset>
+<legend>4. Was the execution trace useful?</legend>
+<label><input type="radio" name="q_trace_useful" value="yes"> Yes</label>
+<label><input type="radio" name="q_trace_useful" value="no"> No</label>
+</fieldset>
+<fieldset>
+<legend>5. What was confusing?</legend>
+<textarea id="q_confusing" rows="3" cols="60" placeholder="Describe what was confusing…"></textarea>
+</fieldset>
+<fieldset>
+<legend>6. What would you expect Ariadne to do next?</legend>
+<textarea id="q_expect_next" rows="3" cols="60" placeholder="Describe your expectation…"></textarea>
+</fieldset>
+<fieldset>
+<legend>Additional notes</legend>
+<textarea id="feedback_notes" rows="3" cols="60" placeholder="Optional additional notes…"></textarea>
+</fieldset>
+<button id="generate-feedback-btn">Generate &amp; copy feedback</button>
+<textarea id="feedback-output" rows="6" cols="80" readonly style="margin-top:0.5rem; display:none;"></textarea>
+</div>
 <script>
 var TRACE_STEPS = [
     {label: "Task received", field: null, complete: true},
@@ -588,6 +625,7 @@ document.getElementById("submit").addEventListener("click", async function () {
             "<span class=\"status-" + (get(data, "runtime_status", "unknown")) + "\">"
             + (get(data, "runtime_status", "unknown")) + "</span>";
         document.getElementById("summary-card").innerHTML = renderSummaryCard(data);
+        window._latestData = data;
         document.getElementById("trace-steps").innerHTML = renderTrace(data);
         document.getElementById("structured-view").innerHTML = renderStructured(data);
         document.getElementById("json").textContent = JSON.stringify(data, null, 2);
@@ -595,6 +633,41 @@ document.getElementById("submit").addEventListener("click", async function () {
         document.getElementById("status-bar").textContent = "Error: " + e.message;
     }
 });
+document.getElementById("generate-feedback-btn").addEventListener("click", generateFeedback);
+function generateFeedback() {
+    var data = window._latestData || {};
+    var adapter = get(data, "execution_request.requested_adapter", "no run submitted");
+    var rt = get(data, "runtime_status", "no run submitted");
+    var eres = get(data, "execution_result.status", "no run submitted");
+    var rb = get(data, "review_boundary.decision", "no run submitted");
+    var g = function(n) {
+        var sel = document.querySelector('input[name="' + n + '"]:checked');
+        return sel ? sel.value : "not answered";
+    };
+    var text = "=== Ariadne Local User Test Feedback ===\n\n";
+    text += "Run summary:\n";
+    text += "  Selected runner: " + adapter + "\n";
+    text += "  Runtime status: " + rt + "\n";
+    text += "  Execution result: " + eres + "\n";
+    text += "  Review decision: " + rb + "\n\n";
+    text += "Questions:\n";
+    text += "  1. Did you understand what Ariadne does? " + g("q_understood") + "\n";
+    text += "  2. Was runner selection clear? " + g("q_runner_clear") + "\n";
+    text += "  3. Was the summary card clear? " + g("q_summary_clear") + "\n";
+    text += "  4. Was the execution trace useful? " + g("q_trace_useful") + "\n";
+    text += "  5. What was confusing? " + (document.getElementById("q_confusing").value || "(none)") + "\n";
+    text += "  6. What would you expect Ariadne to do next? " + (document.getElementById("q_expect_next").value || "(none)") + "\n";
+    text += "\nAdditional notes: " + (document.getElementById("feedback_notes").value || "(none)");
+    var output = document.getElementById("feedback-output");
+    output.value = text;
+    output.style.display = "";
+    try {
+        navigator.clipboard.writeText(text);
+    } catch (e) {
+        output.focus();
+        output.select();
+    }
+}
 </script>
 </body>
 </html>
