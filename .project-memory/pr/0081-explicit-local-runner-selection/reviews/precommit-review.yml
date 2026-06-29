@@ -1,0 +1,109 @@
+schema_version: "0.1"
+pr_id: "0081-explicit-local-runner-selection"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-06-29T18:45:00Z"
+snapshot_delta:
+  plan_base_sha: "965acb35cb09544ca55ffa15cfd67ea5e57b302a"
+  current_head: "2b28b668a78a692c3643ccdf814fe149e6a7550a"
+  action: "continue"
+  stale_snapshot: false
+  git_status_short: "M services/task_intake/tests/test_execution_handoff_http.py\nM services/task_intake/tests/test_task_intake_http.py"
+  git_diff_name_only: "services/task_intake/tests/test_execution_handoff_http.py\nservices/task_intake/tests/test_task_intake_http.py"
+  plan_md_base_sha: "965acb35cb09544ca55ffa15cfd67ea5e57b302a"
+  scope_relevant_diff: "Tests relaxed to permit explanatory Docker wording in server HTML; server.py and safety tests considered in scope."
+  blocking_diff: ""
+  rationale: "Adjust test assertions to allow 'docker' string in HTML copy while still forbidding side-effect patterns. Changes are tests-only and within approved scope correction. All tests passed."
+
+scope:
+  expected_files:
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_local_runner_selection.py"
+    - "services/task_intake/tests/test_execution_handoff_http.py"
+    - "services/task_intake/tests/test_task_intake_http.py"
+  actual_files:
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_local_runner_selection.py"
+    - "services/task_intake/tests/test_execution_handoff_http.py"
+    - "services/task_intake/tests/test_task_intake_http.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+
+files_checked:
+  - ".project-memory/pr/0081-explicit-local-runner-selection/PLAN.md"
+  - ".project-memory/pr/0081-explicit-local-runner-selection/reviews/plan-review.yml"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/app.py"
+  - "services/task_intake/src/task_intake/execution_handoff.py"
+  - "services/task_intake/tests/test_local_runner_selection.py"
+  - "services/task_intake/tests/test_local_result_structured_view.py"
+  - "services/task_intake/tests/test_local_interaction_page.py"
+  - "services/task_intake/tests/test_execution_handoff_http.py"
+  - "services/task_intake/tests/test_task_intake_http.py"
+  - "services/runner/src/runner/adapter_registry.py"
+  - "services/runner/src/runner/docker_agent_adapter.py"
+
+validation:
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_local_runner_selection.py services/task_intake/tests/test_local_result_structured_view.py services/task_intake/tests/test_local_interaction_page.py services/task_intake/tests/test_execution_handoff_http.py services/task_intake/tests/test_task_intake_http.py services/task_intake/tests/test_app_runtime.py services/task_intake/tests/test_test_mode.py services/runner/tests/test_local_harness.py services/runner/tests/test_adapter_registry.py services/runner/tests/test_docker_agent_adapter.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "141 passed"
+  - command: "python -m compileall -f services/task_intake/src services/runner/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "byte-compiled modules"
+
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "None — review followed PLAN.md and scope correction"
+    reason: "Tests adjusted to allow explanatory 'Docker' wording in HTML while maintaining safety assertions."
+
+context_used:
+  labels:
+    - "precommit"
+  memory_files_read:
+    - ".project-memory/pr/0081-explicit-local-runner-selection/PLAN.md"
+    - ".project-memory/pr/0081-explicit-local-runner-selection/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+  anchors_used: []
+  files_inspected:
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/app.py"
+    - "services/task_intake/src/task_intake/execution_handoff.py"
+    - "services/task_intake/tests/test_local_runner_selection.py"
+    - "services/task_intake/tests/test_local_result_structured_view.py"
+    - "services/task_intake/tests/test_local_interaction_page.py"
+    - "services/task_intake/tests/test_execution_handoff_http.py"
+    - "services/task_intake/tests/test_task_intake_http.py"
+    - "services/runner/src/runner/adapter_registry.py"
+    - "services/runner/src/runner/docker_agent_adapter.py"
+  files_modified:
+    - ".project-memory/pr/0081-explicit-local-runner-selection/reviews/precommit-review.yml"
+  files_intentionally_ignored:
+    - ".project-memory/pr/*/reviews/*.yml"
+
+files_read:
+  - ".project-memory/pr/0081-explicit-local-runner-selection/PLAN.md"
+  - ".project-memory/pr/0081-explicit-local-runner-selection/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/app.py"
+  - "services/task_intake/src/task_intake/execution_handoff.py"
+  - "services/task_intake/tests/test_local_runner_selection.py"
+  - "services/task_intake/tests/test_local_result_structured_view.py"
+  - "services/task_intake/tests/test_local_interaction_page.py"
+  - "services/task_intake/tests/test_execution_handoff_http.py"
+  - "services/task_intake/tests/test_task_intake_http.py"
+  - "services/runner/src/runner/adapter_registry.py"
+  - "services/runner/src/runner/docker_agent_adapter.py"
+
+files_written:
+  - ".project-memory/pr/0081-explicit-local-runner-selection/reviews/precommit-review.yml"
+
+required_changes: []
+
+summary: "Scope correction: relaxed test assertions to permit explanatory Docker wording in server HTML. Docker remains opt-in and non-executing; safety tests still forbid subprocess and other side-effect patterns. All tests passed." 
