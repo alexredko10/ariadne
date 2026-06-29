@@ -382,6 +382,16 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 <p>Docker agent is an explicit opt-in boundary. Selecting it returns a structured result without running Docker.</p>
 <p>The response includes execution result, execution envelope, and review boundary.</p>
 </div>
+<fieldset id="scenarios">
+<legend>Guided scenarios</legend>
+<p>Click a scenario to prefill the task and runner, then click Submit.</p>
+<div id="scenario-buttons">
+<button onclick="fillScenario('noop','Implement a JWT authentication middleware for FastAPI')">1. Default local/no-op run</button>
+<button onclick="fillScenario('noop','Add input validation to all API endpoints')">2. Inspect summary and trace</button>
+<button onclick="fillScenario('docker-agent','Run unit tests on the authentication module')">3. Docker-agent opt-in boundary</button>
+<button onclick="fillScenario('noop','Create a health check endpoint')">4. Generate user-test feedback</button>
+</div>
+</fieldset>
 <fieldset id="runner-selection">
 <legend>Runner adapter</legend>
 <label><input type="radio" name="runner" value="noop" checked> Local deterministic / no-op (default)</label>
@@ -605,6 +615,13 @@ function renderStructured(data) {
         html += section("Warnings &amp; Errors", weHtml);
     }
     return html;
+}
+function fillScenario(runnerValue, taskText) {
+    document.getElementById("task").value = taskText;
+    var radios = document.querySelectorAll('input[name="runner"]');
+    for (var i = 0; i < radios.length; i++) {
+        radios[i].checked = (radios[i].value === runnerValue);
+    }
 }
 document.getElementById("submit").addEventListener("click", async function () {
     var task = document.getElementById("task").value;
