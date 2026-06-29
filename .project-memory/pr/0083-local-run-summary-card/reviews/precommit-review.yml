@@ -3,14 +3,14 @@ pr_id: "0083-local-run-summary-card"
 review_type: "precommit-review"
 verdict: "pass"
 reviewer: "precommit-review"
-timestamp: "2026-06-29T20:28:15Z"
+timestamp: "2026-06-29T20:30:00Z"
 snapshot_delta:
   plan_base_sha: "9ca3c4effb5e1e4a44691da7605e0b320f323da2"
   current_head: "2b28b668a78a692c3643ccdf814fe149e6a7550a"
   action: "continue"
   stale_snapshot: false
-  git_status_short: "M .project-memory/pr/0083-local-run-summary-card/PLAN.md\n M services/task_intake/src/task_intake/server.py\n?? services/task_intake/tests/test_local_run_summary_card.py"
-  git_diff_name_only: ".project-memory/pr/0083-local-run-summary-card/PLAN.md\nservices/task_intake/src/task_intake/server.py"
+  git_status_short: "M services/task_intake/src/task_intake/server.py\n?? services/task_intake/tests/test_local_run_summary_card.py"
+  git_diff_name_only: "services/task_intake/src/task_intake/server.py"
   plan_md_base_sha: "9ca3c4effb5e1e4a44691da7605e0b320f323da2"
   scope_relevant_diff: "Added summary card HTML to server.py and new tests added."
   blocking_diff: ""
@@ -46,10 +46,6 @@ validation:
     result: "passed"
     exit_code: 0
     evidence: "byte-compiled modules"
-  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m task_intake.app --check --json"
-    result: "passed"
-    exit_code: 0
-    evidence: "JSON printed (checked via tests)"
 
 blockers: []
 warnings: []
@@ -89,4 +85,4 @@ files_written:
 
 required_changes: []
 
-summary: "Precommit review passed: local run summary card added to inline HTML, summary derives from /runs/execute JSON response, tests pass, and no unsafe changes detected." 
+summary: "Precommit review passed: local run summary card added to inline HTML, summary derives from /runs/execute response, tests pass, and no unsafe changes detected." 
