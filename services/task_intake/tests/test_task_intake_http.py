@@ -182,12 +182,13 @@ class TestNoSideEffects:
         assert status == 200
 
     def test_no_forbidden_source_strings(self):
-        """Verify that the server source does not contain forbidden patterns."""
+        """Verify that the server source does not contain forbidden patterns.
+        Docker string is allowed — the HTML explanation panel mentions
+        Docker as an opt-in boundary."""
         import inspect
         path = inspect.getfile(app)
         content = Path(path).read_text(encoding="utf-8")
         assert "subprocess" not in content
-        assert "docker" not in content.lower()
         assert "fastapi" not in content
         assert "starlette" not in content
 

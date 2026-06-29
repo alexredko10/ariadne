@@ -360,11 +360,25 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 .section { margin-top: 1rem; border: 1px solid #ddd; padding: 0.5rem; }
 .section h3 { margin: 0 0 0.5rem; cursor: pointer; }
 .section-content { margin-left: 1rem; }
-.fade { opacity: 0.5; }
+#explanation { background: #e8f4f8; padding: 0.5rem 1rem; margin-bottom: 1rem; border-left: 4px solid #4a90d9; }
+#explanation p { margin: 0.3rem 0; }
 </style>
 </head>
 <body>
 <h1>Ariadne — Local Interaction</h1>
+<div id="explanation">
+<p>Ariadne turns your task into an execution request.</p>
+<p>The local harness dispatches the request to a selected runner adapter.</p>
+<p><strong>Default mode is deterministic local/no-op.</strong> No real agent execution happens by default.</p>
+<p>Docker agent is an explicit opt-in boundary. Selecting it returns a structured result without running Docker.</p>
+<p>The response includes execution result, execution envelope, and review boundary.</p>
+</div>
+<fieldset id="runner-selection">
+<legend>Runner adapter</legend>
+<label><input type="radio" name="runner" value="noop" checked> Local deterministic / no-op (default)</label>
+<br>
+<label><input type="radio" name="runner" value="docker-agent"> Docker agent (opt-in — does not run Docker)</label>
+</fieldset>
 <label for="task">Task:</label>
 <textarea id="task" rows="4" cols="60" placeholder="Describe your task…">Implement JWT authentication middleware</textarea>
 <br>
@@ -401,8 +415,7 @@ function listItems(arr) {
             html += "<li>" + val(item) + "</li>";
         }
     }
-    html += "</ul>";
-    return html;
+    return html + "</ul>";
 }
 function keyValue(key, value) {
     return "<p><strong>" + key + ":</strong> " + value + "</p>";
@@ -417,12 +430,10 @@ function renderStructured(data) {
     var html = "";
     var status = get(data, "runtime_status", "unknown");
     var ok = get(data, "ok", false);
-    // 1. Status summary
     html += section("Status",
         keyValue("OK", boolSpan(ok))
         + "<p><strong>Runtime status:</strong> <span class=\"status-" + status + "\">" + val(status) + "</span></p>"
     );
-    // 2. Execution request
     var er = get(data, "execution_request", {});
     html += section("Execution Request",
         keyValue("Execution request ID", val(get(er, "execution_request_id")))
@@ -431,7 +442,6 @@ function renderStructured(data) {
         + keyValue("Execution mode", val(get(er, "execution_mode")))
         + keyValue("Task goal", val(get(er, "inputs.task_goal"), ""))
     );
-    // 3. Execution result
     var eres = get(data, "execution_result", {});
     html += section("Execution Result",
         keyValue("Result ID", val(get(eres, "execution_result_id")))
@@ -440,7 +450,6 @@ function renderStructured(data) {
         + keyValue("Review required", boolSpan(get(eres, "review_required", false)))
         + keyValue("Evidence count", val(get(eres, "evidence", []).length))
     );
-    // 4. Execution envelope
     var env = get(data, "execution_envelope", {});
     html += section("Execution Envelope",
         keyValue("Envelope ID", val(get(env, "envelope_id")))
@@ -449,7 +458,6 @@ function renderStructured(data) {
         + keyValue("Artifact count", val(get(env, "artifacts", []).length))
         + keyValue("Evidence count", val(get(env, "evidence", []).length))
     );
-    // 5. Review boundary
     var rb = get(data, "review_boundary", {});
     html += section("Review Boundary",
         "<p><strong>Decision:</strong> <span class=\"status-" + get(rb, "decision", "") + "\">" + val(get(rb, "decision")) + "</span></p>"
@@ -460,17 +468,12 @@ function renderStructured(data) {
         + keyValue("Reason code", val(get(rb, "reason_code")))
         + "<p><strong>Reasons:</strong></p>" + listItems(get(rb, "reasons", []))
     );
-    // 6. Warnings and errors (only if non-empty)
     var warns = get(data, "warnings", []);
     var errs = get(data, "errors", []);
     if (warns.length > 0 || errs.length > 0) {
         var weHtml = "";
-        if (warns.length > 0) {
-            weHtml += "<h4>Warnings</h4>" + listItems(warns);
-        }
-        if (errs.length > 0) {
-            weHtml += "<h4>Errors</h4>" + listItems(errs);
-        }
+        if (warns.length > 0) weHtml += "<h4>Warnings</h4>" + listItems(warns);
+        if (errs.length > 0) weHtml += "<h4>Errors</h4>" + listItems(errs);
         html += section("Warnings &amp; Errors", weHtml);
     }
     return html;
@@ -478,20 +481,22 @@ function renderStructured(data) {
 document.getElementById("submit").addEventListener("click", async function () {
     var task = document.getElementById("task").value;
     if (!task) { alert("Task text is required."); return; }
+    var runner = document.querySelector('input[name="runner"]:checked');
+    var runnerValue = runner ? runner.value : "noop";
     document.getElementById("status-bar").textContent = "Running…";
     try {
+        var body = {task: task, requested_adapter: runnerValue};
         var resp = await fetch("/runs/execute", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({task: task}),
+            body: JSON.stringify(body),
         });
         var data = await resp.json();
         document.getElementById("status-bar").innerHTML =
             "<span class=\"status-" + (get(data, "runtime_status", "unknown")) + "\">"
             + (get(data, "runtime_status", "unknown")) + "</span>";
         document.getElementById("structured-view").innerHTML = renderStructured(data);
-        document.getElementById("json").textContent =
-            JSON.stringify(data, null, 2);
+        document.getElementById("json").textContent = JSON.stringify(data, null, 2);
     } catch (e) {
         document.getElementById("status-bar").textContent = "Error: " + e.message;
     }
