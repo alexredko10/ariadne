@@ -453,6 +453,10 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 </fieldset>
 <button id="generate-feedback-btn">Generate &amp; copy feedback</button>
 <textarea id="feedback-output" rows="6" cols="80" readonly style="margin-top:0.5rem; display:none;"></textarea>
+<hr>
+<button id="generate-session-report-btn">Generate session report</button>
+<button id="copy-report-btn" style="margin-left:0.5rem;">Copy report</button>
+<textarea id="session-report-output" rows="10" cols="80" readonly style="margin-top:0.5rem; display:block; width:100%;"></textarea>
 </div>
 <script>
 var TRACE_STEPS = [
@@ -618,6 +622,7 @@ function renderStructured(data) {
 }
 function fillScenario(runnerValue, taskText) {
     document.getElementById("task").value = taskText;
+    window.__ariadne_last_scenario = taskText;
     var radios = document.querySelectorAll('input[name="runner"]');
     for (var i = 0; i < radios.length; i++) {
         radios[i].checked = (radios[i].value === runnerValue);
@@ -685,6 +690,45 @@ function generateFeedback() {
         output.select();
     }
 }
+function generateSessionReport() {
+    var data = window._latestData || {};
+    var scenarioName = window.__ariadne_last_scenario || "Manual";
+    var taskText = document.getElementById("task").value || "(empty)";
+    var runner = document.querySelector('input[name="runner"]:checked');
+    var runnerValue = runner ? runner.value : "noop";
+    var adapter = get(data, "execution_request.requested_adapter", "not submitted");
+    var rt = get(data, "runtime_status", "not submitted");
+    var eres = get(data, "execution_result.status", "not submitted");
+    var rb = get(data, "review_boundary.decision", "not submitted");
+    var g = function(n) {
+        var sel = document.querySelector('input[name="' + n + '"]:checked');
+        return sel ? sel.value : "not answered";
+    };
+    var ts = new Date().toISOString();
+    var text = "=== Ariadne User Test Session Report ===\n\n";
+    text += "Scenario: " + scenarioName + "\n";
+    text += "Submitted task: " + taskText + "\n";
+    text += "Selected runner: " + runnerValue + "\n";
+    text += "Runtime status: " + rt + "\n";
+    text += "Execution result: " + eres + "\n";
+    text += "Review decision: " + rb + "\n\n";
+    text += "Tester feedback:\n";
+    text += "  Understood: " + g("q_understood") + "\n";
+    text += "  Runner clear: " + g("q_runner_clear") + "\n";
+    text += "  Summary clear: " + g("q_summary_clear") + "\n";
+    text += "  Trace useful: " + g("q_trace_useful") + "\n";
+    text += "  Confusing: " + (document.getElementById("q_confusing").value || "(none)") + "\n";
+    text += "  Expected next: " + (document.getElementById("q_expect_next").value || "(none)") + "\n";
+    text += "  Additional notes: " + (document.getElementById("feedback_notes").value || "(none)") + "\n\n";
+    text += "Session generated locally in browser at: " + ts + "\n";
+    text += "No data was sent to any server.\n";
+    document.getElementById("session-report-output").value = text;
+}
+document.getElementById("generate-session-report-btn").addEventListener("click", generateSessionReport);
+document.getElementById("copy-report-btn").addEventListener("click", function() {
+    var ta = document.getElementById("session-report-output");
+    try { navigator.clipboard.writeText(ta.value); } catch (e) { ta.focus(); ta.select(); }
+});
 </script>
 </body>
 </html>
