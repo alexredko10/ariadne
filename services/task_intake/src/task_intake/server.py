@@ -362,6 +362,10 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 .section-content { margin-left: 1rem; }
 #explanation { background: #e8f4f8; padding: 0.5rem 1rem; margin-bottom: 1rem; border-left: 4px solid #4a90d9; }
 #explanation p { margin: 0.3rem 0; }
+#summary-card { background: #f9f9f9; border: 1px solid #ccc; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+#summary-card h3 { margin: 0 0 0.5rem 0; }
+.summary-field { margin: 0.3rem 0; }
+.summary-label { font-weight: bold; display: inline-block; min-width: 10rem; }
 .trace-step { display: flex; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid #eee; }
 .trace-step:last-child { border-bottom: none; }
 .trace-indicator { font-size: 1.2rem; width: 2rem; text-align: center; }
@@ -391,6 +395,10 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 <div id="status-bar" style="margin-top:0.5rem;"></div>
 <div id="result">
 <h2>Result</h2>
+<div id="summary-card">
+<h3>Ariadne Local Run Summary</h3>
+<p id="summary-placeholder">Submit a task to see the run summary.</p>
+</div>
 <div id="execution-trace-section">
 <h3>Execution Trace</h3>
 <div id="trace-steps"></div>
@@ -441,6 +449,43 @@ function section(title, content) {
         + "<h3 onclick=\"var n=this.nextElementSibling; n.style.display=n.style.display==='none'?'':'none';\">"
         + title + "</h3>"
         + "<div class=\"section-content\">" + content + "</div></div>";
+}
+function renderSummaryCard(data) {
+    var adapter = get(data, "execution_request.requested_adapter", "unknown");
+    var runtimeStatus = get(data, "runtime_status", "unknown");
+    var execStatus = get(data, "execution_result.status", "unknown");
+    var reviewDec = get(data, "review_boundary.decision", "unknown");
+    var evCount = get(data, "execution_envelope.evidence", []).length;
+    var ok = get(data, "ok", false);
+    var isNoop = adapter.indexOf("noop") >= 0;
+    var requiresReview = get(data, "review_boundary.requires_review", false);
+    var whatHappened = "";
+    if (runtimeStatus === "completed" && isNoop)
+        whatHappened = "Deterministic local/no-op run completed. No real execution was performed.";
+    else if (runtimeStatus === "completed" && !isNoop)
+        whatHappened = "Docker opt-in boundary \u2014 completed without Docker. Enable Docker with allow_docker=True to execute.";
+    else if (runtimeStatus === "blocked")
+        whatHappened = "Execution was blocked. Review the review boundary section for details.";
+    else if (runtimeStatus === "requires_review")
+        whatHappened = "Execution completed but requires human review. See review boundary for details.";
+    else if (runtimeStatus === "failed")
+        whatHappened = "Execution failed. Check the errors section for details.";
+    else if (runtimeStatus === "error")
+        whatHappened = "An error occurred. Check the errors section for details.";
+    else
+        whatHappened = "Run completed (" + runtimeStatus + ").";
+    var nextStep = "";
+    if (requiresReview) nextStep = "Human review is required before proceeding.";
+    else if (ok) nextStep = "Inspect the structured sections below for details, or review the raw JSON output.";
+    else nextStep = "Review the errors and warnings sections below to resolve the issue.";
+    return "<h3>Ariadne Local Run Summary</h3>"
+        + "<div class=\"summary-field\"><span class=\"summary-label\">Selected runner:</span> " + adapter + "</div>"
+        + "<div class=\"summary-field\"><span class=\"summary-label\">What happened:</span> " + whatHappened + "</div>"
+        + "<div class=\"summary-field\"><span class=\"summary-label\">Runtime status:</span> <span class=\"status-" + runtimeStatus + "\">" + runtimeStatus + "</span></div>"
+        + "<div class=\"summary-field\"><span class=\"summary-label\">Execution result:</span> <span class=\"status-" + execStatus + "\">" + execStatus + "</span></div>"
+        + "<div class=\"summary-field\"><span class=\"summary-label\">Review decision:</span> <span class=\"status-" + reviewDec + "\">" + reviewDec + "</span></div>"
+        + "<div class=\"summary-field\"><span class=\"summary-label\">Evidence:</span> " + evCount + " evidence record(s)</div>"
+        + "<div class=\"summary-field\"><span class=\"summary-label\">Next step:</span> " + nextStep + "</div>";
 }
 function renderTrace(data) {
     var html = "";
@@ -542,6 +587,7 @@ document.getElementById("submit").addEventListener("click", async function () {
         document.getElementById("status-bar").innerHTML =
             "<span class=\"status-" + (get(data, "runtime_status", "unknown")) + "\">"
             + (get(data, "runtime_status", "unknown")) + "</span>";
+        document.getElementById("summary-card").innerHTML = renderSummaryCard(data);
         document.getElementById("trace-steps").innerHTML = renderTrace(data);
         document.getElementById("structured-view").innerHTML = renderStructured(data);
         document.getElementById("json").textContent = JSON.stringify(data, null, 2);
