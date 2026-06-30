@@ -409,6 +409,14 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 <h3>Ariadne Local Run Summary</h3>
 <p id="summary-placeholder">Submit a task to see the run summary.</p>
 </div>
+<div id="run-report-section" style="display:none;">
+<h2>Run Report</h2>
+<p id="run-report-placeholder" style="display:none;">Run a task to generate a run report.</p>
+<button id="generate-run-report-btn">Generate run report</button>
+<button id="copy-run-report-btn" style="margin-left:0.5rem;">Copy report</button>
+<button id="download-run-report-btn" style="margin-left:0.5rem;">Download report (.txt)</button>
+<textarea id="run-report-output" rows="10" cols="80" readonly style="margin-top:0.5rem; display:block; width:100%;"></textarea>
+</div>
 <div id="execution-trace-section">
 <h3>Execution Trace</h3>
 <div id="trace-steps"></div>
@@ -647,6 +655,7 @@ document.getElementById("submit").addEventListener("click", async function () {
             "<span class=\"status-" + (get(data, "runtime_status", "unknown")) + "\">"
             + (get(data, "runtime_status", "unknown")) + "</span>";
         document.getElementById("summary-card").innerHTML = renderSummaryCard(data);
+        document.getElementById("run-report-section").style.display = "";
         window._latestData = data;
         document.getElementById("trace-steps").innerHTML = renderTrace(data);
         document.getElementById("structured-view").innerHTML = renderStructured(data);
@@ -729,6 +738,69 @@ document.getElementById("copy-report-btn").addEventListener("click", function() 
     var ta = document.getElementById("session-report-output");
     try { navigator.clipboard.writeText(ta.value); } catch (e) { ta.focus(); ta.select(); }
 });
+document.getElementById("generate-run-report-btn").addEventListener("click", generateRunReport);
+document.getElementById("copy-run-report-btn").addEventListener("click", function() {
+    var ta = document.getElementById("run-report-output");
+    try { navigator.clipboard.writeText(ta.value); } catch (e) { ta.focus(); ta.select(); }
+});
+document.getElementById("download-run-report-btn").addEventListener("click", function() {
+    var ta = document.getElementById("run-report-output");
+    var text = ta.value;
+    if (!text) return;
+    var blob = new Blob([text], {type: "text/plain"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "ariadne-run-report.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+});
+function generateRunReport() {
+    var data = window._latestData || {};
+    var taskText = document.getElementById("task").value || "(empty)";
+    var runner = document.querySelector('input[name="runner"]:checked');
+    var runnerValue = runner ? runner.value : "noop";
+    var adapter = get(data, "execution_request.requested_adapter", "not submitted");
+    var rt = get(data, "runtime_status", "not submitted");
+    var eres = get(data, "execution_result.status", "not submitted");
+    var rb = get(data, "review_boundary.decision", "not submitted");
+    var summary = get(data, "review_boundary.completed", false) ? "completed" : get(data, "review_boundary.decision", "...");
+    var ts = new Date().toISOString();
+    var text = "=== Ariadne Local Run Report ===\n\n";
+    text += "Submitted task: " + taskText + "\n";
+    text += "Selected runner: " + runnerValue + "\n";
+    text += "Runtime status: " + rt + "\n";
+    text += "Execution result: " + eres + "\n";
+    text += "Review decision: " + rb + "\n";
+    text += "Summary card: " + summary + "\n\n";
+    text += "=== Execution Trace ===\n";
+    var traceAdap = get(data, "execution_result.adapter", "") || "—";
+    var traceEnvId = get(data, "execution_envelope.envelope_id", "") || "—";
+    text += "1. Task received \u2705\n";
+    text += "2. Execution request built \u2705\n";
+    text += "3. Handoff prepared \u2705\n";
+    text += "4. Local harness invoked \u2705\n";
+    text += "5. Runner selected: " + traceAdap + "\n";
+    text += "6. Execution result returned: " + eres + "\n";
+    text += "7. Execution envelope created: " + traceEnvId + "\n";
+    text += "8. Review boundary derived: " + rb + "\n\n";
+    var understood = document.querySelector('input[name="q_understood"]:checked');
+    if (understood) {
+        var g = function(n) {
+            var s = document.querySelector('input[name="' + n + '"]:checked');
+            return s ? s.value : "not answered";
+        };
+        text += "=== Related feedback ===\n";
+        text += "Understood: " + g("q_understood") + "\n";
+        text += "Runner clear: " + g("q_runner_clear") + "\n";
+        text += "Summary clear: " + g("q_summary_clear") + "\n";
+        text += "Trace useful: " + g("q_trace_useful") + "\n";
+        text += "Notes: " + (document.getElementById("feedback_notes").value || "(none)") + "\n\n";
+    }
+    text += "Generated in browser at: " + ts + "\n";
+    text += "No data was sent to any server.\n";
+    document.getElementById("run-report-output").value = text;
+}
 </script>
 </body>
 </html>
