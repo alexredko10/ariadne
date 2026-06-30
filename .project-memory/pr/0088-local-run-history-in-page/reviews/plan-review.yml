@@ -1,0 +1,56 @@
+schema_version: "0.1"
+pr_id: "0088-local-run-history-in-page"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-06-30T09:21:21Z"
+snapshot_delta:
+  plan_base_sha: "unknown"
+  current_head: "d63a48002826cb710288a8e23a5517b69c23da47"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_local_run_history_in_page.py"
+    - ".project-memory/pr/0088-local-run-history-in-page/reviews/plan-review.yml"
+  actual_files:
+    - "services/task_intake/src/task_intake/server.py"
+    - ".project-memory/pr/0088-local-run-history-in-page/PLAN.md"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0088-local-run-history-in-page/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0087-copy-export-local-run-report/reviews/precommit-review.yml"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/tests/test_copy_export_local_run_report.py"
+validation:
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_copy_export_local_run_report.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "146 passed"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Accept stale base_sha"
+    reason: "PR-specific stale-snapshot policy allows proceeding because PLAN.md and plan-review artifact are present and unchanged and implementation scope is limited."
+context_used:
+  labels: ["plan-review"]
+  memory_files_read:
+    - ".project-memory/pr/0088-local-run-history-in-page/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0087-copy-export-local-run-report/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_copy_export_local_run_report.py"
+  files_modified:
+    - ".project-memory/pr/0088-local-run-history-in-page/reviews/plan-review.yml"
+  files_intentionally_ignored:
+    - "services/runner/**"
+    - "packages/**"
+    - "agents/**"
+    - "apps/**"
