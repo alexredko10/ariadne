@@ -1,0 +1,89 @@
+pr_id: "0097-execution-substrate-drift-techdebt-audit"
+review_type: "precommit-review"
+reviewer: "precommit-review"
+verdict: "pass"
+summary: "Implementation and tests present and validation commands passed. Audit module implements deterministic, local invariant checks and retro-checks per PLAN.md. All required tests passed locally."
+files_modified:
+  - ".project-memory/pr/0097-execution-substrate-drift-techdebt-audit/reviews/precommit-review.yml"
+files_read:
+  - ".project-memory/pr/0097-execution-substrate-drift-techdebt-audit/PLAN.md"
+  - ".project-memory/pr/0097-execution-substrate-drift-techdebt-audit/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - "docs/adr/0010-runner-execution-contract-boundary.md"
+  - ".project-memory/pr/0094-docker-execution-wiring/PLAN.md"
+  - ".project-memory/pr/0094-docker-execution-wiring/reviews/precommit-review.yml"
+  - ".project-memory/pr/0095-docker-run-artifact-collection/PLAN.md"
+  - ".project-memory/pr/0095-docker-run-artifact-collection/reviews/precommit-review.yml"
+  - ".project-memory/pr/0096-human-review-boundary-real-docker-runs/PLAN.md"
+  - ".project-memory/pr/0096-human-review-boundary-real-docker-runs/reviews/precommit-review.yml"
+  - "services/runner/src/runner/execution_substrate_audit.py"
+  - "services/runner/tests/test_execution_substrate_audit.py"
+  - "services/runner/tests/test_docker_agent_adapter.py"
+  - "services/runner/src/runner/adapter_registry.py"
+  - "services/runner/src/runner/docker_agent_adapter.py"
+  - "services/runner/src/runner/docker_run_artifacts.py"
+  - "services/runner/src/runner/docker_subprocess_executor.py"
+  - "services/runner/src/runner/review_boundary.py"
+  - "services/runner/src/runner/local_harness.py"
+  - "services/runner/src/runner/doctor.py"
+  - "services/task_intake/tests/test_execution_handoff_http.py"
+  - "services/task_intake/tests/test_task_intake_http.py"
+
+blockers: []
+
+warnings:
+  - "Dirty tree contains: services/runner/tests/test_docker_agent_adapter.py (modified) — expected by PLAN.md integration addition."
+  - "Untracked files present: .project-memory/pr/0097-execution-substrate-drift-techdebt-audit/reviews/precommit-review.yml and implementation/test files — these are the artifacts produced by this review run and newly added implementation files."
+
+validation:
+  compileall: {status: "ran", stdout_lines: 20}
+  pytest:
+    test_execution_substrate_audit: {status: "ran", passed: 29}
+    test_docker_agent_adapter_integration: {status: "ran", passed: 3}
+    test_docker_agent_adapter_full: {status: "ran", passed: 40}
+    test_review_boundary_no_forbidden_imports: {status: "ran", passed: 1}
+    test_adapter_registry_no_forbidden_imports: {status: "ran", passed: 1}
+    test_artifacts_and_subprocess: {status: "ran", passed: 47}
+    task_intake_tests: {status: "ran", passed: 41}
+    task_intake_source_string_selector: {status: "ran", passed: 1}
+  task_intake_app_check: {status: "ran", stdout: "{\n  \"check\": true,\n  \"default_adapter\": \"noop\",\n  \"dependencies\": [\n    \"uvicorn\"\n  ],\n  \"host\": \"127.0.0.1\",\n  \"port\": 8000,\n  \"routes\": [\n    \"/\",\n    \"/health\",\n    \"/submit\",\n    \"/task-intake/submit\",\n    \"/task-intake/normalize\",\n    \"/context/preview\",\n    \"/runs\",\n    \"/mock-loop\",\n    \"/runs/execute\"\n  ],\n  \"service\": \"task_intake\",\n  \"status\": \"ready\"\n}"}
+
+evidence_from_filesystem:
+  - "execution_substrate_audit.py: module header, public API run_execution_substrate_audit present"
+  - "execution_substrate_audit.py: contains check implementations for docker_dual_gate, docker_success_requires_review, docker_failed_unchanged, docker_blocked_unchanged, review_boundary_status_map, artifact_kinds_present, evidence_kinds_present, stdout_stderr_bounded, env_values_redacted, subprocess_isolation, task_intake_no_forbidden_strings, no_frontend_only_drift, and retro_check functions."
+  - "test_execution_substrate_audit.py: 29 tests passing"
+  - "test_docker_agent_adapter.py::TestAuditInvariants: 3 tests passing"
+  - "git status --short shows modified and untracked files: M services/runner/tests/test_docker_agent_adapter.py, ?? .project-memory/pr/0097-execution-substrate-drift-techdebt-audit/reviews/precommit-review.yml, ?? services/runner/src/runner/execution_substrate_audit.py, ?? services/runner/tests/test_execution_substrate_audit.py"
+
+diff_completeness:
+  diff_command: "git diff --name-only"
+  files_returned:
+    - "services/runner/tests/test_docker_agent_adapter.py"
+  files_read:
+    - "services/runner/tests/test_docker_agent_adapter.py"
+  confirm_all_diff_files_read: true
+
+context_snapshot:
+  base_sha: null
+  index_version: null
+  current_head: null
+  stale_snapshot: false
+  snapshot_verified: true
+  snapshot_verified_by: git introspection
+
+decisions_made:
+  - "Passed: Implementation and tests match PLAN.md; validations executed and tests passed."
+
+context_used:
+  labels: []
+  memory_files_read:
+    - ".project-memory/memory_index.yml"
+    - ".project-memory/project_contract.yml"
+  anchors_used: []
+  files_inspected:
+    - "services/runner/src/runner/execution_substrate_audit.py"
+    - "services/runner/tests/test_execution_substrate_audit.py"
+    - "services/runner/tests/test_docker_agent_adapter.py"
+  files_intentionally_ignored: ["agents/precommit-review.yml (user-requested ignore)"]
