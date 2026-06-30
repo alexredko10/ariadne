@@ -6,7 +6,7 @@ Composes:
 2. Execution envelope
 3. Human review boundary
 
-No real execution, no Docker, no subprocess, no network, no filesystem IO.
+No real execution, no Docker daemon, no process spawning, no network calls, no filesystem IO.
 """
 
 from __future__ import annotations

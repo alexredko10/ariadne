@@ -386,10 +386,35 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 #error-panel p { margin: 0.3rem 0; }
 #dismiss-error-btn { margin-top: 0.5rem; }
 #submit:disabled { opacity: 0.6; cursor: not-allowed; }
+#onboarding-panel { background: #f0f8ff; border: 2px solid #4a90d9; border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 1rem; }
+#onboarding-panel h2 { margin: 0 0 0.5rem 0; color: #2a5f8a; }
+#onboarding-panel p { margin: 0.4rem 0; line-height: 1.5; }
+.onboarding-dismiss { float: right; }
+.onboarding-steps { padding-left: 1.5rem; margin: 0.5rem 0; }
+.onboarding-steps li { margin: 0.3rem 0; line-height: 1.5; }
 </style>
 </head>
 <body>
 <h1>Ariadne — Local Interaction</h1>
+<div id="onboarding-panel">
+<button class="onboarding-dismiss" id="dismiss-onboarding-btn">Dismiss</button>
+<h2>Welcome to Ariadne</h2>
+<p>Ariadne is a local execution substrate for agentic software development.</p>
+<p>It accepts a task, builds an execution request, dispatches it through a selected runner, and returns a deterministic result with an execution envelope and review boundary.</p>
+<p><strong>Local/no-op runner (default):</strong> A deterministic simulation that returns results without executing any real work. No Docker daemon, no process spawning, no network calls.</p>
+<p><strong>Docker agent runner (opt-in):</strong> A boundary that runs tasks in a Docker container. Must be explicitly selected. Selecting it returns a structured blocked result without running Docker — enabling real execution requires additional configuration.</p>
+<p>After submitting a task, inspect the summary card, execution trace, structured result, and raw JSON.</p>
+<p>Use the feedback panel to capture your observations.</p>
+<h3>Step-by-step local flow</h3>
+<ol class="onboarding-steps">
+<li>Select a guided scenario or type your own task.</li>
+<li>Choose a runner (local/no-op default, docker-agent opt-in).</li>
+<li>Click Submit.</li>
+<li>Inspect the summary card, execution trace, and structured result.</li>
+<li>Use the feedback panel to record observations.</li>
+<li>Generate and copy a run report.</li>
+</ol>
+</div>
 <div id="explanation">
 <p>Ariadne turns your task into an execution request.</p>
 <p>The local harness dispatches the request to a selected runner adapter.</p>
@@ -505,6 +530,11 @@ var TRACE_STEPS = [
     {label: "Review boundary derived", field: "review_boundary.decision"},
 ];
 var __ariadne_run_history = [];
+var __onboarding_dismissed = false;
+function dismissOnboarding() {
+    __onboarding_dismissed = true;
+    document.getElementById("onboarding-panel").style.display = "none";
+}
 function get(obj, path, def) {
     try {
         var parts = path.split(".");
@@ -833,6 +863,7 @@ document.getElementById("copy-run-report-btn").addEventListener("click", functio
     try { navigator.clipboard.writeText(ta.value); } catch (e) { ta.focus(); ta.select(); }
 });
 document.getElementById("clear-history-btn").addEventListener("click", clearRunHistory);
+document.getElementById("dismiss-onboarding-btn").addEventListener("click", dismissOnboarding);
 document.getElementById("download-run-report-btn").addEventListener("click", function() {
     var ta = document.getElementById("run-report-output");
     var text = ta.value;
