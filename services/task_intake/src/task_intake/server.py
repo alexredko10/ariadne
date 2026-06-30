@@ -395,6 +395,17 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 .checklist-item { padding: 0.25rem 0; }
 .checklist-counter { margin: 0.5rem 0; font-weight: bold; }
 .checklist-all-passed { color: #0a0; }
+.confusion-buttons { margin: 0.5rem 0; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.confusion-btn { padding: 0.4rem 0.75rem; cursor: pointer; }
+.confusion-note-area { margin: 0.5rem 0; }
+.confusion-note-area textarea { width: 100%; max-width: 40rem; }
+.confusion-list { margin: 0.5rem 0; }
+.confusion-entry { padding: 0.3rem 0; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+.confusion-entry:last-child { border-bottom: none; }
+.confusion-type { font-weight: bold; display: inline-block; min-width: 12rem; }
+.confusion-note { color: #555; margin-left: 0.5rem; }
+.confusion-time { color: #888; font-size: 0.8rem; margin-left: 0.5rem; }
+#clear-confusion-btn { margin-top: 0.5rem; }
 </style>
 </head>
 <body>
@@ -502,8 +513,24 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 <div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 14. Empty task validation works (inline message shown)</label></div>
 <div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 15. Error state preserves previous run and history</label></div>
 </div>
+<div id="confusion-signals-panel">
+<h3>Confusion Signals</h3>
+<p>Click a button to record a moment of confusion.</p>
+<div class="confusion-buttons">
+<button class="confusion-btn" onclick="addConfusionSignal('unclear_next_step')">Unclear next step</button>
+<button class="confusion-btn" onclick="addConfusionSignal('unexpected_result')">Unexpected result</button>
+<button class="confusion-btn" onclick="addConfusionSignal('runner_confusion')">Runner confusion</button>
+<button class="confusion-btn" onclick="addConfusionSignal('report_export_confusion')">Report/export confusion</button>
+</div>
+<div class="confusion-note-area">
+<label for="confusion-note-input">Optional note (applied to last/next signal):</label>
+<br>
+<textarea id="confusion-note-input" rows="2" cols="60" placeholder="What were you confused about? (optional)"></textarea>
+</div>
+<button id="clear-confusion-btn">Clear all signals</button>
+<div id="confusion-signal-list" class="confusion-list"></div>
+</div>
 <fieldset>
-<legend>1. Did you understand what Ariadne does?</legend>
 <label><input type="radio" name="q_understood" value="yes"> Yes</label>
 <label><input type="radio" name="q_understood" value="no"> No</label>
 </fieldset>
@@ -554,6 +581,7 @@ var TRACE_STEPS = [
 ];
 var __ariadne_run_history = [];
 var __onboarding_dismissed = false;
+var __ariadne_confusion_signals = [];
 function dismissOnboarding() {
     __onboarding_dismissed = true;
     document.getElementById("onboarding-panel").style.display = "none";
@@ -570,6 +598,35 @@ function updateChecklistCounter() {
     } else {
         el.textContent = checked + "/15 checked";
     }
+}
+function addConfusionSignal(type) {
+    var note = document.getElementById("confusion-note-input").value.trim();
+    var ts = new Date().toISOString();
+    __ariadne_confusion_signals.push({type: type, note: note, timestamp: ts});
+    document.getElementById("confusion-note-input").value = "";
+    renderConfusionSignals();
+}
+function renderConfusionSignals() {
+    var list = document.getElementById("confusion-signal-list");
+    if (__ariadne_confusion_signals.length === 0) {
+        list.innerHTML = "<em>No confusion signals recorded.</em>";
+        return;
+    }
+    var html = "";
+    for (var i = 0; i < __ariadne_confusion_signals.length; i++) {
+        var sig = __ariadne_confusion_signals[i];
+        var label = sig.type.replace(/_/g, " ").replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+        html += "<div class=\"confusion-entry\">"
+            + "<span class=\"confusion-type\">" + label + "</span>"
+            + (sig.note ? "<span class=\"confusion-note\">" + sig.note + "</span>" : "<span class=\"confusion-note\" style=\"color:#aaa;\">(no note)</span>")
+            + "<span class=\"confusion-time\">" + sig.timestamp + "</span>"
+            + "</div>";
+    }
+    list.innerHTML = html;
+}
+function clearConfusionSignals() {
+    __ariadne_confusion_signals = [];
+    renderConfusionSignals();
 }
 function get(obj, path, def) {
     try {
@@ -884,7 +941,17 @@ function generateSessionReport() {
     text += "  Confusing: " + (document.getElementById("q_confusing").value || "(none)") + "\n";
     text += "  Expected next: " + (document.getElementById("q_expect_next").value || "(none)") + "\n";
     text += "  Additional notes: " + (document.getElementById("feedback_notes").value || "(none)") + "\n\n";
-    text += "Session generated locally in browser at: " + ts + "\n";
+    text += "=== Confusion Signals ===\n";
+    if (__ariadne_confusion_signals.length === 0) {
+        text += "  (none)\n";
+    } else {
+        for (var si = 0; si < __ariadne_confusion_signals.length; si++) {
+            var sig = __ariadne_confusion_signals[si];
+            var slabel = sig.type.replace(/_/g, " ");
+            text += "  - " + slabel + (sig.note ? (": " + sig.note) : "") + " (" + sig.timestamp + ")\n";
+        }
+    }
+    text += "\nSession generated locally in browser at: " + ts + "\n";
     text += "No data was sent to any server.\n";
     document.getElementById("session-report-output").value = text;
 }
@@ -907,6 +974,7 @@ document.getElementById("reset-checklist-btn").addEventListener("click", functio
     }
     updateChecklistCounter();
 });
+document.getElementById("clear-confusion-btn").addEventListener("click", clearConfusionSignals);
 document.getElementById("download-run-report-btn").addEventListener("click", function() {
     var ta = document.getElementById("run-report-output");
     var text = ta.value;
