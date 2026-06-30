@@ -8,10 +8,11 @@ metadata:
 models:
   plan_reviewer:
     provider: openai
-    model: google/gemini-3.1-flash-lite
-    base_url: https://openrouter.ai/api/v1
-    token_key: OPENROUTER_API_KEY
+    model: gpt-5.4-mini
+    base_url: https://api.openmodel.ai/v1 
+    token_key: OPENMODEL_API_KEY
     max_tokens: 10000
+    temperature: 0
 
 agents:
   root:

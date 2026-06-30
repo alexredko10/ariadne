@@ -1,0 +1,84 @@
+schema_version: "1"
+pr_id: "0101-admissible-proof-ref-runtime-object"
+review_type: "plan-review"
+verdict: "block"
+reviewer: "plan-review"
+timestamp: "2026-06-30T00:00:00Z"
+snapshot_delta:
+  current_head: "e4d7bddc04470c4b72b84af4e1b26df9e7343fa7"
+  git_status_short:
+    - "M agents/plan-review.yml"
+    - "?? .project-memory/pr/0101-admissible-proof-ref-runtime-object/"
+scope:
+  target_plan: ".project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md"
+  expected_files:
+    - ".project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md"
+  actual_files_checked:
+    - ".project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md"
+    - ".project-memory/post-0100/strategic-direction/agent-manifest.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - "ROADMAP.md"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+    - "docs/adr/0010-runner-execution-contract-boundary.md"
+    - ".project-memory/pr/0100-execution-substrate-freeze-release-gate/PLAN.md"
+    - ".project-memory/pr/0100-execution-substrate-freeze-release-gate/reviews/precommit-review.yml"
+    - ".project-memory/releases/v0.1.0-execution-substrate-freeze.md"
+    - ".project-memory/project_contract.yml"
+    - ".project-memory/context-bundles/contracts.yml"
+    - "services/runner/src/runner/readiness_gate.py"
+    - "services/runner/tests/test_readiness_gate.py"
+    - "services/runner/src/runner/execution_smoke.py"
+    - "services/runner/src/runner/execution_substrate_audit.py"
+    - "services/runner/src/runner/artifacts.py"
+    - "services/runner/src/runner/execution_envelope.py"
+    - "services/runner/src/runner/local_harness.py"
+files_checked:
+  - ".project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md"
+  - ".project-memory/post-0100/strategic-direction/agent-manifest.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - "docs/adr/0010-runner-execution-contract-boundary.md"
+  - ".project-memory/pr/0100-execution-substrate-freeze-release-gate/PLAN.md"
+  - ".project-memory/pr/0100-execution-substrate-freeze-release-gate/reviews/precommit-review.yml"
+  - ".project-memory/releases/v0.1.0-execution-substrate-freeze.md"
+  - ".project-memory/project_contract.yml"
+  - ".project-memory/context-bundles/contracts.yml"
+  - "services/runner/src/runner/readiness_gate.py"
+  - "services/runner/tests/test_readiness_gate.py"
+  - "services/runner/src/runner/execution_smoke.py"
+  - "services/runner/src/runner/execution_substrate_audit.py"
+  - "services/runner/src/runner/artifacts.py"
+  - "services/runner/src/runner/execution_envelope.py"
+  - "services/runner/src/runner/local_harness.py"
+validation:
+  yaml_check: "manual inspection only; yq unavailable and PyYAML unavailable in python3"
+  plan_structure: "block"
+  mandatory_sections:
+    present:
+      - "Roadmap alignment"
+    missing: []
+  checklist_result: "block"
+blockers:
+  - code: "dirty_tree_unrelated"
+    message: "git status shows unrelated modified file agents/plan-review.yml; reviewer must not proceed with a dirty tree outside the allowed review artifact scope."
+  - code: "plan_review_artifact_path_unverified"
+    message: "The required review artifact path could not be verified as the only writable path because the workspace already contains an unrelated modified file."
+warnings:
+  - code: "yaml_tooling_unavailable"
+    message: "yq and PyYAML were unavailable; PLAN.md YAML validity was checked by manual inspection only."
+  - code: "plan_content_risk"
+    message: "PLAN.md appears to mention proof_ref, task_intake, compileall, JSON determinism, and anti-coT constraints, but the review is blocked before any approval claim due to dirty-tree scope."
+decisions_made:
+  - "Reviewed PLAN.md and required supporting contracts/ADR files without modifying them."
+  - "Observed current HEAD and git status."
+  - "Blocked due to unrelated dirty tree entry outside the allowed review artifact scope."
+context_used:
+  files_modified:
+    - ".project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/plan-review.yml"
+  files_ignored:
+    - "agents/plan-review.yml"
+    - ".git/**"
+    - ".venv/**"
+    - "node_modules/**"
+    - "__pycache__/**"
