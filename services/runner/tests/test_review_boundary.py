@@ -262,3 +262,76 @@ class TestNoSideEffects:
         assert "datetime.now" not in clean
         assert "time.time" not in clean
         assert "random" not in clean
+
+
+# ---------------------------------------------------------------------------
+# Real Docker boundary integration
+# ---------------------------------------------------------------------------
+
+
+class TestRealDockerBoundaryIntegration:
+    """Tests that real docker-agent execution status values produce the
+    correct review boundary decisions."""
+
+    def _docker_request(self, **overrides: object) -> dict:
+        req = dict(_valid_request())
+        req.update(overrides)
+        req["requested_adapter"] = "docker-agent-v1"
+        return req
+
+    def _docker_result(self, status: str = "requires_review", **overrides: object) -> dict:
+        res = dict(_valid_result())
+        res.update(overrides)
+        res["status"] = status
+        res["adapter"] = "docker-agent-v1"
+        return res
+
+    def test_requires_review_status_to_decision(self):
+        b = derive_review_boundary(
+            self._docker_request(),
+            self._docker_result(status="requires_review"),
+        )
+        assert b["decision"] == "requires_review"
+        assert b["requires_review"] is True
+        assert b["reason_code"] == "requires_review"
+
+    def test_failed_to_decision(self):
+        b = derive_review_boundary(
+            self._docker_request(),
+            self._docker_result(status="failed"),
+        )
+        assert b["decision"] == "failed"
+        assert b["failed"] is True
+        assert b["reason_code"] == "execution_failed"
+
+    def test_blocked_to_decision(self):
+        b = derive_review_boundary(
+            self._docker_request(),
+            self._docker_result(status="blocked"),
+        )
+        assert b["decision"] == "blocked"
+        assert b["blocked"] is True
+
+    def test_three_states_distinct(self):
+        b_review = derive_review_boundary(
+            self._docker_request(),
+            self._docker_result(status="requires_review"),
+        )
+        b_failed = derive_review_boundary(
+            self._docker_request(),
+            self._docker_result(status="failed"),
+        )
+        b_blocked = derive_review_boundary(
+            self._docker_request(),
+            self._docker_result(status="blocked"),
+        )
+        decisions = {b_review["decision"], b_failed["decision"], b_blocked["decision"]}
+        assert len(decisions) == 3
+
+    def test_noop_completed_unchanged(self):
+        b = derive_review_boundary(
+            _valid_request(),
+            _valid_result(status="completed", adapter="noop-v1"),
+        )
+        assert b["decision"] == "completed"
+        assert b["completed"] is True
