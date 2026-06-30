@@ -380,6 +380,12 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 .history-time { min-width: 12rem; color: #888; font-size: 0.8rem; }
 #run-history-placeholder { color: #888; font-style: italic; }
 #clear-history-btn { margin-bottom: 0.5rem; }
+.validation-error { color: #d00; font-size: 0.85rem; margin-top: 0.25rem; display: none; }
+#error-panel { background: #fdd; border: 1px solid #d00; border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 1rem; display: none; }
+#error-panel h3 { margin: 0 0 0.5rem 0; color: #a00; }
+#error-panel p { margin: 0.3rem 0; }
+#dismiss-error-btn { margin-top: 0.5rem; }
+#submit:disabled { opacity: 0.6; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -409,8 +415,14 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 </fieldset>
 <label for="task">Task:</label>
 <textarea id="task" rows="4" cols="60" placeholder="Describe your task…">Implement JWT authentication middleware</textarea>
+<div id="task-validation" class="validation-error">Task text is required.</div>
 <br>
 <button id="submit">Submit</button>
+<div id="error-panel">
+<h3>Request Error</h3>
+<p id="error-message"></p>
+<button id="dismiss-error-btn">Dismiss</button>
+</div>
 <div id="status-bar" style="margin-top:0.5rem;"></div>
 <div id="result">
 <h2>Result</h2>
@@ -647,18 +659,49 @@ function renderStructured(data) {
 function fillScenario(runnerValue, taskText) {
     document.getElementById("task").value = taskText;
     window.__ariadne_last_scenario = taskText;
+    document.getElementById("task-validation").style.display = "none";
     var radios = document.querySelectorAll('input[name="runner"]');
     for (var i = 0; i < radios.length; i++) {
         radios[i].checked = (radios[i].value === runnerValue);
     }
 }
+document.getElementById("task").addEventListener("input", function() {
+    document.getElementById("task-validation").style.display = "none";
+});
+function showError(msg) {
+    document.getElementById("error-message").textContent = msg;
+    document.getElementById("error-panel").style.display = "";
+}
+function dismissError() {
+    document.getElementById("error-panel").style.display = "none";
+}
+function validateTask() {
+    var task = document.getElementById("task").value;
+    var el = document.getElementById("task-validation");
+    if (!task || task.trim() === "") {
+        el.style.display = "";
+        return false;
+    }
+    el.style.display = "none";
+    return true;
+}
+document.getElementById("dismiss-error-btn").addEventListener("click", dismissError);
 document.getElementById("submit").addEventListener("click", async function () {
     var task = document.getElementById("task").value;
-    if (!task) { alert("Task text is required."); return; }
     var runner = document.querySelector('input[name="runner"]:checked');
     var runnerValue = runner ? runner.value : "noop";
-    document.getElementById("status-bar").textContent = "Running…";
-    document.getElementById("trace-steps").innerHTML = renderTrace(null);
+    // Validate: empty or whitespace-only
+    if (!task || task.trim() === "") {
+        document.getElementById("task-validation").style.display = "";
+        return;
+    }
+    document.getElementById("task-validation").style.display = "none";
+    dismissError();
+    // Loading state
+    var btn = document.getElementById("submit");
+    btn.disabled = true;
+    btn.textContent = "Running…";
+    document.getElementById("status-bar").innerHTML = "<span class=\"loading\">Running…</span>";
     try {
         var body = {task: task, requested_adapter: runnerValue};
         var resp = await fetch("/runs/execute", {
@@ -666,10 +709,36 @@ document.getElementById("submit").addEventListener("click", async function () {
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(body),
         });
-        var data = await resp.json();
+        if (!resp.ok) {
+            var errBody = "";
+            try { errBody = await resp.text(); } catch (e) {}
+            showError("Unexpected response status: " + resp.status + (errBody ? " — " + errBody : ""));
+            btn.disabled = false;
+            btn.textContent = "Submit";
+            document.getElementById("status-bar").innerHTML = "<span class=\"status-failed\">Request failed (status " + resp.status + ")</span>";
+            return;
+        }
+        var data;
+        try {
+            data = await resp.json();
+        } catch (e) {
+            showError("Failed to parse response as JSON: " + e.message);
+            btn.disabled = false;
+            btn.textContent = "Submit";
+            document.getElementById("status-bar").innerHTML = "<span class=\"status-error\">Invalid JSON response</span>";
+            return;
+        }
+        // Check expected fields
+        var rt = get(data, "runtime_status", null);
+        if (rt === null) {
+            document.getElementById("status-bar").innerHTML = "<span class=\"status-error\">Unexpected response format</span>";
+            document.getElementById("json").textContent = JSON.stringify(data, null, 2);
+            btn.disabled = false;
+            btn.textContent = "Submit";
+            return;
+        }
         document.getElementById("status-bar").innerHTML =
-            "<span class=\"status-" + (get(data, "runtime_status", "unknown")) + "\">"
-            + (get(data, "runtime_status", "unknown")) + "</span>";
+            "<span class=\"status-" + rt + "\">" + rt + "</span>";
         document.getElementById("summary-card").innerHTML = renderSummaryCard(data);
         document.getElementById("run-report-section").style.display = "";
         window._latestData = data;
@@ -678,8 +747,11 @@ document.getElementById("submit").addEventListener("click", async function () {
         document.getElementById("structured-view").innerHTML = renderStructured(data);
         document.getElementById("json").textContent = JSON.stringify(data, null, 2);
     } catch (e) {
-        document.getElementById("status-bar").textContent = "Error: " + e.message;
+        showError("Request failed: " + e.message);
+        document.getElementById("status-bar").innerHTML = "<span class=\"status-error\">Request failed: " + e.message + "</span>";
     }
+    btn.disabled = false;
+    btn.textContent = "Submit";
 });
 document.getElementById("generate-feedback-btn").addEventListener("click", generateFeedback);
 function generateFeedback() {
