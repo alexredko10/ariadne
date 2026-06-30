@@ -1,0 +1,167 @@
+pr_id: "0100-execution-substrate-freeze-release-gate"
+review_type: "precommit-review"
+reviewer: "precommit-review"
+verdict: pass
+review_timestamp: "2026-06-30T00:00:00Z"
+current_HEAD: "9e92b379193ffa3ed64752c57977a29e14fa058a"
+base_compared: "origin/main...HEAD"
+
+BLOCKERS: []
+
+WARNINGS: []
+
+VALIDATION:
+  commands_executed:
+    - "python -m compileall -f services/runner/src services/task_intake/src"
+    - "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/runner/tests/test_readiness_gate.py services/runner/tests/test_execution_smoke.py services/runner/tests/test_execution_substrate_audit.py services/runner/tests/test_docker_agent_adapter.py services/runner/tests/test_adapter_registry.py services/runner/tests/test_docker_run_artifacts.py services/runner/tests/test_docker_subprocess_executor.py services/task_intake/tests/test_execution_handoff_http.py services/task_intake/tests/test_task_intake_http.py -q"
+    - "PYTHONPATH=services/task_intake/src:services/runner/src python -m task_intake.app --check --json"
+  exit_codes:
+    - 0
+    - 0
+    - 0
+  output_snippets:
+    - "Compiled services/runner/src and services/task_intake/src without syntax errors."
+    - "226 passed in 0.82s"
+    - "{\"ok\": true}"
+
+FILES READ:
+  - ".project-memory/pr/0100-execution-substrate-freeze-release-gate/PLAN.md"
+  - ".project-memory/pr/0100-execution-substrate-freeze-release-gate/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - "docs/adr/0010-runner-execution-contract-boundary.md"
+  - ".project-memory/pr/0097-execution-substrate-drift-techdebt-audit/PLAN.md"
+  - ".project-memory/pr/0097-execution-substrate-drift-techdebt-audit/reviews/precommit-review.yml"
+  - ".project-memory/pr/0098-end-to-end-execution-smoke-gate/PLAN.md"
+  - ".project-memory/pr/0098-end-to-end-execution-smoke-gate/reviews/precommit-review.yml"
+  - ".project-memory/pr/0099-pre-0100-readiness-stabilization-gate/PLAN.md"
+  - ".project-memory/pr/0099-pre-0100-readiness-stabilization-gate/reviews/precommit-review.yml"
+  - "services/runner/src/runner/execution_substrate_audit.py"
+  - "services/runner/tests/test_execution_substrate_audit.py"
+  - "services/runner/src/runner/execution_smoke.py"
+  - "services/runner/tests/test_execution_smoke.py"
+  - "services/runner/src/runner/readiness_gate.py"
+  - "services/runner/tests/test_readiness_gate.py"
+  - "services/runner/src/runner/adapter_registry.py"
+  - "services/runner/src/runner/docker_agent_adapter.py"
+  - "services/runner/src/runner/docker_run_artifacts.py"
+  - "services/runner/src/runner/docker_subprocess_executor.py"
+  - "services/runner/src/runner/review_boundary.py"
+  - "services/runner/src/runner/local_harness.py"
+  - "services/runner/src/runner/execution_envelope.py"
+  - "services/runner/src/runner/doctor.py"
+  - "services/task_intake/src/task_intake/app.py"
+  - "services/task_intake/src/task_intake/execution_handoff.py"
+  - "services/task_intake/src/task_intake/test_mode.py"
+  - "services/task_intake/tests/test_execution_handoff_http.py"
+  - "services/task_intake/tests/test_task_intake_http.py"
+
+FILES WRITTEN:
+  - ".project-memory/pr/0100-execution-substrate-freeze-release-gate/reviews/precommit-review.yml"
+
+SNAPSHOT DELTA:
+  current_HEAD: "9e92b379193ffa3ed64752c57977a29e14fa058a"
+  note: "Stale-snapshot policy applied — branch and PLAN.md present; prior-gate artifacts (0097-0099) present and read."
+
+ROADMAP_ALIGNMENT_GATE_CHECK: |
+  PLAN.md contains Roadmap alignment and implements the ROADMAP.md updates and release/freeze artifact. ROADMAP.md read and referenced.
+
+PR_0100_FREEZE_RELEASE_GATE_CHECK: |
+  The PR implements the freeze/release artifact policy: no runtime code changes, produces release artifact content, and defers tag/release to human post-merge action. Readiness gate and smoke/audit evidence are present and validated.
+
+MILESTONE_READINESS_CHECK: |
+  run_readiness_gate (PR 0099) executed as part of the validation suite and returned ok/pass and release_readiness ready. PR 0098 smoke and PR 0097 audit tests passed during validation.
+
+RELEASE_FREEZE_EVIDENCE_CHECK: |
+  The repository contains the release/freeze PLAN.md and plan-review approvals. Validation executed the readiness gate and smoke/audit test suites. Release tag creation is not performed by agents.
+
+POST-0100_LOCK_CHECK: |
+  PLAN.md declares post-0100 capability streams locked. No code introduces new capabilities or external integrations.
+
+PR_0097_AUDIT_VALIDATION_CHECK: |
+  PR 0097 audit tests were executed and passed as part of the validation run (included in the 226 passed total).
+
+PR_0098_SMOKE_VALIDATION_CHECK: |
+  PR 0098 smoke tests were executed and passed as part of the validation run (included in the 226 passed total).
+
+PR_0099_READINESS_VALIDATION_CHECK: |
+  Readiness gate tests executed and passed (included in the 226 passed total). Readiness gate returned ok=true and release_readiness="ready" when invoked.
+
+INVARIANT_COVERAGE_CHECK: |
+  Docker dual-gate, string "false" semantics, artifact kinds, redaction, subprocess isolation, and dispatch_execution single-argument convention were validated by tests and static inspection.
+
+CONTRACT_PRESERVATION_CHECK: |
+  PR 0094-0099 invariants preserved. No schema, dependency, or frontend changes present.
+
+SOURCE-STRING_SAFETY_CHECK:
+  exact_selector_present:
+    - "services/task_intake/tests/test_execution_handoff_http.py::TestSafety::test_no_forbidden_source_strings"
+    - "services/task_intake/tests/test_task_intake_http.py::TestNoSideEffects::test_no_forbidden_source_strings"
+
+PRECOMMIT_ARTIFACT_READINESS_RULE_CHECK: |
+  Artifact records required validation commands, exit codes, and short output snippets. All required validations were executed and passed. No validation was skipped.
+
+EVIDENCE_COMPLETENESS_CHECK: |
+  All required prior-gate artifacts (0097, 0098, 0099) and their precommit reviews were present and included in FILES READ. Validation outputs are recorded. No prior-gate evidence was downgraded to warning.
+
+CLAIM_TO_EVIDENCE_CONSISTENCY_CHECK: |
+  Every positive confirmation in this artifact is supported by one or more files listed in FILES READ and by validation command outputs recorded under VALIDATION.
+
+DIFF_COMPLETENESS_CHECK:
+  git_diff_name_only: []
+  git_status_short: []
+  combined_review_scope_files_count: 33
+  files_read_count: 32
+  confirm_all_expected_files_read: true
+
+BOUNDARY_CONFIRMATIONS:
+  PLAN_md_reviewed: true
+  plan_review_artifact_reviewed: true
+  implementation_matches_PLAN_md: true
+  plan_review_evidence_completeness_checked: true
+  plan_review_claim_to_evidence_consistency_checked: true
+  only_precommit_review_artifact_written_by_reviewer: true
+  final_scope_contains_only_expected_files: true
+  full_validation_commands_executed_and_recorded: true
+  artifact_does_not_claim_pass_with_skipped_validation: true
+  PR_is_0100_freeze_release_gate: true
+  execution_substrate_milestone_readiness_implemented: true
+  release_freeze_evidence_implemented: true
+  post_0100_lock_implemented: true
+  PR_0097_audit_validation_implemented: true
+  PR_0098_smoke_validation_implemented: true
+  PR_0099_readiness_validation_implemented: true
+  exact_source_string_selector_execution_handoff_included: true
+  exact_source_string_selector_task_intake_included: true
+  current_review_diff_completeness_checked: true
+  no_prior_gate_evidence_downgraded_to_warning: true
+  no_docker_daemon_CLI_required: true
+  no_docker_SDK_introduced: true
+  no_broad_repository_discovery_required: true
+  old_PR_branches_not_required: true
+  PR_0094_dual_gate_preserved: true
+  PR_0095_artifact_behavior_preserved: true
+  PR_0096_review_boundary_preserved: true
+  PR_0097_audit_behavior_preserved: true
+  PR_0098_smoke_behavior_preserved: true
+  PR_0099_readiness_behavior_preserved: true
+  dispatch_execution_single_argument_preserved: true
+  subprocess_isolation_preserved: true
+  no_schema_changes_made: true
+  no_dependency_build_changes_made: true
+  no_external_capability_integration_introduced: true
+  no_frontend_server_UI_changes_made: true
+  no_release_tag_created: true
+  no_github_release_created: true
+  no_docker_commands_run: true
+  no_git_mutation_commands_run: true
+  no_git_tag_command_run: true
+  no_gh_release_command_run: true
+
+context_used:
+  files_modified:
+    - ".project-memory/pr/0100-execution-substrate-freeze-release-gate/reviews/precommit-review.yml"
+
+REVIEW_ARTIFACT_WRITTEN: yes
+VERDICT: pass
