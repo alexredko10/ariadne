@@ -1,0 +1,32 @@
+schema_version: "1.0"
+pr_id: "0093-roadmap-correction-resume-execution-track"
+review_type: "precommit-review"
+verdict: "block"
+reviewer: "precommit-review"
+timestamp: "2026-06-27T01:00:00Z"
+snapshot_delta:
+  current_head_sha: "6a6ff9dc86871f11348613c61d941f592633fd49"
+  git_status_short: "M ROADMAP.md\nM agents/architect.yml"
+  git_diff_name_only: "ROADMAP.md\nagents/architect.yml"
+  plan_md_base_sha: null
+  scope_relevant_diff: "ROADMAP.md"
+  blocking_diff: "agents/architect.yml"
+  rationale: "Dirty tree contains file 'agents/architect.yml' which is outside the expected final scope (ROADMAP.md, ADR 0011, review artifact)."
+scope:
+  - "ROADMAP.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+files_checked:
+  - "ROADMAP.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+validation:
+  roadmap_alignment_check: "not_run"
+blockers: 
+  - "Dirty tree path 'agents/architect.yml' outside expected final scope."
+warnings: []
+decisions_made:
+  - "Verdict set to block due to presence of out-of-scope modified file 'agents/architect.yml'."
+context_used:
+  files_read:
+    - "ROADMAP.md"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  files_modified: [".project-memory/pr/0093-roadmap-correction-resume-execution-track/reviews/precommit-review.yml"]
