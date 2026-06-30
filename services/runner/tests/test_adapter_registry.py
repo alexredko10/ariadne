@@ -182,3 +182,92 @@ class TestNoSideEffects:
         assert "importlib" not in clean
         assert "pkg_resources" not in clean
         assert "entry_points" not in clean
+
+
+# ---------------------------------------------------------------------------
+# Docker dual-gate opt-in
+# ---------------------------------------------------------------------------
+
+
+class TestDockerDualGate:
+    """Tests for the docker-agent dual-gate opt-in wrapper.
+
+    Requires both allow_docker (request field) and
+    ARIADNE_ALLOW_DOCKER_EXECUTION (env var) to be truthy.
+    """
+
+    def _docker_request(self, **overrides: object) -> dict:
+        base = {
+            "execution_request_id": "er-002",
+            "run_id": "run-002",
+            "task_intake_id": "task_b2c3d4",
+            "context_preview_id": "ctxpreview_b2c3d4",
+            "requested_adapter": "docker-agent-v1",
+            "execution_mode": "execute",
+            "inputs": {"task_goal": "test"},
+            "constraints": [],
+        }
+        base.update(overrides)
+        return base
+
+    def test_env_missing_allow_docker_false_returns_blocked(self, monkeypatch):
+        monkeypatch.delenv("ARIADNE_ALLOW_DOCKER_EXECUTION", raising=False)
+        result = dispatch_execution(self._docker_request(allow_docker=False))
+        assert result["status"] == "blocked"
+        assert result["adapter"] == "docker-agent-v1"
+
+    def test_env_missing_allow_docker_true_returns_blocked(self, monkeypatch):
+        monkeypatch.delenv("ARIADNE_ALLOW_DOCKER_EXECUTION", raising=False)
+        result = dispatch_execution(self._docker_request(allow_docker=True))
+        assert result["status"] == "blocked"
+        assert result["adapter"] == "docker-agent-v1"
+
+    def test_env_true_allow_docker_false_returns_blocked(self, monkeypatch):
+        monkeypatch.setenv("ARIADNE_ALLOW_DOCKER_EXECUTION", "1")
+        result = dispatch_execution(self._docker_request(allow_docker=False))
+        assert result["status"] == "blocked"
+        assert result["adapter"] == "docker-agent-v1"
+
+    def test_env_true_allow_docker_true_runs_executor(self, monkeypatch):
+        monkeypatch.setenv("ARIADNE_ALLOW_DOCKER_EXECUTION", "1")
+        result = dispatch_execution(self._docker_request(allow_docker=True))
+        # Both gates pass, so executor is invoked. The executor tries to
+        # run "docker" which won't be found in test — expect failed not blocked.
+        assert result["status"] in ("failed", "completed")
+        assert result["adapter"] == "docker-agent-v1"
+
+    def test_dispatch_execution_preserves_single_arg(self, monkeypatch):
+        monkeypatch.setenv("ARIADNE_ALLOW_DOCKER_EXECUTION", "1")
+        req = self._docker_request(allow_docker=False)
+        # dispatch_execution still calls adapter_fn(execution_request) with 1 arg
+        result = dispatch_execution(req)
+        assert "execution_request_id" in result
+
+    def test_docker_agent_string_false_allow_docker_does_not_enable_real_executor(self,monkeypatch):
+        monkeypatch.setenv("ARIADNE_ALLOW_DOCKER_EXECUTION", "1")
+
+        result = dispatch_execution(
+            {
+                "id": "req-1",
+                "run_id": "run-1",
+                "task": "test",
+                "requested_adapter": "docker-agent",
+                "allow_docker": "false",
+            }
+        )
+
+        assert result["status"] == "blocked"
+
+    def test_no_bypass_path(self, monkeypatch):
+        """Any combination except both-true produces blocked."""
+        monkeypatch.delenv("ARIADNE_ALLOW_DOCKER_EXECUTION", raising=False)
+        r1 = dispatch_execution(self._docker_request(allow_docker=False))
+        r2 = dispatch_execution(self._docker_request(allow_docker=True))
+        monkeypatch.setenv("ARIADNE_ALLOW_DOCKER_EXECUTION", "0")
+        r3 = dispatch_execution(self._docker_request(allow_docker=True))
+        monkeypatch.setenv("ARIADNE_ALLOW_DOCKER_EXECUTION", "false")
+        r4 = dispatch_execution(self._docker_request(allow_docker=True))
+        monkeypatch.setenv("ARIADNE_ALLOW_DOCKER_EXECUTION", "no")
+        r5 = dispatch_execution(self._docker_request(allow_docker=True))
+        for r in (r1, r2, r3, r4, r5):
+            assert r["status"] == "blocked", f"Expected blocked but got {r['status']}"

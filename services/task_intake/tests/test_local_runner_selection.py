@@ -155,3 +155,63 @@ class TestRunsExecuteWithDocker:
         # Docker adapter without allow_docker returns blocked
         assert data["runtime_status"] == data["review_boundary"]["decision"]
         assert data["runtime_status"] == "blocked"
+
+
+# ---------------------------------------------------------------------------
+# Docker opt-in UI control
+# ---------------------------------------------------------------------------
+
+
+class TestDockerOptInControl:
+    """Tests for the new allow_docker checkbox in the UI."""
+
+    def test_page_has_allow_docker_checkbox(self):
+        _, html = _request("GET", "/")
+        assert "allow-docker-checkbox" in html
+
+    def test_allow_docker_label_present(self):
+        _, html = _request("GET", "/")
+        assert "ARIADNE_ALLOW_DOCKER_EXECUTION" in html
+
+    def test_allow_docker_defaults_unchecked(self):
+        _, html = _request("GET", "/")
+        # The checkbox should not have 'checked' attribute
+        import re
+        # Find the checkbox input
+        match = re.search(r'<input[^>]*id="allow-docker-checkbox"[^>]*>', html)
+        assert match is not None, "allow-docker-checkbox input not found"
+        assert 'checked' not in match.group()
+
+    def test_selecting_docker_does_not_auto_check_allow(self):
+        body = json.dumps(
+            {"task": "test", "requested_adapter": "docker-agent"}
+        ).encode("utf-8")
+        _, raw = _request("POST", "/runs/execute", body=body)
+        data = json.loads(raw)
+        # Without allow_docker, docker-agent should be blocked
+        assert data["execution_result"]["status"] == "blocked"
+
+    def test_post_includes_allow_docker_when_checked(self):
+        body = json.dumps(
+            {"task": "test", "requested_adapter": "docker-agent", "allow_docker": True}
+        ).encode("utf-8")
+        _, raw = _request("POST", "/runs/execute", body=body)
+        data = json.loads(raw)
+        # The execution result adapter should be docker-agent-v1
+        assert data["execution_result"]["adapter"] == "docker-agent-v1"
+
+    def test_conditional_copy_replaces_hardcoded_boundary(self):
+        _, html = _request("GET", "/")
+        # The old hardcoded string must be gone
+        assert "completed without Docker" not in html
+        assert "allow_docker=True" not in html
+
+    def test_docker_radio_not_auto_selected(self):
+        _, html = _request("GET", "/")
+        # noop should still be the default
+        assert 'value="noop"' in html
+        # docker-agent should not be checked
+        import re
+        docker_match = re.search(r'<input[^>]*value="docker-agent"[^>]*>', html)
+        assert docker_match is not None
+        assert 'checked' not in docker_match.group()

@@ -450,7 +450,9 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 <legend>Runner adapter</legend>
 <label><input type="radio" name="runner" value="noop" checked> Local deterministic / no-op (default)</label>
 <br>
-<label><input type="radio" name="runner" value="docker-agent"> Docker agent (opt-in — does not run Docker)</label>
+<label><input type="radio" name="runner" value="docker-agent"> Docker agent (opt-in)</label>
+<br>
+<label><input type="checkbox" id="allow-docker-checkbox"> Enable real Docker execution (requires ARIADNE_ALLOW_DOCKER_EXECUTION environment variable)</label>
 </fieldset>
 <label for="task">Task:</label>
 <textarea id="task" rows="4" cols="60" placeholder="Describe your task…">Implement JWT authentication middleware</textarea>
@@ -673,7 +675,11 @@ function renderSummaryCard(data) {
     if (runtimeStatus === "completed" && isNoop)
         whatHappened = "Deterministic local/no-op run completed. No real execution was performed.";
     else if (runtimeStatus === "completed" && !isNoop)
-        whatHappened = "Docker opt-in boundary \u2014 completed without Docker. Enable Docker with allow_docker=True to execute.";
+        whatHappened = "Docker execution completed. See execution trace for details.";
+    else if (runtimeStatus === "failed" && !isNoop)
+        whatHappened = "Docker execution failed. Check the errors section for details.";
+    else if (runtimeStatus === "blocked" && !isNoop)
+        whatHappened = "Docker execution blocked. You must select the Docker opt-in checkbox and set the ARIADNE_ALLOW_DOCKER_EXECUTION environment variable to proceed.";
     else if (runtimeStatus === "blocked")
         whatHappened = "Execution was blocked. Review the review boundary section for details.";
     else if (runtimeStatus === "requires_review")
@@ -826,7 +832,7 @@ document.getElementById("submit").addEventListener("click", async function () {
     btn.textContent = "Running…";
     document.getElementById("status-bar").innerHTML = "<span class=\"loading\">Running…</span>";
     try {
-        var body = {task: task, requested_adapter: runnerValue};
+        var body = {task: task, requested_adapter: runnerValue, allow_docker: document.getElementById("allow-docker-checkbox").checked};
         var resp = await fetch("/runs/execute", {
             method: "POST",
             headers: {"Content-Type": "application/json"},

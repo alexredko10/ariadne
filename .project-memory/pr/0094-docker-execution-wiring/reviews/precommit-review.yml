@@ -1,0 +1,104 @@
+schema_version: "0.1"
+pr_id: "0094-docker-execution-wiring"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-06-30T10:06:00Z"
+snapshot_delta:
+  plan_base_sha: "9b792a371abeb44967d9686eef4b2df80d594c85"
+  current_head: "102da04cec93908fa944bc3da3ae864017380a78"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/runner/src/runner/docker_subprocess_executor.py"
+    - "services/runner/src/runner/adapter_registry.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/runner/tests/test_docker_subprocess_executor.py"
+    - "services/runner/tests/test_adapter_registry.py"
+    - "services/task_intake/tests/test_local_runner_selection.py"
+    - ".project-memory/pr/0094-docker-execution-wiring/reviews/precommit-review.yml"
+  actual_files_changed:
+    - "services/runner/src/runner/adapter_registry.py"
+    - "services/runner/tests/test_adapter_registry.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_local_runner_selection.py"
+    - "services/runner/src/runner/docker_subprocess_executor.py"  # untracked/new
+    - "services/runner/tests/test_docker_subprocess_executor.py"  # untracked/new
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0094-docker-execution-wiring/PLAN.md"
+  - ".project-memory/pr/0094-docker-execution-wiring/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - "docs/adr/0010-runner-execution-contract-boundary.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - "services/runner/src/runner/docker_agent_adapter.py"
+  - "services/runner/src/runner/adapter_registry.py"
+  - "services/runner/tests/test_docker_agent_adapter.py"
+  - "services/runner/tests/test_adapter_registry.py"
+  - "services/runner/tests/test_docker_subprocess_executor.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/tests/test_local_runner_selection.py"
+  - "services/task_intake/tests/test_execution_handoff_http.py"
+  - "services/task_intake/tests/test_task_intake_http.py"
+validation:
+  - command: "python -m compileall -f services/runner/src services/task_intake/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "modules compiled"
+  - command: "PYTHONPATH=services/runner/src python -m pytest services/runner/tests/test_docker_subprocess_executor.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "5 passed"
+  - command: "PYTHONPATH=services/runner/src python -m pytest services/runner/tests/test_adapter_registry.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "14 passed"
+  - command: "PYTHONPATH=services/runner/src python -m pytest services/runner/tests/test_docker_agent_adapter.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "8 passed"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_local_runner_selection.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "10 passed"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_execution_handoff_http.py services/task_intake/tests/test_task_intake_http.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "48 passed"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_task_intake_http.py::TestNoSideEffects::test_no_forbidden_source_strings services/task_intake/tests/test_execution_handoff_http.py::TestSafety::test_no_forbidden_source_strings -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "2 passed"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m task_intake.app --check --json"
+    result: "passed"
+    exit_code: 0
+    evidence: "{\n  \"check\": true,\n  \"default_adapter\": \"noop\",\n  \"dependencies\": [\n    \"uvicorn\"\n  ],\n  \"host\": \"127.0.0.1\",\n  \"port\": 8000,\n  \"routes\": [\n    \"/\",\n    \"/health\",\n    \"/submit\",\n    \"/task-intake/submit\",\n    \"/task-intake/normalize\",\n    \"/context/preview\",\n    \"/runs\",\n    \"/mock-loop\",\n    \"/runs/execute\"\n  ],\n  \"service\": \"task_intake\",\n  \"status\": \"ready\"\n}"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Follow PLAN.md exactly"
+    reason: "New docker_subprocess_executor implements subprocess.run with list argv, timeout handling, FileNotFoundError handling; adapter_registry implements dual-gate wrapper; server UI adds allow_docker checkbox and includes flag in POST body. Tests mock subprocess.run and pass."
+context_used:
+  labels:
+    - precommit
+    - contracts
+  memory_files_read:
+    - ".project-memory/pr/0094-docker-execution-wiring/PLAN.md"
+    - ".project-memory/pr/0094-docker-execution-wiring/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - "docs/adr/0010-runner-execution-contract-boundary.md"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  anchors_used: []
+  files_inspected:
+    - "services/runner/src/runner/docker_subprocess_executor.py"
+    - "services/runner/src/runner/adapter_registry.py"
+    - "services/task_intake/src/task_intake/server.py"
+  files_modified:
+    - ".project-memory/pr/0094-docker-execution-wiring/reviews/precommit-review.yml"
+  files_intentionally_ignored:
+    - "services/runner/**/__pycache__"
+    - "services/task_intake/**/__pycache__"
