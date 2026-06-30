@@ -10,10 +10,41 @@ No plugin discovery, no dynamic imports, no filesystem access, no subprocess.
 
 from __future__ import annotations
 
+import os
 from typing import Any
 
 from runner.noop_adapter import run_noop_execution
 from runner.docker_agent_adapter import run_docker_agent_execution
+from runner.docker_subprocess_executor import run_docker_subprocess
+
+
+# ---------------------------------------------------------------------------
+# Docker-opt-in wrapper
+# ---------------------------------------------------------------------------
+
+
+def _dispatch_docker_agent(execution_request: dict) -> dict:
+    """Dispatch docker-agent with dual-gate opt-in.
+
+    Both ``execution_request.allow_docker`` and the
+    ``ARIADNE_ALLOW_DOCKER_EXECUTION`` environment variable must be truthy
+    for real Docker execution. Otherwise returns the existing blocked result.
+    """
+    request_allows_docker = execution_request.get("allow_docker") is True
+    env_raw = os.environ.get("ARIADNE_ALLOW_DOCKER_EXECUTION", "")
+    env_allowed = env_raw.strip().lower() not in ("", "0", "false", "no", "off")
+
+    if not (request_allows_docker and env_allowed):
+        return run_docker_agent_execution(
+            execution_request,
+            allow_docker=False,
+        )
+
+    return run_docker_agent_execution(
+        execution_request,
+        executor=run_docker_subprocess,
+        allow_docker=True,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -24,7 +55,7 @@ from runner.docker_agent_adapter import run_docker_agent_execution
 # Selection checks if requested_adapter.lower() contains the key.
 _ADAPTERS: list[tuple[str, Any]] = [
     ("noop", run_noop_execution),
-    ("docker", run_docker_agent_execution),
+    ("docker", _dispatch_docker_agent),
 ]
 
 
