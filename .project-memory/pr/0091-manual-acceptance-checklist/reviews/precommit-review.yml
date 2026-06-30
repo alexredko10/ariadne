@@ -1,0 +1,69 @@
+schema_version: "0.1"
+pr_id: "0091-manual-acceptance-checklist"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-06-30T09:46:12Z"
+snapshot_delta:
+  plan_base_sha: "a284fa520adc9b3b9fa0fe54ab5c16f85bf1bfcb"
+  current_head: "a284fa520adc9b3b9fa0fe54ab5c16f85bf1bfcb"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_manual_acceptance_checklist.py"
+    - ".project-memory/pr/0091-manual-acceptance-checklist/reviews/precommit-review.yml"
+  actual_files:
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_manual_acceptance_checklist.py"
+    - ".project-memory/pr/0091-manual-acceptance-checklist/PLAN.md"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0091-manual-acceptance-checklist/PLAN.md"
+  - ".project-memory/pr/0091-manual-acceptance-checklist/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0090-first-time-user-onboarding-panel/reviews/precommit-review.yml"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/tests/test_manual_acceptance_checklist.py"
+validation:
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_manual_acceptance_checklist.py services/task_intake/tests/test_first_time_user_onboarding_panel.py services/task_intake/tests/test_local_empty_error_states.py services/task_intake/tests/test_local_run_history_in_page.py services/task_intake/tests/test_copy_export_local_run_report.py services/task_intake/tests/test_local_user_test_session_report.py services/task_intake/tests/test_guided_local_user_test_scenarios.py services/task_intake/tests/test_local_user_test_feedback_panel.py services/task_intake/tests/test_local_run_summary_card.py services/task_intake/tests/test_local_execution_trace.py services/task_intake/tests/test_local_runner_selection.py services/task_intake/tests/test_local_result_structured_view.py services/task_intake/tests/test_local_interaction_page.py services/task_intake/tests/test_execution_handoff_http.py::TestSafety::test_no_forbidden_source_strings services/task_intake/tests/test_task_intake_http.py::TestNoSideEffects::test_no_forbidden_source_strings -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "276 passed"
+  - command: "python -m compileall -f services/task_intake/src services/runner/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "modules compiled"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m task_intake.app --check --json"
+    result: "passed"
+    exit_code: 0
+    evidence: "{\n  \"check\": true,\n  \"default_adapter\": \"noop\",\n  \"dependencies\": [\n    \"uvicorn\"\n  ],\n  \"host\": \"127.0.0.1\",\n  \"port\": 8000,\n  \"routes\": [\n    \"/\",\n    \"/health\",\n    \"/submit\",\n    \"/task-intake/submit\",\n    \"/task-intake/normalize\",\n    \"/context/preview\",\n    \"/runs\",\n    \"/mock-loop\",\n    \"/runs/execute\"\n  ],\n  \"service\": \"task_intake\",\n  \"status\": \"ready\"\n}"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Follow PLAN.md exactly"
+    reason: "Implementation adds checklist panel in server.py with in-memory checkboxes and counter; tests added and passing."
+context_used:
+  labels:
+    - precommit
+    - contracts
+  memory_files_read:
+    - ".project-memory/pr/0091-manual-acceptance-checklist/PLAN.md"
+    - ".project-memory/pr/0091-manual-acceptance-checklist/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0090-first-time-user-onboarding-panel/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_manual_acceptance_checklist.py"
+  files_modified:
+    - ".project-memory/pr/0091-manual-acceptance-checklist/reviews/precommit-review.yml"
+  files_intentionally_ignored:
+    - "services/runner/**"
+    - "packages/**"
+    - "agents/**"
+    - "apps/**"
