@@ -380,3 +380,52 @@ class TestHumanReviewBoundary:
         assert allow_docker_false["status"] == "blocked"
         # allow_docker=True must NOT be blocked
         assert allow_docker_true["status"] != "blocked"
+
+
+# ---------------------------------------------------------------------------
+# Audit invariants integration
+# ---------------------------------------------------------------------------
+
+
+class TestAuditInvariants:
+    """Tests that audit invariant checks match actual docker_agent_adapter
+    behavior. Uses real source text for the audit module."""
+
+    def _get_adapter_source(self) -> str:
+        import inspect
+        from runner.docker_agent_adapter import run_docker_agent_execution
+        return inspect.getsource(run_docker_agent_execution)
+
+    def test_audit_requires_review_matches_adapter(self):
+        """The audit's requires_review check passes when given the real
+        adapter source."""
+        from runner.execution_substrate_audit import run_execution_substrate_audit
+        source = self._get_adapter_source()
+        report = run_execution_substrate_audit(
+            docker_agent_adapter_source=source,
+        )
+        check = [c for c in report["checks"] if c["check_id"] == "docker_success_requires_review"]
+        assert len(check) == 1
+        assert check[0]["passed"] is True
+
+    def test_audit_blocked_matches_adapter(self):
+        """The audit's blocked check passes when given the real adapter source."""
+        from runner.execution_substrate_audit import run_execution_substrate_audit
+        source = self._get_adapter_source()
+        report = run_execution_substrate_audit(
+            docker_agent_adapter_source=source,
+        )
+        check = [c for c in report["checks"] if c["check_id"] == "docker_blocked_unchanged"]
+        assert len(check) == 1
+        assert check[0]["passed"] is True
+
+    def test_audit_failed_matches_adapter(self):
+        """The audit's failed check passes when given the real adapter source."""
+        from runner.execution_substrate_audit import run_execution_substrate_audit
+        source = self._get_adapter_source()
+        report = run_execution_substrate_audit(
+            docker_agent_adapter_source=source,
+        )
+        check = [c for c in report["checks"] if c["check_id"] == "docker_failed_unchanged"]
+        assert len(check) == 1
+        assert check[0]["passed"] is True
