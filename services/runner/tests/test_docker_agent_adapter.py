@@ -64,13 +64,13 @@ class TestOptIn:
         ev = result.get("evidence", [])
         assert any("allow_docker" in e.get("summary", "") for e in ev)
 
-    def test_allow_docker_with_fake_executor_completes(self):
+    def test_allow_docker_with_fake_executor_requires_review(self):
         result = run_docker_agent_execution(
             _valid_request(),
             allow_docker=True,
             executor=_fake_successful_executor,
         )
-        assert result["status"] == "completed"
+        assert result["status"] == "requires_review"
 
     def test_allow_docker_with_fake_failing_executor_fails(self):
         result = run_docker_agent_execution(
@@ -273,3 +273,110 @@ class TestRunArtifacts:
         result = run_docker_agent_execution(_valid_request())
         evidence = result.get("evidence", [])
         assert evidence[0]["status"] == "skipped"
+
+
+# ---------------------------------------------------------------------------
+# Human review boundary for real Docker runs
+# ---------------------------------------------------------------------------
+
+
+class TestHumanReviewBoundary:
+    """Tests that real docker-agent executions produce the correct status
+    for the existing derive_review_boundary()."""
+
+    def test_successful_real_execution_requires_review(self):
+        result = run_docker_agent_execution(
+            _valid_request(),
+            allow_docker=True,
+            executor=_fake_successful_executor,
+        )
+        assert result["status"] == "requires_review"
+
+    def test_failed_real_execution_failed(self):
+        result = run_docker_agent_execution(
+            _valid_request(),
+            allow_docker=True,
+            executor=_fake_failing_executor,
+        )
+        assert result["status"] == "failed"
+
+    def test_blocked_execution_blocked(self):
+        result = run_docker_agent_execution(_valid_request())
+        assert result["status"] == "blocked"
+
+    def test_requires_review_failed_blocked_are_distinct(self):
+        r_requires = run_docker_agent_execution(
+            _valid_request(), allow_docker=True, executor=_fake_successful_executor,
+        )
+        r_failed = run_docker_agent_execution(
+            _valid_request(), allow_docker=True, executor=_fake_failing_executor,
+        )
+        r_blocked = run_docker_agent_execution(_valid_request())
+        statuses = {r_requires["status"], r_failed["status"], r_blocked["status"]}
+        assert len(statuses) == 3
+
+    def test_review_required_field_is_false(self):
+        result = run_docker_agent_execution(
+            _valid_request(),
+            allow_docker=True,
+            executor=_fake_successful_executor,
+        )
+        # review_required is a different field from status — it stays False
+        # The boundary function reads status, not review_required
+        assert result["review_required"] is False
+
+    def test_pr_0095_artifact_kinds_preserved_requires_review(self):
+        result = run_docker_agent_execution(
+            _valid_request(),
+            allow_docker=True,
+            executor=_fake_successful_executor,
+        )
+        kinds = [a["kind"] for a in result.get("artifacts", [])]
+        assert "docker_stdout" in kinds
+        assert "docker_stderr" in kinds
+        assert "docker_execution_metadata" in kinds
+        assert "docker_command_metadata" in kinds
+
+    def test_pr_0095_evidence_preserved_requires_review(self):
+        result = run_docker_agent_execution(
+            _valid_request(),
+            allow_docker=True,
+            executor=_fake_successful_executor,
+        )
+        evidence = result.get("evidence", [])
+        assert evidence[0]["evidence_kind"] == "execution_log"
+        assert evidence[0]["status"] == "passed"
+
+    def test_pr_0095_artifact_kinds_preserved_failed(self):
+        result = run_docker_agent_execution(
+            _valid_request(),
+            allow_docker=True,
+            executor=_fake_failing_executor,
+        )
+        kinds = [a["kind"] for a in result.get("artifacts", [])]
+        assert "docker_stdout" in kinds
+        assert "docker_stderr" in kinds
+        assert "docker_execution_metadata" in kinds
+        assert "docker_command_metadata" in kinds
+
+    def test_pr_0095_evidence_preserved_failed(self):
+        result = run_docker_agent_execution(
+            _valid_request(),
+            allow_docker=True,
+            executor=_fake_failing_executor,
+        )
+        evidence = result.get("evidence", [])
+        assert evidence[0]["evidence_kind"] == "execution_log"
+        assert evidence[0]["status"] == "failed"
+
+    def test_pr_0094_dual_gate_compatibility(self):
+        allow_docker_false = run_docker_agent_execution(
+            _valid_request(), allow_docker=False,
+        )
+        allow_docker_true = run_docker_agent_execution(
+            _valid_request(), allow_docker=True, executor=_fake_successful_executor,
+        )
+        # allow_docker=False must be blocked
+        assert allow_docker_false["status"] == "blocked"
+        # allow_docker=True must NOT be blocked
+        assert allow_docker_true["status"] != "blocked"

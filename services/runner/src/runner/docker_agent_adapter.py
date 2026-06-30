@@ -149,12 +149,17 @@ def run_docker_agent_execution(
 
     success = executor_result.get("success", False)
 
+    if success:
+        status = "requires_review"
+    else:
+        status = "failed"
+
     # --- Normalize result ---
     return {
         "execution_result_id": f"{req_id}-result",
         "execution_request_id": req_id,
         "run_id": run_id,
-        "status": "completed" if success else "failed",
+        "status": status,
         "adapter": "docker-agent-v1",
         "artifacts": build_docker_artifacts(executor_result, command_metadata, req_id),
         "evidence": build_docker_evidence(executor_result, command_metadata, req_id),
