@@ -1,5 +1,79 @@
 # Ariadne Roadmap
 
+## PR Cadence & Track Architecture
+
+This roadmap describes two kinds of work:
+
+- **Substrate/execution PRs** — multi-step coherent units that deliver backend
+  contracts, runner behavior, artifact contracts, schema changes, or platform
+  infrastructure.
+- **UX-hardening PRs** — frontend-only page additions that improve local
+  testing ergonomics. These are explicitly gated and may only proceed under
+  architect sign-off.
+
+**PR batching policy (effective PR 0094 onward):** Every PR must deliver a
+coherent multi-step substrate capability unit. Single isolated UI control/
+toggle/copy PRs must be merged into an adjacent backlog item or rejected by
+the planner. The planner must block PRs that touch only
+`services/task_intake/src/task_intake/server.py` for isolated UI additions
+unless architect sign-off is cited.
+
+**Drift-detection heuristic:** If 4 or more consecutive PRs touch only one
+runtime UI file (`services/task_intake/src/task_intake/server.py`) and
+introduce no backend contract, runner behavior, artifact contract, or schema
+change, architect review is required before next PR planning.
+
+---
+
+## Roadmap Alignment Gate
+
+From PR 0094 onward, every new PR must pass a roadmap alignment check before
+planning is approved.
+
+### Planner responsibilities
+
+- Read ROADMAP.md and ADR 0011 before writing PLAN.md.
+- Identify the current roadmap track.
+- Identify the expected next PR number or accepted batch slot.
+- State why the proposed PR is the next coherent roadmap step.
+- State whether the PR is substrate/execution, stabilization/acceptance, or
+  explicitly architect-approved exception.
+- Reject or block any PR that is a single isolated frontend-only UI/copy/
+  control change unless explicit architect sign-off is cited.
+
+### PLAN.md required section
+
+Every PLAN.md from PR 0094 onward must include the following section:
+
+```markdown
+### Roadmap alignment
+
+* roadmap track:
+* expected PR slot:
+* why this PR is next:
+* batching policy check:
+* drift heuristic check:
+* architect sign-off required: yes | no
+* architect sign-off reference if required:
+```
+
+### Plan-review responsibilities
+
+- Block if PLAN.md lacks the Roadmap alignment section.
+- Block if the PR does not match the active ROADMAP.md sequence.
+- Block if batching policy is not satisfied.
+- Block if drift heuristic triggers and no architect sign-off is cited.
+- Block if the PR continues a closed track.
+
+### Implementation and precommit-review responsibilities
+
+- Implementation follows the approved PLAN.md only.
+- Precommit-review verifies no implementation drift beyond approved PLAN.md
+  scope.
+- Roadmap reinterpretation must not happen during implementation.
+
+---
+
 ## Phase 0: Architecture Contracts
 
 **Deliverables:** Platform schemas, ADRs, architecture documentation.
@@ -21,6 +95,201 @@
 **Dependencies:** None.
 **Estimated PR count:** 1.
 **Risks:** None — contract-only.
+
+---
+
+## Local Interaction UX Track (CLOSED)
+
+**What this track delivered:** A complete local browser interaction page at
+`GET /` served by `services/task_intake/src/task_intake/server.py` that lets
+an operator submit a task, select a runner (noop default, docker-agent opt-in),
+inspect the result, summary card, execution trace, structured view, raw JSON,
+run history, and generate session reports, feedback, run reports, and confusion
+signals.
+
+**PRs:** PR 0079 through PR 0092 (14 PRs).
+- PR 0079 — First user-facing local interaction
+- PR 0080 — Local result structured view
+- PR 0081 — Explicit local runner selection
+- PR 0082 — Visible local execution trace
+- PR 0083 — Local run summary card
+- PR 0084 — Local user test feedback panel
+- PR 0085 — Guided local user test scenarios
+- PR 0086 — Local user test session report
+- PR 0087 — Copy/export local run report
+- PR 0088 — Local run history in page
+- PR 0089 — Local empty and error states
+- PR 0090 — First-time user onboarding panel
+- PR 0091 — Manual acceptance checklist
+- PR 0092 — Local user confusion signals
+
+**Evidence for endpoint:** Project-memory PR directories exist for PR 0079
+through PR 0092. No PR 0093 or higher UX-track PRs exist in project memory.
+`git log` is not available in the current shell environment to confirm commit
+SHAs.
+
+**Status: CLOSED.** The Local Interaction page is feature-complete for manual
+local testing purposes. No further single-feature frontend-only PRs against
+this page without explicit architect sign-off.
+
+---
+
+## Execution/Substrate Track (Resumed at PR 0094)
+
+**Current substrate state (verified from filesystem):**
+
+| Component | File | Status |
+|---|---|---|
+| No-op runner adapter | `services/runner/src/runner/noop_adapter.py` | Present — deterministic dry_run/preview only |
+| Docker agent adapter | `services/runner/src/runner/docker_agent_adapter.py` | Present — opt-in boundary, returns blocked without allow_docker=True |
+| Adapter registry | `services/runner/src/runner/adapter_registry.py` | Present — dispatches noop or docker |
+| Execution envelope | `services/runner/src/runner/execution_envelope.py` | Present — deterministic artifact/evidence normalization |
+| Human review boundary | `services/runner/src/runner/review_boundary.py` | Present — deterministic approval/review state interpretation |
+| Local harness | `services/runner/src/runner/local_harness.py` | Present — composes dispatcher, envelope, review boundary |
+| Content-addressed artifact store | `services/runner/src/runner/artifacts.py` | Present — stores by sha256; writes to filesystem |
+| Task intake server | `services/task_intake/src/task_intake/server.py` | Present — serves HTML page + API endpoints |
+| Execution handoff | `services/task_intake/src/task_intake/execution_handoff.py` | Present — mock execution handoff |
+
+### Substrate gaps (to be closed PR 0094–0100)
+
+1. **Real Docker-backed execution** — `docker_agent_adapter.py` requires
+   `allow_docker=True` + an injected executor. No actual Docker daemon
+   invocation exists.
+2. **Run artifact collection** — the artifact store exists as a library but
+   is not wired into the execution pipeline. Artifacts are not persisted from
+   real runs.
+3. **Human review boundary for real runs** — `review_boundary.py` is a pure
+   deterministic function. It is not wired into a persistence or notification
+   path for real multi-step runs.
+4. **Stabilization/acceptance pass** — end-to-end flow must be verified with
+   real execution conditions (not just mock/noop).
+
+---
+
+## PR Sequence: PR 0094 to PR 0100
+
+Gap consolidation is prioritized to merge dependency-graph-adjacent work into
+the fewest coherent PRs.
+
+### PR 0094 — Docker Execution Wiring
+
+- Wire `docker_agent_adapter.py` into a real subprocess/executor that invokes
+  Docker via `subprocess.run` or equivalent.
+- Inject real executor into `run_docker_agent_execution` from the harness or
+  entrypoint.
+- Add minimal smoke test that the new executor path is callable (no daemon
+  required in CI).
+
+**Backend contract change:** Yes — executor wiring.
+**Runner behavior change:** Yes — Docker adapter no longer always blocked.
+**Artifact contract change:** No.
+**Schema change:** No.
+
+### PR 0095 — Run Artifact Persistence
+
+- Wire `ArtifactStore` into the execution pipeline so artifacts produced
+  during a run are persisted to a configured store root.
+- Expose stored artifact metadata in the execution envelope.
+- Add test that artifacts survive across run boundaries in a local store.
+
+**Backend contract change:** Yes — artifact store integration.
+**Runner behavior change:** Yes — artifacts are persisted, not only in-memory.
+**Artifact contract change:** No (existing schema).
+**Schema change:** No.
+
+### PR 0096 — Human Review Persistence Path
+
+- Wire an approval/review record into the execution pipeline so that
+  `review_boundary.py` decisions can be persisted and later retrieved.
+- Add a lightweight in-memory review store (file-backed or ephemeral) that
+  records review decisions and makes them available for downstream
+  consumption.
+- Add test that review decisions are storable and retrievable.
+
+**Backend contract change:** Yes — review storage path.
+**Runner behavior change:** No.
+**Artifact contract change:** No.
+**Schema change:** No.
+
+### PR 0097 — Local Docker End-to-End Smoke
+
+- Combine PR 0094 + PR 0095 + PR 0096 into a local end-to-end smoke test that
+  exercises the full substrate path: task intake → execution request → Docker
+  executor (if Docker available) or noop fallback → artifact persistence →
+  review boundary.
+- Document the local end-to-end flow in a README or quickstart.
+- Add a smoke CLI command that runs the full loop.
+
+**Backend contract change:** No — integration of existing pieces.
+**Runner behavior change:** No.
+**Artifact contract change:** No.
+**Schema change:** No.
+
+### PR 0098 — Stabilization: Error Handling & Edge Cases
+
+- Audit error propagation from adapter failures through harness, envelope,
+  review boundary, and API response.
+- Add missing error handling paths (Docker daemon unavailable, store disk
+  full, malformed execution request at runtime).
+- Add edge-case tests for each error path.
+
+**Backend contract change:** No — hardening.
+**Runner behavior change:** Minimal — better error messages.
+**Artifact contract change:** No.
+**Schema change:** No.
+
+### PR 0099 — Stabilization: Acceptance Pass
+
+- Run the full acceptance checklist (defined in PR 0091) against the actual
+  local substrate, not just the noop mock.
+- Fix any gaps found during acceptance.
+- Ensure the local interaction page works correctly with the real execution
+  pipeline (not just mock `/runs/execute`).
+
+**Backend contract change:** No — hardening.
+**Runner behavior change:** No.
+**Artifact contract change:** No.
+**Schema change:** No.
+
+### PR 0100 — Freeze / Release Gate
+
+- Tag the repository as `v0.1.0` (or equivalent release marker).
+- Update version metadata.
+- Write release notes summarizing the execution substrate capabilities.
+- Lock all post-0100 capability streams.
+
+**Backend contract change:** No — release.
+**Runner behavior change:** No.
+**Artifact contract change:** No.
+**Schema change:** No.
+
+---
+
+## Post-0100 Capability Streams (LOCKED until PR 0100 lands)
+
+No work on the following capability streams may begin before PR 0100 lands:
+
+- **Proof-First Runtime** — formal verification, invariant enforcement
+- **Decision Core** — conductor, planner orchestration, multi-agent decision
+  loop
+- **Context Layer** — context compilation beyond current mock/preview
+- **Model Health Monitor** — model routing, capability profiling, cost
+  tracking
+- **External Capability Integration** — non-coding domain adapters, external
+  service integration
+
+These streams correspond to the original Phase 1–10 decomposition. They
+remain locked. The roadmap above replaces the phase-based decomposition with
+an explicit PR sequence that ends at PR 0100.
+
+---
+
+## Legacy Phase Reference (Superseded)
+
+The phase-based roadmap from PR 0041/0042 is preserved below for historical
+reference but is superseded by the execution/substrate PR sequence defined
+above. No new PRs shall be planned against these phases without explicit
+permission from the architect.
 
 ---
 
