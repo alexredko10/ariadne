@@ -1,0 +1,104 @@
+schema_version: "0.1"
+pr_id: "0087-copy-export-local-run-report"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-06-30T00:00:00Z"
+snapshot_delta:
+  plan_base_sha: "609852fbabbf6899c8cb7a2247be2ebaf7872120"
+  current_head: "e35303fe44e73429048b05025a3e2a7de98dd87a"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_copy_export_local_run_report.py"
+    - ".project-memory/pr/0087-copy-export-local-run-report/reviews/precommit-review.yml"
+  actual_files:
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_copy_export_local_run_report.py"
+    - ".project-memory/pr/0087-copy-export-local-run-report/reviews/precommit-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0087-copy-export-local-run-report/PLAN.md"
+  - ".project-memory/pr/0087-copy-export-local-run-report/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/tests/test_copy_export_local_run_report.py"
+validation:
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_copy_export_local_run_report.py services/task_intake/tests/test_local_user_test_session_report.py services/task_intake/tests/test_guided_local_user_test_scenarios.py services/task_intake/tests/test_local_user_test_feedback_panel.py services/task_intake/tests/test_local_run_summary_card.py services/task_intake/tests/test_local_execution_trace.py services/task_intake/tests/test_local_runner_selection.py services/task_intake/tests/test_local_result_structured_view.py services/task_intake/tests/test_local_interaction_page.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "146 passed"
+  - command: "python -m compileall -f services/task_intake/src services/runner/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "modules compiled (see compileall output)"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m task_intake.app --check --json"
+    result: "passed"
+    exit_code: 0
+    evidence: "{\n  \"check\": true,\n  \"default_adapter\": \"noop\",\n  \"dependencies\": [\n    \"uvicorn\"\n  ],\n  \"host\": \"127.0.0.1\",\n  \"port\": 8000,\n  \"routes\": [\n    \"/\",\n    \"/health\",\n    \"/submit\",\n    \"/task-intake/submit\",\n    \"/task-intake/normalize\",\n    \"/context/preview\",\n    \"/runs\",\n    \"/mock-loop\",\n    \"/runs/execute\"\n  ],\n  \"service\": \"task_intake\",\n  \"status\": \"ready\"\n}"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Accept dirty tree despite PLAN base SHA mismatch"
+    reason: "Per PR-specific stale-snapshot policy in task prompt: plan-review snapshot may predate planning-gate commit. Proceeding because planning artifacts (PLAN.md and plan-review.yml) are present and unchanged, and plan-review verdict is approve."
+context_used:
+  labels: []
+  memory_files_read:
+    - ".project-memory/pr/0087-copy-export-local-run-report/PLAN.md"
+    - ".project-memory/pr/0087-copy-export-local-run-report/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0086-local-user-test-session-report/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_copy_export_local_run_report.py"
+  files_modified:
+    - ".project-memory/pr/0087-copy-export-local-run-report/reviews/precommit-review.yml"
+  files_intentionally_ignored:
+    - ".git/**"
+    - "node_modules/**"
+    - "__pycache__/**"
+
+# Evidence snippets
+EVIDENCE FROM FILESYSTEM:
+- services/task_intake/src/task_intake/server.py: "run-report-section" present; JS functions generateRunReport, generate-run-report-btn, copy-run-report-btn, download-run-report-btn, Blob.createObjectURL usage present.
+- services/task_intake/tests/test_copy_export_local_run_report.py: tests assert presence of run-report-section, buttons, textarea, generateRunReport, Blob/createObjectURL, and that POST /run-report returns 404.
+
+BLOCKERS: []
+
+WARNINGS: []
+
+VALIDATION:
+- pytest: passed (146 passed)
+- compileall: passed
+- app runtime check: passed (status: ready; routes include /runs/execute)
+
+FILES READ:
+- .project-memory/pr/0087-copy-export-local-run-report/PLAN.md
+- .project-memory/pr/0087-copy-export-local-run-report/reviews/plan-review.yml
+- .project-memory/review-artifact.schema.yml
+- .project-memory/pr/0086-local-user-test-session-report/reviews/precommit-review.yml
+- services/task_intake/src/task_intake/server.py
+- services/task_intake/tests/test_copy_export_local_run_report.py
+
+FILES WRITTEN:
+- .project-memory/pr/0087-copy-export-local-run-report/reviews/precommit-review.yml
+
+SNAPSHOT DELTA:
+- base_sha: 609852fbabbf6899c8cb7a2247be2ebaf7872120
+- index_version: unknown
+- current_head: e35303fe44e73429048b05025a3e2a7de98dd87a
+- stale_snapshot: false
+
+BOUNDARY CONFIRMATIONS:
+- confirm: PLAN.md was not modified: true
+- confirm: plan-review.yml was not modified: true
+- confirm: only precommit-review.yml was written: true
+- confirm: final scope contains only PLAN-approved files plus review artifact: true
+- confirm: validation commands were run and reported with evidence: true
+- confirm: no git mutation commands run: true
