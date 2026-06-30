@@ -14,6 +14,8 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
+from runner.docker_run_artifacts import build_docker_artifacts, build_docker_evidence
+
 
 # ---------------------------------------------------------------------------
 # Default executor
@@ -114,6 +116,9 @@ def run_docker_agent_execution(
     req_id = execution_request.get("execution_request_id", "")
     run_id = execution_request.get("run_id", "")
 
+    # --- Build command metadata (available to both branches) ---
+    command_metadata = build_docker_agent_command(execution_request)
+
     # --- Opt-in check ---
     if not allow_docker:
         return {
@@ -122,26 +127,21 @@ def run_docker_agent_execution(
             "run_id": run_id,
             "status": "blocked",
             "adapter": "docker-agent-v1",
-            "artifacts": [],
-            "evidence": [
-                {
-                    "evidence_id": f"{req_id}-docker-optin-evidence",
-                    "evidence_kind": "execution_note",
-                    "summary": (
-                        "Docker execution requires explicit opt-in "
-                        "(allow_docker=True).  No Docker command was executed."
-                    ),
-                    "status": "skipped",
-                },
-            ],
+            "artifacts": build_docker_artifacts(
+                {"exit_code": -1, "stdout": "", "stderr": "", "success": False},
+                command_metadata,
+                req_id,
+            ),
+            "evidence": build_docker_evidence(
+                {"exit_code": -1, "stdout": "", "stderr": "", "success": False},
+                command_metadata,
+                req_id,
+            ),
             "errors": [],
             "warnings": [],
             "review_required": False,
             "next": "",
         }
-
-    # --- Build command metadata ---
-    command_metadata = build_docker_agent_command(execution_request)
 
     # --- Execute (or simulate) ---
     actual_executor = executor or _DEFAULT_EXECUTOR
@@ -156,26 +156,8 @@ def run_docker_agent_execution(
         "run_id": run_id,
         "status": "completed" if success else "failed",
         "adapter": "docker-agent-v1",
-        "artifacts": [
-            {
-                "artifact_id": f"{req_id}-docker-command-meta",
-                "kind": "docker_command_metadata",
-                "reference": "in-memory",
-                "summary": "Docker command metadata (not executed).",
-            },
-        ],
-        "evidence": [
-            {
-                "evidence_id": f"{req_id}-docker-evidence",
-                "evidence_kind": "execution_log",
-                "summary": (
-                    "Docker agent execution completed via executor."
-                    if success
-                    else "Docker agent execution failed via executor."
-                ),
-                "status": "passed" if success else "failed",
-            },
-        ],
+        "artifacts": build_docker_artifacts(executor_result, command_metadata, req_id),
+        "evidence": build_docker_evidence(executor_result, command_metadata, req_id),
         "errors": [] if success else [
             {"code": "execution_failed", "message": executor_result.get("stderr", "Unknown error")},
         ],

@@ -195,3 +195,81 @@ class TestNoSideEffects:
         assert "importlib" not in clean
         assert "pkg_resources" not in clean
         assert "entry_points" not in clean
+
+
+# ---------------------------------------------------------------------------
+# Run artifact tests
+# ---------------------------------------------------------------------------
+
+
+class TestRunArtifacts:
+    """Tests that docker_agent_adapter now populates artifacts and evidence
+    via the new docker_run_artifacts module."""
+
+    def test_blocked_has_command_meta_artifact(self):
+        result = run_docker_agent_execution(_valid_request())
+        artifacts = result.get("artifacts", [])
+        kinds = [a["kind"] for a in artifacts]
+        assert "docker_command_metadata" in kinds
+
+    def test_completed_has_four_artifacts(self):
+        result = run_docker_agent_execution(
+            _valid_request(),
+            allow_docker=True,
+            executor=_fake_successful_executor,
+        )
+        artifacts = result.get("artifacts", [])
+        assert len(artifacts) == 4
+
+    def test_failed_has_four_artifacts(self):
+        result = run_docker_agent_execution(
+            _valid_request(),
+            allow_docker=True,
+            executor=_fake_failing_executor,
+        )
+        artifacts = result.get("artifacts", [])
+        assert len(artifacts) == 4
+
+    def test_completed_artifact_kinds(self):
+        result = run_docker_agent_execution(
+            _valid_request(),
+            allow_docker=True,
+            executor=_fake_successful_executor,
+        )
+        kinds = [a["kind"] for a in result.get("artifacts", [])]
+        assert "docker_stdout" in kinds
+        assert "docker_stderr" in kinds
+        assert "docker_execution_metadata" in kinds
+        assert "docker_command_metadata" in kinds
+
+    def test_artifact_content_matches_executor_output(self):
+        result = run_docker_agent_execution(
+            _valid_request(),
+            allow_docker=True,
+            executor=_fake_successful_executor,
+        )
+        stdout_artifact = [a for a in result.get("artifacts", []) if a["kind"] == "docker_stdout"][0]
+        assert stdout_artifact["content"] == "Execution completed successfully."
+
+    def test_evidence_passed_for_completed(self):
+        result = run_docker_agent_execution(
+            _valid_request(),
+            allow_docker=True,
+            executor=_fake_successful_executor,
+        )
+        evidence = result.get("evidence", [])
+        assert evidence[0]["status"] == "passed"
+
+    def test_evidence_failed_for_failed(self):
+        result = run_docker_agent_execution(
+            _valid_request(),
+            allow_docker=True,
+            executor=_fake_failing_executor,
+        )
+        evidence = result.get("evidence", [])
+        assert evidence[0]["status"] == "failed"
+
+    def test_blocked_evidence_skipped(self):
+        result = run_docker_agent_execution(_valid_request())
+        evidence = result.get("evidence", [])
+        assert evidence[0]["status"] == "skipped"
