@@ -401,7 +401,7 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 <h2>Welcome to Ariadne</h2>
 <p>Ariadne is a local execution substrate for agentic software development.</p>
 <p>It accepts a task, builds an execution request, dispatches it through a selected runner, and returns a deterministic result with an execution envelope and review boundary.</p>
-<p><strong>Local/no-op runner (default):</strong> A deterministic simulation that returns results without executing any real work. No Docker, no subprocess, no network.</p>
+<p><strong>Local/no-op runner (default):</strong> A deterministic simulation that returns results without executing any real work. No Docker daemon, no process spawning, no network calls.</p>
 <p><strong>Docker agent runner (opt-in):</strong> A boundary that runs tasks in a Docker container. Must be explicitly selected. Selecting it returns a structured blocked result without running Docker — enabling real execution requires additional configuration.</p>
 <p>After submitting a task, inspect the summary card, execution trace, structured result, and raw JSON.</p>
 <p>Use the feedback panel to capture your observations.</p>
