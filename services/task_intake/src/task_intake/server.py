@@ -371,6 +371,15 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 .trace-indicator { font-size: 1.2rem; width: 2rem; text-align: center; }
 .trace-label { flex: 1; margin-left: 0.5rem; }
 .trace-detail { color: #555; font-size: 0.9rem; margin-left: 0.5rem; }
+.history-entry { display: flex; align-items: center; padding: 0.3rem 0; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+.history-entry:last-child { border-bottom: none; }
+.history-index { font-weight: bold; min-width: 2.5rem; }
+.history-status { min-width: 7rem; }
+.history-task { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 0 0.5rem; }
+.history-runner { min-width: 7rem; color: #555; }
+.history-time { min-width: 12rem; color: #888; font-size: 0.8rem; }
+#run-history-placeholder { color: #888; font-style: italic; }
+#clear-history-btn { margin-bottom: 0.5rem; }
 </style>
 </head>
 <body>
@@ -416,6 +425,12 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 <button id="copy-run-report-btn" style="margin-left:0.5rem;">Copy report</button>
 <button id="download-run-report-btn" style="margin-left:0.5rem;">Download report (.txt)</button>
 <textarea id="run-report-output" rows="10" cols="80" readonly style="margin-top:0.5rem; display:block; width:100%;"></textarea>
+</div>
+<div id="run-history-section">
+<h2>Run History</h2>
+<p id="run-history-placeholder">No runs yet. Submit a task to see your run history.</p>
+<button id="clear-history-btn" style="display:none;">Clear history</button>
+<div id="run-history-list"></div>
 </div>
 <div id="execution-trace-section">
 <h3>Execution Trace</h3>
@@ -477,6 +492,7 @@ var TRACE_STEPS = [
     {label: "Execution envelope created", field: "execution_envelope.envelope_id"},
     {label: "Review boundary derived", field: "review_boundary.decision"},
 ];
+var __ariadne_run_history = [];
 function get(obj, path, def) {
     try {
         var parts = path.split(".");
@@ -657,6 +673,7 @@ document.getElementById("submit").addEventListener("click", async function () {
         document.getElementById("summary-card").innerHTML = renderSummaryCard(data);
         document.getElementById("run-report-section").style.display = "";
         window._latestData = data;
+        pushRunHistory(data);
         document.getElementById("trace-steps").innerHTML = renderTrace(data);
         document.getElementById("structured-view").innerHTML = renderStructured(data);
         document.getElementById("json").textContent = JSON.stringify(data, null, 2);
@@ -743,6 +760,7 @@ document.getElementById("copy-run-report-btn").addEventListener("click", functio
     var ta = document.getElementById("run-report-output");
     try { navigator.clipboard.writeText(ta.value); } catch (e) { ta.focus(); ta.select(); }
 });
+document.getElementById("clear-history-btn").addEventListener("click", clearRunHistory);
 document.getElementById("download-run-report-btn").addEventListener("click", function() {
     var ta = document.getElementById("run-report-output");
     var text = ta.value;
@@ -800,6 +818,55 @@ function generateRunReport() {
     text += "Generated in browser at: " + ts + "\n";
     text += "No data was sent to any server.\n";
     document.getElementById("run-report-output").value = text;
+}
+function pushRunHistory(data) {
+    var taskText = document.getElementById("task").value || "(empty)";
+    var runner = document.querySelector('input[name="runner"]:checked');
+    var runnerValue = runner ? runner.value : "noop";
+    var status = get(data, "runtime_status", "unknown");
+    var ts = new Date().toISOString();
+    __ariadne_run_history.push({
+        task: taskText,
+        runner: runnerValue,
+        status: status,
+        timestamp: ts,
+    });
+    if (__ariadne_run_history.length > 10) {
+        __ariadne_run_history.shift();
+    }
+    renderRunHistory();
+}
+function renderRunHistory() {
+    var placeholder = document.getElementById("run-history-placeholder");
+    var list = document.getElementById("run-history-list");
+    var clearBtn = document.getElementById("clear-history-btn");
+    if (__ariadne_run_history.length === 0) {
+        placeholder.style.display = "";
+        list.innerHTML = "";
+        clearBtn.style.display = "none";
+        return;
+    }
+    placeholder.style.display = "none";
+    clearBtn.style.display = "";
+    var html = "";
+    var total = __ariadne_run_history.length;
+    for (var i = total - 1; i >= 0; i--) {
+        var entry = __ariadne_run_history[i];
+        var idx = total - i;
+        var taskDisplay = entry.task.length > 60 ? entry.task.substring(0, 60) + "…" : entry.task;
+        html += "<div class=\"history-entry\">"
+            + "<span class=\"history-index\">#" + idx + "</span>"
+            + "<span class=\"history-status status-" + entry.status + "\">" + entry.status + "</span>"
+            + "<span class=\"history-task\" title=\"" + entry.task.replace(/"/g, "&quot;") + "\">" + taskDisplay + "</span>"
+            + "<span class=\"history-runner\">" + entry.runner + "</span>"
+            + "<span class=\"history-time\">" + entry.timestamp + "</span>"
+            + "</div>";
+    }
+    list.innerHTML = html;
+}
+function clearRunHistory() {
+    __ariadne_run_history = [];
+    renderRunHistory();
 }
 </script>
 </body>
