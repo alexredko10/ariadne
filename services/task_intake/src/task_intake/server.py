@@ -392,6 +392,9 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 .onboarding-dismiss { float: right; }
 .onboarding-steps { padding-left: 1.5rem; margin: 0.5rem 0; }
 .onboarding-steps li { margin: 0.3rem 0; line-height: 1.5; }
+.checklist-item { padding: 0.25rem 0; }
+.checklist-counter { margin: 0.5rem 0; font-weight: bold; }
+.checklist-all-passed { color: #0a0; }
 </style>
 </head>
 <body>
@@ -479,6 +482,26 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 </div>
 <div id="feedback-panel">
 <h2>User Test Feedback</h2>
+<div id="manual-checklist">
+<h3>Manual Acceptance Checklist</h3>
+<p class="checklist-counter" id="checklist-counter">0/15 checked</p>
+<button id="reset-checklist-btn">Reset all</button>
+<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 1. First-time onboarding is visible and understandable</label></div>
+<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 2. Scenario can be selected (task prefilled, runner set)</label></div>
+<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 3. Task can be submitted</label></div>
+<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 4. Local/no-op remains default</label></div>
+<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 5. Docker-agent remains opt-in and non-default</label></div>
+<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 6. Summary card is visible after run</label></div>
+<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 7. Execution trace is visible after run</label></div>
+<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 8. Structured result is visible after run</label></div>
+<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 9. Raw JSON remains available</label></div>
+<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 10. Feedback can be captured</label></div>
+<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 11. Session report can be generated</label></div>
+<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 12. Run report can be copied/exported</label></div>
+<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 13. Local run history updates</label></div>
+<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 14. Empty task validation works (inline message shown)</label></div>
+<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 15. Error state preserves previous run and history</label></div>
+</div>
 <fieldset>
 <legend>1. Did you understand what Ariadne does?</legend>
 <label><input type="radio" name="q_understood" value="yes"> Yes</label>
@@ -534,6 +557,19 @@ var __onboarding_dismissed = false;
 function dismissOnboarding() {
     __onboarding_dismissed = true;
     document.getElementById("onboarding-panel").style.display = "none";
+}
+function updateChecklistCounter() {
+    var cbs = document.querySelectorAll(".checklist-cb");
+    var checked = 0;
+    for (var i = 0; i < cbs.length; i++) {
+        if (cbs[i].checked) checked++;
+    }
+    var el = document.getElementById("checklist-counter");
+    if (checked === 15) {
+        el.innerHTML = "15/15 — <span class=\"checklist-all-passed\">All checks passed.</span>";
+    } else {
+        el.textContent = checked + "/15 checked";
+    }
 }
 function get(obj, path, def) {
     try {
@@ -864,6 +900,13 @@ document.getElementById("copy-run-report-btn").addEventListener("click", functio
 });
 document.getElementById("clear-history-btn").addEventListener("click", clearRunHistory);
 document.getElementById("dismiss-onboarding-btn").addEventListener("click", dismissOnboarding);
+document.getElementById("reset-checklist-btn").addEventListener("click", function() {
+    var cbs = document.querySelectorAll(".checklist-cb");
+    for (var i = 0; i < cbs.length; i++) {
+        cbs[i].checked = false;
+    }
+    updateChecklistCounter();
+});
 document.getElementById("download-run-report-btn").addEventListener("click", function() {
     var ta = document.getElementById("run-report-output");
     var text = ta.value;
