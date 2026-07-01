@@ -12,8 +12,9 @@ scope:
   review_path: .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/plan-review.yml
 files_checked:
   - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/PLAN.md
-  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/plan-review.yml
   - .project-memory/review-artifact.schema.yml
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
   - ROADMAP.md
   - docs/adr/0011-pr-batching-and-roadmap-discipline.md
   - docs/adr/0010-runner-execution-contract-boundary.md
@@ -28,7 +29,9 @@ files_checked:
   - .project-memory/pr/0105-spec-freeze-acceptance-criteria/PLAN.md
   - .project-memory/pr/0105-spec-freeze-acceptance-criteria/reviews/precommit-review.yml
   - .project-memory/pr/0106-gate-evidence-bundle/PLAN.md
-  - .project-memory/pr/0106-gate-evidence-bundle/reviews/plan-review.yml
+  - .project-memory/pr/0106-gate-evidence-bundle/reviews/precommit-review.yml
+  - services/runner/src/runner/gate_evidence.py
+  - services/runner/tests/test_gate_evidence.py
   - services/runner/src/runner/proof_ref.py
   - services/runner/tests/test_proof_ref.py
   - services/runner/src/runner/handoff_packet.py
@@ -37,15 +40,9 @@ files_checked:
   - services/runner/tests/test_proof_capture.py
   - services/runner/src/runner/acceptance_criteria.py
   - services/runner/tests/test_acceptance_criteria.py
-  - services/runner/src/runner/gate_evidence.py
-  - services/runner/tests/test_gate_evidence.py
   - services/runner/src/runner/doctor.py
   - services/runner/src/runner/__main__.py
   - services/runner/tests/test_doctor_cli.py
-  - services/runner/src/runner/readiness_gate.py
-  - services/runner/tests/test_readiness_gate.py
-  - services/runner/src/runner/execution_smoke.py
-  - services/runner/src/runner/execution_substrate_audit.py
   - services/task_intake/src/task_intake/app.py
   - services/task_intake/src/task_intake/execution_handoff.py
 validation:
@@ -55,26 +52,26 @@ validation:
     result: ""
   - command: git diff --name-only
     result: ""
-  - command: grep -R -n "improvement|self.improvement|candidate|backlog|frontend|browser|ui|gate_evidence|shell|subprocess|docker|network|requests|urllib|openai|anthropic|chain.of.thought|reasoning|PLACEHOLDER" .project-memory/pr/0107-evidence-backed-self-improvement-candidate/PLAN.md services/runner/src/runner services/runner/tests apps packages 2>/dev/null || true
-    result: "matches found in PLAN.md only"
+  - command: grep -R -n "VERDICT:|Plan Drift Gate|PLAN DRIFT GATE|gate evidence bundle|gate_evidence|264 passed|task_intake" .project-memory/pr/0106-gate-evidence-bundle/reviews/precommit-review.yml services/runner/src/runner/gate_evidence.py services/runner/tests/test_gate_evidence.py 2>/dev/null || true
+    result: "matches found in .project-memory/pr/0106-gate-evidence-bundle/reviews/precommit-review.yml only"
   - command: date -u +%Y-%m-%dT%H:%M:%SZ
     result: "2026-07-01T00:00:00Z"
 blockers: []
 warnings:
-  - The plan is executable-first and autonomy-safe, but the self-improvement candidate is only partially evidenced as a runtime object because the review cannot independently verify the candidate derivation and drift-gate behavior without executing the planned tests.
-  - The plan defers frontend repair, which is acceptable, but the review cannot confirm any future frontend follow-up because no frontend repository evidence was required or read.
+  - The prior PR 0106 predecessor evidence gap is corrected by reading the required PR 0106 precommit-review artifact, but plan review still cannot independently execute the gate_evidence tests.
+  - The PR 0107 plan remains autonomy-safe and executable-first, but frontend repair remains deferred rather than concretely evidenced in this review.
 decisions_made:
-  - The plan remains executable-first and not docs-only, schemas-only, review-artifact-only, frontend-only, or packaging-only.
-  - The plan composes with PR 0101 through PR 0106 runtime objects.
-  - The plan rejects autonomous code edits, git mutation, provider/LLM calls, shell execution, user-provided command execution, network, Docker, hidden reasoning, and external URL-only evidence.
-  - The plan defers autonomous repair, source code edits, commits/push/PR creation, proof evaluation, gate approval/finalization, benchmark runner, model switching, provider calls, external capability integration, and frontend repair.
+  - PR 0106 implementation evidence is established by the PR 0106 PLAN, PR 0106 precommit-review, gate_evidence source, and gate_evidence tests.
+  - The PR 0107 review artifact is corrected to include the missing PR 0106 precommit-review evidence.
+  - The PR 0107 plan remains acceptable with warnings only.
 context_used:
   files_modified:
     - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/plan-review.yml
   files_read:
     - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/PLAN.md
-    - .project-memory/post-0100/strategic-direction/agent-manifest.md
+    - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/plan-review.yml
     - .project-memory/review-artifact.schema.yml
+    - .project-memory/post-0100/strategic-direction/agent-manifest.md
     - ROADMAP.md
     - docs/adr/0011-pr-batching-and-roadmap-discipline.md
     - docs/adr/0010-runner-execution-contract-boundary.md
@@ -89,7 +86,9 @@ context_used:
     - .project-memory/pr/0105-spec-freeze-acceptance-criteria/PLAN.md
     - .project-memory/pr/0105-spec-freeze-acceptance-criteria/reviews/precommit-review.yml
     - .project-memory/pr/0106-gate-evidence-bundle/PLAN.md
-    - .project-memory/pr/0106-gate-evidence-bundle/reviews/plan-review.yml
+    - .project-memory/pr/0106-gate-evidence-bundle/reviews/precommit-review.yml
+    - services/runner/src/runner/gate_evidence.py
+    - services/runner/tests/test_gate_evidence.py
     - services/runner/src/runner/proof_ref.py
     - services/runner/tests/test_proof_ref.py
     - services/runner/src/runner/handoff_packet.py
@@ -98,15 +97,9 @@ context_used:
     - services/runner/tests/test_proof_capture.py
     - services/runner/src/runner/acceptance_criteria.py
     - services/runner/tests/test_acceptance_criteria.py
-    - services/runner/src/runner/gate_evidence.py
-    - services/runner/tests/test_gate_evidence.py
     - services/runner/src/runner/doctor.py
     - services/runner/src/runner/__main__.py
     - services/runner/tests/test_doctor_cli.py
-    - services/runner/src/runner/readiness_gate.py
-    - services/runner/tests/test_readiness_gate.py
-    - services/runner/src/runner/execution_smoke.py
-    - services/runner/src/runner/execution_substrate_audit.py
     - services/task_intake/src/task_intake/app.py
     - services/task_intake/src/task_intake/execution_handoff.py
   files_written:
