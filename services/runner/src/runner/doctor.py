@@ -21,6 +21,10 @@ from .acceptance_criteria import (
     AcceptanceCriteriaFreezeInput,
     freeze_acceptance_criteria,
 )
+from .gate_evidence import (
+    GateEvidenceBundleInput,
+    build_gate_evidence_bundle,
+)
 from .handoff_packet import (
     GateReadyHandoffPacket,
     validate_handoff_packet,
@@ -445,6 +449,97 @@ def freeze_acceptance_criteria_file(path: str, output_dir: str = ".") -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Build gate evidence bundle file
+# ---------------------------------------------------------------------------
+
+
+def build_gate_evidence_bundle_file(path: str, output_dir: str = ".") -> dict:
+    """Read a JSON file, parse as GateEvidenceBundleInput, and build bundle.
+
+    Parameters
+    ----------
+    path:
+        Path to a JSON file containing GateEvidenceBundleInput data.
+    output_dir:
+        Directory where the bundle artifact will be written.
+
+    Returns
+    -------
+    dict
+        A JSON-serializable result dict with keys:
+        ``status``, ``command``, ``result``, ``error``.
+    """
+    try:
+        raw = Path(path).read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return {
+            "status": "error",
+            "command": "bundle evidence",
+            "result": None,
+            "error": f"File not found: {path}",
+        }
+    except OSError as exc:
+        return {
+            "status": "error",
+            "command": "bundle evidence",
+            "result": None,
+            "error": f"Error reading file: {exc}",
+        }
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        return {
+            "status": "error",
+            "command": "bundle evidence",
+            "result": None,
+            "error": f"Invalid JSON: {exc}",
+        }
+
+    if not isinstance(data, dict):
+        return {
+            "status": "error",
+            "command": "bundle evidence",
+            "result": None,
+            "error": "JSON root must be an object",
+        }
+
+    # Convert list fields to tuples
+    if "proof_ref_ids" in data and isinstance(data["proof_ref_ids"], list):
+        data["proof_ref_ids"] = tuple(data["proof_ref_ids"])
+    if "runtime_capture_refs" in data and isinstance(data["runtime_capture_refs"], list):
+        data["runtime_capture_refs"] = tuple(data["runtime_capture_refs"])
+    if "capture_artifact_paths" in data and isinstance(data["capture_artifact_paths"], list):
+        data["capture_artifact_paths"] = tuple(data["capture_artifact_paths"])
+
+    try:
+        bundle_input = GateEvidenceBundleInput(**data)
+    except (TypeError, ValueError) as exc:
+        return {
+            "status": "error",
+            "command": "bundle evidence",
+            "result": None,
+            "error": f"Invalid GateEvidenceBundleInput data: {exc}",
+        }
+
+    result = build_gate_evidence_bundle(bundle_input, output_dir=output_dir)
+
+    return {
+        "status": "ok",
+        "command": "bundle evidence",
+        "result": {
+            "bundle_status": result.status.value,
+            "reason_codes": list(result.reason_codes),
+            "artifact_path": result.artifact_path,
+            "bundle_ref": result.bundle_ref,
+            "consistency_summary": result.consistency_summary,
+            "details": result.details,
+        },
+        "error": None,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
 
@@ -507,6 +602,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Directory where the artifact will be written (default: current directory).",
     )
 
+    # Bundle subcommand group
+    bundle_parser = subparsers.add_parser("bundle", help="Build gate evidence bundles.")
+    bundle_subparsers = bundle_parser.add_subparsers(dest="bundle_command", required=True)
+
+    # bundle evidence <path>
+    bundle_evidence_parser = bundle_subparsers.add_parser("evidence", help="Build a gate evidence bundle from a JSON input file.")
+    bundle_evidence_parser.add_argument("path", help="Path to the gate evidence bundle input JSON file.")
+    bundle_evidence_parser.add_argument(
+        "--output-dir",
+        default=".",
+        help="Directory where the bundle artifact will be written (default: current directory).",
+    )
+
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     if args.command == "doctor":
@@ -548,6 +656,16 @@ def main(argv: Sequence[str] | None = None) -> int:
             if result["status"] == "error":
                 return 1
             if result["result"] and result["result"].get("freeze_status") == "rejected":
+                return 1
+            return 0
+
+    if args.command == "bundle":
+        if args.bundle_command == "evidence":
+            result = build_gate_evidence_bundle_file(args.path, output_dir=args.output_dir)
+            _print_json_result(result)
+            if result["status"] == "error":
+                return 1
+            if result["result"] and result["result"].get("bundle_status") == "rejected":
                 return 1
             return 0
 
