@@ -1,0 +1,105 @@
+schema_version: 1
+pr_id: "0105-spec-freeze-acceptance-criteria"
+review_type: plan-review
+reviewer: plan-review
+timestamp: "2026-07-01T00:00:00Z"
+verdict: warning
+snapshot_delta:
+  head: 92293191c55292c46c61809b3312905959eb890e
+  git_status_short: ""
+scope:
+  plan_path: .project-memory/pr/0105-spec-freeze-acceptance-criteria/PLAN.md
+  review_path: .project-memory/pr/0105-spec-freeze-acceptance-criteria/reviews/plan-review.yml
+files_checked:
+  - .project-memory/pr/0105-spec-freeze-acceptance-criteria/PLAN.md
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - .project-memory/review-artifact.schema.yml
+  - ROADMAP.md
+  - ARIADNE_ARCHITECTURE.md
+  - .project-memory/project_contract.yml
+  - .project-memory/context-bundles/contracts.yml
+  - .project-memory/memory_index.yml
+  - docs/adr/0011-pr-batching-and-roadmap-discipline.md
+  - docs/adr/0010-runner-execution-contract-boundary.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+  - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+  - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+  - .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+  - .project-memory/pr/0103-ariadna-cli-skeleton/reviews/precommit-review.yml
+  - .project-memory/pr/0104-proof-capture-command/PLAN.md
+  - .project-memory/pr/0104-proof-capture-command/reviews/precommit-review.yml
+  - services/runner/src/runner/proof_ref.py
+  - services/runner/tests/test_proof_ref.py
+  - services/runner/src/runner/handoff_packet.py
+  - services/runner/tests/test_handoff_packet.py
+  - services/runner/src/runner/proof_capture.py
+  - services/runner/tests/test_proof_capture.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/src/runner/__main__.py
+  - services/runner/tests/test_doctor_cli.py
+  - services/runner/src/runner/readiness_gate.py
+  - services/runner/tests/test_readiness_gate.py
+  - services/runner/src/runner/execution_smoke.py
+  - services/runner/src/runner/execution_substrate_audit.py
+  - services/task_intake/src/task_intake/app.py
+  - services/task_intake/src/task_intake/execution_handoff.py
+validation:
+  - command: git rev-parse --verify HEAD
+    result: 92293191c55292c46c61809b3312905959eb890e
+  - command: git status --short
+    result: ""
+  - command: git diff --name-only
+    result: ""
+  - command: grep -R -n "acceptance_criteria|criteria|freeze|proof_capture|doctor|shell|subprocess|docker|network|requests|urllib|openai|anthropic|chain.of.thought|reasoning|PLACEHOLDER" .project-memory/pr/0105-spec-freeze-acceptance-criteria/PLAN.md services/runner/src/runner services/runner/tests 2>/dev/null || true
+    result: "matches found in PLAN.md only"
+  - command: date -u +%Y-%m-%dT%H:%M:%SZ
+    result: "2026-07-01T00:00:00Z"
+blockers: []
+warnings:
+  - The plan is executable-first and scope-correct, but it uses a fixed `frozen_at: null` artifact field and a SHA256-derived reference without a runtime validation command that independently proves the ref derivation; this is acceptable for plan review but remains unexecuted.
+  - The plan includes task_intake validation in the validation strategy, but plan review cannot confirm runtime executability of that check without running tests, which is outside scope.
+decisions_made:
+  - The plan remains executable-first and not docs-only, schemas-only, review-artifact-only, frontend-only, or packaging-only.
+  - The plan composes with PR 0104 proof_capture and prior runtime objects.
+  - The plan rejects arbitrary command execution, hidden reasoning capture, external URL-only criteria, oversized payloads, and empty/malformed criteria.
+  - The plan defers proof evaluation, finalization, benchmark runner, model switching, provider calls, external capability integration, and command-execution capture.
+context_used:
+  files_modified:
+    - .project-memory/pr/0105-spec-freeze-acceptance-criteria/reviews/plan-review.yml
+  files_read:
+    - .project-memory/pr/0105-spec-freeze-acceptance-criteria/PLAN.md
+    - .project-memory/post-0100/strategic-direction/agent-manifest.md
+    - .project-memory/review-artifact.schema.yml
+    - ROADMAP.md
+    - ARIADNE_ARCHITECTURE.md
+    - .project-memory/project_contract.yml
+    - .project-memory/context-bundles/contracts.yml
+    - .project-memory/memory_index.yml
+    - docs/adr/0011-pr-batching-and-roadmap-discipline.md
+    - docs/adr/0010-runner-execution-contract-boundary.md
+    - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+    - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+    - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+    - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+    - .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+    - .project-memory/pr/0103-ariadna-cli-skeleton/reviews/precommit-review.yml
+    - .project-memory/pr/0104-proof-capture-command/PLAN.md
+    - .project-memory/pr/0104-proof-capture-command/reviews/precommit-review.yml
+    - services/runner/src/runner/proof_ref.py
+    - services/runner/tests/test_proof_ref.py
+    - services/runner/src/runner/handoff_packet.py
+    - services/runner/tests/test_handoff_packet.py
+    - services/runner/src/runner/proof_capture.py
+    - services/runner/tests/test_proof_capture.py
+    - services/runner/src/runner/doctor.py
+    - services/runner/src/runner/__main__.py
+    - services/runner/tests/test_doctor_cli.py
+    - services/runner/src/runner/readiness_gate.py
+    - services/runner/tests/test_readiness_gate.py
+    - services/runner/src/runner/execution_smoke.py
+    - services/runner/src/runner/execution_substrate_audit.py
+    - services/task_intake/src/task_intake/app.py
+    - services/task_intake/src/task_intake/execution_handoff.py
+  files_written:
+    - .project-memory/pr/0105-spec-freeze-acceptance-criteria/reviews/plan-review.yml
