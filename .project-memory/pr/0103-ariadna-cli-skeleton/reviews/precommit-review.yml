@@ -1,0 +1,118 @@
+schema_version: 1
+pr_id: "0103-ariadna-cli-skeleton"
+review_type: precommit-review
+reviewer: precommit-review
+timestamp: "2026-07-01T00:00:00Z"
+verdict: pass
+snapshot_delta:
+  head: 676f150cbccc7a0def1c7d6bd32f11957af41cbb
+  git_status_short: " M services/runner/src/runner/doctor.py\n M services/runner/tests/test_doctor_cli.py"
+  diff_name_only: "services/runner/src/runner/doctor.py\nservices/runner/tests/test_doctor_cli.py"
+scope:
+  branch: 0103-ariadna-cli-skeleton
+  plan_path: .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+files_checked:
+  - .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+  - .project-memory/pr/0103-ariadna-cli-skeleton/reviews/plan-review.yml
+  - .project-memory/review-artifact.schema.yml
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+  - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+  - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+  - services/runner/src/runner/proof_ref.py
+  - services/runner/tests/test_proof_ref.py
+  - services/runner/src/runner/handoff_packet.py
+  - services/runner/tests/test_handoff_packet.py
+  - services/runner/tests/test_readiness_gate.py
+  - services/runner/src/runner/execution_smoke.py
+  - services/runner/src/runner/execution_substrate_audit.py
+  - services/task_intake/src/task_intake/app.py
+  - services/task_intake/src/task_intake/execution_handoff.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/tests/test_doctor_cli.py
+  - services/runner/src/runner/__main__.py
+validation:
+  - command: git rev-parse --verify HEAD
+    exit_code: 0
+    result: 676f150cbccc7a0def1c7d6bd32f11957af41cbb
+  - command: git status --short
+    exit_code: 0
+    result: " M services/runner/src/runner/doctor.py\n M services/runner/tests/test_doctor_cli.py"
+  - command: git diff --name-only
+    exit_code: 0
+    result: "services/runner/src/runner/doctor.py\nservices/runner/tests/test_doctor_cli.py"
+  - command: python -m compileall -f services/runner/src services/task_intake/src
+    exit_code: 0
+    result: "Compiling... (see compileall output)"
+  - command: PYTHONPATH=services/runner/src python -m pytest services/runner/tests/test_doctor_cli.py -q
+    exit_code: 0
+    result: "18 passed"
+  - command: PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/runner/tests/test_doctor_cli.py services/runner/tests/test_proof_ref.py services/runner/tests/test_handoff_packet.py services/runner/tests/test_readiness_gate.py services/runner/tests/test_execution_smoke.py services/runner/tests/test_execution_substrate_audit.py -q
+    exit_code: 0
+    result: "163 passed"
+  - command: PYTHONPATH=services/task_intake/src:services/runner/src python -m task_intake.app --check --json
+    exit_code: 0
+    result: "{\n  \"check\": true,\n  \"default_adapter\": \"noop\",\n  \"dependencies\": [\n    \"uvicorn\"\n  ],\n  \"host\": \"127.0.0.1\",\n  \"port\": 8000,\n  \"routes\": [\n    \"/\",\n    \"/health\",\n    \"/submit\",\n    \"/task-intake/submit\",\n    \"/task-intake/normalize\",\n    \"/context/preview\",\n    \"/runs\",\n    \"/mock-loop\",\n    \"/runs/execute\"\n  ],\n  \"service\": \"task_intake\",\n  \"status\": \"ready\"\n}"
+blockers: []
+warnings: []
+files_read:
+  - .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+  - .project-memory/pr/0103-ariadna-cli-skeleton/reviews/plan-review.yml
+  - .project-memory/review-artifact.schema.yml
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+  - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+  - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+  - services/runner/src/runner/proof_ref.py
+  - services/runner/tests/test_proof_ref.py
+  - services/runner/src/runner/handoff_packet.py
+  - services/runner/tests/test_handoff_packet.py
+  - services/runner/tests/test_readiness_gate.py
+  - services/runner/src/runner/execution_smoke.py
+  - services/runner/src/runner/execution_substrate_audit.py
+  - services/task_intake/src/task_intake/app.py
+  - services/task_intake/src/task_intake/execution_handoff.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/tests/test_doctor_cli.py
+  - services/runner/src/runner/__main__.py
+files_written:
+  - .project-memory/pr/0103-ariadna-cli-skeleton/reviews/precommit-review.yml
+blockers_list: []
+warnings_list: []
+decisions_made:
+  - implementation_files:
+      - services/runner/src/runner/__main__.py
+      - services/runner/src/runner/doctor.py
+    tests:
+      - services/runner/tests/test_doctor_cli.py
+  - entrypoint_pattern: existing __main__.py with doctor._main() pattern preserved
+  - stable_exit_codes:
+      success: 0
+      failure: 1
+  - output_format: json with keys status, command, result, error; json.dumps(sort_keys=True, indent=2)
+context_used:
+  files_modified:
+    - .project-memory/pr/0103-ariadna-cli-skeleton/reviews/precommit-review.yml
+  files_read:
+    - .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+    - .project-memory/pr/0103-ariadna-cli-skeleton/reviews/plan-review.yml
+    - .project-memory/review-artifact.schema.yml
+    - .project-memory/post-0100/strategic-direction/agent-manifest.md
+    - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+    - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+    - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+    - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+    - services/runner/src/runner/proof_ref.py
+    - services/runner/tests/test_proof_ref.py
+    - services/runner/src/runner/handoff_packet.py
+    - services/runner/tests/test_handoff_packet.py
+    - services/runner/tests/test_readiness_gate.py
+    - services/runner/src/runner/execution_smoke.py
+    - services/runner/src/runner/execution_substrate_audit.py
+    - services/task_intake/src/task_intake/app.py
+    - services/task_intake/src/task_intake/execution_handoff.py
+    - services/runner/src/runner/doctor.py
+    - services/runner/tests/test_doctor_cli.py
+    - services/runner/src/runner/__main__.py
