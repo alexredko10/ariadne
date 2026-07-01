@@ -388,6 +388,212 @@ class TestFreezeCriteria:
 
 
 # ---------------------------------------------------------------------------
+# Bundle evidence subcommand
+# ---------------------------------------------------------------------------
+
+
+class TestBundleEvidence:
+    def test_bundle_evidence_help(self):
+        """``--help`` output for ``bundle evidence`` subcommand."""
+        result = _run_runner(["bundle", "evidence", "--help"])
+        assert result.returncode == 0
+        assert "usage:" in result.stdout
+        assert "path" in result.stdout
+
+    def test_bundle_evidence_valid_file(self, tmp_path: Path):
+        """Valid JSON input with real artifacts → exit 0, bundled."""
+        # Set up artifacts using the same pattern as test_gate_evidence
+        from runner.acceptance_criteria import (
+            AcceptanceCriterion,
+            AcceptanceCriteriaFreezeInput,
+            freeze_acceptance_criteria,
+        )
+        from runner.proof_capture import (
+            ProofCaptureInput,
+            capture_proof,
+        )
+        from runner.handoff_packet import (
+            GateReadyHandoffPacket,
+        )
+
+        # Freeze criteria
+        criteria_inp = AcceptanceCriteriaFreezeInput(
+            product_state_ref="abc123",
+            criteria=(
+                AcceptanceCriterion(criterion_id="AC-001", description="Criterion 1."),
+                AcceptanceCriterion(criterion_id="AC-002", description="Criterion 2."),
+            ),
+            phase_id="phase-1",
+            run_id="run-001",
+            output_path="criteria/frozen.json",
+        )
+        criteria_result = freeze_acceptance_criteria(criteria_inp, output_dir=str(tmp_path))
+        ac_ref = criteria_result.acceptance_criteria_ref
+        criteria_path = str(tmp_path / criteria_result.artifact_path)
+
+        # Capture proof
+        capture_inp = ProofCaptureInput(
+            product_state_ref="abc123",
+            acceptance_criteria_ref=ac_ref,
+            runtime_capture_kind="text",
+            phase_id="phase-1",
+            run_id="run-001",
+            payload="Evidence.",
+            output_path="captures/evidence.json",
+        )
+        capture_result = capture_proof(capture_inp, output_dir=str(tmp_path))
+        capture_path = str(tmp_path / capture_result.artifact_path)
+        runtime_capture_ref = capture_result.proof_ref_fields["runtime_capture_ref"]
+
+        # Handoff packet
+        handoff_packet = GateReadyHandoffPacket(
+            product_state_ref="abc123",
+            acceptance_criteria_ref=ac_ref,
+            phase_id="phase-1",
+            run_id="run-001",
+            gate_id="human_review_gate",
+            actor_or_role="reviewer",
+            proof_ref_ids=("pr-001", "pr-002"),
+            payload="All checks passed.",
+        )
+        handoff_path = str(tmp_path / "handoff.json")
+        with open(handoff_path, "w", encoding="utf-8") as f:
+            f.write(handoff_packet.to_json())
+
+        # Bundle input JSON
+        bundle_input = {
+            "product_state_ref": "abc123",
+            "acceptance_criteria_ref": ac_ref,
+            "phase_id": "phase-1",
+            "run_id": "run-001",
+            "proof_ref_ids": ["pr-001", "pr-002"],
+            "runtime_capture_refs": [runtime_capture_ref],
+            "handoff_packet_path": handoff_path,
+            "acceptance_criteria_path": criteria_path,
+            "output_path": "bundle/evidence.json",
+            "capture_artifact_paths": [capture_path],
+            "gate_id": "human_review_gate",
+            "actor_or_role": "reviewer",
+        }
+        f = tmp_path / "bundle_input.json"
+        f.write_text(json.dumps(bundle_input), encoding="utf-8")
+
+        result = _run_runner(["bundle", "evidence", str(f), "--output-dir", str(tmp_path)])
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+        assert output["status"] == "ok"
+        assert output["command"] == "bundle evidence"
+        assert output["result"]["bundle_status"] == "bundled"
+        assert output["error"] is None
+        assert output["result"]["bundle_ref"] is not None
+
+        # Verify bundle artifact was written
+        bundle_file = tmp_path / "bundle" / "evidence.json"
+        assert bundle_file.exists()
+
+    def test_bundle_evidence_inconsistent_file(self, tmp_path: Path):
+        """Mismatched refs → exit 1, rejected."""
+        from runner.acceptance_criteria import (
+            AcceptanceCriterion,
+            AcceptanceCriteriaFreezeInput,
+            freeze_acceptance_criteria,
+        )
+        from runner.proof_capture import (
+            ProofCaptureInput,
+            capture_proof,
+        )
+        from runner.handoff_packet import (
+            GateReadyHandoffPacket,
+        )
+
+        # Freeze criteria
+        criteria_inp = AcceptanceCriteriaFreezeInput(
+            product_state_ref="abc123",
+            criteria=(
+                AcceptanceCriterion(criterion_id="AC-001", description="Criterion 1."),
+            ),
+            phase_id="phase-1",
+            run_id="run-001",
+            output_path="criteria/frozen.json",
+        )
+        criteria_result = freeze_acceptance_criteria(criteria_inp, output_dir=str(tmp_path))
+        ac_ref = criteria_result.acceptance_criteria_ref
+        criteria_path = str(tmp_path / criteria_result.artifact_path)
+
+        # Capture proof
+        capture_inp = ProofCaptureInput(
+            product_state_ref="abc123",
+            acceptance_criteria_ref=ac_ref,
+            runtime_capture_kind="text",
+            phase_id="phase-1",
+            run_id="run-001",
+            payload="Evidence.",
+            output_path="captures/evidence.json",
+        )
+        capture_result = capture_proof(capture_inp, output_dir=str(tmp_path))
+        capture_path = str(tmp_path / capture_result.artifact_path)
+        runtime_capture_ref = capture_result.proof_ref_fields["runtime_capture_ref"]
+
+        # Handoff packet with DIFFERENT product_state_ref
+        handoff_packet = GateReadyHandoffPacket(
+            product_state_ref="different",  # inconsistent!
+            acceptance_criteria_ref=ac_ref,
+            phase_id="phase-1",
+            run_id="run-001",
+            gate_id="human_review_gate",
+            actor_or_role="reviewer",
+            proof_ref_ids=("pr-001",),
+            payload="All checks passed.",
+        )
+        handoff_path = str(tmp_path / "handoff.json")
+        with open(handoff_path, "w", encoding="utf-8") as f:
+            f.write(handoff_packet.to_json())
+
+        bundle_input = {
+            "product_state_ref": "abc123",
+            "acceptance_criteria_ref": ac_ref,
+            "phase_id": "phase-1",
+            "run_id": "run-001",
+            "proof_ref_ids": ["pr-001"],
+            "runtime_capture_refs": [runtime_capture_ref],
+            "handoff_packet_path": handoff_path,
+            "acceptance_criteria_path": criteria_path,
+            "output_path": "bundle/evidence.json",
+            "capture_artifact_paths": [capture_path],
+            "gate_id": "human_review_gate",
+            "actor_or_role": "reviewer",
+        }
+        f = tmp_path / "bundle_input.json"
+        f.write_text(json.dumps(bundle_input), encoding="utf-8")
+
+        result = _run_runner(["bundle", "evidence", str(f), "--output-dir", str(tmp_path)])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "ok"
+        assert output["result"]["bundle_status"] == "rejected"
+        assert len(output["result"]["reason_codes"]) > 0
+
+    def test_bundle_evidence_file_not_found(self):
+        """Nonexistent path → exit 1."""
+        result = _run_runner(["bundle", "evidence", "/nonexistent/path.json"])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "error"
+        assert "File not found" in output["error"]
+
+    def test_bundle_evidence_invalid_json(self, tmp_path: Path):
+        """Malformed JSON → exit 1."""
+        f = tmp_path / "bad.json"
+        f.write_text("{invalid json}", encoding="utf-8")
+
+        result = _run_runner(["bundle", "evidence", str(f)])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "error"
+        assert "Invalid JSON" in output["error"]
+
+
+# ---------------------------------------------------------------------------
 # General CLI behavior
 # ---------------------------------------------------------------------------
 

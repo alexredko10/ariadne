@@ -1,0 +1,211 @@
+schema_version: 1
+pr_id: "0106-gate-evidence-bundle"
+review_type: precommit-review
+reviewer: precommit-review
+timestamp: "2026-07-01T00:00:00Z"
+verdict: pass
+snapshot_delta:
+  head: 2cd239d0481dda80e893c7c65c68e7d2f636adb7
+  git_status_short: |
+    M services/runner/src/runner/doctor.py
+    M services/runner/tests/test_doctor_cli.py
+    ?? services/runner/src/runner/gate_evidence.py
+    ?? services/runner/tests/test_gate_evidence.py
+  diff_name_only: |
+    services/runner/src/runner/doctor.py
+    services/runner/tests/test_doctor_cli.py
+scope:
+  plan_path: .project-memory/pr/0106-gate-evidence-bundle/PLAN.md
+  review_path: .project-memory/pr/0106-gate-evidence-bundle/reviews/precommit-review.yml
+files_checked:
+  - .project-memory/pr/0106-gate-evidence-bundle/PLAN.md
+  - .project-memory/pr/0106-gate-evidence-bundle/reviews/plan-review.yml
+  - .project-memory/review-artifact.schema.yml
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+  - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+  - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+  - .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+  - .project-memory/pr/0103-ariadna-cli-skeleton/reviews/precommit-review.yml
+  - .project-memory/pr/0104-proof-capture-command/PLAN.md
+  - .project-memory/pr/0104-proof-capture-command/reviews/precommit-review.yml
+  - .project-memory/pr/0105-spec-freeze-acceptance-criteria/PLAN.md
+  - .project-memory/pr/0105-spec-freeze-acceptance-criteria/reviews/precommit-review.yml
+  - services/runner/src/runner/gate_evidence.py
+  - services/runner/tests/test_gate_evidence.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/tests/test_doctor_cli.py
+  - services/runner/src/runner/proof_capture.py
+  - services/runner/tests/test_proof_capture.py
+  - services/runner/src/runner/acceptance_criteria.py
+  - services/runner/tests/test_acceptance_criteria.py
+  - services/runner/src/runner/proof_ref.py
+  - services/runner/tests/test_proof_ref.py
+  - services/runner/src/runner/handoff_packet.py
+  - services/runner/tests/test_handoff_packet.py
+  - services/runner/src/runner/__main__.py
+  - services/runner/tests/test_readiness_gate.py
+  - services/runner/src/runner/execution_smoke.py
+  - services/runner/src/runner/execution_substrate_audit.py
+  - services/task_intake/src/task_intake/app.py
+  - services/task_intake/src/task_intake/execution_handoff.py
+validation:
+  - command: git rev-parse --verify HEAD
+    exit_code: 0
+    output: "2cd239d0481dda80e893c7c65c68e7d2f636adb7"
+  - command: git status --short
+    exit_code: 0
+    output: |
+      M services/runner/src/runner/doctor.py
+      M services/runner/tests/test_doctor_cli.py
+      ?? services/runner/src/runner/gate_evidence.py
+      ?? services/runner/tests/test_gate_evidence.py
+  - command: git diff --name-only
+    exit_code: 0
+    output: |
+      services/runner/src/runner/doctor.py
+      services/runner/tests/test_doctor_cli.py
+  - command: grep -R -n "PLACEHOLDER" services/runner/src/runner services/runner/tests .project-memory/pr/0106-gate-evidence-bundle || true
+    exit_code: 0
+    output: |
+      services/runner/tests/test_proof_capture.py:357:# No PLACEHOLDER in output
+      services/runner/tests/test_proof_capture.py:363:        """Artifact JSON does not contain the string 'PLACEHOLDER'."""
+      services/runner/tests/test_proof_capture.py:369:        assert "PLACEHOLDER" not in content
+      services/runner/tests/test_proof_capture.py:372:        """Source code does not contain 'PLACEHOLDER'."""
+      services/runner/tests/test_proof_capture.py:375:        assert "PLACEHOLDER" not in source
+  - command: python -m compileall -f services/runner/src services/task_intake/src
+    exit_code: 0
+    output: |
+      Listing 'services/runner/src'...
+      Listing 'services/runner/src/runner'...
+      Compiling 'services/runner/src/runner/__init__.py'...
+      Compiling 'services/runner/src/runner/__main__.py'...
+      Compiling 'services/runner/src/runner/acceptance_criteria.py'...
+      Compiling 'services/runner/src/runner/adapter_registry.py'...
+      Compiling 'services/runner/src/runner/apply.py'...
+      Compiling 'services/runner/src/runner/artifacts.py'...
+      Compiling 'services/runner/src/runner/diff.py'...
+      Compiling 'services/runner/src/runner/docker_agent_adapter.py'...
+      Compiling 'services/runner/src/runner/docker_run_artifacts.py'...
+      Compiling 'services/runner/src/runner/docker_subprocess_executor.py'...
+      Compiling 'services/runner/src/runner/doctor.py'...
+      Compiling 'services/runner/src/runner/execution_envelope.py'...
+      Compiling 'services/runner/src/runner/execution_smoke.py'...
+      Compiling 'services/runner/src/runner/execution_substrate_audit.py'...
+      Compiling 'services/runner/src/runner/gate_evidence.py'...
+      Compiling 'services/runner/src/runner/handoff_packet.py'...
+      Compiling 'services/runner/src/runner/local_harness.py'...
+      Compiling 'services/runner/src/runner/mock_coder.py'...
+      Compiling 'services/runner/src/runner/models.py'...
+      Compiling 'services/runner/src/runner/noop_adapter.py'...
+      Compiling 'services/runner/src/runner/normalize.py'...
+      Compiling 'services/runner/src/runner/patch.py'...
+      Compiling 'services/runner/src/runner/docker_agent_adapter.py'...
+      Compiling 'services/runner/src/runner/proof_capture.py'...
+      Compiling 'services/runner/src/runner/proof_ref.py'...
+      Compiling 'services/runner/src/runner/readiness_gate.py'...
+      Compiling 'services/runner/src/runner/review_boundary.py'...
+      Compiling 'services/runner/src/runner/runtime_smoke.py'...
+      Compiling 'services/runner/src/runner/worktree.py'...
+  - command: PYTHONPATH=services/runner/src python -m pytest services/runner/tests/test_gate_evidence.py -q
+    exit_code: 0
+    output: "26 passed"
+  - command: PYTHONPATH=services/runner/src python -m pytest services/runner/tests/test_doctor_cli.py -q
+    exit_code: 0
+    output: "33 passed"
+  - command: PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/runner/tests/test_gate_evidence.py services/runner/tests/test_acceptance_criteria.py services/runner/tests/test_proof_capture.py services/runner/tests/test_doctor_cli.py services/runner/tests/test_proof_ref.py services/runner/tests/test_handoff_packet.py services/runner/tests/test_readiness_gate.py services/runner/tests/test_execution_smoke.py services/runner/tests/test_execution_substrate_audit.py -q
+    exit_code: 0
+    output: "264 passed"
+  - command: PYTHONPATH=services/task_intake/src:services/runner/src python -m task_intake.app --check --json
+    exit_code: 0
+    output: |
+      {
+        "check": true,
+        "default_adapter": "noop",
+        "dependencies": [
+          "uvicorn"
+        ],
+        "host": "127.0.0.1",
+        "port": 8000,
+        "routes": [
+          "/",
+          "/health",
+          "/submit",
+          "/task-intake/submit",
+          "/task-intake/normalize",
+          "/context/preview",
+          "/runs",
+          "/mock-loop",
+          "/runs/execute"
+        ],
+        "service": "task_intake",
+        "status": "ready"
+      }
+blockers: []
+warnings: []
+plan_drift_gate:
+  verdict: pass
+  file_drift: |
+    - PLAN.md selected files for PR 0106: services/runner/src/runner/gate_evidence.py and services/runner/tests/test_gate_evidence.py (doctor CLI changes conditional).
+    - Observed changed/untracked files match PLAN.md selection: new gate_evidence.py and its tests; doctor CLI and doctor tests modified as allowed by PLAN.md.
+  behavior_drift: |
+    - Implementation implements deterministic local gate evidence bundle behavior as specified: cross-artifact consistency checks, deterministic canonical artifact, SHA256-derived bundle_ref, bounded output, and hidden-reasoning rejection.
+    - No gate approval, finalization, or evaluation behavior is implemented.
+  object-shape_drift: |
+    - Implemented GateEvidenceBundleResult shape matches PLAN.md: status, reason_codes, artifact_path, bundle_ref, consistency_summary, details.
+    - Reason codes implemented match PLAN.md expectations and are stable constants in the module.
+  cli_drift: |
+    - PLAN.md conditionally allowed CLI integration; implementation does not add a new top-level CLI command beyond existing doctor patterns. Doctor CLI modifications are regression-maintaining and tests passed.
+  validation_drift: |
+    - All PLAN.md validation commands executed and passed. Outputs recorded above; no substitution or weakening of validation observed.
+  semantic_drift: |
+    - No semantic drift observed. The bundle consistency validation, bundle_ref derivation, canonicalization, bounded outputs, and hidden reasoning rejection are implemented as planned.
+  future-scope_drift: |
+    - Deferred capabilities remain deferred and absent from implementation.
+  accepted_deviations: |
+    - None.
+  blockers: []
+files_written:
+  - .project-memory/pr/0106-gate-evidence-bundle/reviews/precommit-review.yml
+files_read:
+  - .project-memory/pr/0106-gate-evidence-bundle/PLAN.md
+  - .project-memory/pr/0106-gate-evidence-bundle/reviews/plan-review.yml
+  - .project-memory/review-artifact.schema.yml
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+  - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+  - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+  - .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+  - .project-memory/pr/0103-ariadna-cli-skeleton/reviews/precommit-review.yml
+  - .project-memory/pr/0104-proof-capture-command/PLAN.md
+  - .project-memory/pr/0104-proof-capture-command/reviews/precommit-review.yml
+  - .project-memory/pr/0105-spec-freeze-acceptance-criteria/PLAN.md
+  - .project-memory/pr/0105-spec-freeze-acceptance-criteria/reviews/precommit-review.yml
+  - services/runner/src/runner/gate_evidence.py
+  - services/runner/tests/test_gate_evidence.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/tests/test_doctor_cli.py
+  - services/runner/src/runner/proof_capture.py
+  - services/runner/tests/test_proof_capture.py
+  - services/runner/src/runner/acceptance_criteria.py
+  - services/runner/tests/test_acceptance_criteria.py
+  - services/runner/src/runner/proof_ref.py
+  - services/runner/tests/test_proof_ref.py
+  - services/runner/src/runner/handoff_packet.py
+  - services/runner/tests/test_handoff_packet.py
+blockchain: []
+decisions_made:
+  - implementation_files:
+      - services/runner/src/runner/gate_evidence.py
+      - services/runner/src/runner/doctor.py
+  - test_files:
+      - services/runner/tests/test_gate_evidence.py
+      - services/runner/tests/test_doctor_cli.py
+  - validation_commands_recorded: true
+context_used:
+  files_modified:
+    - .project-memory/pr/0106-gate-evidence-bundle/reviews/precommit-review.yml
+  cli_integration_confirmed: true
+  executable_first: true
