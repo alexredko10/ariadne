@@ -17,6 +17,10 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
+from .acceptance_criteria import (
+    AcceptanceCriteriaFreezeInput,
+    freeze_acceptance_criteria,
+)
 from .handoff_packet import (
     GateReadyHandoffPacket,
     validate_handoff_packet,
@@ -338,6 +342,109 @@ def capture_proof_file(path: str, output_dir: str = ".") -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Freeze acceptance criteria file
+# ---------------------------------------------------------------------------
+
+
+def freeze_acceptance_criteria_file(path: str, output_dir: str = ".") -> dict:
+    """Read a JSON file, parse as AcceptanceCriteriaFreezeInput, and freeze.
+
+    Parameters
+    ----------
+    path:
+        Path to a JSON file containing AcceptanceCriteriaFreezeInput data.
+    output_dir:
+        Directory where the artifact will be written.
+
+    Returns
+    -------
+    dict
+        A JSON-serializable result dict with keys:
+        ``status``, ``command``, ``result``, ``error``.
+    """
+    try:
+        raw = Path(path).read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return {
+            "status": "error",
+            "command": "freeze criteria",
+            "result": None,
+            "error": f"File not found: {path}",
+        }
+    except OSError as exc:
+        return {
+            "status": "error",
+            "command": "freeze criteria",
+            "result": None,
+            "error": f"Error reading file: {exc}",
+        }
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        return {
+            "status": "error",
+            "command": "freeze criteria",
+            "result": None,
+            "error": f"Invalid JSON: {exc}",
+        }
+
+    if not isinstance(data, dict):
+        return {
+            "status": "error",
+            "command": "freeze criteria",
+            "result": None,
+            "error": "JSON root must be an object",
+        }
+
+    # Convert criteria list to tuple of AcceptanceCriterion
+    if "criteria" in data and isinstance(data["criteria"], list):
+        from .acceptance_criteria import AcceptanceCriterion
+        criteria_list = []
+        for c in data["criteria"]:
+            if isinstance(c, dict):
+                criteria_list.append(AcceptanceCriterion(
+                    criterion_id=c.get("criterion_id", ""),
+                    description=c.get("description", ""),
+                ))
+            else:
+                return {
+                    "status": "error",
+                    "command": "freeze criteria",
+                    "result": None,
+                    "error": "Each criterion must be an object with criterion_id and description",
+                }
+        data["criteria"] = tuple(criteria_list)
+
+    try:
+        freeze_input = AcceptanceCriteriaFreezeInput(**data)
+    except (TypeError, ValueError) as exc:
+        return {
+            "status": "error",
+            "command": "freeze criteria",
+            "result": None,
+            "error": f"Invalid AcceptanceCriteriaFreezeInput data: {exc}",
+        }
+
+    result = freeze_acceptance_criteria(freeze_input, output_dir=output_dir)
+
+    return {
+        "status": "ok",
+        "command": "freeze criteria",
+        "result": {
+            "freeze_status": result.status.value,
+            "reason_codes": list(result.reason_codes),
+            "artifact_path": result.artifact_path,
+            "acceptance_criteria_ref": result.acceptance_criteria_ref,
+            "criteria_count": result.criteria_count,
+            "criterion_ids": list(result.criterion_ids) if result.criterion_ids else None,
+            "details": result.details,
+        },
+        "error": None,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
 
@@ -387,6 +494,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Directory where the artifact will be written (default: current directory).",
     )
 
+    # Freeze subcommand group
+    freeze_parser = subparsers.add_parser("freeze", help="Freeze acceptance criteria.")
+    freeze_subparsers = freeze_parser.add_subparsers(dest="freeze_command", required=True)
+
+    # freeze criteria <path>
+    freeze_criteria_parser = freeze_subparsers.add_parser("criteria", help="Freeze acceptance criteria from a JSON input file.")
+    freeze_criteria_parser.add_argument("path", help="Path to the acceptance criteria freeze input JSON file.")
+    freeze_criteria_parser.add_argument(
+        "--output-dir",
+        default=".",
+        help="Directory where the artifact will be written (default: current directory).",
+    )
+
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     if args.command == "doctor":
@@ -418,6 +538,16 @@ def main(argv: Sequence[str] | None = None) -> int:
             if result["status"] == "error":
                 return 1
             if result["result"] and result["result"].get("capture_status") == "rejected":
+                return 1
+            return 0
+
+    if args.command == "freeze":
+        if args.freeze_command == "criteria":
+            result = freeze_acceptance_criteria_file(args.path, output_dir=args.output_dir)
+            _print_json_result(result)
+            if result["status"] == "error":
+                return 1
+            if result["result"] and result["result"].get("freeze_status") == "rejected":
                 return 1
             return 0
 
