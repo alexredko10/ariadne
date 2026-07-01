@@ -594,6 +594,92 @@ class TestBundleEvidence:
 
 
 # ---------------------------------------------------------------------------
+# Improve propose subcommand
+# ---------------------------------------------------------------------------
+
+
+class TestImprovePropose:
+    def test_improve_propose_help(self):
+        """``--help`` output for ``improve propose`` subcommand."""
+        result = _run_runner(["improve", "propose", "--help"])
+        assert result.returncode == 0
+        assert "usage:" in result.stdout
+        assert "path" in result.stdout
+
+    def test_improve_propose_valid_file(self, tmp_path: Path):
+        """Valid JSON file → exit 0, proposed."""
+        data = {
+            "product_state_ref": "abc123",
+            "acceptance_criteria_ref": "def456",
+            "phase_id": "phase-1",
+            "run_id": "run-001",
+            "source_bundle_ref": "deadbeef12345678",
+            "source_reason_codes": ["missing_proof_refs"],
+            "output_path": "candidate.json",
+            "evidence_refs": ["pr-001"],
+            "proposed_next_action": "Add proof capture before handoff",
+            "affected_runtime_area": "runner/proof_capture",
+            "requires_human_review": True,
+        }
+        f = tmp_path / "input.json"
+        f.write_text(json.dumps(data), encoding="utf-8")
+
+        result = _run_runner(["improve", "propose", str(f), "--output-dir", str(tmp_path)])
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+        assert output["status"] == "ok"
+        assert output["command"] == "improve propose"
+        assert output["result"]["proposal_status"] == "proposed"
+        assert output["error"] is None
+        assert output["result"]["candidate_id"] is not None
+
+        # Verify artifact was written
+        artifact_file = tmp_path / "candidate.json"
+        assert artifact_file.exists()
+
+    def test_improve_propose_invalid_file(self, tmp_path: Path):
+        """JSON with missing fields → exit 1, rejected."""
+        data = {
+            "product_state_ref": "",
+            "acceptance_criteria_ref": "def456",
+            "phase_id": "phase-1",
+            "run_id": "run-001",
+            "source_bundle_ref": "deadbeef12345678",
+            "source_reason_codes": ["missing_proof_refs"],
+            "output_path": "candidate.json",
+            "evidence_refs": ["pr-001"],
+        }
+        f = tmp_path / "bad_input.json"
+        f.write_text(json.dumps(data), encoding="utf-8")
+
+        result = _run_runner(["improve", "propose", str(f), "--output-dir", str(tmp_path)])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "ok"
+        assert output["result"]["proposal_status"] == "rejected"
+        assert len(output["result"]["reason_codes"]) > 0
+
+    def test_improve_propose_file_not_found(self):
+        """Nonexistent path → exit 1."""
+        result = _run_runner(["improve", "propose", "/nonexistent/path.json"])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "error"
+        assert "File not found" in output["error"]
+
+    def test_improve_propose_invalid_json(self, tmp_path: Path):
+        """Malformed JSON → exit 1."""
+        f = tmp_path / "bad.json"
+        f.write_text("{invalid json}", encoding="utf-8")
+
+        result = _run_runner(["improve", "propose", str(f)])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "error"
+        assert "Invalid JSON" in output["error"]
+
+
+# ---------------------------------------------------------------------------
 # General CLI behavior
 # ---------------------------------------------------------------------------
 

@@ -1,0 +1,106 @@
+schema_version: 1
+pr_id: "0107-evidence-backed-self-improvement-candidate"
+review_type: plan-review
+reviewer: plan-review
+timestamp: "2026-07-01T00:00:00Z"
+verdict: warning
+snapshot_delta:
+  head: 92293191c55292c46c61809b3312905959eb890e
+  git_status_short: ""
+scope:
+  plan_path: .project-memory/pr/0107-evidence-backed-self-improvement-candidate/PLAN.md
+  review_path: .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/plan-review.yml
+files_checked:
+  - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/PLAN.md
+  - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/plan-review.yml
+  - .project-memory/review-artifact.schema.yml
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - ROADMAP.md
+  - docs/adr/0011-pr-batching-and-roadmap-discipline.md
+  - docs/adr/0010-runner-execution-contract-boundary.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+  - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+  - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+  - .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+  - .project-memory/pr/0103-ariadna-cli-skeleton/reviews/precommit-review.yml
+  - .project-memory/pr/0104-proof-capture-command/PLAN.md
+  - .project-memory/pr/0104-proof-capture-command/reviews/precommit-review.yml
+  - .project-memory/pr/0105-spec-freeze-acceptance-criteria/PLAN.md
+  - .project-memory/pr/0105-spec-freeze-acceptance-criteria/reviews/precommit-review.yml
+  - .project-memory/pr/0106-gate-evidence-bundle/PLAN.md
+  - .project-memory/pr/0106-gate-evidence-bundle/reviews/precommit-review.yml
+  - services/runner/src/runner/gate_evidence.py
+  - services/runner/tests/test_gate_evidence.py
+  - services/runner/src/runner/proof_ref.py
+  - services/runner/tests/test_proof_ref.py
+  - services/runner/src/runner/handoff_packet.py
+  - services/runner/tests/test_handoff_packet.py
+  - services/runner/src/runner/proof_capture.py
+  - services/runner/tests/test_proof_capture.py
+  - services/runner/src/runner/acceptance_criteria.py
+  - services/runner/tests/test_acceptance_criteria.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/src/runner/__main__.py
+  - services/runner/tests/test_doctor_cli.py
+  - services/task_intake/src/task_intake/app.py
+  - services/task_intake/src/task_intake/execution_handoff.py
+validation:
+  - command: git rev-parse --verify HEAD
+    result: 92293191c55292c46c61809b3312905959eb890e
+  - command: git status --short
+    result: ""
+  - command: git diff --name-only
+    result: ""
+  - command: grep -R -n "VERDICT:|Plan Drift Gate|PLAN DRIFT GATE|gate evidence bundle|gate_evidence|264 passed|task_intake" .project-memory/pr/0106-gate-evidence-bundle/reviews/precommit-review.yml services/runner/src/runner/gate_evidence.py services/runner/tests/test_gate_evidence.py 2>/dev/null || true
+    result: "matches found in .project-memory/pr/0106-gate-evidence-bundle/reviews/precommit-review.yml only"
+  - command: date -u +%Y-%m-%dT%H:%M:%SZ
+    result: "2026-07-01T00:00:00Z"
+blockers: []
+warnings:
+  - The prior PR 0106 predecessor evidence gap is corrected by reading the required PR 0106 precommit-review artifact, but plan review still cannot independently execute the gate_evidence tests.
+  - The PR 0107 plan remains autonomy-safe and executable-first, but frontend repair remains deferred rather than concretely evidenced in this review.
+decisions_made:
+  - PR 0106 implementation evidence is established by the PR 0106 PLAN, PR 0106 precommit-review, gate_evidence source, and gate_evidence tests.
+  - The PR 0107 review artifact is corrected to include the missing PR 0106 precommit-review evidence.
+  - The PR 0107 plan remains acceptable with warnings only.
+context_used:
+  files_modified:
+    - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/plan-review.yml
+  files_read:
+    - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/PLAN.md
+    - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/plan-review.yml
+    - .project-memory/review-artifact.schema.yml
+    - .project-memory/post-0100/strategic-direction/agent-manifest.md
+    - ROADMAP.md
+    - docs/adr/0011-pr-batching-and-roadmap-discipline.md
+    - docs/adr/0010-runner-execution-contract-boundary.md
+    - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+    - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+    - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+    - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+    - .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+    - .project-memory/pr/0103-ariadna-cli-skeleton/reviews/precommit-review.yml
+    - .project-memory/pr/0104-proof-capture-command/PLAN.md
+    - .project-memory/pr/0104-proof-capture-command/reviews/precommit-review.yml
+    - .project-memory/pr/0105-spec-freeze-acceptance-criteria/PLAN.md
+    - .project-memory/pr/0105-spec-freeze-acceptance-criteria/reviews/precommit-review.yml
+    - .project-memory/pr/0106-gate-evidence-bundle/PLAN.md
+    - .project-memory/pr/0106-gate-evidence-bundle/reviews/precommit-review.yml
+    - services/runner/src/runner/gate_evidence.py
+    - services/runner/tests/test_gate_evidence.py
+    - services/runner/src/runner/proof_ref.py
+    - services/runner/tests/test_proof_ref.py
+    - services/runner/src/runner/handoff_packet.py
+    - services/runner/tests/test_handoff_packet.py
+    - services/runner/src/runner/proof_capture.py
+    - services/runner/tests/test_proof_capture.py
+    - services/runner/src/runner/acceptance_criteria.py
+    - services/runner/tests/test_acceptance_criteria.py
+    - services/runner/src/runner/doctor.py
+    - services/runner/src/runner/__main__.py
+    - services/runner/tests/test_doctor_cli.py
+    - services/task_intake/src/task_intake/app.py
+    - services/task_intake/src/task_intake/execution_handoff.py
+  files_written:
+    - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/plan-review.yml

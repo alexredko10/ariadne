@@ -29,6 +29,10 @@ from .handoff_packet import (
     GateReadyHandoffPacket,
     validate_handoff_packet,
 )
+from .improvement_candidate import (
+    ImprovementCandidateInput,
+    propose_improvement_candidate,
+)
 from .proof_capture import (
     ProofCaptureInput,
     capture_proof,
@@ -540,6 +544,95 @@ def build_gate_evidence_bundle_file(path: str, output_dir: str = ".") -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Propose improvement candidate file
+# ---------------------------------------------------------------------------
+
+
+def propose_improvement_candidate_file(path: str, output_dir: str = ".") -> dict:
+    """Read a JSON file, parse as ImprovementCandidateInput, and propose.
+
+    Parameters
+    ----------
+    path:
+        Path to a JSON file containing ImprovementCandidateInput data.
+    output_dir:
+        Directory where the candidate artifact will be written.
+
+    Returns
+    -------
+    dict
+        A JSON-serializable result dict with keys:
+        ``status``, ``command``, ``result``, ``error``.
+    """
+    try:
+        raw = Path(path).read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return {
+            "status": "error",
+            "command": "improve propose",
+            "result": None,
+            "error": f"File not found: {path}",
+        }
+    except OSError as exc:
+        return {
+            "status": "error",
+            "command": "improve propose",
+            "result": None,
+            "error": f"Error reading file: {exc}",
+        }
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        return {
+            "status": "error",
+            "command": "improve propose",
+            "result": None,
+            "error": f"Invalid JSON: {exc}",
+        }
+
+    if not isinstance(data, dict):
+        return {
+            "status": "error",
+            "command": "improve propose",
+            "result": None,
+            "error": "JSON root must be an object",
+        }
+
+    # Convert list fields to tuples
+    if "source_reason_codes" in data and isinstance(data["source_reason_codes"], list):
+        data["source_reason_codes"] = tuple(data["source_reason_codes"])
+    if "evidence_refs" in data and isinstance(data["evidence_refs"], list):
+        data["evidence_refs"] = tuple(data["evidence_refs"])
+
+    try:
+        candidate_input = ImprovementCandidateInput(**data)
+    except (TypeError, ValueError) as exc:
+        return {
+            "status": "error",
+            "command": "improve propose",
+            "result": None,
+            "error": f"Invalid ImprovementCandidateInput data: {exc}",
+        }
+
+    result = propose_improvement_candidate(candidate_input, output_dir=output_dir)
+
+    return {
+        "status": "ok",
+        "command": "improve propose",
+        "result": {
+            "proposal_status": result.status.value,
+            "reason_codes": list(result.reason_codes),
+            "candidate_id": result.candidate.candidate_id if result.candidate else None,
+            "improvement_category": result.candidate.improvement_category if result.candidate else None,
+            "artifact_path": result.artifact_path,
+            "details": result.details,
+        },
+        "error": None,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
 
@@ -615,6 +708,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Directory where the bundle artifact will be written (default: current directory).",
     )
 
+    # Improve subcommand group
+    improve_parser = subparsers.add_parser("improve", help="Propose improvement candidates.")
+    improve_subparsers = improve_parser.add_subparsers(dest="improve_command", required=True)
+
+    # improve propose <path>
+    improve_propose_parser = improve_subparsers.add_parser("propose", help="Propose an improvement candidate from a JSON input file.")
+    improve_propose_parser.add_argument("path", help="Path to the improvement candidate input JSON file.")
+    improve_propose_parser.add_argument(
+        "--output-dir",
+        default=".",
+        help="Directory where the candidate artifact will be written (default: current directory).",
+    )
+
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     if args.command == "doctor":
@@ -666,6 +772,16 @@ def main(argv: Sequence[str] | None = None) -> int:
             if result["status"] == "error":
                 return 1
             if result["result"] and result["result"].get("bundle_status") == "rejected":
+                return 1
+            return 0
+
+    if args.command == "improve":
+        if args.improve_command == "propose":
+            result = propose_improvement_candidate_file(args.path, output_dir=args.output_dir)
+            _print_json_result(result)
+            if result["status"] == "error":
+                return 1
+            if result["result"] and result["result"].get("proposal_status") == "rejected":
                 return 1
             return 0
 
