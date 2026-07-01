@@ -21,6 +21,10 @@ from .handoff_packet import (
     GateReadyHandoffPacket,
     validate_handoff_packet,
 )
+from .proof_capture import (
+    ProofCaptureInput,
+    capture_proof,
+)
 from .proof_ref import (
     ProofRef,
     validate_proof_ref,
@@ -248,6 +252,92 @@ def validate_handoff_file(
 
 
 # ---------------------------------------------------------------------------
+# Capture proof file
+# ---------------------------------------------------------------------------
+
+
+def capture_proof_file(path: str, output_dir: str = ".") -> dict:
+    """Read a JSON file, parse as ProofCaptureInput, and capture proof.
+
+    Parameters
+    ----------
+    path:
+        Path to a JSON file containing ProofCaptureInput data.
+    output_dir:
+        Directory where the artifact will be written.
+
+    Returns
+    -------
+    dict
+        A JSON-serializable result dict with keys:
+        ``status``, ``command``, ``result``, ``error``.
+    """
+    try:
+        raw = Path(path).read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return {
+            "status": "error",
+            "command": "capture proof",
+            "result": None,
+            "error": f"File not found: {path}",
+        }
+    except OSError as exc:
+        return {
+            "status": "error",
+            "command": "capture proof",
+            "result": None,
+            "error": f"Error reading file: {exc}",
+        }
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        return {
+            "status": "error",
+            "command": "capture proof",
+            "result": None,
+            "error": f"Invalid JSON: {exc}",
+        }
+
+    if not isinstance(data, dict):
+        return {
+            "status": "error",
+            "command": "capture proof",
+            "result": None,
+            "error": "JSON root must be an object",
+        }
+
+    # Convert tags list to frozenset if present
+    if "tags" in data and isinstance(data["tags"], list):
+        data["tags"] = frozenset(data["tags"])
+
+    try:
+        capture_input = ProofCaptureInput(**data)
+    except (TypeError, ValueError) as exc:
+        return {
+            "status": "error",
+            "command": "capture proof",
+            "result": None,
+            "error": f"Invalid ProofCaptureInput data: {exc}",
+        }
+
+    result = capture_proof(capture_input, output_dir=output_dir)
+
+    return {
+        "status": "ok",
+        "command": "capture proof",
+        "result": {
+            "capture_status": result.status.value,
+            "reason_codes": list(result.reason_codes),
+            "artifact_path": result.artifact_path,
+            "proof_ref_fields": result.proof_ref_fields,
+            "details": result.details,
+        },
+        "error": None,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
 
@@ -284,6 +374,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="List of admissible proof ref IDs.",
     )
 
+    # Capture subcommand group
+    capture_parser = subparsers.add_parser("capture", help="Capture proof artifacts.")
+    capture_subparsers = capture_parser.add_subparsers(dest="capture_command", required=True)
+
+    # capture proof <path>
+    capture_proof_parser = capture_subparsers.add_parser("proof", help="Capture a proof artifact from a JSON input file.")
+    capture_proof_parser.add_argument("path", help="Path to the proof capture input JSON file.")
+    capture_proof_parser.add_argument(
+        "--output-dir",
+        default=".",
+        help="Directory where the artifact will be written (default: current directory).",
+    )
+
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     if args.command == "doctor":
@@ -305,6 +408,16 @@ def main(argv: Sequence[str] | None = None) -> int:
             if result["status"] == "error":
                 return 1
             if result["result"] and result["result"].get("status") == "not_gate_ready":
+                return 1
+            return 0
+
+    if args.command == "capture":
+        if args.capture_command == "proof":
+            result = capture_proof_file(args.path, output_dir=args.output_dir)
+            _print_json_result(result)
+            if result["status"] == "error":
+                return 1
+            if result["result"] and result["result"].get("capture_status") == "rejected":
                 return 1
             return 0
 
