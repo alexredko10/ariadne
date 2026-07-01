@@ -1,0 +1,79 @@
+schema_version: 1
+pr_id: "0103-ariadna-cli-skeleton"
+review_type: plan-review
+reviewer: plan-review
+timestamp: "2026-07-01T00:00:00Z"
+verdict: warning
+snapshot_delta:
+  head: d5031886df33d070c0d97029d0eec35bfe98b426
+  git_status_short: ""
+scope:
+  plan_path: .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+  review_path: .project-memory/pr/0103-ariadna-cli-skeleton/reviews/plan-review.yml
+files_checked:
+  - .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - .project-memory/review-artifact.schema.yml
+  - ROADMAP.md
+  - docs/adr/0011-pr-batching-and-roadmap-discipline.md
+  - docs/adr/0010-runner-execution-contract-boundary.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+  - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+  - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+  - services/runner/src/runner/proof_ref.py
+  - services/runner/tests/test_proof_ref.py
+  - services/runner/src/runner/handoff_packet.py
+  - services/runner/tests/test_handoff_packet.py
+  - services/runner/src/runner/readiness_gate.py
+  - services/runner/tests/test_readiness_gate.py
+  - services/runner/src/runner/execution_smoke.py
+  - services/runner/src/runner/execution_substrate_audit.py
+  - services/task_intake/src/task_intake/app.py
+  - pyproject.toml
+validation:
+  - command: git rev-parse --verify HEAD
+    result: d5031886df33d070c0d97029d0eec35bfe98b426
+  - command: git status --short
+    result: ""
+  - command: git diff --name-only
+    result: ""
+  - command: grep -R -n "argparse|click|typer|console_scripts|**main**|python -m runner.cli|proof capture|spec freeze|finalize" .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md services pyproject.toml setup.cfg setup.py 2>/dev/null || true
+    result: ""
+  - command: date -u +%Y-%m-%dT%H:%M:%SZ
+    result: "2026-07-01T00:00:00Z"
+blockers: []
+warnings:
+  - The plan is executable-first and scope-correct, but it relies on modifying existing runner CLI files rather than the preferred `python -m runner.cli` style; this is acceptable only because the plan explicitly justifies the existing `__main__.py` entrypoint pattern.
+  - The plan includes a task_intake app check in validation, but the required-read set only included `services/task_intake/src/task_intake/app.py` and not `execution_handoff.py` because that file was absent from the required reads list in the task prompt.
+decisions_made:
+  - The plan remains executable-first and not docs-only, schemas-only, review-artifact-only, frontend-only, or packaging-only.
+  - The plan preserves PR 0102 handoff packet evidence and PR 0101 proof_ref evidence.
+  - The plan keeps proof capture, spec freeze, finalization, provider calls, Docker, network, and LLM work deferred.
+  - The plan uses deterministic JSON output and stable exit codes.
+context_used:
+  files_modified:
+    - .project-memory/pr/0103-ariadna-cli-skeleton/reviews/plan-review.yml
+  files_read:
+    - .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+    - .project-memory/post-0100/strategic-direction/agent-manifest.md
+    - .project-memory/review-artifact.schema.yml
+    - ROADMAP.md
+    - docs/adr/0011-pr-batching-and-roadmap-discipline.md
+    - docs/adr/0010-runner-execution-contract-boundary.md
+    - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+    - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+    - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+    - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+    - services/runner/src/runner/proof_ref.py
+    - services/runner/tests/test_proof_ref.py
+    - services/runner/src/runner/handoff_packet.py
+    - services/runner/tests/test_handoff_packet.py
+    - services/runner/src/runner/readiness_gate.py
+    - services/runner/tests/test_readiness_gate.py
+    - services/runner/src/runner/execution_smoke.py
+    - services/runner/src/runner/execution_substrate_audit.py
+    - services/task_intake/src/task_intake/app.py
+    - pyproject.toml
+  files_written:
+    - .project-memory/pr/0103-ariadna-cli-skeleton/reviews/plan-review.yml
