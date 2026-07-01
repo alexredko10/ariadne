@@ -1,0 +1,239 @@
+schema_version: 1
+pr_id: "0107-evidence-backed-self-improvement-candidate"
+review_type: precommit-review
+reviewer: precommit-review
+timestamp: "2026-07-01T00:00:00Z"
+verdict: pass
+snapshot_delta:
+  head: 76565100053f5a0db3a1c684437b00af596abd00
+  git_status_short: |
+    M services/runner/src/runner/doctor.py
+    M services/runner/tests/test_doctor_cli.py
+    ?? services/runner/src/runner/improvement_candidate.py
+    ?? services/runner/tests/test_improvement_candidate.py
+  diff_name_only: |
+    services/runner/src/runner/doctor.py
+    services/runner/tests/test_doctor_cli.py
+scope:
+  plan_path: .project-memory/pr/0107-evidence-backed-self-improvement-candidate/PLAN.md
+  review_path: .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/precommit-review.yml
+files_checked:
+  - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/PLAN.md
+  - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/plan-review.yml
+  - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/precommit-review.yml
+  - .project-memory/review-artifact.schema.yml
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+  - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+  - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+  - .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+  - .project-memory/pr/0103-ariadne-cli-skeleton/reviews/precommit-review.yml
+  - .project-memory/pr/0104-proof-capture-command/PLAN.md
+  - .project-memory/pr/0104-proof-capture-command/reviews/precommit-review.yml
+  - .project-memory/pr/0105-spec-freeze-acceptance-criteria/PLAN.md
+  - .project-memory/pr/0105-spec-freeze-acceptance-criteria/reviews/precommit-review.yml
+  - .project-memory/pr/0106-gate-evidence-bundle/PLAN.md
+  - .project-memory/pr/0106-gate-evidence-bundle/reviews/precommit-review.yml
+  - services/runner/src/runner/improvement_candidate.py
+  - services/runner/tests/test_improvement_candidate.py
+  - services/runner/src/runner/gate_evidence.py
+  - services/runner/tests/test_gate_evidence.py
+  - services/runner/src/runner/acceptance_criteria.py
+  - services/runner/tests/test_acceptance_criteria.py
+  - services/runner/src/runner/proof_capture.py
+  - services/runner/tests/test_proof_capture.py
+  - services/runner/src/runner/proof_ref.py
+  - services/runner/tests/test_proof_ref.py
+  - services/runner/src/runner/handoff_packet.py
+  - services/runner/tests/test_handoff_packet.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/src/runner/__main__.py
+  - services/runner/tests/test_doctor_cli.py
+  - services/runner/tests/test_readiness_gate.py
+  - services/runner/src/runner/execution_smoke.py
+  - services/runner/src/runner/execution_substrate_audit.py
+  - services/task_intake/src/task_intake/app.py
+  - services/task_intake/src/task_intake/execution_handoff.py
+validation:
+  - command: git rev-parse --verify HEAD
+    exit_code: 0
+    output: "76565100053f5a0db3a1c684437b00af596abd00"
+  - command: git status --short
+    exit_code: 0
+    output: |
+      M services/runner/src/runner/doctor.py
+      M services/runner/tests/test_doctor_cli.py
+      ?? services/runner/src/runner/improvement_candidate.py
+      ?? services/runner/tests/test_improvement_candidate.py
+  - command: git diff --name-only
+    exit_code: 0
+    output: |
+      services/runner/src/runner/doctor.py
+      services/runner/tests/test_doctor_cli.py
+  - command: grep -R -n "PLACEHOLDER" services/runner/src/runner services/runner/tests .project-memory/pr/0107-evidence-backed-self-improvement-candidate || true
+    exit_code: 0
+    output: |
+      services/runner/tests/test_proof_capture.py:357:# No PLACEHOLDER in output
+      services/runner/tests/test_proof_capture.py:363:        """Artifact JSON does not contain the string 'PLACEHOLDER'."""
+      services/runner/tests/test_proof_capture.py:369:        assert "PLACEHOLDER" not in content
+      services/runner/tests/test_proof_capture.py:372:        """Source code does not contain 'PLACEHOLDER'."""
+      services/runner/tests/test_proof_capture.py:375:        assert "PLACEHOLDER" not in source
+  - command: grep -R -n "subprocess|os.system|shell=True|docker|requests|urllib|openai|anthropic|git commit|git push|gh pr create" services/runner/src/runner/improvement_candidate.py services/runner/src/runner/doctor.py services/runner/tests/test_improvement_candidate.py services/runner/tests/test_doctor_cli.py 2>/dev/null || true
+    exit_code: 0
+    output: ""
+  - command: python -m compileall -f services/runner/src services/task_intake/src
+    exit_code: 0
+    output: |
+      Listing 'services/runner/src'...
+      Listing 'services/runner/src/runner'...
+      Compiling 'services/runner/src/runner/__init__.py'...
+      Compiling 'services/runner/src/runner/__main__.py'...
+      Compiling 'services/runner/src/runner/acceptance_criteria.py'...
+      Compiling 'services/runner/src/runner/adapter_registry.py'...
+      Compiling 'services/runner/src/runner/apply.py'...
+      Compiling 'services/runner/src/runner/artifacts.py'...
+      Compiling 'services/runner/src/runner/diff.py'...
+      Compiling 'services/runner/src/runner/docker_agent_adapter.py'...
+      Compiling 'services/runner/src/runner/docker_run_artifacts.py'...
+      Compiling 'services/runner/src/runner/docker_subprocess_executor.py'...
+      Compiling 'services/runner/src/runner/doctor.py'...
+      Compiling 'services/runner/src/runner/execution_envelope.py'...
+      Compiling 'services/runner/src/runner/execution_smoke.py'...
+      Compiling 'services/runner/src/runner/execution_substrate_audit.py'...
+      Compiling 'services/runner/src/runner/gate_evidence.py'...
+      Compiling 'services/runner/src/runner/handoff_packet.py'...
+      Compiling 'services/runner/src/runner/improvement_candidate.py'...
+      Compiling 'services/runner/src/runner/local_harness.py'...
+      Compiling 'services/runner/src/runner/mock_coder.py'...
+      Compiling 'services/runner/src/runner/models.py'...
+      Compiling 'services/runner/src/runner/noop_adapter.py'...
+      Compiling 'services/runner/src/runner/normalize.py'...
+      Compiling 'services/runner/src/runner/patch.py'...
+      Compiling 'services/runner/src/runner/proof_capture.py'...
+      Compiling 'services/runner/src/runner/proof_ref.py'...
+      Compiling 'services/runner/src/runner/readiness_gate.py'...
+      Compiling 'services/runner/src/runner/review_boundary.py'...
+      Compiling 'services/runner/src/runner/runtime_smoke.py'...
+      Compiling 'services/runner/src/runner/worktree.py'...
+      Listing 'services/task_intake/src'...
+      Listing 'services/task_intake/src/task_intake'...
+      Compiling 'services/task_intake/src/task_intake/__init__.py'...
+      Compiling 'services/task_intake/src/task_intake/app.py'...
+      Compiling 'services/task_intake/src/task_intake/context_preview.py'...
+      Compiling 'services/task_intake/src/task_intake/execution_handoff.py'...
+      Compiling 'services/task_intake/src/task_intake/mock_loop.py'...
+      Compiling 'services/task_intake/src/task_intake/models.py'...
+      Compiling 'services/task_intake/src/task_intake/normalize.py'...
+      Compiling 'services/task_intake/src/task_intake/normalizer.py'...
+      Compiling 'services/task_intake/src/task_intake/runs.py'...
+      Compiling 'services/task_intake/src/task_intake/server.py'...
+      Compiling 'services/task_intake/src/task_intake/smoke.py'...
+      Compiling 'services/task_intake/src/task_intake/test_mode.py'...
+  - command: PYTHONPATH=services/runner/src python -m pytest services/runner/tests/test_improvement_candidate.py -q
+    exit_code: 0
+    output: "32 passed"
+  - command: PYTHONPATH=services/runner/src python -m pytest services/runner/tests/test_doctor_cli.py -q
+    exit_code: 0
+    output: "38 passed"
+  - command: PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/runner/tests/test_improvement_candidate.py services/runner/tests/test_gate_evidence.py services/runner/tests/test_acceptance_criteria.py services/runner/tests/test_proof_capture.py services/runner/tests/test_doctor_cli.py services/runner/tests/test_proof_ref.py services/runner/tests/test_handoff_packet.py services/runner/tests/test_readiness_gate.py services/runner/tests/test_execution_smoke.py services/runner/tests/test_execution_substrate_audit.py -q
+    exit_code: 0
+    output: "301 passed"
+  - command: PYTHONPATH=services/task_intake/src:services/runner/src python -m task_intake.app --check --json
+    exit_code: 0
+    output: |
+      {
+        "check": true,
+        "default_adapter": "noop",
+        "dependencies": [
+          "uvicorn"
+        ],
+        "host": "127.0.0.1",
+        "port": 8000,
+        "routes": [
+          "/",
+          "/health",
+          "/submit",
+          "/task-intake/submit",
+        "/task-intake/normalize",
+          "/context/preview",
+          "/runs",
+          "/mock-loop",
+          "/runs/execute"
+        ],
+        "service": "task_intake",
+        "status": "ready"
+      }
+blockers: []
+warnings: []
+plan_drift_gate:
+  verdict: pass
+  file_drift: |
+    - PLAN.md selected implementation/test files for PR 0107: services/runner/src/runner/improvement_candidate.py and services/runner/tests/test_improvement_candidate.py (doctor CLI modifications allowed if selected).
+    - Observed changed/untracked files match PLAN.md selection: new improvement_candidate.py and its tests; doctor CLI and doctor tests modified as allowed by PLAN.md.
+  behavior_drift: |
+    - Implementation behaves per PLAN.md: deterministic candidate generation from gate evidence, evidence-backed source requirements enforced, bounded output, deterministic category mapping, and rejection of autonomous code/edit requests.
+    - No autonomous code edits, git mutation, provider/LLM calls, or proof evaluation implemented.
+  object-shape_drift: |
+    - Implemented SelfImprovementCandidateResult shape matches PLAN.md: candidate_id (SHA-derived), category, summary, evidence_refs, artifact_path, status, reason_codes.
+    - Tests validate candidate shape and stable reason codes.
+  cli_drift: |
+    - CLI integration was conditional in PLAN.md. Implementation modifies doctor CLI per approved plan-review decision; CLI tests passed and no unplanned CLI commands were added.
+  frontend_drift: |
+    - No frontend/browser/app files were modified. Frontend repair was correctly deferred per PLAN.md.
+  validation_drift: |
+    - All PLAN.md validation commands were executed and succeeded; outputs recorded above.
+  semantic_drift: |
+    - No semantic drift observed. Candidate derivation, mapping, and evidence requirements match PLAN.md semantics.
+  future-scope_drift: |
+    - Deferred capabilities remain deferred and absent.
+  accepted_deviations: |
+    - None.
+  blockers: []
+files_written:
+  - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/precommit-review.yml
+files_read:
+  - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/PLAN.md
+  - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/plan-review.yml
+  - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/precommit-review.yml
+  - .project-memory/review-artifact.schema.yml
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+  - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+  - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+  - .project-memory/pr/0103-ariadne-cli-skeleton/PLAN.md
+  - .project-memory/pr/0103-ariadne-cli-skeleton/reviews/precommit-review.yml
+  - .project-memory/pr/0104-proof-capture-command/PLAN.md
+  - .project-memory/pr/0104-proof-capture-command/reviews/precommit-review.yml
+  - .project-memory/pr/0105-spec-freeze-acceptance-criteria/PLAN.md
+  - .project-memory/pr/0105-spec-freeze-acceptance-criteria/reviews/precommit-review.yml
+  - .project-memory/pr/0106-gate-evidence-bundle/PLAN.md
+  - .project-memory/pr/0106-gate-evidence-bundle/reviews/precommit-review.yml
+  - services/runner/src/runner/improvement_candidate.py
+  - services/runner/tests/test_improvement_candidate.py
+  - services/runner/src/runner/gate_evidence.py
+  - services/runner/tests/test_gate_evidence.py
+  - services/runner/src/runner/acceptance_criteria.py
+  - services/runner/tests/test_acceptance_criteria.py
+  - services/runner/src/runner/proof_capture.py
+  - services/runner/tests/test_proof_capture.py
+  - services/runner/src/runner/proof_ref.py
+  - services/runner/tests/test_proof_ref.py
+  - services/runner/src/runner/handoff_packet.py
+  - services/runner/tests/test_handoff_packet.py
+  - services/runner/src/runner/doctor.py
+blockchain: []
+decisions_made:
+  - implementation_files:
+      - services/runner/src/runner/improvement_candidate.py
+      - services/runner/src/runner/doctor.py
+  - test_files:
+      - services/runner/tests/test_improvement_candidate.py
+      - services/runner/tests/test_doctor_cli.py
+  - validation_commands_recorded: true
+context_used:
+  files_modified:
+    - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/precommit-review.yml
+  cli_integration_confirmed: true
+  executable_first: true
