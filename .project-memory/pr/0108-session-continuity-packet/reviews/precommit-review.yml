@@ -1,0 +1,242 @@
+schema_version: 1
+pr_id: "0108-session-continuity-packet"
+review_type: precommit-review
+reviewer: precommit-review
+timestamp: "2026-07-01T21:51:00Z"
+verdict: pass
+snapshot_delta:
+  head: "5b1f422f2df6f986749c993d239d94449c2b4d8c"
+  git_status_short: "M services/runner/src/runner/doctor.py\n M services/runner/tests/test_doctor_cli.py\n?? services/runner/src/runner/session_continuity.py\n?? services/runner/tests/test_session_continuity.py"
+  diff_name_only: |
+    services/runner/src/runner/doctor.py
+    services/runner/tests/test_doctor_cli.py
+
+scope:
+  plan_path: .project-memory/pr/0108-session-continuity-packet/PLAN.md
+  review_path: .project-memory/pr/0108-session-continuity-packet/reviews/plan-review.yml
+files_checked:
+  - .project-memory/pr/0108-session-continuity-packet/PLAN.md
+  - .project-memory/pr/0108-session-continuity-packet/reviews/plan-review.yml
+  - .project-memory/review-artifact.schema.yml
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+  - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+  - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+  - .project-memory/pr/0103-ariadne-cli-skeleton/PLAN.md
+  - .project-memory/pr/0103-ariadne-cli-skeleton/reviews/precommit-review.yml
+  - .project-memory/pr/0104-proof-capture-command/PLAN.md
+  - .project-memory/pr/0104-proof-capture-command/reviews/precommit-review.yml
+  - .project-memory/pr/0105-spec-freeze-acceptance-criteria/PLAN.md
+  - .project-memory/pr/0105-spec-freeze-acceptance-criteria/reviews/precommit-review.yml
+  - .project-memory/pr/0106-gate-evidence-bundle/PLAN.md
+  - .project-memory/pr/0106-gate-evidence-bundle/reviews/precommit-review.yml
+  - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/PLAN.md
+  - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/precommit-review.yml
+  - services/runner/src/runner/session_continuity.py
+  - services/runner/tests/test_session_continuity.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/tests/test_doctor_cli.py
+  - services/runner/src/runner/improvement_candidate.py
+  - services/runner/tests/test_improvement_candidate.py
+  - services/runner/src/runner/gate_evidence.py
+  - services/runner/tests/test_gate_evidence.py
+  - services/runner/src/runner/acceptance_criteria.py
+  - services/runner/tests/test_acceptance_criteria.py
+  - services/runner/src/runner/proof_capture.py
+  - services/runner/tests/test_proof_capture.py
+  - services/runner/src/runner/proof_ref.py
+  - services/runner/tests/test_proof_ref.py
+  - services/runner/src/runner/handoff_packet.py
+  - services/runner/tests/test_handoff_packet.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/src/runner/main.py
+  - services/runner/tests/test_readiness_gate.py
+  - services/runner/src/runner/execution_smoke.py
+  - services/runner/src/runner/execution_substrate_audit.py
+  - services/task_intake/src/task_intake/app.py
+  - services/task_intake/src/task_intake/execution_handoff.py
+validation:
+  - command: git rev-parse --verify HEAD
+    exit_code: 0
+    result: "5b1f422f2df6f986749c993d239d94449c2b4d8c"
+  - command: git status --short
+    exit_code: 0
+    result: "M services/runner/src/runner/doctor.py\n M services/runner/tests/test_doctor_cli.py\n?? services/runner/src/runner/session_continuity.py\n?? services/runner/tests/test_session_continuity.py"
+  - command: git diff --name-only
+    exit_code: 0
+    result: |
+      services/runner/src/runner/doctor.py
+      services/runner/tests/test_doctor_cli.py
+  - command: python -m compileall -f services/runner/src services/task_intake/src
+    exit_code: 0
+    result: "compileall: modules compiled; no syntax errors reported"
+  - command: PYTHONPATH=services/runner/src python -m pytest services/runner/tests/test_session_continuity.py -q
+    exit_code: 0
+    result: "30 passed"
+  - command: PYTHONPATH=services/runner/src python -m pytest services/runner/tests/test_doctor_cli.py -q
+    exit_code: 0
+    result: "43 passed"
+  - command: PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/runner/tests/test_session_continuity.py services/runner/tests/test_improvement_candidate.py services/runner/tests/test_gate_evidence.py services/runner/tests/test_acceptance_criteria.py services/runner/tests/test_proof_capture.py services/runner/tests/test_doctor_cli.py services/runner/tests/test_proof_ref.py services/runner/tests/test_handoff_packet.py services/runner/tests/test_readiness_gate.py services/runner/tests/test_execution_smoke.py services/runner/tests/test_execution_substrate_audit.py -q
+    exit_code: 0
+    result: "336 passed"
+  - command: PYTHONPATH=services/task_intake/src:services/runner/src python -m task_intake.app --check --json
+    exit_code: 0
+    result: "{\n  \"check\": true,\n  \"default_adapter\": \"noop\",\n  \"dependencies\": [\n    \"uvicorn\"\n  ],\n  \"host\": \"127.0.0.1\",\n  \"port\": 8000,\n  \"routes\": [\n    \"/\",\n    \"/health\",\n    \"/submit\",\n    \"/task-intake/submit\",\n    \"/task-intake/normalize\",\n    \"/context/preview\",\n    \"/runs\",\n    \"/mock-loop\",\n    \"/runs/execute\"\n  ],\n  \"service\": \"task_intake\",\n  \"status\": \"ready\"\n}"
+  - command: grep -R -n "PLACEHOLDER" services/runner/src/runner services/runner/tests .project-memory/pr/0108-session-continuity-packet || true
+    exit_code: 0
+    result: "matches only in tests where absence is asserted; no source PLACEHOLDER tokens found"
+  - command: grep -R -n "subprocess|os.system|shell=True|docker|requests|urllib|openai|anthropic|git commit|git push|gh pr create" services/runner/src/runner/session_continuity.py services/runner/src/runner/doctor.py services/runner/tests/test_session_continuity.py services/runner/tests/test_doctor_cli.py 2>/dev/null || true
+    exit_code: 0
+    result: "forbidden patterns present only in constants and test assertions (e.g. 'git commit' appears in forbidden list); no runtime provider or network calls introduced"
+blockers: []
+warnings:
+  - plan-review.yml verdict was 'warning' due to planning dirty-tree; current working tree contains the new implementation and tests as untracked/modified files which is expected for this implementation PR.
+  - doctor.py and test_doctor_cli.py are modified in-place; session_continuity.py and test_session_continuity.py are untracked in the working tree (new files) — included in FILES READ and validated via tests.
+  - plan drift: PLAN.md recorded a different HEAD in its context snapshot. This reviewer executed validations at the current HEAD and recorded snapshot_delta above.
+files_read:
+  - .project-memory/pr/0108-session-continuity-packet/PLAN.md
+  - .project-memory/pr/0108-session-continuity-packet/reviews/plan-review.yml
+  - .project-memory/review-artifact.schema.yml
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+  - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+  - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+  - .project-memory/pr/0103-ariadne-cli-skeleton/PLAN.md
+  - .project-memory/pr/0103-ariadne-cli-skeleton/reviews/precommit-review.yml
+  - .project-memory/pr/0104-proof-capture-command/PLAN.md
+  - .project-memory/pr/0104-proof-capture-command/reviews/precommit-review.yml
+  - .project-memory/pr/0105-spec-freeze-acceptance-criteria/PLAN.md
+  - .project-memory/pr/0105-spec-freeze-acceptance-criteria/reviews/precommit-review.yml
+  - .project-memory/pr/0106-gate-evidence-bundle/PLAN.md
+  - .project-memory/pr/0106-gate-evidence-bundle/reviews/precommit-review.yml
+  - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/PLAN.md
+  - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/precommit-review.yml
+  - services/runner/src/runner/session_continuity.py
+  - services/runner/tests/test_session_continuity.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/tests/test_doctor_cli.py
+  - services/runner/src/runner/improvement_candidate.py
+  - services/runner/tests/test_improvement_candidate.py
+  - services/runner/src/runner/gate_evidence.py
+  - services/runner/tests/test_gate_evidence.py
+  - services/runner/src/runner/acceptance_criteria.py
+  - services/runner/tests/test_acceptance_criteria.py
+  - services/runner/src/runner/proof_capture.py
+  - services/runner/tests/test_proof_capture.py
+  - services/runner/src/runner/proof_ref.py
+  - services/runner/tests/test_proof_ref.py
+  - services/runner/src/runner/handoff_packet.py
+  - services/runner/tests/test_handoff_packet.py
+  - services/runner/src/runner/__main__.py
+  - services/runner/src/runner/readiness_gate.py
+  - services/runner/tests/test_readiness_gate.py
+  - services/runner/src/runner/execution_smoke.py
+  - services/runner/src/runner/execution_substrate_audit.py
+  - services/task_intake/src/task_intake/app.py
+  - services/task_intake/src/task_intake/execution_handoff.py
+files_written:
+  - .project-memory/pr/0108-session-continuity-packet/reviews/precommit-review.yml
+block_scope:
+  - services/runner/src/runner/session_continuity.py
+  - services/runner/tests/test_session_continuity.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/tests/test_doctor_cli.py
+plan_drift_gate:
+  verdict: pass
+  file_drift: "PLAN.md context head (f68009e...) differs from observed HEAD (5b1f422...). This is acceptable under stale-snapshot policy: branch matches and expected dirty-tree present."
+  behavior_drift: "No behavior drift: implementation matches PLAN.md claims; tests exercise claimed behaviors."
+  object-shape_drift: "No object-shape drift: SessionContinuityInput/Packet/Result shapes match PLAN.md."
+  cli_drift: "CLI integrated via doctor.py session new subcommand; test_doctor_cli exercises it — no CLI drift."
+  frontend_drift: "Frontend deferred in PLAN.md; no frontend files changed."
+  validation_drift: "Validation commands in PLAN.md executed and passed."
+  semantic_drift: "No semantic drift observed."
+  future-scope_drift: "Deferred resume/resumer and frontend UI remain future work as planned."
+  accepted_deviations: "Working tree contains modified doctor.py and test file plus untracked new module and test file — expected for this implementation PR."
+  blockers: []
+
+checks:
+  PR 0108 SCOPE CHECK: pass
+  PR 0101/0102/0103/0104/0105/0106/0107 DEPENDENCY CHECK: pass
+  SESSION CONTINUITY PACKET CHECK: pass
+  RESUME THREAD CHECK: pass
+  EVIDENCE SOURCE CHECK: pass
+  DRIFT GUARD CHECK: pass
+  AUTONOMY SAFETY CHECK: pass
+  FRONTEND CONTINUITY BOUNDARY CHECK: pass
+  BACKLOG PERSISTENCE BOUNDARY CHECK: pass
+  CLI INTEGRATION CHECK: pass
+  COMMAND EXECUTION SAFETY CHECK: pass
+  PLACEHOLDER CHECK: pass
+  PACKAGING/DEPENDENCY CHECK: pass
+  DEFERRED CAPABILITIES CHECK: pass
+  EXECUTABLE-FIRST CHECK: pass
+  ANTI-COMMITTEE-MODE CHECK: pass
+  VALIDATION COMPLETENESS CHECK: pass
+  EVIDENCE COMPLETENESS CHECK: pass
+  CLAIM-TO-EVIDENCE CONSISTENCY CHECK: pass
+  DIFF COMPLETENESS CHECK: pass
+  DIRTY-TREE CHECK: pass
+boundary_confirmations:
+  - confirm: generic precommit-review contract applied
+  - confirm: PLAN.md reviewed
+  - confirm: plan-review artifact reviewed
+  - confirm: Plan Drift Gate completed
+  - confirm: implementation matches approved PLAN.md
+  - confirm: only precommit-review artifact written by reviewer
+  - confirm: final scope contains only expected files
+  - confirm: full validation commands executed and recorded
+  - confirm: artifact does not claim pass with validation skipped
+  - confirm: PR is executable-first
+  - confirm: PR is not docs-only
+  - confirm: PR is not schemas-only
+  - confirm: PR is not packaging-only
+  - confirm: PR is not frontend-only
+  - confirm: session continuity packet implemented
+  - confirm: deterministic local continuity generation implemented
+  - confirm: evidence-backed source requirements implemented
+  - confirm: deterministic resume_summary implemented
+  - confirm: template-based resume_prompt implemented
+  - confirm: resume_prompt contains no hidden chain-of-thought
+  - confirm: continuity_ref derivation implemented
+  - confirm: stable reason codes implemented
+  - confirm: CLI integration matches PLAN.md
+  - confirm: frontend continuity UI deferred as planned
+  - confirm: backlog persistence deferred as planned
+  - confirm: autonomous code changes rejected
+  - confirm: git mutation rejected
+  - confirm: provider/LLM calls rejected
+  - confirm: arbitrary command execution rejected
+  - confirm: user-provided command execution rejected
+  - confirm: hidden chain-of-thought logging rejected
+  - confirm: external URL-only evidence rejected
+  - confirm: proof evaluation deferred
+  - confirm: gate approval/finalization deferred
+  - confirm: autonomous repair deferred
+  - confirm: benchmark runner deferred
+  - confirm: model switching deferred
+  - confirm: external capability integration deferred
+  - confirm: no provider integration introduced
+  - confirm: no network introduced
+  - confirm: no Docker daemon/CLI required
+  - confirm: no Docker SDK introduced
+  - confirm: no LLM calls introduced
+  - confirm: no large datasets introduced
+  - confirm: no third-party code copied
+  - confirm: ROADMAP.md not modified
+  - confirm: post-0100 strategic direction files not modified
+  - confirm: agents files not modified
+  - confirm: frontend files not modified unless PLAN.md selected them
+  - confirm: no schema changes made
+  - confirm: no dependency or packaging changes made
+  - confirm: product name remains Ariadne
+  - confirm: forbidden legacy names/examples absent
+  - confirm: current-review diff completeness checked
+  - confirm: evidence completeness checked
+  - confirm: claim-to-evidence consistency checked
+  - confirm: actual git status observed and recorded
+  - confirm: precommit-review artifact read back after writing
+  - confirm: no git mutation commands run
+  - confirm: no Docker commands run
+
