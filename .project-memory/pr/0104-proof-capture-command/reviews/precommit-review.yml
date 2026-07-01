@@ -1,0 +1,132 @@
+schema_version: 1
+pr_id: "0104-proof-capture-command"
+review_type: precommit-review
+reviewer: precommit-review
+timestamp: "2026-07-01T00:00:00Z"
+verdict: pass
+snapshot_delta:
+  head: 0f4a94e20761ee743294edc4ce7e083732e4f982
+  git_status_short: |
+    M services/runner/src/runner/doctor.py
+    M services/runner/tests/test_doctor_cli.py
+    ?? services/runner/src/runner/proof_capture.py
+    ?? services/runner/tests/test_proof_capture.py
+  diff_name_only: |
+    .project-memory/pr/0104-proof-capture-command/PLAN.md
+    .project-memory/pr/0104-proof-capture-command/reviews/plan-review.yml
+scope:
+  plan_path: .project-memory/pr/0104-proof-capture-command/PLAN.md
+  review_path: .project-memory/pr/0104-proof-capture-command/reviews/precommit-review.yml
+files_checked:
+  - .project-memory/pr/0104-proof-capture-command/PLAN.md
+  - .project-memory/pr/0104-proof-capture-command/reviews/plan-review.yml
+  - .project-memory/review-artifact.schema.yml
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+  - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+  - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+  - .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+  - .project-memory/pr/0103-ariadna-cli-skeleton/reviews/precommit-review.yml
+  - services/runner/src/runner/proof_capture.py
+  - services/runner/tests/test_proof_capture.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/tests/test_doctor_cli.py
+  - services/runner/src/runner/proof_ref.py
+  - services/runner/tests/test_proof_ref.py
+  - services/runner/src/runner/handoff_packet.py
+  - services/runner/tests/test_handoff_packet.py
+  - services/runner/src/runner/__main__.py
+  - services/runner/tests/test_readiness_gate.py
+  - services/runner/src/runner/execution_smoke.py
+  - services/runner/src/runner/execution_substrate_audit.py
+  - services/task_intake/src/task_intake/app.py
+  - services/task_intake/src/task_intake/execution_handoff.py
+validation:
+  - command: git rev-parse --verify HEAD
+    exit_code: 0
+    output: "0f4a94e20761ee743294edc4ce7e083732e4f982"
+  - command: git status --short
+    exit_code: 0
+    output: |
+      M services/runner/src/runner/doctor.py
+      M services/runner/tests/test_doctor_cli.py
+      ?? services/runner/src/runner/proof_capture.py
+      ?? services/runner/tests/test_proof_capture.py
+  - command: git diff --name-only
+    exit_code: 0
+    output: |
+      services/runner/src/runner/doctor.py
+      services/runner/tests/test_doctor_cli.py
+  - command: grep -R -n "PLACEHOLDER" services/runner/src/runner services/runner/tests .project-memory/pr/0104-proof-capture-command || true
+    exit_code: 0
+    output: |
+      services/runner/tests/test_proof_capture.py:357:# No PLACEHOLDER in output
+      services/runner/tests/test_proof_capture.py:363:        """Artifact JSON does not contain the string 'PLACEHOLDER'."""
+      services/runner/tests/test_proof_capture.py:369:        assert "PLACEHOLDER" not in content
+      services/runner/tests/test_proof_capture.py:372:        """Source code does not contain 'PLACEHOLDER'."""
+      services/runner/tests/test_proof_capture.py:375:        assert "PLACEHOLDER" not in source
+      .project-memory/pr/0104-proof-capture-command/PLAN.md:218:    "captured_at": "PLACEHOLDER"
+  - command: python -m compileall -f services/runner/src services/task_intake/src
+    exit_code: 0
+    output: "compileall: success (listings omitted)"
+  - command: PYTHONPATH=services/runner/src python -m pytest services/runner/tests/test_proof_capture.py -q
+    exit_code: 0
+    output: "30 passed"
+  - command: PYTHONPATH=services/runner/src python -m pytest services/runner/tests/test_doctor_cli.py -q
+    exit_code: 0
+    output: "23 passed"
+  - command: PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/runner/tests/test_proof_capture.py services/runner/tests/test_doctor_cli.py services/runner/tests/test_proof_ref.py services/runner/tests/test_handoff_packet.py services/runner/tests/test_readiness_gate.py services/runner/tests/test_execution_smoke.py services/runner/tests/test_execution_substrate_audit.py -q
+    exit_code: 0
+    output: "198 passed"
+  - command: PYTHONPATH=services/task_intake/src:services/runner/src python -m task_intake.app --check --json
+    exit_code: 0
+    output: |
+      {"check": true, "service": "task_intake", "status": "ready"}
+blockers: []
+warnings:
+  - "Implementation deviates from PLAN.md artifact field 'captured_at: \"PLACEHOLDER\"'. Implementation uses null/None for captured_at (deterministic without non-semantic placeholder). This deviation was intentional and tests assert absence of the literal 'PLACEHOLDER'. This is non-blocking per the plan-review warning and the task-specific requirement that 'PLACEHOLDER' must not appear."
+files_written:
+  - .project-memory/pr/0104-proof-capture-command/reviews/precommit-review.yml
+files_read:
+  - .project-memory/pr/0104-proof-capture-command/PLAN.md
+  - .project-memory/pr/0104-proof-capture-command/reviews/plan-review.yml
+  - .project-memory/review-artifact.schema.yml
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+  - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+  - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+  - .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+  - .project-memory/pr/0103-ariadna-cli-skeleton/reviews/precommit-review.yml
+  - services/runner/src/runner/proof_capture.py
+  - services/runner/tests/test_proof_capture.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/tests/test_doctor_cli.py
+  - services/runner/src/runner/proof_ref.py
+  - services/runner/tests/test_proof_ref.py
+  - services/runner/src/runner/handoff_packet.py
+  - services/runner/tests/test_handoff_packet.py
+  - services/runner/src/runner/__main__.py
+  - services/runner/tests/test_readiness_gate.py
+  - services/runner/src/runner/execution_smoke.py
+  - services/runner/src/runner/execution_substrate_audit.py
+  - services/task_intake/src/task_intake/app.py
+  - services/task_intake/src/task_intake/execution_handoff.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/tests/test_doctor_cli.py
+blockchain: []
+decisions_made:
+  - implementation_files:
+      - services/runner/src/runner/proof_capture.py
+      - services/runner/src/runner/doctor.py
+      - services/runner/src/runner/__main__.py
+  - test_files:
+      - services/runner/tests/test_proof_capture.py
+      - services/runner/tests/test_doctor_cli.py
+  - validation_commands_recorded: true
+context_used:
+  files_modified:
+    - .project-memory/pr/0104-proof-capture-command/reviews/precommit-review.yml
+  cli_integration_confirmed: true
+  executable_first: true

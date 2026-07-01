@@ -222,6 +222,88 @@ class TestValidateHandoff:
 
 
 # ---------------------------------------------------------------------------
+# Capture proof subcommand
+# ---------------------------------------------------------------------------
+
+
+class TestCaptureProof:
+    def test_capture_proof_help(self):
+        """``--help`` output for ``capture proof`` subcommand."""
+        result = _run_runner(["capture", "proof", "--help"])
+        assert result.returncode == 0
+        assert "usage:" in result.stdout
+        assert "path" in result.stdout
+
+    def test_capture_proof_valid_file(self, tmp_path: Path):
+        """Valid JSON file → exit 0, captured."""
+        data = {
+            "product_state_ref": "abc123",
+            "acceptance_criteria_ref": "def456",
+            "runtime_capture_kind": "text",
+            "phase_id": "phase-1",
+            "run_id": "run-001",
+            "payload": "All automated checks passed.",
+            "output_path": "capture.json",
+            "summary": "Test capture",
+            "tags": ["unit_test"],
+        }
+        f = tmp_path / "input.json"
+        f.write_text(json.dumps(data), encoding="utf-8")
+
+        result = _run_runner(["capture", "proof", str(f), "--output-dir", str(tmp_path)])
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+        assert output["status"] == "ok"
+        assert output["command"] == "capture proof"
+        assert output["result"]["capture_status"] == "captured"
+        assert output["error"] is None
+
+        # Verify artifact was written
+        artifact_file = tmp_path / "capture.json"
+        assert artifact_file.exists()
+
+    def test_capture_proof_invalid_file(self, tmp_path: Path):
+        """JSON with missing fields → exit 1, rejected."""
+        data = {
+            "product_state_ref": "",
+            "acceptance_criteria_ref": "def456",
+            "runtime_capture_kind": "text",
+            "phase_id": "phase-1",
+            "run_id": "run-001",
+            "payload": "Some payload.",
+            "output_path": "capture.json",
+        }
+        f = tmp_path / "bad_input.json"
+        f.write_text(json.dumps(data), encoding="utf-8")
+
+        result = _run_runner(["capture", "proof", str(f), "--output-dir", str(tmp_path)])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "ok"
+        assert output["result"]["capture_status"] == "rejected"
+        assert len(output["result"]["reason_codes"]) > 0
+
+    def test_capture_proof_file_not_found(self):
+        """Nonexistent path → exit 1."""
+        result = _run_runner(["capture", "proof", "/nonexistent/path.json"])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "error"
+        assert "File not found" in output["error"]
+
+    def test_capture_proof_invalid_json(self, tmp_path: Path):
+        """Malformed JSON → exit 1."""
+        f = tmp_path / "bad.json"
+        f.write_text("{invalid json}", encoding="utf-8")
+
+        result = _run_runner(["capture", "proof", str(f)])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "error"
+        assert "Invalid JSON" in output["error"]
+
+
+# ---------------------------------------------------------------------------
 # General CLI behavior
 # ---------------------------------------------------------------------------
 
