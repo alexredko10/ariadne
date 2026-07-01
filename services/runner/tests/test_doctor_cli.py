@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
@@ -25,16 +26,26 @@ def _runner_env() -> dict[str, str]:
     return env
 
 
-def test_doctor_cli_succeeds_with_stable_output() -> None:
-    """``python -m runner doctor`` exits 0 and prints expected lines in order."""
-    result = subprocess.run(
-        [sys.executable, "-m", "runner", "doctor"],
+def _run_runner(args: list[str]) -> subprocess.CompletedProcess:
+    """Run ``python -m runner`` with the given arguments."""
+    return subprocess.run(
+        [sys.executable, "-m", "runner", *args],
         cwd=REPO_ROOT,
         env=_runner_env(),
         capture_output=True,
         text=True,
         check=False,
     )
+
+
+# ---------------------------------------------------------------------------
+# Existing doctor tests
+# ---------------------------------------------------------------------------
+
+
+def test_doctor_cli_succeeds_with_stable_output() -> None:
+    """``python -m runner doctor`` exits 0 and prints expected lines in order."""
+    result = _run_runner(["doctor"])
 
     assert result.returncode == 0
     assert result.stderr == ""
@@ -45,15 +56,232 @@ def test_doctor_cli_succeeds_with_stable_output() -> None:
 
 def test_unknown_command_exits_non_zero_and_prints_usage() -> None:
     """An unrecognised subcommand exits non-zero and shows usage."""
-    result = subprocess.run(
-        [sys.executable, "-m", "runner", "unknown-command"],
-        cwd=REPO_ROOT,
-        env=_runner_env(),
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    result = _run_runner(["unknown-command"])
 
     assert result.returncode != 0
     combined_output = result.stdout + result.stderr
     assert "usage:" in combined_output
+
+
+# ---------------------------------------------------------------------------
+# Validate proof subcommand
+# ---------------------------------------------------------------------------
+
+
+class TestValidateProof:
+    def test_validate_proof_help(self):
+        """``--help`` output for ``validate proof`` subcommand."""
+        result = _run_runner(["validate", "proof", "--help"])
+        assert result.returncode == 0
+        assert "usage:" in result.stdout
+        assert "path" in result.stdout
+
+    def test_validate_proof_valid_file(self, tmp_path: Path):
+        """Valid proof ref JSON file → exit 0, admissible=true."""
+        data = {
+            "run_id": "run-001",
+            "phase_id": "phase-1",
+            "product_state_ref": "abc123",
+            "acceptance_criteria_ref": "def456",
+            "runtime_capture_ref": "er-001",
+            "artifact_path": "results/evidence.json",
+            "summary": "Test artifact",
+            "tags": ["unit_test", "smoke"],
+        }
+        f = tmp_path / "proof.json"
+        f.write_text(json.dumps(data), encoding="utf-8")
+
+        result = _run_runner(["validate", "proof", str(f)])
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+        assert output["status"] == "ok"
+        assert output["command"] == "validate proof"
+        assert output["result"]["admissible"] is True
+        assert output["error"] is None
+
+    def test_validate_proof_invalid_file(self, tmp_path: Path):
+        """JSON with missing required field → exit 1, error output."""
+        data = {
+            "run_id": "run-001",
+            # missing product_state_ref, acceptance_criteria_ref, etc.
+        }
+        f = tmp_path / "bad_proof.json"
+        f.write_text(json.dumps(data), encoding="utf-8")
+
+        result = _run_runner(["validate", "proof", str(f)])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        # ProofRef requires positional args; missing fields cause TypeError
+        assert output["status"] == "error"
+        assert "Invalid ProofRef data" in output["error"]
+
+    def test_validate_proof_file_not_found(self):
+        """Nonexistent path → exit 1, JSON error output."""
+        result = _run_runner(["validate", "proof", "/nonexistent/path.json"])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "error"
+        assert "File not found" in output["error"]
+
+    def test_validate_proof_invalid_json(self, tmp_path: Path):
+        """Malformed JSON → exit 1, JSON error output."""
+        f = tmp_path / "bad.json"
+        f.write_text("{invalid json}", encoding="utf-8")
+
+        result = _run_runner(["validate", "proof", str(f)])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "error"
+        assert "Invalid JSON" in output["error"]
+
+
+# ---------------------------------------------------------------------------
+# Validate handoff subcommand
+# ---------------------------------------------------------------------------
+
+
+class TestValidateHandoff:
+    def test_validate_handoff_help(self):
+        """``--help`` output for ``validate handoff`` subcommand."""
+        result = _run_runner(["validate", "handoff", "--help"])
+        assert result.returncode == 0
+        assert "usage:" in result.stdout
+        assert "path" in result.stdout
+
+    def test_validate_handoff_valid_file(self, tmp_path: Path):
+        """Valid handoff packet JSON + admissible refs → exit 0, gate_ready."""
+        data = {
+            "product_state_ref": "abc123",
+            "acceptance_criteria_ref": "def456",
+            "phase_id": "phase-1",
+            "run_id": "run-001",
+            "gate_id": "human_review_gate",
+            "actor_or_role": "reviewer",
+            "proof_ref_ids": ["pr-001", "pr-002"],
+            "payload": "All automated checks passed.",
+        }
+        f = tmp_path / "handoff.json"
+        f.write_text(json.dumps(data), encoding="utf-8")
+
+        result = _run_runner([
+            "validate", "handoff", str(f),
+            "--current-product-state-ref", "abc123",
+            "--admissible-ref-ids", "pr-001", "pr-002",
+        ])
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+        assert output["status"] == "ok"
+        assert output["command"] == "validate handoff"
+        assert output["result"]["status"] == "gate_ready"
+        assert output["error"] is None
+
+    def test_validate_handoff_invalid_file(self, tmp_path: Path):
+        """Packet missing fields → exit 1, not_gate_ready."""
+        data = {
+            "product_state_ref": "",
+            "acceptance_criteria_ref": "def456",
+            "phase_id": "phase-1",
+            "run_id": "run-001",
+            "gate_id": "human_review_gate",
+            "actor_or_role": "reviewer",
+            "proof_ref_ids": ["pr-001"],
+            "payload": "Some payload.",
+        }
+        f = tmp_path / "bad_handoff.json"
+        f.write_text(json.dumps(data), encoding="utf-8")
+
+        result = _run_runner([
+            "validate", "handoff", str(f),
+            "--current-product-state-ref", "abc123",
+            "--admissible-ref-ids", "pr-001",
+        ])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "ok"
+        assert output["result"]["status"] == "not_gate_ready"
+        assert len(output["result"]["reason_codes"]) > 0
+
+    def test_validate_handoff_file_not_found(self):
+        """Nonexistent path → exit 1."""
+        result = _run_runner(["validate", "handoff", "/nonexistent/path.json"])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "error"
+        assert "File not found" in output["error"]
+
+    def test_validate_handoff_invalid_json(self, tmp_path: Path):
+        """Malformed JSON → exit 1."""
+        f = tmp_path / "bad.json"
+        f.write_text("{invalid json}", encoding="utf-8")
+
+        result = _run_runner(["validate", "handoff", str(f)])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "error"
+        assert "Invalid JSON" in output["error"]
+
+
+# ---------------------------------------------------------------------------
+# General CLI behavior
+# ---------------------------------------------------------------------------
+
+
+class TestGeneralCli:
+    def test_cli_no_subcommand(self):
+        """``python -m runner`` with no args → help output, exit 2 (argparse default)."""
+        result = _run_runner([])
+        assert result.returncode == 2
+        assert "usage:" in result.stderr
+
+    def test_cli_unknown_command(self):
+        """Unknown subcommand → exit 1, deterministic error."""
+        result = _run_runner(["nonexistent"])
+        assert result.returncode != 0
+        combined = result.stdout + result.stderr
+        assert "usage:" in combined
+
+    def test_cli_no_network_import(self):
+        """CLI does not import network/Docker/LLM modules."""
+        from runner import doctor
+        source_path = Path(doctor.__file__)
+        source_text = source_path.read_text(encoding="utf-8")
+        forbidden_imports = [
+            "import urllib", "from urllib",
+            "import requests", "from requests",
+            "import socket", "from socket",
+            "import http", "from http",
+            "import docker", "from docker",
+            "import openai", "from openai",
+            "import anthropic", "from anthropic",
+        ]
+        for imp in forbidden_imports:
+            assert imp not in source_text, f"Forbidden import found: {imp}"
+
+    def test_cli_no_filesystem_mutation(self):
+        """CLI does not write files (only reads)."""
+        from runner import doctor
+        source = Path(doctor.__file__).read_text(encoding="utf-8")
+        # Check for write operations (Path.read_text is allowed for reading)
+        forbidden_writes = [
+            ".write_text",
+            ".write_bytes",
+        ]
+        for fw in forbidden_writes:
+            assert fw not in source, f"Forbidden write operation found: {fw}"
+
+    def test_product_name_ariadne(self):
+        """Output contains 'Ariadne'."""
+        from runner import doctor
+        source = Path(doctor.__file__).read_text(encoding="utf-8")
+        assert "Ariadne" in source
+
+    def test_no_forbidden_legacy_names(self):
+        """Source contains no forbidden legacy terms."""
+        from runner import doctor
+        source = Path(doctor.__file__).read_text(encoding="utf-8")
+        forbidden = [
+            "water_meter", "water-meter", "Broken Clock", "broken_clock",
+            "daily-consumption", ".grace", "@grace-", "old Flask",
+        ]
+        for f in forbidden:
+            assert f not in source, f"Forbidden string found: {f!r}"
