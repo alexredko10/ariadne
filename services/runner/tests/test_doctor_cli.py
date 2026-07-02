@@ -906,6 +906,131 @@ class TestBacklogArchive:
 
 
 # ---------------------------------------------------------------------------
+# Backlog surface subcommand
+# ---------------------------------------------------------------------------
+
+
+class TestBacklogSurface:
+    def test_backlog_surface_help(self):
+        """``--help`` output for ``backlog surface`` subcommand."""
+        result = _run_runner(["backlog", "surface", "--help"])
+        assert result.returncode == 0
+        assert "usage:" in result.stdout
+        assert "--status" in result.stdout
+        assert "--category" in result.stdout
+        assert "--max-items" in result.stdout
+
+    def test_backlog_surface_with_valid_store(self, tmp_path: Path):
+        """``backlog surface`` with valid store → exit 0, JSON output with view/summary."""
+        backlog_store = tmp_path / "backlog_store"
+        # Enqueue an item first
+        data = {
+            "candidate_ref": "candidate-abc123",
+            "continuity_ref": "continuity-def456",
+            "product_state_ref": "abc123",
+            "source_reason_codes": ["missing_proof_refs"],
+            "evidence_refs": ["pr-001"],
+            "improvement_category": "self_improvement",
+            "next_safe_action": "Review and merge",
+            "blocked_actions": ["Waiting for review"],
+            "drift_risks": ["Scope must not include frontend"],
+            "requires_human_review": True,
+            "phase_id": "phase-1",
+            "run_id": "run-001",
+            "output_path": "backlog_item.json",
+            "session_label": "PR 0110",
+        }
+        f = tmp_path / "input.json"
+        f.write_text(json.dumps(data), encoding="utf-8")
+        enq_result = _run_runner(["backlog", "enqueue", str(f), "--output-dir", str(tmp_path), "--backlog-store-dir", str(backlog_store)])
+        assert enq_result.returncode == 0
+
+        result = _run_runner(["backlog", "surface", "--backlog-store-dir", str(backlog_store)])
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+        assert output["status"] == "ok"
+        assert output["command"] == "backlog surface"
+        assert output["result"]["surface_status"] == "ready"
+        assert "view" in output["result"]
+        view = output["result"]["view"]
+        assert "items" in view
+        assert "summary" in view
+        assert "total_count" in view
+        assert "human_review_required_count" in view
+        assert "drift_risk_items" in view
+        assert "ready_for_review_items" in view
+        assert view["total_count"] >= 1
+
+    def test_backlog_surface_with_status_filter(self, tmp_path: Path):
+        """``backlog surface --status new`` → filtered."""
+        backlog_store = tmp_path / "backlog_store"
+        data = {
+            "candidate_ref": "candidate-abc123",
+            "continuity_ref": "continuity-def456",
+            "product_state_ref": "abc123",
+            "source_reason_codes": ["missing_proof_refs"],
+            "evidence_refs": ["pr-001"],
+            "improvement_category": "self_improvement",
+            "next_safe_action": "Review and merge",
+            "blocked_actions": ["Waiting for review"],
+            "drift_risks": ["Scope must not include frontend"],
+            "requires_human_review": True,
+            "phase_id": "phase-1",
+            "run_id": "run-001",
+            "output_path": "backlog_item.json",
+            "session_label": "PR 0110",
+        }
+        f = tmp_path / "input.json"
+        f.write_text(json.dumps(data), encoding="utf-8")
+        enq_result = _run_runner(["backlog", "enqueue", str(f), "--output-dir", str(tmp_path), "--backlog-store-dir", str(backlog_store)])
+        assert enq_result.returncode == 0
+
+        result = _run_runner(["backlog", "surface", "--status", "new", "--backlog-store-dir", str(backlog_store)])
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+        assert output["result"]["surface_status"] == "ready"
+        assert output["result"]["view"]["total_count"] >= 1
+
+    def test_backlog_surface_with_nonexistent_status(self, tmp_path: Path):
+        """``backlog surface --status nonexistent`` → empty."""
+        backlog_store = tmp_path / "backlog_store"
+        data = {
+            "candidate_ref": "candidate-abc123",
+            "continuity_ref": "continuity-def456",
+            "product_state_ref": "abc123",
+            "source_reason_codes": ["missing_proof_refs"],
+            "evidence_refs": ["pr-001"],
+            "improvement_category": "self_improvement",
+            "next_safe_action": "Review and merge",
+            "blocked_actions": ["Waiting for review"],
+            "drift_risks": ["Scope must not include frontend"],
+            "requires_human_review": True,
+            "phase_id": "phase-1",
+            "run_id": "run-001",
+            "output_path": "backlog_item.json",
+            "session_label": "PR 0110",
+        }
+        f = tmp_path / "input.json"
+        f.write_text(json.dumps(data), encoding="utf-8")
+        enq_result = _run_runner(["backlog", "enqueue", str(f), "--output-dir", str(tmp_path), "--backlog-store-dir", str(backlog_store)])
+        assert enq_result.returncode == 0
+
+        result = _run_runner(["backlog", "surface", "--status", "nonexistent", "--backlog-store-dir", str(backlog_store)])
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+        assert output["result"]["surface_status"] == "empty"
+
+    def test_backlog_surface_nonexistent_store(self, tmp_path: Path):
+        """``backlog surface`` with nonexistent store → exit 1, rejected."""
+        backlog_store = tmp_path / "nonexistent_store"
+        result = _run_runner(["backlog", "surface", "--backlog-store-dir", str(backlog_store)])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["result"]["surface_status"] == "rejected"
+        assert len(output["result"]["reason_codes"]) > 0
+
+
+# ---------------------------------------------------------------------------
 # General CLI behavior
 # ---------------------------------------------------------------------------
 
