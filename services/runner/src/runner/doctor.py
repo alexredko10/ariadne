@@ -29,6 +29,11 @@ from .handoff_packet import (
     GateReadyHandoffPacket,
     validate_handoff_packet,
 )
+from .backlog_surface import (
+    BacklogSurfaceInput,
+    BacklogSurfaceStatus,
+    build_backlog_surface,
+)
 from .improvement_backlog import (
     BacklogItemInput,
     enqueue_backlog_item,
@@ -908,6 +913,90 @@ def backlog_archive_file(backlog_item_ref: str, target_status: str = "archived",
 
 
 # ---------------------------------------------------------------------------
+# Backlog surface
+# ---------------------------------------------------------------------------
+
+
+def backlog_surface(
+    backlog_store_dir: str = ".ariadne/backlog",
+    status_filter: str | None = None,
+    category_filter: str | None = None,
+    max_items: int = 0,
+) -> dict:
+    """Build a read-only surface view of the self-improvement backlog.
+
+    Parameters
+    ----------
+    backlog_store_dir:
+        Directory for durable backlog persistence.
+    status_filter:
+        Optional status to filter by.
+    category_filter:
+        Optional category to filter by.
+    max_items:
+        Maximum number of items to include (0 = unlimited).
+
+    Returns
+    -------
+    dict
+        A JSON-serializable result dict with keys:
+        ``status``, ``command``, ``result``, ``error``.
+    """
+    inp = BacklogSurfaceInput(
+        backlog_store_dir=backlog_store_dir,
+        status_filter=status_filter,
+        category_filter=category_filter,
+        max_items=max_items,
+    )
+    result = build_backlog_surface(inp)
+
+    if result.status == BacklogSurfaceStatus.REJECTED:
+        return {
+            "status": "ok",
+            "command": "backlog surface",
+            "result": {
+                "surface_status": result.status.value,
+                "reason_codes": list(result.reason_codes),
+                "details": result.details,
+            },
+            "error": None,
+        }
+
+    if result.surface_view is None:
+        return {
+            "status": "ok",
+            "command": "backlog surface",
+            "result": {
+                "surface_status": result.status.value,
+                "view": None,
+                "summary": None,
+                "human_review_required_count": 0,
+                "drift_risk_items": [],
+                "ready_for_review_items": [],
+            },
+            "error": None,
+        }
+
+    view = result.surface_view
+    return {
+        "status": "ok",
+        "command": "backlog surface",
+        "result": {
+            "surface_status": result.status.value,
+            "view": {
+                "items": list(view.items),
+                "summary": view.summary,
+                "total_count": view.total_count,
+                "human_review_required_count": view.human_review_required_count,
+                "drift_risk_items": list(view.drift_risk_items),
+                "ready_for_review_items": list(view.ready_for_review_items),
+            },
+        },
+        "error": None,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
 
@@ -1055,6 +1144,30 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Directory for durable backlog persistence (default: .ariadne/backlog).",
     )
 
+    # backlog surface
+    backlog_surface_parser = backlog_subparsers.add_parser("surface", help="Show a read-only surface view of the self-improvement backlog.")
+    backlog_surface_parser.add_argument(
+        "--status",
+        default=None,
+        help="Optional status filter: new, human_review, archived, rejected",
+    )
+    backlog_surface_parser.add_argument(
+        "--category",
+        default=None,
+        help="Optional category filter: self_improvement, continuity_followup, drift_risk, validation_gap, frontend_visibility_gap, human_review_required",
+    )
+    backlog_surface_parser.add_argument(
+        "--max-items",
+        type=int,
+        default=0,
+        help="Maximum number of items to include (0 = unlimited).",
+    )
+    backlog_surface_parser.add_argument(
+        "--backlog-store-dir",
+        default=".ariadne/backlog",
+        help="Directory for durable backlog persistence (default: .ariadne/backlog).",
+    )
+
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     if args.command == "doctor":
@@ -1150,6 +1263,20 @@ def main(argv: Sequence[str] | None = None) -> int:
             if result["status"] == "error":
                 return 1
             if result["result"] and result["result"].get("backlog_status") == "rejected":
+                return 1
+            return 0
+
+        if args.backlog_command == "surface":
+            result = backlog_surface(
+                backlog_store_dir=args.backlog_store_dir,
+                status_filter=args.status,
+                category_filter=args.category,
+                max_items=args.max_items,
+            )
+            _print_json_result(result)
+            if result["status"] == "error":
+                return 1
+            if result["result"] and result["result"].get("surface_status") == "rejected":
                 return 1
             return 0
 

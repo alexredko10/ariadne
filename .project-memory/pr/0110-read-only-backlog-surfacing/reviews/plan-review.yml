@@ -1,0 +1,62 @@
+schema_version: 1
+pr_id: "0110-read-only-backlog-surfacing"
+review_type: plan-review
+reviewer: plan-review
+timestamp: "2026-07-01T22:06:00Z"
+verdict: warning
+snapshot_delta:
+  head: 5659c1eef50f8e2cc606561ae4f80e39c52eb566
+  git_status_short: "?? .project-memory/pr/0110-read-only-backlog-surfacing/"
+scope:
+  plan_path: .project-memory/pr/0110-read-only-backlog-surfacing/PLAN.md
+  review_path: .project-memory/pr/0110-read-only-backlog-surfacing/reviews/plan-review.yml
+files_checked:
+  - .project-memory/pr/0110-read-only-backlog-surfacing/PLAN.md
+  - .project-memory/pr/0110-read-only-backlog-surfacing/reviews/plan-review.yml
+  - .project-memory/pr/0109-self-improvement-backlog-store/PLAN.md
+  - .project-memory/pr/0109-self-improvement-backlog-store/reviews/precommit-review.yml
+  - services/runner/src/runner/improvement_backlog.py
+  - services/runner/tests/test_improvement_backlog.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/tests/test_doctor_cli.py
+validation:
+  - command: git rev-parse --verify HEAD
+    result: 5659c1eef50f8e2cc606561ae4f80e39c52eb566
+  - command: git branch --show-current
+    result: 0110-read-only-backlog-surfacing
+  - command: git status --short
+    result: "?? .project-memory/pr/0110-read-only-backlog-surfacing/"
+  - command: git diff --name-only
+    result: ""
+  - command: git diff -- .project-memory/pr/0109-self-improvement-backlog-store/reviews/plan-review.yml
+    result: ""
+  - command: find .project-memory/pr/0110-read-only-backlog-surfacing -maxdepth 4 -type f | sort
+    result: ".project-memory/pr/0110-read-only-backlog-surfacing/PLAN.md\n.project-memory/pr/0110-read-only-backlog-surfacing/reviews/plan-review.yml"
+  - command: find .project-memory/pr/0109-self-improvement-backlog-store -maxdepth 4 -type f | sort
+    result: ".project-memory/pr/0109-self-improvement-backlog-store/PLAN.md\n.project-memory/pr/0109-self-improvement-backlog-store/reviews/plan-review.yml"
+  - command: grep -R -n "VERDICT:|PLAN DRIFT GATE|374 passed|task_intake|ready|improvement_backlog|.ariadne" .project-memory/pr/0109-self-improvement-backlog-store/reviews/precommit-review.yml services/runner/src/runner/improvement_backlog.py services/runner/tests/test_improvement_backlog.py 2>/dev/null || true
+    result: "matches found in .project-memory/pr/0109-self-improvement-backlog-store/reviews/precommit-review.yml only"
+  - command: date -u +%Y-%m-%dT%H:%M:%SZ
+    result: "2026-07-01T22:06:00Z"
+blockers: []
+warnings:
+  - The PR 0110 plan remains executable-first and read-only.
+  - The PR 0110 directory itself contains only PLAN.md and the review artifact.
+decisions_made:
+  - PR 0109 predecessor evidence is established from the required precommit-review artifact and the requested source/test reads.
+  - The stale dirty-tree blocker from the old PR 0109 review artifact is resolved in the fresh snapshot.
+  - The verdict remains warning with empty blockers.
+context_used:
+  files_modified:
+    - .project-memory/pr/0110-read-only-backlog-surfacing/reviews/plan-review.yml
+  files_read:
+    - .project-memory/pr/0110-read-only-backlog-surfacing/PLAN.md
+    - .project-memory/pr/0110-read-only-backlog-surfacing/reviews/plan-review.yml
+    - .project-memory/pr/0109-self-improvement-backlog-store/PLAN.md
+    - .project-memory/pr/0109-self-improvement-backlog-store/reviews/precommit-review.yml
+    - services/runner/src/runner/improvement_backlog.py
+    - services/runner/tests/test_improvement_backlog.py
+    - services/runner/src/runner/doctor.py
+    - services/runner/tests/test_doctor_cli.py
+  files_written:
+    - .project-memory/pr/0110-read-only-backlog-surfacing/reviews/plan-review.yml
