@@ -781,6 +781,131 @@ class TestSessionNew:
 
 
 # ---------------------------------------------------------------------------
+# Backlog subcommands
+# ---------------------------------------------------------------------------
+
+
+class TestBacklogEnqueue:
+    def test_backlog_enqueue_help(self):
+        """``--help`` output for ``backlog enqueue`` subcommand."""
+        result = _run_runner(["backlog", "enqueue", "--help"])
+        assert result.returncode == 0
+        assert "usage:" in result.stdout
+        assert "path" in result.stdout
+
+    def test_backlog_enqueue_valid_file(self, tmp_path: Path):
+        """Valid JSON file → exit 0, enqueued."""
+        backlog_store = tmp_path / "backlog_store"
+        data = {
+            "candidate_ref": "candidate-abc123",
+            "continuity_ref": "continuity-def456",
+            "product_state_ref": "abc123",
+            "source_reason_codes": ["missing_proof_refs"],
+            "evidence_refs": ["pr-001"],
+            "improvement_category": "self_improvement",
+            "next_safe_action": "Review and merge",
+            "blocked_actions": ["Waiting for review"],
+            "drift_risks": ["Scope must not include frontend"],
+            "requires_human_review": True,
+            "phase_id": "phase-1",
+            "run_id": "run-001",
+            "output_path": "backlog_item.json",
+            "session_label": "PR 0109",
+        }
+        f = tmp_path / "input.json"
+        f.write_text(json.dumps(data), encoding="utf-8")
+
+        result = _run_runner(["backlog", "enqueue", str(f), "--output-dir", str(tmp_path), "--backlog-store-dir", str(backlog_store)])
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+        assert output["status"] == "ok"
+        assert output["command"] == "backlog enqueue"
+        assert output["result"]["backlog_status"] == "enqueued"
+        assert output["error"] is None
+        assert output["result"]["backlog_item_ref"] is not None
+
+        # Verify artifact was written
+        artifact_file = tmp_path / "backlog_item.json"
+        assert artifact_file.exists()
+
+    def test_backlog_enqueue_invalid_file(self, tmp_path: Path):
+        """JSON with missing fields → exit 1, rejected."""
+        data = {
+            "candidate_ref": "",
+            "product_state_ref": "abc123",
+            "evidence_refs": ["pr-001"],
+            "next_safe_action": "Review",
+            "requires_human_review": True,
+            "output_path": "item.json",
+        }
+        f = tmp_path / "bad_input.json"
+        f.write_text(json.dumps(data), encoding="utf-8")
+
+        result = _run_runner(["backlog", "enqueue", str(f), "--output-dir", str(tmp_path)])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "ok"
+        assert output["result"]["backlog_status"] == "rejected"
+        assert len(output["result"]["reason_codes"]) > 0
+
+    def test_backlog_enqueue_file_not_found(self):
+        """Nonexistent path → exit 1."""
+        result = _run_runner(["backlog", "enqueue", "/nonexistent/path.json"])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "error"
+        assert "File not found" in output["error"]
+
+    def test_backlog_enqueue_invalid_json(self, tmp_path: Path):
+        """Malformed JSON → exit 1."""
+        f = tmp_path / "bad.json"
+        f.write_text("{invalid json}", encoding="utf-8")
+
+        result = _run_runner(["backlog", "enqueue", str(f)])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "error"
+        assert "Invalid JSON" in output["error"]
+
+
+class TestBacklogList:
+    def test_backlog_list_help(self):
+        """``--help`` output for ``backlog list`` subcommand."""
+        result = _run_runner(["backlog", "list", "--help"])
+        assert result.returncode == 0
+        assert "usage:" in result.stdout
+
+    def test_backlog_list_succeeds(self, tmp_path: Path):
+        """``backlog list`` → exit 0, JSON output."""
+        backlog_store = tmp_path / "backlog_store"
+        result = _run_runner(["backlog", "list", "--backlog-store-dir", str(backlog_store)])
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+        assert output["status"] == "ok"
+        assert output["command"] == "backlog list"
+        assert "items" in output["result"]
+        assert "total_count" in output["result"]
+
+
+class TestBacklogArchive:
+    def test_backlog_archive_help(self):
+        """``--help`` output for ``backlog archive`` subcommand."""
+        result = _run_runner(["backlog", "archive", "--help"])
+        assert result.returncode == 0
+        assert "usage:" in result.stdout
+        assert "ref" in result.stdout
+
+    def test_backlog_archive_nonexistent_ref(self, tmp_path: Path):
+        """Nonexistent ref → exit 1."""
+        backlog_store = tmp_path / "backlog_store"
+        result = _run_runner(["backlog", "archive", "nonexistent-ref", "--backlog-store-dir", str(backlog_store)])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "ok"
+        assert output["result"]["backlog_status"] == "rejected"
+
+
+# ---------------------------------------------------------------------------
 # General CLI behavior
 # ---------------------------------------------------------------------------
 

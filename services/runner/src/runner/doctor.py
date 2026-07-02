@@ -29,6 +29,12 @@ from .handoff_packet import (
     GateReadyHandoffPacket,
     validate_handoff_packet,
 )
+from .improvement_backlog import (
+    BacklogItemInput,
+    enqueue_backlog_item,
+    list_backlog,
+    archive_backlog_item,
+)
 from .improvement_candidate import (
     ImprovementCandidateInput,
     propose_improvement_candidate,
@@ -727,6 +733,181 @@ def build_session_continuity_packet_file(path: str, output_dir: str = ".") -> di
 
 
 # ---------------------------------------------------------------------------
+# Backlog enqueue file
+# ---------------------------------------------------------------------------
+
+
+def backlog_enqueue_file(path: str, output_dir: str = ".", backlog_store_dir: str = ".ariadne/backlog") -> dict:
+    """Read a JSON file, parse as BacklogItemInput, and enqueue.
+
+    Parameters
+    ----------
+    path:
+        Path to a JSON file containing BacklogItemInput data.
+    output_dir:
+        Directory where the item artifact will be written.
+    backlog_store_dir:
+        Directory for durable backlog persistence.
+
+    Returns
+    -------
+    dict
+        A JSON-serializable result dict with keys:
+        ``status``, ``command``, ``result``, ``error``.
+    """
+    try:
+        raw = Path(path).read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return {
+            "status": "error",
+            "command": "backlog enqueue",
+            "result": None,
+            "error": f"File not found: {path}",
+        }
+    except OSError as exc:
+        return {
+            "status": "error",
+            "command": "backlog enqueue",
+            "result": None,
+            "error": f"Error reading file: {exc}",
+        }
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        return {
+            "status": "error",
+            "command": "backlog enqueue",
+            "result": None,
+            "error": f"Invalid JSON: {exc}",
+        }
+
+    if not isinstance(data, dict):
+        return {
+            "status": "error",
+            "command": "backlog enqueue",
+            "result": None,
+            "error": "JSON root must be an object",
+        }
+
+    # Convert list fields to tuples
+    for list_field in ("source_reason_codes", "evidence_refs",
+                       "blocked_actions", "drift_risks"):
+        if list_field in data and isinstance(data[list_field], list):
+            data[list_field] = tuple(data[list_field])
+
+    try:
+        backlog_input = BacklogItemInput(**data)
+    except (TypeError, ValueError) as exc:
+        return {
+            "status": "error",
+            "command": "backlog enqueue",
+            "result": None,
+            "error": f"Invalid BacklogItemInput data: {exc}",
+        }
+
+    result = enqueue_backlog_item(backlog_input, output_dir=output_dir, backlog_store_dir=backlog_store_dir)
+
+    return {
+        "status": "ok",
+        "command": "backlog enqueue",
+        "result": {
+            "backlog_status": result.status,
+            "reason_codes": list(result.reason_codes),
+            "backlog_item_ref": result.backlog_item.backlog_item_ref if result.backlog_item else None,
+            "artifact_path": result.artifact_path,
+            "total_count": result.total_count,
+            "details": result.details,
+        },
+        "error": None,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Backlog list
+# ---------------------------------------------------------------------------
+
+
+def backlog_list(status_filter: str | None = None, backlog_store_dir: str = ".ariadne/backlog") -> dict:
+    """List backlog items from the durable store.
+
+    Parameters
+    ----------
+    status_filter:
+        Optional status to filter by.
+    backlog_store_dir:
+        Directory for durable backlog persistence.
+
+    Returns
+    -------
+    dict
+        A JSON-serializable result dict with keys:
+        ``status``, ``command``, ``result``, ``error``.
+    """
+    result = list_backlog(status_filter=status_filter, backlog_store_dir=backlog_store_dir)
+
+    items_list = []
+    for item in result.backlog_items:
+        items_list.append({
+            "backlog_item_ref": item.backlog_item_ref,
+            "candidate_ref": item.candidate_ref,
+            "status": item.status,
+            "improvement_category": item.improvement_category,
+            "next_safe_action": item.next_safe_action,
+            "requires_human_review": item.requires_human_review,
+        })
+
+    return {
+        "status": "ok",
+        "command": "backlog list",
+        "result": {
+            "backlog_status": result.status,
+            "items": items_list,
+            "total_count": result.total_count,
+        },
+        "error": None,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Backlog archive file
+# ---------------------------------------------------------------------------
+
+
+def backlog_archive_file(backlog_item_ref: str, target_status: str = "archived", backlog_store_dir: str = ".ariadne/backlog") -> dict:
+    """Archive or reject a backlog item.
+
+    Parameters
+    ----------
+    backlog_item_ref:
+        The ref of the backlog item to archive.
+    target_status:
+        Target status: ``"archived"`` or ``"rejected"``.
+    backlog_store_dir:
+        Directory for durable backlog persistence.
+
+    Returns
+    -------
+    dict
+        A JSON-serializable result dict with keys:
+        ``status``, ``command``, ``result``, ``error``.
+    """
+    result = archive_backlog_item(backlog_item_ref, target_status=target_status, backlog_store_dir=backlog_store_dir)
+
+    return {
+        "status": "ok",
+        "command": "backlog archive",
+        "result": {
+            "backlog_status": result.status,
+            "reason_codes": list(result.reason_codes),
+            "backlog_item_ref": result.backlog_item.backlog_item_ref if result.backlog_item else None,
+            "details": result.details,
+        },
+        "error": None,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
 
@@ -828,6 +1009,52 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Directory where the packet artifact will be written (default: current directory).",
     )
 
+    # Backlog subcommand group
+    backlog_parser = subparsers.add_parser("backlog", help="Manage self-improvement backlog.")
+    backlog_subparsers = backlog_parser.add_subparsers(dest="backlog_command", required=True)
+
+    # backlog enqueue <path>
+    backlog_enqueue_parser = backlog_subparsers.add_parser("enqueue", help="Enqueue a backlog item from a JSON input file.")
+    backlog_enqueue_parser.add_argument("path", help="Path to the backlog item input JSON file.")
+    backlog_enqueue_parser.add_argument(
+        "--output-dir",
+        default=".",
+        help="Directory where the item artifact will be written (default: current directory).",
+    )
+    backlog_enqueue_parser.add_argument(
+        "--backlog-store-dir",
+        default=".ariadne/backlog",
+        help="Directory for durable backlog persistence (default: .ariadne/backlog).",
+    )
+
+    # backlog list
+    backlog_list_parser = backlog_subparsers.add_parser("list", help="List backlog items.")
+    backlog_list_parser.add_argument(
+        "--status",
+        default=None,
+        help="Optional status filter: new, human_review, archived, rejected",
+    )
+    backlog_list_parser.add_argument(
+        "--backlog-store-dir",
+        default=".ariadne/backlog",
+        help="Directory for durable backlog persistence (default: .ariadne/backlog).",
+    )
+
+    # backlog archive <ref>
+    backlog_archive_parser = backlog_subparsers.add_parser("archive", help="Archive or reject a backlog item.")
+    backlog_archive_parser.add_argument("ref", help="Backlog item ref to archive.")
+    backlog_archive_parser.add_argument(
+        "--status",
+        default="archived",
+        choices=["archived", "rejected"],
+        help="Target status: archived or rejected (default: archived).",
+    )
+    backlog_archive_parser.add_argument(
+        "--backlog-store-dir",
+        default=".ariadne/backlog",
+        help="Directory for durable backlog persistence (default: .ariadne/backlog).",
+    )
+
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     if args.command == "doctor":
@@ -899,6 +1126,30 @@ def main(argv: Sequence[str] | None = None) -> int:
             if result["status"] == "error":
                 return 1
             if result["result"] and result["result"].get("continuity_status") == "rejected":
+                return 1
+            return 0
+
+    if args.command == "backlog":
+        if args.backlog_command == "enqueue":
+            result = backlog_enqueue_file(args.path, output_dir=args.output_dir, backlog_store_dir=args.backlog_store_dir)
+            _print_json_result(result)
+            if result["status"] == "error":
+                return 1
+            if result["result"] and result["result"].get("backlog_status") == "rejected":
+                return 1
+            return 0
+
+        if args.backlog_command == "list":
+            result = backlog_list(status_filter=args.status, backlog_store_dir=args.backlog_store_dir)
+            _print_json_result(result)
+            return 0 if result["status"] == "ok" else 1
+
+        if args.backlog_command == "archive":
+            result = backlog_archive_file(args.ref, target_status=args.status, backlog_store_dir=args.backlog_store_dir)
+            _print_json_result(result)
+            if result["status"] == "error":
+                return 1
+            if result["result"] and result["result"].get("backlog_status") == "rejected":
                 return 1
             return 0
 
