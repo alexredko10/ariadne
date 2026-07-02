@@ -41,6 +41,10 @@ from .proof_ref import (
     ProofRef,
     validate_proof_ref,
 )
+from .session_continuity import (
+    SessionContinuityInput,
+    build_session_continuity_packet,
+)
 
 
 EXPECTED_OUTPUT_LINES = (
@@ -633,6 +637,96 @@ def propose_improvement_candidate_file(path: str, output_dir: str = ".") -> dict
 
 
 # ---------------------------------------------------------------------------
+# Build session continuity packet file
+# ---------------------------------------------------------------------------
+
+
+def build_session_continuity_packet_file(path: str, output_dir: str = ".") -> dict:
+    """Read a JSON file, parse as SessionContinuityInput, and build packet.
+
+    Parameters
+    ----------
+    path:
+        Path to a JSON file containing SessionContinuityInput data.
+    output_dir:
+        Directory where the packet artifact will be written.
+
+    Returns
+    -------
+    dict
+        A JSON-serializable result dict with keys:
+        ``status``, ``command``, ``result``, ``error``.
+    """
+    try:
+        raw = Path(path).read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return {
+            "status": "error",
+            "command": "session new",
+            "result": None,
+            "error": f"File not found: {path}",
+        }
+    except OSError as exc:
+        return {
+            "status": "error",
+            "command": "session new",
+            "result": None,
+            "error": f"Error reading file: {exc}",
+        }
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        return {
+            "status": "error",
+            "command": "session new",
+            "result": None,
+            "error": f"Invalid JSON: {exc}",
+        }
+
+    if not isinstance(data, dict):
+        return {
+            "status": "error",
+            "command": "session new",
+            "result": None,
+            "error": "JSON root must be an object",
+        }
+
+    # Convert list fields to tuples
+    for list_field in ("gate_evidence_refs", "improvement_candidate_refs",
+                       "known_drift_risks", "deferred_capabilities",
+                       "blocked_actions", "files_in_scope", "files_out_of_scope",
+                       "evidence_refs"):
+        if list_field in data and isinstance(data[list_field], list):
+            data[list_field] = tuple(data[list_field])
+
+    try:
+        continuity_input = SessionContinuityInput(**data)
+    except (TypeError, ValueError) as exc:
+        return {
+            "status": "error",
+            "command": "session new",
+            "result": None,
+            "error": f"Invalid SessionContinuityInput data: {exc}",
+        }
+
+    result = build_session_continuity_packet(continuity_input, output_dir=output_dir)
+
+    return {
+        "status": "ok",
+        "command": "session new",
+        "result": {
+            "continuity_status": result.status.value,
+            "reason_codes": list(result.reason_codes),
+            "continuity_ref": result.packet.continuity_ref if result.packet else None,
+            "artifact_path": result.artifact_path,
+            "details": result.details,
+        },
+        "error": None,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
 
@@ -721,6 +815,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Directory where the candidate artifact will be written (default: current directory).",
     )
 
+    # Session subcommand group
+    session_parser = subparsers.add_parser("session", help="Manage session continuity packets.")
+    session_subparsers = session_parser.add_subparsers(dest="session_command", required=True)
+
+    # session new <path>
+    session_new_parser = session_subparsers.add_parser("new", help="Create a session continuity packet from a JSON input file.")
+    session_new_parser.add_argument("path", help="Path to the session continuity input JSON file.")
+    session_new_parser.add_argument(
+        "--output-dir",
+        default=".",
+        help="Directory where the packet artifact will be written (default: current directory).",
+    )
+
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     if args.command == "doctor":
@@ -782,6 +889,16 @@ def main(argv: Sequence[str] | None = None) -> int:
             if result["status"] == "error":
                 return 1
             if result["result"] and result["result"].get("proposal_status") == "rejected":
+                return 1
+            return 0
+
+    if args.command == "session":
+        if args.session_command == "new":
+            result = build_session_continuity_packet_file(args.path, output_dir=args.output_dir)
+            _print_json_result(result)
+            if result["status"] == "error":
+                return 1
+            if result["result"] and result["result"].get("continuity_status") == "rejected":
                 return 1
             return 0
 

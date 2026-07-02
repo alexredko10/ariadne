@@ -1,0 +1,127 @@
+schema_version: 1
+pr_id: "0108-session-continuity-packet"
+review_type: plan-review
+reviewer: plan-review
+timestamp: "2026-07-01T21:46:12Z"
+verdict: warning
+snapshot_delta:
+  head: f68009e411be0f7f04aa618395b8053db571d47a
+  git_status_short: "?? .project-memory/pr/0108-session-continuity-packet/"
+scope:
+  plan_path: .project-memory/pr/0108-session-continuity-packet/PLAN.md
+  review_path: .project-memory/pr/0108-session-continuity-packet/reviews/plan-review.yml
+files_checked:
+  - .project-memory/pr/0108-session-continuity-packet/PLAN.md
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - .project-memory/review-artifact.schema.yml
+  - ROADMAP.md
+  - docs/adr/0011-pr-batching-and-roadmap-discipline.md
+  - docs/adr/0010-runner-execution-contract-boundary.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+  - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+  - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+  - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+  - .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+  - .project-memory/pr/0103-ariadna-cli-skeleton/reviews/precommit-review.yml
+  - .project-memory/pr/0104-proof-capture-command/PLAN.md
+  - .project-memory/pr/0104-proof-capture-command/reviews/precommit-review.yml
+  - .project-memory/pr/0105-spec-freeze-acceptance-criteria/PLAN.md
+  - .project-memory/pr/0105-spec-freeze-acceptance-criteria/reviews/precommit-review.yml
+  - .project-memory/pr/0106-gate-evidence-bundle/PLAN.md
+  - .project-memory/pr/0106-gate-evidence-bundle/reviews/precommit-review.yml
+  - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/PLAN.md
+  - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/precommit-review.yml
+  - services/runner/src/runner/proof_ref.py
+  - services/runner/tests/test_proof_ref.py
+  - services/runner/src/runner/handoff_packet.py
+  - services/runner/tests/test_handoff_packet.py
+  - services/runner/src/runner/proof_capture.py
+  - services/runner/tests/test_proof_capture.py
+  - services/runner/src/runner/acceptance_criteria.py
+  - services/runner/tests/test_acceptance_criteria.py
+  - services/runner/src/runner/gate_evidence.py
+  - services/runner/tests/test_gate_evidence.py
+  - services/runner/src/runner/improvement_candidate.py
+  - services/runner/tests/test_improvement_candidate.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/src/runner/__main__.py
+  - services/runner/tests/test_doctor_cli.py
+  - services/runner/src/runner/readiness_gate.py
+  - services/runner/tests/test_readiness_gate.py
+  - services/runner/src/runner/execution_smoke.py
+  - services/runner/src/runner/execution_substrate_audit.py
+  - services/task_intake/src/task_intake/app.py
+  - services/task_intake/src/task_intake/execution_handoff.py
+validation:
+  - command: git rev-parse --verify HEAD
+    result: f68009e411be0f7f04aa618395b8053db571d47a
+  - command: git status --short
+    result: "?? .project-memory/pr/0108-session-continuity-packet/"
+  - command: git diff --name-only
+    result: ""
+  - command: find .project-memory/pr/0108-session-continuity-packet -maxdepth 4 -type f | sort
+    result: ".project-memory/pr/0108-session-continuity-packet/PLAN.md\n.project-memory/pr/0108-session-continuity-packet/reviews/plan-review.yml"
+  - command: git diff -- .project-memory/pr/0108-session-continuity-packet/PLAN.md
+    result: ""
+  - command: grep -R -n "continuity|session|resume|handoff|breadcrumb|thread|frontend|browser|ui|gate_evidence|improvement_candidate|shell|subprocess|docker|network|requests|urllib|openai|anthropic|chain.of.thought|reasoning|PLACEHOLDER" .project-memory/pr/0108-session-continuity-packet/PLAN.md services/runner/src/runner services/runner/tests apps packages 2>/dev/null || true
+    result: "matches found in PLAN.md only"
+  - command: date -u +%Y-%m-%dT%H:%M:%SZ
+    result: "2026-07-01T21:46:12Z"
+blockers: []
+warnings:
+  - The plan is executable-first and autonomy-safe, but the session continuity packet is only partially evidenced as a runtime object because the review cannot independently verify the continuity derivation and drift-gate behavior without executing the planned tests.
+  - The plan defers frontend continuity UI, which is acceptable, but the review cannot confirm any future frontend follow-up because no frontend repository evidence was required or read.
+  - The PR 0108 directory is an allowed planning dirty-tree state because `find` shows only PLAN.md and the review artifact.
+decisions_made:
+  - The PR 0108 plan remains acceptable with warnings only.
+  - The plan is not docs-only, schemas-only, review-artifact-only, frontend-only, or packaging-only.
+  - The plan composes with PR 0101 through PR 0107 runtime objects.
+  - The plan rejects autonomous code edits, git mutation, provider/LLM calls, shell execution, user-provided command execution, network, Docker, hidden reasoning, and external URL-only evidence.
+  - The plan defers autonomous repair, source code edits, commits/push/PR creation, proof evaluation, gate approval/finalization, backlog persistence unless bounded, benchmark runner, model switching, provider calls, external capability integration, and frontend continuity UI.
+context_used:
+  files_modified:
+    - .project-memory/pr/0108-session-continuity-packet/reviews/plan-review.yml
+  files_read:
+    - .project-memory/pr/0108-session-continuity-packet/PLAN.md
+    - .project-memory/post-0100/strategic-direction/agent-manifest.md
+    - .project-memory/review-artifact.schema.yml
+    - ROADMAP.md
+    - docs/adr/0011-pr-batching-and-roadmap-discipline.md
+    - docs/adr/0010-runner-execution-contract-boundary.md
+    - .project-memory/pr/0101-admissible-proof-ref-runtime-object/PLAN.md
+    - .project-memory/pr/0101-admissible-proof-ref-runtime-object/reviews/precommit-review.yml
+    - .project-memory/pr/0102-gate-ready-handoff-packet/PLAN.md
+    - .project-memory/pr/0102-gate-ready-handoff-packet/reviews/precommit-review.yml
+    - .project-memory/pr/0103-ariadna-cli-skeleton/PLAN.md
+    - .project-memory/pr/0103-ariadna-cli-skeleton/reviews/precommit-review.yml
+    - .project-memory/pr/0104-proof-capture-command/PLAN.md
+    - .project-memory/pr/0104-proof-capture-command/reviews/precommit-review.yml
+    - .project-memory/pr/0105-spec-freeze-acceptance-criteria/PLAN.md
+    - .project-memory/pr/0105-spec-freeze-acceptance-criteria/reviews/precommit-review.yml
+    - .project-memory/pr/0106-gate-evidence-bundle/PLAN.md
+    - .project-memory/pr/0106-gate-evidence-bundle/reviews/precommit-review.yml
+    - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/PLAN.md
+    - .project-memory/pr/0107-evidence-backed-self-improvement-candidate/reviews/precommit-review.yml
+    - services/runner/src/runner/proof_ref.py
+    - services/runner/tests/test_proof_ref.py
+    - services/runner/src/runner/handoff_packet.py
+    - services/runner/tests/test_handoff_packet.py
+    - services/runner/src/runner/proof_capture.py
+    - services/runner/tests/test_proof_capture.py
+    - services/runner/src/runner/acceptance_criteria.py
+    - services/runner/tests/test_acceptance_criteria.py
+    - services/runner/src/runner/gate_evidence.py
+    - services/runner/tests/test_gate_evidence.py
+    - services/runner/src/runner/improvement_candidate.py
+    - services/runner/tests/test_improvement_candidate.py
+    - services/runner/src/runner/doctor.py
+    - services/runner/src/runner/__main__.py
+    - services/runner/tests/test_doctor_cli.py
+    - services/runner/src/runner/readiness_gate.py
+    - services/runner/tests/test_readiness_gate.py
+    - services/runner/src/runner/execution_smoke.py
+    - services/runner/src/runner/execution_substrate_audit.py
+    - services/task_intake/src/task_intake/app.py
+    - services/task_intake/src/task_intake/execution_handoff.py
+  files_written:
+    - .project-memory/pr/0108-session-continuity-packet/reviews/plan-review.yml

@@ -680,6 +680,107 @@ class TestImprovePropose:
 
 
 # ---------------------------------------------------------------------------
+# Session new subcommand
+# ---------------------------------------------------------------------------
+
+
+class TestSessionNew:
+    def test_session_new_help(self):
+        """``--help`` output for ``session new`` subcommand."""
+        result = _run_runner(["session", "new", "--help"])
+        assert result.returncode == 0
+        assert "usage:" in result.stdout
+        assert "path" in result.stdout
+
+    def test_session_new_valid_file(self, tmp_path: Path):
+        """Valid JSON file → exit 0, created."""
+        data = {
+            "product_state_ref": "abc123",
+            "phase_id": "phase-1",
+            "run_id": "run-001",
+            "current_pr": "0108-session-continuity-packet",
+            "current_goal": "Add session continuity packet",
+            "approved_plan_ref": "PLAN.md",
+            "latest_review_status": "pending",
+            "latest_validation_status": "pending",
+            "gate_evidence_refs": ["deadbeef12345678"],
+            "improvement_candidate_refs": [],
+            "known_drift_risks": ["Scope must not include frontend"],
+            "deferred_capabilities": ["Frontend UI"],
+            "next_safe_action": "Review and merge",
+            "blocked_actions": ["Waiting for review"],
+            "files_in_scope": ["session_continuity.py"],
+            "files_out_of_scope": ["frontend/"],
+            "output_path": "session.json",
+            "session_label": "PR 0108",
+            "evidence_refs": ["pr-001"],
+            "requires_human_review": True,
+        }
+        f = tmp_path / "input.json"
+        f.write_text(json.dumps(data), encoding="utf-8")
+
+        result = _run_runner(["session", "new", str(f), "--output-dir", str(tmp_path)])
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+        assert output["status"] == "ok"
+        assert output["command"] == "session new"
+        assert output["result"]["continuity_status"] == "created"
+        assert output["error"] is None
+        assert output["result"]["continuity_ref"] is not None
+
+        # Verify artifact was written
+        artifact_file = tmp_path / "session.json"
+        assert artifact_file.exists()
+
+    def test_session_new_invalid_file(self, tmp_path: Path):
+        """JSON with missing fields → exit 1, rejected."""
+        data = {
+            "product_state_ref": "",
+            "phase_id": "phase-1",
+            "run_id": "run-001",
+            "current_pr": "0108-session-continuity-packet",
+            "current_goal": "Add session continuity packet",
+            "approved_plan_ref": "PLAN.md",
+            "latest_review_status": "pending",
+            "latest_validation_status": "pending",
+            "gate_evidence_refs": ["deadbeef12345678"],
+            "known_drift_risks": ["Scope must not include frontend"],
+            "next_safe_action": "Review and merge",
+            "files_in_scope": ["session_continuity.py"],
+            "output_path": "session.json",
+            "evidence_refs": ["pr-001"],
+        }
+        f = tmp_path / "bad_input.json"
+        f.write_text(json.dumps(data), encoding="utf-8")
+
+        result = _run_runner(["session", "new", str(f), "--output-dir", str(tmp_path)])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "ok"
+        assert output["result"]["continuity_status"] == "rejected"
+        assert len(output["result"]["reason_codes"]) > 0
+
+    def test_session_new_file_not_found(self):
+        """Nonexistent path → exit 1."""
+        result = _run_runner(["session", "new", "/nonexistent/path.json"])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "error"
+        assert "File not found" in output["error"]
+
+    def test_session_new_invalid_json(self, tmp_path: Path):
+        """Malformed JSON → exit 1."""
+        f = tmp_path / "bad.json"
+        f.write_text("{invalid json}", encoding="utf-8")
+
+        result = _run_runner(["session", "new", str(f)])
+        assert result.returncode == 1
+        output = json.loads(result.stdout)
+        assert output["status"] == "error"
+        assert "Invalid JSON" in output["error"]
+
+
+# ---------------------------------------------------------------------------
 # General CLI behavior
 # ---------------------------------------------------------------------------
 
