@@ -1,0 +1,57 @@
+schema_version: 1
+pr_id: "0109-self-improvement-backlog-store"
+review_type: plan-review
+reviewer: plan-review
+timestamp: "2026-07-01T21:55:00Z"
+verdict: warning
+snapshot_delta:
+  head: f68009e411be0f7f04aa618395b8053db571d47a
+  git_status_short: "?? .project-memory/pr/0109-self-improvement-backlog-store/"
+scope:
+  plan_path: .project-memory/pr/0109-self-improvement-backlog-store/PLAN.md
+  review_path: .project-memory/pr/0109-self-improvement-backlog-store/reviews/plan-review.yml
+files_checked:
+  - .project-memory/pr/0109-self-improvement-backlog-store/PLAN.md
+  - .project-memory/pr/0109-self-improvement-backlog-store/reviews/plan-review.yml
+  - .project-memory/pr/0108-session-continuity-packet/PLAN.md
+  - .project-memory/pr/0108-session-continuity-packet/reviews/precommit-review.yml
+  - services/runner/src/runner/session_continuity.py
+  - services/runner/tests/test_session_continuity.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/tests/test_doctor_cli.py
+validation:
+  - command: git rev-parse --verify HEAD
+    result: f68009e411be0f7f04aa618395b8053db571d47a
+  - command: git status --short
+    result: "?? .project-memory/pr/0109-self-improvement-backlog-store/"
+  - command: git diff --name-only
+    result: ""
+  - command: find .project-memory/pr/0109-self-improvement-backlog-store -maxdepth 4 -type f | sort
+    result: ".project-memory/pr/0109-self-improvement-backlog-store/PLAN.md\n.project-memory/pr/0109-self-improvement-backlog-store/reviews/plan-review.yml"
+  - command: grep -R -n "VERDICT:|PLAN DRIFT GATE|session_continuity|30 passed|43 passed|336 passed|task_intake|ready" .project-memory/pr/0108-session-continuity-packet/reviews/precommit-review.yml services/runner/src/runner/session_continuity.py services/runner/tests/test_session_continuity.py 2>/dev/null || true
+    result: "matches found in .project-memory/pr/0108-session-continuity-packet/reviews/precommit-review.yml only"
+  - command: date -u +%Y-%m-%dT%H:%M:%SZ
+    result: "2026-07-01T21:55:00Z"
+blockers:
+  - PR 0108 precommit-review artifact was read and supports the predecessor evidence claim, but the current PR 0109 artifact still cannot independently establish PR 0108 implementation readiness from the limited source/test reads requested in this correction task.
+warnings:
+  - The PR 0109 plan remains executable-first and autonomy-safe.
+  - The PR 0109 directory remains an allowed planning dirty-tree state because `find` shows only `PLAN.md` and `reviews/plan-review.yml`.
+decisions_made:
+  - PR 0108 implementation evidence is established only to the extent supported by the PR 0108 precommit-review artifact and the requested source/test reads.
+  - The PR 0109 review artifact is corrected to include the missing PR 0108 precommit-review evidence.
+  - The verdict remains warning because the predecessor evidence is now present, but the review still cannot elevate runtime readiness beyond plan-review scope.
+context_used:
+  files_modified:
+    - .project-memory/pr/0109-self-improvement-backlog-store/reviews/plan-review.yml
+  files_read:
+    - .project-memory/pr/0109-self-improvement-backlog-store/PLAN.md
+    - .project-memory/pr/0109-self-improvement-backlog-store/reviews/plan-review.yml
+    - .project-memory/pr/0108-session-continuity-packet/PLAN.md
+    - .project-memory/pr/0108-session-continuity-packet/reviews/precommit-review.yml
+    - services/runner/src/runner/session_continuity.py
+    - services/runner/tests/test_session_continuity.py
+    - services/runner/src/runner/doctor.py
+    - services/runner/tests/test_doctor_cli.py
+  files_written:
+    - .project-memory/pr/0109-self-improvement-backlog-store/reviews/plan-review.yml
