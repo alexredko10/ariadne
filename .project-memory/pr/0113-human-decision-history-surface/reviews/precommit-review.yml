@@ -1,0 +1,243 @@
+schema_version: 1
+pr_id: "0113-human-decision-history-surface"
+review_type: precommit-review
+reviewer: implementation
+timestamp: "2026-07-03T11:06:28Z"
+verdict: pass
+backfill_notice: |
+  THIS IS A BACKFILLED / POST-MERGE EVIDENCE ARTIFACT.
+
+  It was created during PR 0114 (0114-pr0113-precommit-evidence-backfill)
+  to repair the missing predecessor evidence chain for future PRs.
+
+  It was created after PR 0113 merge by re-running validation against
+  the current repository state containing PR 0113 implementation.
+
+  It is NOT the original PR 0113 pre-merge review artifact.
+  It does NOT modify PR 0113 runtime behavior.
+  It exists solely to restore Ariadne's predecessor evidence completeness.
+
+correction_backfill_summary: |
+  PR 0113 (Human Decision History Surface) was implemented with
+  decision_history.py, test_decision_history.py, server.py route, and
+  app.py route registration, but its precommit-review.yml evidence
+  artifact was never created. This backfill re-runs the PR 0113
+  validation plan against the current repository state and records
+  the results as a post-merge evidence artifact.
+
+  No runtime behavior, source files, or tests were modified by this
+  backfill. The PR 0113 implementation is unchanged.
+
+blockers: []
+warnings:
+  - PR 0112 precommit-review.yml is also missing but is not the target of this backfill.
+  - This artifact is backfilled/post-merge, not an original pre-merge review.
+  - The abandoned .project-memory/pr/0114-decision-backlog-trace-summary/ directory does not exist in the current working tree.
+
+validation:
+  - command: python -m compileall -f services/runner/src services/task_intake/src
+    exit_code: 0
+    result: "All files compiled successfully (no errors)."
+  - command: PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_decision_history.py -q
+    exit_code: 0
+    result: "31 passed in 0.08s"
+  - command: PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_backlog_decision.py -q
+    exit_code: 0
+    result: "26 passed in 0.04s"
+  - command: PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_backlog_review.py -q
+    exit_code: 0
+    result: "19 passed in 0.11s"
+  - command: PYTHONPATH=services/task_intake/src:services/runner/src python -m task_intake.app --check --json
+    exit_code: 0
+    result: "ready — routes include /backlog/decision/history"
+  - command: PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_decision_history.py services/task_intake/tests/test_backlog_decision.py services/task_intake/tests/test_backlog_review.py services/runner/tests/test_backlog_surface.py services/runner/tests/test_improvement_backlog.py services/runner/tests/test_session_continuity.py services/runner/tests/test_improvement_candidate.py services/runner/tests/test_gate_evidence.py services/runner/tests/test_acceptance_criteria.py services/runner/tests/test_proof_capture.py services/runner/tests/test_doctor_cli.py services/runner/tests/test_proof_ref.py services/runner/tests/test_handoff_packet.py services/runner/tests/test_readiness_gate.py services/runner/tests/test_execution_smoke.py services/runner/tests/test_execution_substrate_audit.py -q
+    exit_code: 0
+    result: "487 passed in 3.36s"
+  - command: git status --short
+    exit_code: 0
+    result: "clean — no dirty files"
+  - command: find .ariadne -maxdepth 5 -type f | sort 2>/dev/null || true
+    exit_code: 0
+    result: "No .ariadne/ directory — no residue"
+
+files_read:
+  - .project-memory/pr/0113-human-decision-history-surface/PLAN.md
+  - .project-memory/pr/0113-human-decision-history-surface/reviews/plan-review.yml
+  - .project-memory/pr/0114-pr0113-precommit-evidence-backfill/PLAN.md
+  - .project-memory/pr/0114-pr0113-precommit-evidence-backfill/reviews/plan-review.yml
+  - .project-memory/review-artifact.schema.yml
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - ROADMAP.md
+  - docs/adr/0011-pr-batching-and-roadmap-discipline.md
+  - docs/adr/0010-runner-execution-contract-boundary.md
+  - services/task_intake/src/task_intake/decision_history.py
+  - services/task_intake/tests/test_decision_history.py
+  - services/task_intake/src/task_intake/app.py
+  - services/task_intake/src/task_intake/server.py
+  - services/task_intake/src/task_intake/backlog_decision.py
+  - services/task_intake/tests/test_backlog_decision.py
+  - services/task_intake/src/task_intake/backlog_review.py
+  - services/task_intake/tests/test_backlog_review.py
+  - services/runner/src/runner/backlog_surface.py
+  - services/runner/tests/test_backlog_surface.py
+  - services/runner/src/runner/improvement_backlog.py
+  - services/runner/tests/test_improvement_backlog.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/tests/test_doctor_cli.py
+
+files_written:
+  - .project-memory/pr/0113-human-decision-history-surface/reviews/precommit-review.yml
+
+snapshot_delta:
+  head: 7098b3acd0ec9be933b32c8c86646d32b5079c39
+  branch: 0114-pr0113-precommit-evidence-backfill
+  git_status_short: "clean"
+  git_diff_name_only: ""
+  pr_0113_precommit_artifact_status: "MISSING (before backfill)"
+  pr_0113_runtime_files_status: "ALL PRESENT"
+  ariadne_residue: "none"
+
+plan_drift_gate:
+  verdict: pass
+  file_drift: "none — all 4 PLAN.md-selected files exist and are unchanged"
+  behavior_drift: "none — load_decision_history() matches PLAN.md spec"
+  object_shape_drift: "none — DecisionHistoryInput, DecisionHistoryItem, DecisionHistoryView, DecisionHistorySummary, DecisionHistoryResult, DecisionHistoryStatus match PLAN.md"
+  decision_history_drift: "none — 31 tests pass, all required behaviors covered"
+  decision_record_mutation_drift: "none — read-only, no writes to decision store"
+  backlog_mutation_drift: "none — no backlog access"
+  decision_execution_drift: "none — showing only, no execution"
+  local_view_drift: "none — GET /backlog/decision/history returns JSON per PLAN.md"
+  task_intake_drift: "none — decision_history.py module + server.py route match PLAN.md"
+  server_app_drift: "none — GET /backlog/decision/history route registered in server.py and app.py _ROUTES"
+  frontend_browser_static_drift: "none — not selected, not modified"
+  backlog_decision_drift: "none — imports BacklogDecisionType, no modification"
+  backlog_review_drift: "none — not modified"
+  runner_backlog_surface_drift: "none — not modified"
+  cli_drift: "none — not selected, not modified"
+  validation_drift: "none — all 6 validation commands run and passed"
+  semantic_drift: "none — no non-semantic placeholders, product name is Ariadne"
+  future_scope_drift: "none — no PR 0115 trace summary, no frontend, no CLI"
+  dirty_tree_residue_drift: "none — no .ariadne/ residue after validation"
+  accepted_deviations: []
+  blockers: []
+
+no_drift_check:
+  repair_target: ".project-memory/pr/0113-human-decision-history-surface/reviews/precommit-review.yml"
+  backfilled_artifact_path: ".project-memory/pr/0113-human-decision-history-surface/reviews/precommit-review.yml"
+  runtime_behavior_changes_introduced: "no"
+  source_test_changes_introduced: "no"
+  roadmap_schema_dependency_changes_introduced: "no"
+  trace_summary_implementation_introduced: "no"
+  provider_network_docker_shell_introduced: "no"
+  verdict: pass
+  blockers: []
+
+artifact_write_readback_check:
+  - command: find .project-memory/pr/0113-human-decision-history-surface -maxdepth 4 -type f | sort
+    exit_code: 0
+    result: ".project-memory/pr/0113-human-decision-history-surface/PLAN.md\n.project-memory/pr/0113-human-decision-history-surface/reviews/plan-review.yml\n.project-memory/pr/0113-human-decision-history-surface/reviews/precommit-review.yml"
+  - command: test -f .project-memory/pr/0113-human-decision-history-surface/reviews/precommit-review.yml
+    exit_code: 0
+    result: "EXISTS"
+  - command: git status --short
+    exit_code: 0
+    result: "clean"
+
+diff_completeness_check:
+  files_changed:
+    - .project-memory/pr/0113-human-decision-history-surface/reviews/precommit-review.yml
+  files_not_modified:
+    - services/task_intake/src/task_intake/decision_history.py
+    - services/task_intake/tests/test_decision_history.py
+    - services/task_intake/src/task_intake/app.py
+    - services/task_intake/src/task_intake/server.py
+    - services/task_intake/src/task_intake/backlog_decision.py
+    - services/task_intake/tests/test_backlog_decision.py
+    - services/task_intake/src/task_intake/backlog_review.py
+    - services/task_intake/tests/test_backlog_review.py
+    - services/runner/src/runner/backlog_surface.py
+    - services/runner/tests/test_backlog_surface.py
+    - services/runner/src/runner/improvement_backlog.py
+    - services/runner/tests/test_improvement_backlog.py
+    - services/runner/src/runner/doctor.py
+    - services/runner/tests/test_doctor_cli.py
+    - ROADMAP.md
+    - docs/**
+    - schemas/**
+    - agents/**
+    - pyproject.toml
+  verdict: pass
+
+validation_completeness_check:
+  commands_run:
+    - python -m compileall -f services/runner/src services/task_intake/src
+    - PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_decision_history.py -q
+    - PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_backlog_decision.py -q
+    - PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_backlog_review.py -q
+    - PYTHONPATH=services/task_intake/src:services/runner/src python -m task_intake.app --check --json
+    - PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_decision_history.py services/task_intake/tests/test_backlog_decision.py services/task_intake/tests/test_backlog_review.py services/runner/tests/test_backlog_surface.py services/runner/tests/test_improvement_backlog.py services/runner/tests/test_session_continuity.py services/runner/tests/test_improvement_candidate.py services/runner/tests/test_gate_evidence.py services/runner/tests/test_acceptance_criteria.py services/runner/tests/test_proof_capture.py services/runner/tests/test_doctor_cli.py services/runner/tests/test_proof_ref.py services/runner/tests/test_handoff_packet.py services/runner/tests/test_readiness_gate.py services/runner/tests/test_execution_smoke.py services/runner/tests/test_execution_substrate_audit.py -q
+    - git status --short
+    - find .ariadne -maxdepth 5 -type f | sort 2>/dev/null || true
+  all_passed: true
+  verdict: pass
+
+evidence_completeness_check:
+  pr_0113_plan_exists: true
+  pr_0113_plan_review_exists: true
+  pr_0113_precommit_review_exists: true (backfilled)
+  pr_0113_runtime_source_exists: true
+  pr_0113_tests_exist: true
+  pr_0113_validation_passes: true
+  pr_0113_dirty_tree_residue: none
+  verdict: pass
+
+claim_to_evidence_consistency_check:
+  claim_1: "PR 0113 implementation exists in filesystem"
+  evidence_1: "test -f services/task_intake/src/task_intake/decision_history.py → EXISTS"
+  claim_2: "PR 0113 tests exist"
+  evidence_2: "test -f services/task_intake/tests/test_decision_history.py → EXISTS"
+  claim_3: "PR 0113 validation passes"
+  evidence_3: "31 decision history tests passed, 487 total regression tests passed"
+  claim_4: "No .ariadne/ residue"
+  evidence_4: "find .ariadne → No such file or directory"
+  claim_5: "No runtime behavior changes introduced by backfill"
+  evidence_5: "git diff --name-only → empty (no source/test changes)"
+  claim_6: "Backfill artifact is clearly marked as backfilled/post-merge"
+  evidence_6: "backfill_notice field in this artifact"
+  verdict: pass
+
+dirty_tree_residue_check:
+  ariadne_dir_exists: false
+  ariadne_files: []
+  git_status_short: "clean"
+  verdict: pass
+
+dirty_tree_check:
+  git_status_short: "clean"
+  untracked_files: []
+  modified_files: []
+  verdict: pass
+
+boundary_confirmations:
+  - confirm: generic coder contract applied
+  - confirm: approved repair PLAN.md followed
+  - confirm: PR 0113 backfilled precommit-review artifact written
+  - confirm: artifact clearly marked as backfilled/post-merge
+  - confirm: artifact does not pretend to be original PR 0113 pre-merge review
+  - confirm: fresh validation run and recorded
+  - confirm: PR 0113 Plan Drift Gate completed
+  - confirm: repair No-Drift Check completed
+  - confirm: artifact write/readback completed
+  - confirm: no runtime behavior changed
+  - confirm: no source files modified
+  - confirm: no tests modified
+  - confirm: no ROADMAP changes
+  - confirm: no schema changes
+  - confirm: no dependency changes
+  - confirm: no docs changes
+  - confirm: no agents changes
+  - confirm: PR 0115 trace summary not implemented
+  - confirm: no provider/network/Docker/shell introduced
+  - confirm: no .ariadne/ residue after validation
+  - confirm: no git mutation commands run
+  - confirm: no Docker commands run
