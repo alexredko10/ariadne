@@ -1,0 +1,111 @@
+schema_version: 1
+pr_id: "0115-decision-backlog-trace-summary"
+review_type: plan-review
+reviewer: plan-review
+timestamp: "2026-07-03T13:35:04Z"
+verdict: warning
+snapshot_delta:
+  head: 22c339dc2782ff6bd8fc3dfb1ae1db08f078f8af
+  git_status_short: "?? .project-memory/pr/0115-decision-backlog-trace-summary/"
+scope:
+  plan_path: .project-memory/pr/0115-decision-backlog-trace-summary/PLAN.md
+  review_path: .project-memory/pr/0115-decision-backlog-trace-summary/reviews/plan-review.yml
+files_checked:
+  - .project-memory/pr/0115-decision-backlog-trace-summary/PLAN.md
+  - .project-memory/pr/0115-decision-backlog-trace-summary/reviews/plan-review.yml
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - .project-memory/review-artifact.schema.yml
+  - ROADMAP.md
+  - docs/adr/0011-pr-batching-and-roadmap-discipline.md
+  - docs/adr/0010-runner-execution-contract-boundary.md
+  - .project-memory/pr/0114-pr0113-precommit-evidence-backfill/PLAN.md
+  - .project-memory/pr/0114-pr0113-precommit-evidence-backfill/reviews/plan-review.yml
+  - .project-memory/pr/0114-pr0113-precommit-evidence-backfill/reviews/precommit-review.yml
+  - .project-memory/pr/0113-human-decision-history-surface/PLAN.md
+  - .project-memory/pr/0113-human-decision-history-surface/reviews/plan-review.yml
+  - .project-memory/pr/0113-human-decision-history-surface/reviews/precommit-review.yml
+  - .project-memory/pr/0112-human-backlog-decision-intake/PLAN.md
+  - .project-memory/pr/0112-human-backlog-decision-intake/reviews/precommit-review.yml
+  - .project-memory/pr/0111-local-human-review-backlog-view/PLAN.md
+  - .project-memory/pr/0111-local-human-review-backlog-view/reviews/precommit-review.yml
+  - .project-memory/pr/0110-read-only-self-improvement-backlog-surfacing/PLAN.md
+  - .project-memory/pr/0110-read-only-self-improvement-backlog-surfacing/reviews/precommit-review.yml
+  - .project-memory/pr/0109-self-improvement-backlog-store-local-queue/PLAN.md
+  - .project-memory/pr/0109-self-improvement-backlog-store-local-queue/reviews/precommit-review.yml
+  - services/task_intake/src/task_intake/decision_history.py
+  - services/task_intake/tests/test_decision_history.py
+  - services/task_intake/src/task_intake/backlog_decision.py
+  - services/task_intake/tests/test_backlog_decision.py
+  - services/task_intake/src/task_intake/backlog_review.py
+  - services/task_intake/tests/test_backlog_review.py
+  - services/task_intake/src/task_intake/app.py
+  - services/task_intake/src/task_intake/server.py
+  - services/runner/src/runner/backlog_surface.py
+  - services/runner/tests/test_backlog_surface.py
+validation:
+  - command: git rev-parse --verify HEAD
+    result: 22c339dc2782ff6bd8fc3dfb1ae1db08f078f8af
+  - command: git branch --show-current
+    result: 0115-decision-backlog-trace-summary
+  - command: git status --short
+    result: "?? .project-memory/pr/0115-decision-backlog-trace-summary/"
+  - command: find .project-memory/pr/0115-decision-backlog-trace-summary -maxdepth 4 -type f | sort
+    result: ".project-memory/pr/0115-decision-backlog-trace-summary/PLAN.md\n.project-memory/pr/0115-decision-backlog-trace-summary/reviews/plan-review.yml"
+  - command: test -f .project-memory/pr/0115-decision-backlog-trace-summary/reviews/plan-review.yml
+    result: "exit 0"
+  - command: find .project-memory/pr/0114-pr0113-precommit-evidence-backfill -maxdepth 4 -type f | sort
+    result: ".project-memory/pr/0114-pr0113-precommit-evidence-backfill/PLAN.md\n.project-memory/pr/0114-pr0113-precommit-evidence-backfill/reviews/plan-review.yml\n.project-memory/pr/0114-pr0113-precommit-evidence-backfill/reviews/precommit-review.yml"
+  - command: find .project-memory/pr/0113-human-decision-history-surface -maxdepth 4 -type f | sort
+    result: ".project-memory/pr/0113-human-decision-history-surface/PLAN.md\n.project-memory/pr/0113-human-decision-history-surface/reviews/plan-review.yml\n.project-memory/pr/0113-human-decision-history-surface/reviews/precommit-review.yml"
+  - command: find .ariadne -maxdepth 5 -type f | sort 2>/dev/null || true
+    result: "no output"
+  - command: date -u +%Y-%m-%dT%H:%M:%SZ
+    result: "2026-07-03T13:35:04Z"
+blockers: []
+warnings:
+  - The plan is executable-first and read-only, but the trace summary is only partially evidenced as a runtime object because the review cannot independently verify deterministic ordering and residue cleanup without executing the planned tests.
+  - The plan composes existing runtime objects rather than introducing new authority, which is acceptable, but the review cannot confirm any future frontend follow-up because no frontend repository evidence was required or read.
+  - The PR 0115 directory is an allowed planning dirty-tree state because `find` shows only PLAN.md and the review artifact.
+decisions_made:
+  - The plan remains acceptable with warnings only.
+  - The plan is not docs-only, schemas-only, review-artifact-only, packaging-only, or frontend-only.
+  - The plan composes PR 0109 through PR 0114 runtime objects.
+  - The plan rejects new authority, mutation, decision execution, scoring/ranking, gate approval/finalization, autonomous repair, provider calls, shell execution, network, Docker, schema changes, dependency changes, roadmap changes, and hidden reasoning.
+  - The plan defers autonomous repair, source code edits, commits/push/PR creation, proof evaluation, gate approval/finalization, backlog lifecycle mutation, decision record mutation, decision execution, scoring/ranking/authority, benchmark runner, model switching, provider calls, and external capability integration.
+context_used:
+  files_modified:
+    - .project-memory/pr/0115-decision-backlog-trace-summary/reviews/plan-review.yml
+  files_read:
+    - .project-memory/pr/0115-decision-backlog-trace-summary/PLAN.md
+    - .project-memory/pr/0115-decision-backlog-trace-summary/reviews/plan-review.yml
+    - .project-memory/post-0100/strategic-direction/agent-manifest.md
+    - .project-memory/review-artifact.schema.yml
+    - ROADMAP.md
+    - docs/adr/0011-pr-batching-and-roadmap-discipline.md
+    - docs/adr/0010-runner-execution-contract-boundary.md
+    - .project-memory/pr/0114-pr0113-precommit-evidence-backfill/PLAN.md
+    - .project-memory/pr/0114-pr0113-precommit-evidence-backfill/reviews/plan-review.yml
+    - .project-memory/pr/0114-pr0113-precommit-evidence-backfill/reviews/precommit-review.yml
+    - .project-memory/pr/0113-human-decision-history-surface/PLAN.md
+    - .project-memory/pr/0113-human-decision-history-surface/reviews/plan-review.yml
+    - .project-memory/pr/0113-human-decision-history-surface/reviews/precommit-review.yml
+    - .project-memory/pr/0112-human-backlog-decision-intake/PLAN.md
+    - .project-memory/pr/0112-human-backlog-decision-intake/reviews/precommit-review.yml
+    - .project-memory/pr/0111-local-human-review-backlog-view/PLAN.md
+    - .project-memory/pr/0111-local-human-review-backlog-view/reviews/precommit-review.yml
+    - .project-memory/pr/0110-read-only-self-improvement-backlog-surfacing/PLAN.md
+    - .project-memory/pr/0110-read-only-self-improvement-backlog-surfacing/reviews/precommit-review.yml
+    - .project-memory/pr/0109-self-improvement-backlog-store-local-queue/PLAN.md
+    - .project-memory/pr/0109-self-improvement-backlog-store-local-queue/reviews/precommit-review.yml
+    - services/task_intake/src/task_intake/decision_history.py
+    - services/task_intake/tests/test_decision_history.py
+    - services/task_intake/src/task_intake/backlog_decision.py
+    - services/task_intake/tests/test_backlog_decision.py
+    - services/task_intake/src/task_intake/backlog_review.py
+    - services/task_intake/tests/test_backlog_review.py
+    - services/task_intake/src/task_intake/app.py
+    - services/task_intake/src/task_intake/server.py
+    - services/runner/src/runner/backlog_surface.py
+    - services/runner/tests/test_backlog_surface.py
+  files_written:
+    - .project-memory/pr/0115-decision-backlog-trace-summary/reviews/plan-review.yml
