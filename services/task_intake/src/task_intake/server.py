@@ -14,6 +14,7 @@ from task_intake.app import accept_task
 from task_intake.backlog_decision import BacklogDecisionInput, record_human_decision
 from task_intake.backlog_review import BacklogReviewInput, build_backlog_review_json
 from task_intake.decision_history import DecisionHistoryInput, load_decision_history
+from task_intake.decision_backlog_trace_summary import DecisionTraceInput, build_decision_trace
 from task_intake.doctor import doctor
 from task_intake.models import TaskIntakeRequest
 from task_intake.normalize import normalize_task_intake
@@ -553,6 +554,130 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
                     "status": "empty",
                     "view": None,
                 }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        return
+
+    if method == "GET" and path == "/backlog/decision/trace":
+        # Parse query parameters
+        query_string = scope.get("query_string", b"").decode("utf-8")
+        params = parse_qs(query_string)
+        max_traces_str = params.get("max_traces", ["50"])[0]
+        try:
+            max_traces = int(max_traces_str)
+        except (ValueError, TypeError):
+            max_traces = 50
+        backlog_item_ref = params.get("backlog_item_ref", [None])[0]
+        include_without_decisions_str = params.get("include_backlog_items_without_decisions", ["false"])[0]
+        include_without_decisions = include_without_decisions_str.lower() in ("true", "1", "yes")
+        sort_by = params.get("sort_by", ["backlog_item_ref"])[0]
+        sort_descending_str = params.get("sort_descending", ["false"])[0]
+        sort_descending = sort_descending_str.lower() in ("true", "1", "yes")
+
+        inp = DecisionTraceInput(
+            max_traces=max_traces,
+            backlog_item_ref=backlog_item_ref,
+            include_backlog_items_without_decisions=include_without_decisions,
+            sort_by=sort_by,
+            sort_descending=sort_descending,
+        )
+        result = build_decision_trace(inp)
+
+        if result.status == "rejected":
+            body = json.dumps({
+                "status": "rejected",
+                "reason_codes": list(result.reason_codes),
+                "details": result.details,
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        elif result.status == "empty":
+            body = json.dumps({
+                "status": "empty",
+                "traces": [],
+                "untraced_decisions": [],
+                "summary": {
+                    "total_backlog_items": 0,
+                    "traced_backlog_items": 0,
+                    "backlog_items_without_decisions": 0,
+                    "total_decisions": 0,
+                    "decisions_without_backlog_item": 0,
+                    "total_evidence_refs": 0,
+                    "unresolved_traces": 0,
+                    "invalid_decision_records": 0,
+                    "human_review_required": 0,
+                },
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        else:
+            traces_json = []
+            for trace in result.traces:
+                decisions_json = []
+                for d in trace.decisions:
+                    decisions_json.append({
+                        "decision_ref": d.decision_ref,
+                        "decision_type": d.decision_type,
+                        "decision_reason": d.decision_reason,
+                        "human_actor": d.human_actor,
+                        "created_at": d.created_at,
+                        "evidence_refs": list(d.evidence_refs),
+                        "next_human_action": d.next_human_action,
+                        "blocked_agent_actions": list(d.blocked_agent_actions),
+                        "source_surface": d.source_surface,
+                        "requires_human_review": d.requires_human_review,
+                    })
+                traces_json.append({
+                    "backlog_item": {
+                        "backlog_item_ref": trace.backlog_item.backlog_item_ref,
+                        "backlog_status": trace.backlog_item.backlog_status,
+                        "backlog_category": trace.backlog_item.backlog_category,
+                        "candidate_ref": trace.backlog_item.candidate_ref,
+                        "continuity_ref": trace.backlog_item.continuity_ref,
+                    },
+                    "decisions": decisions_json,
+                    "decision_refs": list(trace.decision_refs),
+                    "latest_decision_ref": trace.latest_decision_ref,
+                    "latest_decision_type": trace.latest_decision_type,
+                    "evidence_refs": list(trace.evidence_refs),
+                    "missing_evidence_refs": list(trace.missing_evidence_refs),
+                    "blocked_agent_actions": list(trace.blocked_agent_actions),
+                    "next_safe_human_action": trace.next_safe_human_action,
+                    "trace_status": trace.trace_status,
+                    "trace_warnings": list(trace.trace_warnings),
+                    "requires_human_review": trace.requires_human_review,
+                })
+
+            untraced_json = []
+            for d in result.untraced_decisions:
+                untraced_json.append({
+                    "decision_ref": d.decision_ref,
+                    "decision_type": d.decision_type,
+                    "decision_reason": d.decision_reason,
+                    "human_actor": d.human_actor,
+                    "created_at": d.created_at,
+                    "evidence_refs": list(d.evidence_refs),
+                    "next_human_action": d.next_human_action,
+                    "blocked_agent_actions": list(d.blocked_agent_actions),
+                    "source_surface": d.source_surface,
+                    "requires_human_review": d.requires_human_review,
+                })
+
+            summary = result.summary
+            body = json.dumps({
+                "status": result.status,
+                "reason_codes": list(result.reason_codes) if result.reason_codes else [],
+                "traces": traces_json,
+                "untraced_decisions": untraced_json,
+                "summary": {
+                    "total_backlog_items": summary.total_backlog_items if summary else 0,
+                    "traced_backlog_items": summary.traced_backlog_items if summary else 0,
+                    "backlog_items_without_decisions": summary.backlog_items_without_decisions if summary else 0,
+                    "total_decisions": summary.total_decisions if summary else 0,
+                    "decisions_without_backlog_item": summary.decisions_without_backlog_item if summary else 0,
+                    "total_evidence_refs": summary.total_evidence_refs if summary else 0,
+                    "unresolved_traces": summary.unresolved_traces if summary else 0,
+                    "invalid_decision_records": summary.invalid_decision_records if summary else 0,
+                    "human_review_required": summary.human_review_required if summary else 0,
+                },
+            }, ensure_ascii=False).encode("utf-8")
             await _send_json(send, 200, body)
         return
 

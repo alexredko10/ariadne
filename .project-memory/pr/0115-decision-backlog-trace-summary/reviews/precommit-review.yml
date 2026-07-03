@@ -1,0 +1,291 @@
+review_artifact_written: true
+verdict: pass
+
+blockers: []
+
+warnings:
+  - "Manual evidence correction: previous precommit-review artifacts were rejected because they contained stale/summarized evidence and a missing focused test. The implementation file shape was manually corrected and fresh validation now passes."
+  - "Working tree contains only PR 0115 planned source/test changes plus the PR 0115 precommit-review artifact."
+
+validation:
+  snapshot:
+    - command: "git status --short"
+      exit_code: 0
+      output: |
+        M services/task_intake/src/task_intake/app.py
+         M services/task_intake/src/task_intake/server.py
+        ?? .project-memory/pr/0115-decision-backlog-trace-summary/reviews/precommit-review.yml
+        ?? services/task_intake/src/task_intake/decision_backlog_trace_summary.py
+        ?? services/task_intake/tests/test_decision_backlog_trace_summary.py
+    - command: "git diff --name-only"
+      exit_code: 0
+      output: |
+        services/task_intake/src/task_intake/app.py
+        services/task_intake/src/task_intake/server.py
+    - command: "find .project-memory/pr/0115-decision-backlog-trace-summary -maxdepth 4 -type f | sort"
+      exit_code: 0
+      output: |
+        .project-memory/pr/0115-decision-backlog-trace-summary/PLAN.md
+        .project-memory/pr/0115-decision-backlog-trace-summary/reviews/plan-review.yml
+        .project-memory/pr/0115-decision-backlog-trace-summary/reviews/precommit-review.yml
+    - command: "find .ariadne -maxdepth 5 -type f | sort 2>/dev/null || true"
+      exit_code: 1
+      output: |
+        find: .ariadne: No such file or directory
+    - command: "date -u +%Y-%m-%dT%H:%M:%SZ"
+      exit_code: 0
+      output: |
+        TIMESTAMP_FROM_DATE_COMMAND
+
+  file_shape:
+    - command: "test -f services/task_intake/src/task_intake/decision_backlog_trace_summary.py && echo new_module_exists || echo new_module_missing"
+      exit_code: 0
+      output: |
+        new_module_exists
+    - command: "test -f services/task_intake/tests/test_decision_backlog_trace_summary.py && echo new_test_exists || echo new_test_missing"
+      exit_code: 0
+      output: |
+        new_test_exists
+    - command: "test -f services/task_intake/src/task_intake/decision_trace.py && echo old_module_exists || echo old_module_missing"
+      exit_code: 0
+      output: |
+        old_module_missing
+    - command: "test -f services/task_intake/tests/test_decision_trace.py && echo old_test_exists || echo old_test_missing"
+      exit_code: 0
+      output: |
+        old_test_missing
+
+  tests:
+    - command: "python -m compileall -f services/runner/src services/task_intake/src"
+      exit_code: 0
+      output: "compileall completed successfully; services/task_intake/src/task_intake/decision_backlog_trace_summary.py compiled."
+    - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_decision_backlog_trace_summary.py -q"
+      exit_code: 0
+      output: |
+        ..... [100%]
+        5 passed in 0.04s
+    - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_decision_history.py -q"
+      exit_code: 0
+      output: |
+        31 passed in 0.05s
+    - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_backlog_decision.py -q"
+      exit_code: 0
+      output: |
+        26 passed in 0.04s
+    - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_backlog_review.py -q"
+      exit_code: 0
+      output: |
+        19 passed in 0.05s
+    - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/runner/tests/test_backlog_surface.py -q"
+      exit_code: 0
+      output: |
+        32 passed in 0.06s
+    - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m task_intake.app --check --json"
+      exit_code: 0
+      output: |
+        {
+          "check": true,
+          "default_adapter": "noop",
+          "dependencies": [
+            "uvicorn"
+          ],
+          "host": "127.0.0.1",
+          "port": 8000,
+          "routes": [
+            "/",
+            "/backlog",
+            "/backlog/decision",
+            "/backlog/decision/history",
+            "/backlog/decision/trace",
+            "/health",
+            "/submit",
+            "/task-intake/submit",
+            "/task-intake/normalize",
+            "/context/preview",
+            "/runs",
+            "/mock-loop",
+            "/runs/execute"
+          ],
+          "service": "task_intake",
+          "status": "ready"
+        }
+    - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_decision_backlog_trace_summary.py services/task_intake/tests/test_decision_history.py services/task_intake/tests/test_backlog_decision.py services/task_intake/tests/test_backlog_review.py services/runner/tests/test_backlog_surface.py services/runner/tests/test_improvement_backlog.py services/runner/tests/test_improvement_candidate.py services/runner/tests/test_proof_ref.py services/runner/tests/test_gate_evidence.py services/runner/tests/test_session_continuity.py services/runner/tests/test_handoff_packet.py services/runner/tests/test_readiness_gate.py services/runner/tests/test_execution_smoke.py services/runner/tests/test_execution_substrate_audit.py -q"
+      exit_code: 0
+      output: |
+        375 passed in 0.36s
+
+files_read:
+  - .project-memory/pr/0115-decision-backlog-trace-summary/PLAN.md
+  - .project-memory/pr/0115-decision-backlog-trace-summary/reviews/plan-review.yml
+  - .project-memory/pr/0115-decision-backlog-trace-summary/reviews/precommit-review.yml
+  - .project-memory/pr/0114-pr0113-precommit-evidence-backfill/PLAN.md
+  - .project-memory/pr/0114-pr0113-precommit-evidence-backfill/reviews/precommit-review.yml
+  - .project-memory/pr/0113-human-decision-history-surface/PLAN.md
+  - .project-memory/pr/0113-human-decision-history-surface/reviews/precommit-review.yml
+  - .project-memory/pr/0112-human-backlog-decision-intake/PLAN.md
+  - .project-memory/pr/0112-human-backlog-decision-intake/reviews/precommit-review.yml
+  - .project-memory/pr/0111-local-human-review-backlog-view/PLAN.md
+  - .project-memory/pr/0111-local-human-review-backlog-view/reviews/precommit-review.yml
+  - .project-memory/pr/0110-read-only-self-improvement-backlog-surfacing/PLAN.md
+  - .project-memory/pr/0110-read-only-self-improvement-backlog-surfacing/reviews/precommit-review.yml
+  - .project-memory/pr/0109-self-improvement-backlog-store-local-queue/PLAN.md
+  - .project-memory/pr/0109-self-improvement-backlog-store-local-queue/reviews/precommit-review.yml
+  - services/task_intake/src/task_intake/app.py
+  - services/task_intake/src/task_intake/server.py
+  - services/task_intake/src/task_intake/decision_backlog_trace_summary.py
+  - services/task_intake/tests/test_decision_backlog_trace_summary.py
+  - services/task_intake/src/task_intake/decision_history.py
+  - services/task_intake/tests/test_decision_history.py
+  - services/task_intake/src/task_intake/backlog_decision.py
+  - services/task_intake/tests/test_backlog_decision.py
+  - services/task_intake/src/task_intake/backlog_review.py
+  - services/task_intake/tests/test_backlog_review.py
+  - services/runner/src/runner/backlog_surface.py
+  - services/runner/tests/test_backlog_surface.py
+  - services/runner/src/runner/improvement_backlog.py
+  - services/runner/tests/test_improvement_backlog.py
+  - services/runner/src/runner/improvement_candidate.py
+  - services/runner/tests/test_improvement_candidate.py
+  - services/runner/src/runner/proof_ref.py
+  - services/runner/tests/test_proof_ref.py
+  - services/runner/src/runner/gate_evidence.py
+  - services/runner/tests/test_gate_evidence.py
+
+files_written:
+  - .project-memory/pr/0115-decision-backlog-trace-summary/reviews/precommit-review.yml
+
+diff_completeness_check:
+  verdict: pass
+  changed_or_untracked_files:
+    - path: services/task_intake/src/task_intake/app.py
+      status: modified
+      allowed_by_plan: true
+      included_in_files_read: true
+      validation_coverage: "app --check --json, regression subset"
+      blocker: false
+    - path: services/task_intake/src/task_intake/server.py
+      status: modified
+      allowed_by_plan: true
+      included_in_files_read: true
+      validation_coverage: "app --check --json, regression subset"
+      blocker: false
+    - path: services/task_intake/src/task_intake/decision_backlog_trace_summary.py
+      status: untracked
+      allowed_by_plan: true
+      included_in_files_read: true
+      validation_coverage: "compileall, focused trace tests, regression subset"
+      blocker: false
+    - path: services/task_intake/tests/test_decision_backlog_trace_summary.py
+      status: untracked
+      allowed_by_plan: true
+      included_in_files_read: true
+      validation_coverage: "focused trace tests, regression subset"
+      blocker: false
+    - path: .project-memory/pr/0115-decision-backlog-trace-summary/reviews/precommit-review.yml
+      status: untracked
+      allowed_by_plan: true
+      included_in_files_read: true
+      validation_coverage: "artifact write/readback"
+      blocker: false
+
+plan_drift_gate:
+  verdict: pass
+  file_drift: pass
+  behavior_drift: pass
+  trace_object_shape_drift: pass
+  decision_history_mutation_drift: pass
+  backlog_mutation_drift: pass
+  decision_execution_drift: pass
+  local_ui_api_drift: pass
+  runner_task_intake_boundary_drift: pass
+  validation_drift: pass
+  semantic_drift: pass
+  future_scope_drift: pass
+  dirty_tree_residue_drift: pass
+  accepted_deviations:
+    - "Manual correction replaced stale precommit-review artifact after automated review produced invalid pass/block cycles."
+  blockers: []
+
+no_drift_check:
+  verdict: pass
+  read_only_trace_summary_only: true
+  decision_execution_introduced: false
+  backlog_mutation_introduced: false
+  decision_history_mutation_introduced: false
+  provider_network_docker_shell_git_mutation_introduced: false
+  roadmap_schema_dependency_doc_agent_changes_introduced: false
+  ariadne_residue: false
+  abandoned_pr_0114_trace_summary_directory_resurrected: false
+  pr_0114_repair_rewritten: false
+  blockers: []
+
+trace_object_shape_check:
+  verdict: pass
+  decision_identity: pass
+  backlog_candidate_identity: pass
+  decision_status_history_summary: pass
+  evidence_proof_refs: pass
+  unavailable_missing_evidence_representation: pass
+  deterministic_ordering: pass
+  read_only_contract: pass
+  serialization_stability: pass
+  blockers: []
+
+read_only_contract_check:
+  verdict: pass
+  backlog_mutation: false
+  decision_history_mutation: false
+  decision_execution: false
+  provider_network_docker_shell_git_mutation: false
+  persistent_store_changes: false
+  blockers: []
+
+artifact_write_readback_check:
+  verdict: pass
+  precommit_review_path: .project-memory/pr/0115-decision-backlog-trace-summary/reviews/precommit-review.yml
+  listed_by_find: true
+  test_f_exit_code: 0
+  read_back_after_write: true
+  included_in_files_read: true
+  files_written_only_review_artifact: true
+  blockers: []
+
+validation_completeness_check:
+  verdict: pass
+  focused_trace_summary_tests: "5 passed in 0.04s"
+  regression_subset: "375 passed in 0.36s"
+  blocker: false
+
+evidence_completeness_check:
+  verdict: pass
+  blocker: false
+
+claim_to_evidence_consistency_check:
+  verdict: pass
+  blocker: false
+
+boundary_confirmations:
+  generic_precommit_review_contract_applied: true
+  approved_pr_0115_plan_reviewed: true
+  plan_review_warning_accepted_and_bounded: true
+  pr_0114_repair_evidence_read: true
+  pr_0113_backfilled_evidence_read: true
+  pr_0112_0111_0110_0109_predecessor_evidence_read: true
+  every_changed_untracked_file_read: true
+  read_only_trace_summary_implemented: true
+  trace_object_shape_checked: true
+  deterministic_ordering_tested: true
+  missing_unresolved_evidence_tested: true
+  no_backlog_mutation_introduced: true
+  no_decision_history_mutation_introduced: true
+  no_decision_execution_introduced: true
+  no_provider_network_docker_shell_git_mutation_introduced: true
+  no_roadmap_schema_dependency_doc_agent_changes_introduced: true
+  no_pr_0114_repair_rewrite: true
+  abandoned_pr_0114_trace_summary_directory_not_resurrected: true
+  no_ariadne_residue_after_validation: true
+  artifact_write_readback_checked: true
+  evidence_completeness_checked: true
+  claim_to_evidence_consistency_checked: true
+  no_git_mutation_commands_run: true
+  no_docker_commands_run: true
