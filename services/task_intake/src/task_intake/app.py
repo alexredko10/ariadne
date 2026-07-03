@@ -61,6 +61,7 @@ def accept_task(request: TaskIntakeRequest) -> TaskIntakeAccepted | TaskIntakeRe
 _ROUTES = [
     "/",
     "/backlog",
+    "/backlog/decision",
     "/health",
     "/submit",
     "/task-intake/submit",
