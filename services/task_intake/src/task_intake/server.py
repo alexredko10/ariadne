@@ -11,6 +11,7 @@ import json
 from urllib.parse import parse_qs
 
 from task_intake.app import accept_task
+from task_intake.backlog_review import BacklogReviewInput, build_backlog_review_json
 from task_intake.doctor import doctor
 from task_intake.models import TaskIntakeRequest
 from task_intake.normalize import normalize_task_intake
@@ -299,6 +300,76 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
         else:
             body = json.dumps(result, ensure_ascii=False).encode("utf-8")
             await _send_json(send, 400, body)
+        return
+
+    if method == "GET" and path == "/backlog":
+        # Parse query parameters
+        query_string = scope.get("query_string", b"").decode("utf-8")
+        params = parse_qs(query_string)
+        status_filter = params.get("status", [None])[0]
+        category_filter = params.get("category", [None])[0]
+        max_items_str = params.get("max_items", ["0"])[0]
+        try:
+            max_items = int(max_items_str)
+        except (ValueError, TypeError):
+            max_items = 0
+
+        inp = BacklogReviewInput(
+            status_filter=status_filter,
+            category_filter=category_filter,
+            max_items=max_items,
+        )
+        result = build_backlog_review_json(inp)
+        body = json.dumps(result, ensure_ascii=False).encode("utf-8")
+        await _send_json(send, 200, body)
+        return
+
+    if method == "POST" and path == "/backlog":
+        # Read body
+        body_bytes = b""
+        more_body = True
+        while more_body:
+            event = await receive()
+            if event["type"] == "http.request":
+                body_bytes += event.get("body", b"")
+                more_body = event.get("more_body", False)
+
+        # Parse JSON body for optional filter overrides
+        try:
+            data = json.loads(body_bytes) if body_bytes else {}
+        except json.JSONDecodeError:
+            await _send_json(
+                send, 400,
+                json.dumps({
+                    "status": "rejected",
+                    "read_only": True,
+                    "reason_codes": ["invalid_json_body"],
+                    "details": "Invalid JSON body.",
+                }, ensure_ascii=False).encode("utf-8"),
+            )
+            return
+
+        if not isinstance(data, dict):
+            await _send_json(
+                send, 400,
+                json.dumps({
+                    "status": "rejected",
+                    "read_only": True,
+                    "reason_codes": ["invalid_json_body"],
+                    "details": "Body must be a JSON object.",
+                }, ensure_ascii=False).encode("utf-8"),
+            )
+            return
+
+        inp = BacklogReviewInput(
+            backlog_store_dir=data.get("backlog_store_dir", ".ariadne/backlog"),
+            status_filter=data.get("status_filter"),
+            category_filter=data.get("category_filter"),
+            max_items=data.get("max_items", 0),
+        )
+        result = build_backlog_review_json(inp)
+        body = json.dumps(result, ensure_ascii=False).encode("utf-8")
+        await _send_json(send, 200, body)
         return
 
     if method == "GET" and path == "/":

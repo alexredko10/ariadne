@@ -1,0 +1,67 @@
+schema_version: 1
+pr_id: "0111-local-human-review-backlog-view"
+review_type: plan-review
+reviewer: plan-review
+timestamp: "2026-07-01T22:18:00Z"
+verdict: warning
+snapshot_delta:
+  head: 5659c1eef50f8e2cc606561ae4f80e39c52eb566
+  git_status_short: "?? .project-memory/pr/0111-local-human-review-backlog-view/"
+scope:
+  plan_path: .project-memory/pr/0111-local-human-review-backlog-view/PLAN.md
+  review_path: .project-memory/pr/0111-local-human-review-backlog-view/reviews/plan-review.yml
+files_checked:
+  - .project-memory/pr/0111-local-human-review-backlog-view/PLAN.md
+  - .project-memory/pr/0111-local-human-review-backlog-view/reviews/plan-review.yml
+  - .project-memory/pr/0110-read-only-backlog-surfacing/PLAN.md
+  - .project-memory/pr/0110-read-only-backlog-surfacing/reviews/precommit-review.yml
+  - services/runner/src/runner/backlog_surface.py
+  - services/runner/tests/test_backlog_surface.py
+  - services/runner/src/runner/doctor.py
+  - services/runner/tests/test_doctor_cli.py
+  - services/task_intake/src/task_intake/app.py
+  - services/task_intake/src/task_intake/execution_handoff.py
+validation:
+  - command: git rev-parse --verify HEAD
+    result: 5659c1eef50f8e2cc606561ae4f80e39c52eb566
+  - command: git branch --show-current
+    result: 0111-local-human-review-backlog-view
+  - command: git status --short
+    result: "?? .project-memory/pr/0111-local-human-review-backlog-view/"
+  - command: git diff --name-only
+    result: ""
+  - command: find .project-memory/pr/0111-local-human-review-backlog-view -maxdepth 4 -type f | sort
+    result: ".project-memory/pr/0111-local-human-review-backlog-view/PLAN.md\n.project-memory/pr/0111-local-human-review-backlog-view/reviews/plan-review.yml"
+  - command: find .project-memory/pr/0110-read-only-backlog-surfacing -maxdepth 4 -type f | sort
+    result: ".project-memory/pr/0110-read-only-backlog-surfacing/PLAN.md\n.project-memory/pr/0110-read-only-backlog-surfacing/reviews/precommit-review.yml\n.project-memory/pr/0110-read-only-backlog-surfacing/reviews/plan-review.yml"
+  - command: test -f .project-memory/pr/0110-read-only-backlog-surfacing/reviews/precommit-review.yml
+    result: "exit 0"
+  - command: grep -R -n "VERDICT:|PLAN DRIFT GATE|379 passed|task_intake|ready|backlog_surface|.ariadne" .project-memory/pr/0110-read-only-backlog-surfacing/reviews/precommit-review.yml services/runner/src/runner/backlog_surface.py services/runner/tests/test_backlog_surface.py 2>/dev/null || true
+    result: "matches found in .project-memory/pr/0110-read-only-backlog-surfacing/reviews/precommit-review.yml only"
+  - command: date -u +%Y-%m-%dT%H:%M:%SZ
+    result: "2026-07-01T22:18:00Z"
+blockers: []
+warnings:
+  - The PR 0111 plan remains executable-first and human-facing.
+  - The PR 0111 directory itself contains only PLAN.md and the review artifact.
+decisions_made:
+  - The incorrect PR 0100 predecessor path typo was removed from the artifact logic.
+  - The correct PR 0110 precommit-review artifact exists and was read from the fresh snapshot.
+  - PR 0110 predecessor evidence is established from the required precommit-review artifact and the requested source/test reads.
+  - The verdict remains warning with empty blockers.
+context_used:
+  files_modified:
+    - .project-memory/pr/0111-local-human-review-backlog-view/reviews/plan-review.yml
+  files_read:
+    - .project-memory/pr/0111-local-human-review-backlog-view/PLAN.md
+    - .project-memory/pr/0111-local-human-review-backlog-view/reviews/plan-review.yml
+    - .project-memory/pr/0110-read-only-backlog-surfacing/PLAN.md
+    - .project-memory/pr/0110-read-only-backlog-surfacing/reviews/precommit-review.yml
+    - services/runner/src/runner/backlog_surface.py
+    - services/runner/tests/test_backlog_surface.py
+    - services/runner/src/runner/doctor.py
+    - services/runner/tests/test_doctor_cli.py
+    - services/task_intake/src/task_intake/app.py
+    - services/task_intake/src/task_intake/execution_handoff.py
+  files_written:
+    - .project-memory/pr/0111-local-human-review-backlog-view/reviews/plan-review.yml
