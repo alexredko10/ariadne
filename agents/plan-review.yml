@@ -662,8 +662,8 @@ permissions:
     - "create_directory"
 
     # Artifact write permission: plan-review artifact only.
-    - "write_file:path=.project-memory/pr/*/reviews/plan-review.yml"
-    - "edit_file:path=.project-memory/pr/*/reviews/plan-review.yml"
+    - "write_file:.project-memory/pr/*/reviews/plan-review.yml"
+    - "edit_file:.project-memory/pr/*/reviews/plan-review.yml"
 
     # Git read-only introspection.
     - "shell:cmd=git status*"
