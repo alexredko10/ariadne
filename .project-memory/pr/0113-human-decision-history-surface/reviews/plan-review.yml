@@ -1,0 +1,97 @@
+schema_version: 1
+pr_id: "0113-human-decision-history-surface"
+review_type: plan-review
+reviewer: plan-review
+timestamp: "2026-07-01T22:26:00Z"
+verdict: warning
+snapshot_delta:
+  head: 5659c1eef50f8e2cc606561ae4f80e39c52eb566
+  git_status_short: "?? .project-memory/pr/0113-human-decision-history-surface/"
+scope:
+  plan_path: .project-memory/pr/0113-human-decision-history-surface/PLAN.md
+  review_path: .project-memory/pr/0113-human-decision-history-surface/reviews/plan-review.yml
+files_checked:
+  - .project-memory/pr/0113-human-decision-history-surface/PLAN.md
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - .project-memory/review-artifact.schema.yml
+  - ROADMAP.md
+  - docs/adr/0011-pr-batching-and-roadmap-discipline.md
+  - docs/adr/0010-runner-execution-contract-boundary.md
+  - .project-memory/pr/0109-self-improvement-backlog-store/PLAN.md
+  - .project-memory/pr/0109-self-improvement-backlog-store/reviews/precommit-review.yml
+  - .project-memory/pr/0110-read-only-backlog-surfacing/PLAN.md
+  - .project-memory/pr/0110-read-only-backlog-surfacing/reviews/precommit-review.yml
+  - .project-memory/pr/0111-local-human-review-backlog-view/PLAN.md
+  - .project-memory/pr/0111-local-human-review-backlog-view/reviews/precommit-review.yml
+  - .project-memory/pr/0112-human-backlog-decision-intake/PLAN.md
+  - .project-memory/pr/0112-human-backlog-decision-intake/reviews/precommit-review.yml
+  - services/task_intake/src/task_intake/backlog_decision.py
+  - services/task_intake/tests/test_backlog_decision.py
+  - services/task_intake/src/task_intake/backlog_review.py
+  - services/task_intake/tests/test_backlog_review.py
+  - services/task_intake/src/task_intake/app.py
+  - services/task_intake/src/task_intake/server.py
+  - services/runner/src/runner/backlog_surface.py
+  - services/runner/tests/test_backlog_surface.py
+validation:
+  - command: git rev-parse --verify HEAD
+    result: 5659c1eef50f8e2cc606561ae4f80e39c52eb566
+  - command: git branch --show-current
+    result: 0113-human-decision-history-surface
+  - command: git status --short
+    result: "?? .project-memory/pr/0113-human-decision-history-surface/"
+  - command: git diff --name-only
+    result: ""
+  - command: find .project-memory/pr/0113-human-decision-history-surface -maxdepth 4 -type f | sort
+    result: ".project-memory/pr/0113-human-decision-history-surface/PLAN.md\n.project-memory/pr/0113-human-decision-history-surface/reviews/plan-review.yml"
+  - command: find .project-memory/pr/0112-human-backlog-decision-intake -maxdepth 4 -type f | sort
+    result: ".project-memory/pr/0112-human-backlog-decision-intake/PLAN.md\n.project-memory/pr/0112-human-backlog-decision-intake/reviews/plan-review.yml"
+  - command: find services/task_intake -maxdepth 5 -type f | sort 2>/dev/null
+    result: "services/task_intake/src/task_intake/app.py\nservices/task_intake/src/task_intake/backlog_decision.py\nservices/task_intake/src/task_intake/backlog_review.py\nservices/task_intake/src/task_intake/execution_handoff.py\nservices/task_intake/src/task_intake/server.py"
+  - command: find services/runner/src/runner -maxdepth 2 -type f | sort
+    result: "services/runner/src/runner/acceptance_criteria.py\nservices/runner/src/runner/backlog_surface.py\nservices/runner/src/runner/doctor.py\nservices/runner/src/runner/execution_smoke.py\nservices/runner/src/runner/execution_substrate_audit.py\nservices/runner/src/runner/gate_evidence.py\nservices/runner/src/runner/handoff_packet.py\nservices/runner/src/runner/improvement_backlog.py\nservices/runner/src/runner/improvement_candidate.py\nservices/runner/src/runner/proof_capture.py\nservices/runner/src/runner/proof_ref.py\nservices/runner/src/runner/readiness_gate.py\nservices/runner/src/runner/session_continuity.py"
+  - command: find services/runner/tests -maxdepth 1 -type f | sort
+    result: "services/runner/tests/test_acceptance_criteria.py\nservices/runner/tests/test_backlog_surface.py\nservices/runner/tests/test_doctor_cli.py\nservices/runner/tests/test_execution_smoke.py\nservices/runner/tests/test_execution_substrate_audit.py\nservices/runner/tests/test_gate_evidence.py\nservices/runner/tests/test_handoff_packet.py\nservices/runner/tests/test_improvement_backlog.py\nservices/runner/tests/test_improvement_candidate.py\nservices/runner/tests/test_proof_capture.py\nservices/runner/tests/test_proof_ref.py\nservices/runner/tests/test_readiness_gate.py\nservices/runner/tests/test_session_continuity.py"
+  - command: grep -R -n "backlog|decision|history|review|human|surface|task_intake|server|app|mutation|archive|approve|finalize|shell|subprocess|docker|network|requests|urllib|openai|anthropic|PLACEHOLDER" .project-memory/pr/0113-human-decision-history-surface/PLAN.md services/runner services/task_intake 2>/dev/null || true
+    result: "matches found in PLAN.md only"
+  - command: date -u +%Y-%m-%dT%H:%M:%SZ
+    result: "2026-07-01T22:26:00Z"
+blockers: []
+warnings:
+  - The plan is executable-first and read-only, but the decision history surface is only partially evidenced as a runtime object because the review cannot independently verify deterministic ordering and residue cleanup without executing the planned tests.
+  - The plan defers UI surfacing details into task_intake, which is acceptable, but the review cannot confirm any future frontend follow-up because no frontend repository evidence was required or read.
+  - The PR 0113 directory is an allowed planning dirty-tree state because `find` shows only PLAN.md and the review artifact.
+decisions_made:
+  - The PR 0113 plan remains acceptable with warnings only.
+  - The plan is not docs-only, schemas-only, review-artifact-only, packaging-only, or frontend-only.
+  - The plan composes with PR 0109, PR 0110, PR 0111, and PR 0112 runtime objects.
+  - The plan rejects decision record mutation, backlog mutation, archive/accept/reject mutation, gate approval/finalization, autonomous source edits, git mutation, provider/LLM calls, shell execution, user-provided command execution, network, Docker, hidden reasoning, and external URL-only evidence.
+  - The plan defers autonomous repair, source code edits, commits/push/PR creation, proof evaluation, gate approval/finalization, backlog lifecycle mutation, decision execution, benchmark runner, model switching, provider calls, and external capability integration.
+context_used:
+  files_modified:
+    - .project-memory/pr/0113-human-decision-history-surface/reviews/plan-review.yml
+  files_read:
+    - .project-memory/pr/0113-human-decision-history-surface/PLAN.md
+    - .project-memory/post-0100/strategic-direction/agent-manifest.md
+    - .project-memory/review-artifact.schema.yml
+    - ROADMAP.md
+    - docs/adr/0011-pr-batching-and-roadmap-discipline.md
+    - docs/adr/0010-runner-execution-contract-boundary.md
+    - .project-memory/pr/0109-self-improvement-backlog-store/PLAN.md
+    - .project-memory/pr/0109-self-improvement-backlog-store/reviews/precommit-review.yml
+    - .project-memory/pr/0110-read-only-backlog-surfacing/PLAN.md
+    - .project-memory/pr/0110-read-only-backlog-surfacing/reviews/precommit-review.yml
+    - .project-memory/pr/0111-local-human-review-backlog-view/PLAN.md
+    - .project-memory/pr/0111-local-human-review-backlog-view/reviews/precommit-review.yml
+    - .project-memory/pr/0112-human-backlog-decision-intake/PLAN.md
+    - .project-memory/pr/0112-human-backlog-decision-intake/reviews/precommit-review.yml
+    - services/task_intake/src/task_intake/backlog_decision.py
+    - services/task_intake/tests/test_backlog_decision.py
+    - services/task_intake/src/task_intake/backlog_review.py
+    - services/task_intake/tests/test_backlog_review.py
+    - services/task_intake/src/task_intake/app.py
+    - services/task_intake/src/task_intake/server.py
+    - services/runner/src/runner/backlog_surface.py
+    - services/runner/tests/test_backlog_surface.py
+  files_written:
+    - .project-memory/pr/0113-human-decision-history-surface/reviews/plan-review.yml
