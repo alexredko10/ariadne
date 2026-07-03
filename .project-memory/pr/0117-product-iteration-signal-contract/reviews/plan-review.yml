@@ -1,0 +1,82 @@
+schema_version: "0.1"
+pr_id: "0117"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-03T17:58:45Z"
+snapshot_delta:
+  plan_base_sha: "f8258f6d3f27435c529a96d9c92448b0daaa07d1"
+  current_head: "f8258f6d3f27435c529a96d9c92448b0daaa07d1"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0117-product-iteration-signal-contract/PLAN.md"
+    - ".project-memory/pr/0117-product-iteration-signal-contract/reviews/plan-review.yml"
+  actual_files:
+    - ".project-memory/pr/0117-product-iteration-signal-contract/PLAN.md"
+    - ".project-memory/pr/0117-product-iteration-signal-contract/reviews/plan-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0117-product-iteration-signal-contract/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - ".project-memory/pr/0116-pr0115-plan-file-shape-evidence-correction/pr0115-file-shape-note.md"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "f8258f6d3f27435c529a96d9c92448b0daaa07d1"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0117-local-product-iteration-signal-contract"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? .project-memory/pr/0117-local-product-iteration-signals/\n?? .project-memory/pr/0117-product-iteration-signal-contract/"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "<no output>"
+  - command: "find .project-memory/pr/0117-product-iteration-signal-contract -maxdepth 4 -type f | sort"
+    result: "passed"
+    exit_code: 0
+    evidence: ".project-memory/pr/0117-product-iteration-signal-contract/PLAN.md"
+  - command: "grep -R -n \"Roadmap alignment|экран тайм, product, итерации|architect-approved product iteration substrate|ProductIteration|product_iteration.py|test_product_iteration.py|external analytics|decision_trace.py|test_decision_trace.py\" .project-memory/pr/0117-product-iteration-signal-contract ROADMAP.md docs/adr/0011-pr-batching-and-roadmap-discipline.md 2>/dev/null || true"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md includes Roadmap alignment, exact architect sign-off phrase, product_iteration module/tests, external analytics ban, and obsolete-name guards"
+  - command: "find .ariadne -maxdepth 5 -type f | sort 2>/dev/null || true"
+    result: "passed"
+    exit_code: 0
+    evidence: "find: .ariadne: No such file or directory"
+  - command: "date -u +%Y-%m-%dT%H:%M:%SZ"
+    result: "passed"
+    exit_code: 0
+    evidence: "2026-07-03T17:58:45Z"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "approve"
+    reason: "PR 0117 is explicitly framed as an architect-approved product iteration substrate, includes the exact sign-off phrase, defines a backend/store/API/test contract, forbids external analytics and mutation of backlog/decision history, and preserves the obsolete-name guardrails."
+context_used:
+  labels:
+    - "plan-review"
+    - "architect-approved-substrate"
+  memory_files_read:
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0116-pr0115-plan-file-shape-evidence-correction/pr0115-file-shape-note.md"
+  anchors_used: []
+  files_inspected:
+    - ".project-memory/pr/0117-product-iteration-signal-contract/PLAN.md"
+    - "ROADMAP.md"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  files_modified:
+    - ".project-memory/pr/0117-product-iteration-signal-contract/reviews/plan-review.yml"
+  files_intentionally_ignored:
+    - ".project-memory/pr/*/reviews/*.yml"

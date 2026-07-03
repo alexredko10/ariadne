@@ -1,0 +1,100 @@
+schema_version: 1
+pr_id: "0117"
+review_type: precommit-review
+verdict: pass
+reviewer: precommit-review
+timestamp: "2026-07-03T16:52:10Z"
+
+summary: >
+  Correction rerun confirms the previous route inconsistency is fixed.
+  The app check output now lists /product/iterations. Product iteration
+  module, route wiring, focused tests, and regression subset passed.
+
+blockers: []
+warnings: []
+
+snapshot_delta:
+  git_head: "1919d3e220adacae88d378189f8716644dfa8d47"
+  branch: "0117-local-product-iteration-signal-contract"
+  git_status_before_review: |
+    M services/task_intake/src/task_intake/app.py
+    M services/task_intake/src/task_intake/server.py
+    M services/task_intake/src/task_intake/product_iteration.py
+    M services/task_intake/tests/test_product_iteration.py
+    ?? .project-memory/pr/0117-product-iteration-signal-contract/reviews/precommit-review.yml
+  git_diff_names: |
+    services/task_intake/src/task_intake/app.py
+    services/task_intake/src/task_intake/server.py
+    services/task_intake/src/task_intake/product_iteration.py
+    services/task_intake/tests/test_product_iteration.py
+
+validation:
+  app_check:
+    cmd: "PYTHONPATH=services/task_intake/src:services/runner/src python -m task_intake.app --check --json"
+    exit: 0
+    observed_route: "/product/iterations"
+    status: pass
+  route_grep:
+    cmd: "grep -R -n \"product/iterations\\|ProductIteration\" services/task_intake/src/task_intake/app.py services/task_intake/src/task_intake/server.py services/task_intake/src/task_intake/product_iteration.py services/task_intake/tests/test_product_iteration.py .project-memory/pr/0117-product-iteration-signal-contract/PLAN.md 2>/dev/null || true"
+    exit: 0
+    evidence: |
+      services/task_intake/src/task_intake/app.py:68:    "/product/iterations",
+      services/task_intake/src/task_intake/server.py:690:    if method == "POST" and path == "/product/iterations":
+      services/task_intake/src/task_intake/server.py:780:    if method == "GET" and path == "/product/iterations":
+  compileall:
+    cmd: "python -m compileall -f services/runner/src services/task_intake/src"
+    exit: 0
+    status: pass
+  focused_pytest:
+    cmd: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_product_iteration.py -q"
+    exit: 0
+    output: "27 passed in 0.07s"
+  regression_pytest:
+    cmd: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_product_iteration.py services/task_intake/tests/test_decision_backlog_trace_summary.py services/task_intake/tests/test_decision_history.py services/task_intake/tests/test_backlog_decision.py services/task_intake/tests/test_backlog_review.py services/runner/tests/test_backlog_surface.py -q"
+    exit: 0
+    output: "150 passed in 0.38s"
+  old_name_grep:
+    cmd: "grep -R -n \"decision_trace.py\\|test_decision_trace.py\" services/task_intake/src/task_intake services/task_intake/tests .project-memory/pr/0117-product-iteration-signal-contract 2>/dev/null || true"
+    exit: 0
+    output: "(no matches)"
+  ariadne_residue:
+    cmd: "find .ariadne -maxdepth 5 -type f | sort 2>/dev/null || true"
+    exit: 1
+    output: "find: .ariadne: No such file or directory"
+    status: pass_absent
+
+files_read:
+  - .project-memory/pr/0117-product-iteration-signal-contract/PLAN.md
+  - .project-memory/pr/0117-product-iteration-signal-contract/reviews/plan-review.yml
+  - services/task_intake/src/task_intake/product_iteration.py
+  - services/task_intake/tests/test_product_iteration.py
+  - services/task_intake/src/task_intake/server.py
+  - services/task_intake/src/task_intake/app.py
+  - .project-memory/review-artifact.schema.yml
+
+files_written:
+  - .project-memory/pr/0117-product-iteration-signal-contract/reviews/precommit-review.yml
+
+checks:
+  branch: pass
+  route: pass
+  scope: pass
+  contract: pass
+  privacy_local_only: pass
+  runtime_boundary: pass
+  mutation_boundary: pass
+  file_shape: pass
+  validation: pass
+  ariadne_residue: pass
+  plan_drift_gate: pass
+  no_drift_check: pass
+  artifact_write_readback: pass
+
+boundary_confirmations:
+  correction_rerun_completed: true
+  previous_route_inconsistency_fixed: true
+  product_iterations_route_visible_in_app_check: true
+  only_precommit_review_artifact_written_by_review: true
+  no_runtime_tests_skipped: true
+  no_git_mutation_commands_run_by_review: true
+  no_docker_commands_run_by_review: true
