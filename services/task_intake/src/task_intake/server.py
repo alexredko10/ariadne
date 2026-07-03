@@ -16,6 +16,12 @@ from task_intake.backlog_review import BacklogReviewInput, build_backlog_review_
 from task_intake.decision_history import DecisionHistoryInput, load_decision_history
 from task_intake.decision_backlog_trace_summary import DecisionTraceInput, build_decision_trace
 from task_intake.doctor import doctor
+from task_intake.product_iteration import (
+    ProductIterationInput,
+    ProductIterationStatus,
+    record_product_iteration_signal,
+    list_product_iteration_signals,
+)
 from task_intake.models import TaskIntakeRequest
 from task_intake.normalize import normalize_task_intake
 from task_intake.context_preview import generate_context_preview
@@ -677,6 +683,156 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
                     "invalid_decision_records": summary.invalid_decision_records if summary else 0,
                     "human_review_required": summary.human_review_required if summary else 0,
                 },
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        return
+
+    if method == "POST" and path == "/product/iterations":
+        # Read body
+        body_bytes = b""
+        more_body = True
+        while more_body:
+            event = await receive()
+            if event["type"] == "http.request":
+                body_bytes += event.get("body", b"")
+                more_body = event.get("more_body", False)
+
+        # Parse JSON
+        try:
+            data = json.loads(body_bytes) if body_bytes else {}
+        except json.JSONDecodeError:
+            await _send_json(
+                send, 400,
+                json.dumps({
+                    "status": "rejected",
+                    "reason_codes": ["invalid_json_body"],
+                    "details": "Invalid JSON body.",
+                }, ensure_ascii=False).encode("utf-8"),
+            )
+            return
+
+        if not isinstance(data, dict):
+            await _send_json(
+                send, 400,
+                json.dumps({
+                    "status": "rejected",
+                    "reason_codes": ["invalid_json_body"],
+                    "details": "Body must be a JSON object.",
+                }, ensure_ascii=False).encode("utf-8"),
+            )
+            return
+
+        inp = ProductIterationInput(
+            session_ref=data.get("session_ref", ""),
+            started_at=data.get("started_at"),
+            ended_at=data.get("ended_at"),
+            screen_time_seconds=data.get("screen_time_seconds", 0),
+            active_time_seconds=data.get("active_time_seconds", 0),
+            idle_time_seconds=data.get("idle_time_seconds", 0),
+            run_refs=tuple(data.get("run_refs", [])),
+            feedback_refs=tuple(data.get("feedback_refs", [])),
+            confusion_refs=tuple(data.get("confusion_refs", [])),
+            report_refs=tuple(data.get("report_refs", [])),
+            decision_trace_refs=tuple(data.get("decision_trace_refs", [])),
+            human_iteration_note=data.get("human_iteration_note", ""),
+            source_surface=data.get("source_surface", "task_intake"),
+            product_signal_status=data.get("product_signal_status", "recorded"),
+            store_dir=data.get("store_dir", ".ariadne/product-iterations"),
+        )
+        result = record_product_iteration_signal(inp)
+
+        if result.status == ProductIterationStatus.RECORDED:
+            record = result.record
+            record_dict = {
+                "iteration_ref": record.iteration_ref,
+                "session_ref": record.session_ref,
+                "started_at": record.started_at,
+                "ended_at": record.ended_at,
+                "screen_time_seconds": record.screen_time_seconds,
+                "active_time_seconds": record.active_time_seconds,
+                "idle_time_seconds": record.idle_time_seconds,
+                "run_refs": list(record.run_refs),
+                "feedback_refs": list(record.feedback_refs),
+                "confusion_refs": list(record.confusion_refs),
+                "report_refs": list(record.report_refs),
+                "decision_trace_refs": list(record.decision_trace_refs),
+                "human_iteration_note": record.human_iteration_note,
+                "product_signal_status": record.product_signal_status,
+                "created_at": record.created_at,
+                "source_surface": record.source_surface,
+                "schema_version": record.schema_version,
+            } if record else None
+            body = json.dumps({
+                "status": "recorded",
+                "iteration_ref": result.iteration_ref,
+                "record": record_dict,
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        else:
+            body = json.dumps({
+                "status": "rejected",
+                "reason_codes": list(result.reason_codes),
+                "details": result.details,
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        return
+
+    if method == "GET" and path == "/product/iterations":
+        # Parse query parameters
+        query_string = scope.get("query_string", b"").decode("utf-8")
+        params = parse_qs(query_string)
+        session_ref = params.get("session_ref", [None])[0]
+        max_results_str = params.get("max_results", ["100"])[0]
+        try:
+            max_results = int(max_results_str)
+        except (ValueError, TypeError):
+            max_results = 100
+
+        result = list_product_iteration_signals(
+            session_ref=session_ref,
+            max_results=max_results,
+        )
+
+        if result.status == ProductIterationStatus.REJECTED:
+            body = json.dumps({
+                "status": "rejected",
+                "reason_codes": list(result.reason_codes),
+                "details": result.details,
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        elif result.status == ProductIterationStatus.EMPTY:
+            body = json.dumps({
+                "status": "empty",
+                "records": [],
+                "total_count": 0,
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        else:
+            records_json = []
+            for record in result.records:
+                records_json.append({
+                    "iteration_ref": record.iteration_ref,
+                    "session_ref": record.session_ref,
+                    "started_at": record.started_at,
+                    "ended_at": record.ended_at,
+                    "screen_time_seconds": record.screen_time_seconds,
+                    "active_time_seconds": record.active_time_seconds,
+                    "idle_time_seconds": record.idle_time_seconds,
+                    "run_refs": list(record.run_refs),
+                    "feedback_refs": list(record.feedback_refs),
+                    "confusion_refs": list(record.confusion_refs),
+                    "report_refs": list(record.report_refs),
+                    "decision_trace_refs": list(record.decision_trace_refs),
+                    "human_iteration_note": record.human_iteration_note,
+                    "product_signal_status": record.product_signal_status,
+                    "created_at": record.created_at,
+                    "source_surface": record.source_surface,
+                    "schema_version": record.schema_version,
+                })
+            body = json.dumps({
+                "status": "recorded",
+                "records": records_json,
+                "total_count": result.total_count,
             }, ensure_ascii=False).encode("utf-8")
             await _send_json(send, 200, body)
         return
