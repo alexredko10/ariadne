@@ -495,8 +495,8 @@ permissions:
     - "create_directory"
 
     # Artifact write permission: precommit-review artifact only.
-    - "write_file:path=.project-memory/pr/*/reviews/precommit-review.yml"
-    - "edit_file:path=.project-memory/pr/*/reviews/precommit-review.yml"
+    - "write_file:.project-memory/pr/*/reviews/precommit-review.yml"
+    - "edit_file:.project-memory/pr/*/reviews/precommit-review.yml"
 
     # Git read-only introspection and diff review.
     - "shell:cmd=git status*"
