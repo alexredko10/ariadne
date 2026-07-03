@@ -62,6 +62,7 @@ _ROUTES = [
     "/",
     "/backlog",
     "/backlog/decision",
+    "/backlog/decision/history",
     "/health",
     "/submit",
     "/task-intake/submit",

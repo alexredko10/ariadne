@@ -13,6 +13,7 @@ from urllib.parse import parse_qs
 from task_intake.app import accept_task
 from task_intake.backlog_decision import BacklogDecisionInput, record_human_decision
 from task_intake.backlog_review import BacklogReviewInput, build_backlog_review_json
+from task_intake.decision_history import DecisionHistoryInput, load_decision_history
 from task_intake.doctor import doctor
 from task_intake.models import TaskIntakeRequest
 from task_intake.normalize import normalize_task_intake
@@ -455,6 +456,103 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
                 "reason_codes": list(result.reason_codes),
                 "details": result.details,
             }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        return
+
+    if method == "GET" and path == "/backlog/decision/history":
+        # Parse query parameters
+        query_string = scope.get("query_string", b"").decode("utf-8")
+        params = parse_qs(query_string)
+        max_results_str = params.get("max_results", ["100"])[0]
+        try:
+            max_results = int(max_results_str)
+        except (ValueError, TypeError):
+            max_results = 100
+        backlog_item_ref = params.get("backlog_item_ref", [None])[0]
+        decision_type = params.get("decision_type", [None])[0]
+        human_actor = params.get("human_actor", [None])[0]
+        sort_by = params.get("sort_by", ["created_at"])[0]
+        sort_descending_str = params.get("sort_descending", ["true"])[0]
+        sort_descending = sort_descending_str.lower() not in ("false", "0", "no")
+
+        inp = DecisionHistoryInput(
+            max_results=max_results,
+            backlog_item_ref=backlog_item_ref,
+            decision_type=decision_type,
+            human_actor=human_actor,
+            sort_by=sort_by,
+            sort_descending=sort_descending,
+        )
+        result = load_decision_history(inp)
+
+        if result.status == "rejected":
+            body = json.dumps({
+                "status": "rejected",
+                "reason_codes": list(result.reason_codes),
+                "details": result.details,
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        elif result.status == "empty":
+            body = json.dumps({
+                "status": "empty",
+                "view": {
+                    "items": [],
+                    "total_count": 0,
+                    "summary": {
+                        "total_decisions": 0,
+                        "decisions_by_type": {},
+                        "decisions_by_backlog_item": {},
+                        "rejected_or_invalid_decision_records": 0,
+                        "human_review_required": 0,
+                    },
+                },
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        else:
+            view = result.view
+            items_json = []
+            if view:
+                for item in view.items:
+                    items_json.append({
+                        "decision_ref": item.decision_ref,
+                        "backlog_item_ref": item.backlog_item_ref,
+                        "candidate_ref": item.candidate_ref,
+                        "continuity_ref": item.continuity_ref,
+                        "evidence_refs": list(item.evidence_refs),
+                        "human_actor": item.human_actor,
+                        "decision_type": item.decision_type,
+                        "decision_reason": item.decision_reason,
+                        "next_human_action": item.next_human_action,
+                        "blocked_agent_actions": list(item.blocked_agent_actions),
+                        "created_at": item.created_at,
+                        "product_name": item.product_name,
+                        "source_surface": item.source_surface,
+                        "requires_human_review": item.requires_human_review,
+                        "decision_record_path": item.decision_record_path,
+                        "linked_backlog_item_status": item.linked_backlog_item_status,
+                        "schema_version": item.schema_version,
+                    })
+                summary = view.summary
+                body = json.dumps({
+                    "status": "ready",
+                    "reason_codes": list(result.reason_codes) if result.reason_codes else [],
+                    "view": {
+                        "items": items_json,
+                        "total_count": view.total_count,
+                        "summary": {
+                            "total_decisions": summary.total_decisions,
+                            "decisions_by_type": summary.decisions_by_type,
+                            "decisions_by_backlog_item": summary.decisions_by_backlog_item,
+                            "rejected_or_invalid_decision_records": summary.rejected_or_invalid_decision_records,
+                            "human_review_required": summary.human_review_required,
+                        },
+                    },
+                }, ensure_ascii=False).encode("utf-8")
+            else:
+                body = json.dumps({
+                    "status": "empty",
+                    "view": None,
+                }, ensure_ascii=False).encode("utf-8")
             await _send_json(send, 200, body)
         return
 
