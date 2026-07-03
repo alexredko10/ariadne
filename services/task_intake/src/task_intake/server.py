@@ -11,6 +11,7 @@ import json
 from urllib.parse import parse_qs
 
 from task_intake.app import accept_task
+from task_intake.backlog_decision import BacklogDecisionInput, record_human_decision
 from task_intake.backlog_review import BacklogReviewInput, build_backlog_review_json
 from task_intake.doctor import doctor
 from task_intake.models import TaskIntakeRequest
@@ -370,6 +371,91 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
         result = build_backlog_review_json(inp)
         body = json.dumps(result, ensure_ascii=False).encode("utf-8")
         await _send_json(send, 200, body)
+        return
+
+    if method == "POST" and path == "/backlog/decision":
+        # Read body
+        body_bytes = b""
+        more_body = True
+        while more_body:
+            event = await receive()
+            if event["type"] == "http.request":
+                body_bytes += event.get("body", b"")
+                more_body = event.get("more_body", False)
+
+        # Parse JSON
+        try:
+            data = json.loads(body_bytes) if body_bytes else {}
+        except json.JSONDecodeError:
+            await _send_json(
+                send, 400,
+                json.dumps({
+                    "status": "rejected",
+                    "reason_codes": ["invalid_json_body"],
+                    "details": "Invalid JSON body.",
+                }, ensure_ascii=False).encode("utf-8"),
+            )
+            return
+
+        if not isinstance(data, dict):
+            await _send_json(
+                send, 400,
+                json.dumps({
+                    "status": "rejected",
+                    "reason_codes": ["invalid_json_body"],
+                    "details": "Body must be a JSON object.",
+                }, ensure_ascii=False).encode("utf-8"),
+            )
+            return
+
+        inp = BacklogDecisionInput(
+            backlog_item_ref=data.get("backlog_item_ref", ""),
+            decision_type=data.get("decision_type", ""),
+            human_actor=data.get("human_actor", ""),
+            decision_reason=data.get("decision_reason", ""),
+            decision_store_dir=data.get("decision_store_dir", ".ariadne/decisions"),
+            evidence_refs=tuple(data.get("evidence_refs", [])),
+            next_human_action=data.get("next_human_action", ""),
+            candidate_ref=data.get("candidate_ref", ""),
+            continuity_ref=data.get("continuity_ref", ""),
+        )
+        result = record_human_decision(inp)
+
+        if result.status == "recorded":
+            record = result.decision_record
+            record_dict = {
+                "decision_ref": record.decision_ref,
+                "backlog_item_ref": record.backlog_item_ref,
+                "decision_type": record.decision_type,
+                "human_actor": record.human_actor,
+                "decision_reason": record.decision_reason,
+                "evidence_refs": list(record.evidence_refs),
+                "next_human_action": record.next_human_action,
+                "candidate_ref": record.candidate_ref,
+                "continuity_ref": record.continuity_ref,
+                "created_at": record.created_at,
+            } if record else None
+            body = json.dumps({
+                "status": "recorded",
+                "decision_ref": result.decision_ref,
+                "decision_record": record_dict,
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        elif result.status == "duplicate":
+            body = json.dumps({
+                "status": "duplicate",
+                "decision_ref": result.decision_ref,
+                "reason_codes": list(result.reason_codes),
+                "details": result.details,
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        else:
+            body = json.dumps({
+                "status": "rejected",
+                "reason_codes": list(result.reason_codes),
+                "details": result.details,
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
         return
 
     if method == "GET" and path == "/":
