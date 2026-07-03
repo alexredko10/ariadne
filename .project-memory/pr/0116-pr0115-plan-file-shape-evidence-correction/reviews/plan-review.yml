@@ -1,0 +1,114 @@
+schema_version: "0.1"
+pr_id: "0116"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-03T16:17:35Z"
+snapshot_delta:
+  plan_base_sha: "596f2635c8fd75b835d4ace8369bb2d6b4818038"
+  current_head: "596f2635c8fd75b835d4ace8369bb2d6b4818038"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0116-pr0115-plan-file-shape-evidence-correction/PLAN.md"
+    - ".project-memory/pr/0116-pr0115-plan-file-shape-evidence-correction/reviews/plan-review.yml"
+  actual_files:
+    - ".project-memory/pr/0116-pr0115-plan-file-shape-evidence-correction/PLAN.md"
+    - ".project-memory/pr/0116-pr0115-plan-file-shape-evidence-correction/reviews/plan-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0116-pr0115-plan-file-shape-evidence-correction/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0115-decision-backlog-trace-summary/PLAN.md"
+  - ".project-memory/pr/0115-decision-backlog-trace-summary/reviews/plan-review.yml"
+  - ".project-memory/pr/0115-decision-backlog-trace-summary/reviews/precommit-review.yml"
+  - "services/task_intake/src/task_intake/decision_backlog_trace_summary.py"
+  - "services/task_intake/tests/test_decision_backlog_trace_summary.py"
+  - "services/task_intake/src/task_intake/app.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - "ROADMAP.md"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "596f2635c8fd75b835d4ace8369bb2d6b4818038"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "main"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? .project-memory/pr/0116-pr0115-plan-file-shape-evidence-correction/"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "<no output>"
+  - command: "find .project-memory/pr/0115-decision-backlog-trace-summary -maxdepth 4 -type f | sort"
+    result: "passed"
+    exit_code: 0
+    evidence: ".project-memory/pr/0115-decision-backlog-trace-summary/PLAN.md; reviews/plan-review.yml; reviews/precommit-review.yml"
+  - command: "find .project-memory/pr/0116-pr0115-plan-file-shape-evidence-correction -maxdepth 4 -type f | sort"
+    result: "passed"
+    exit_code: 0
+    evidence: ".project-memory/pr/0116-pr0115-plan-file-shape-evidence-correction/PLAN.md; reviews/plan-review.yml"
+  - command: "test -f services/task_intake/src/task_intake/decision_backlog_trace_summary.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "file exists"
+  - command: "test -f services/task_intake/tests/test_decision_backlog_trace_summary.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "file exists"
+  - command: "test -f services/task_intake/src/task_intake/decision_trace.py"
+    result: "failed"
+    exit_code: 1
+    evidence: "file absent"
+  - command: "test -f services/task_intake/tests/test_decision_trace.py"
+    result: "failed"
+    exit_code: 1
+    evidence: "file absent"
+  - command: "grep -R -n \"decision_trace.py|test_decision_trace.py|decision_backlog_trace_summary.py|test_decision_backlog_trace_summary.py\" .project-memory/pr/0115-decision-backlog-trace-summary .project-memory/pr/0116-pr0115-plan-file-shape-evidence-correction services/task_intake/src/task_intake services/task_intake/tests 2>/dev/null || true"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md and plan-review.yml reference both old and accepted names; runtime files use accepted names"
+  - command: "find .ariadne -maxdepth 5 -type f | sort 2>/dev/null || true"
+    result: "passed"
+    exit_code: 0
+    evidence: "<no output>; .ariadne absent"
+  - command: "date -u +%Y-%m-%dT%H:%M:%SZ"
+    result: "passed"
+    exit_code: 0
+    evidence: "2026-07-03T16:17:35Z"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "approve"
+    reason: "PR 0116 is scoped to a project-memory-only evidence correction, explicitly identifies the old and accepted file names, forbids runtime/source/test changes, preserves PR 0115 history honesty, and includes the required validation and drift-gate sections."
+context_used:
+  labels:
+    - "plan-review"
+    - "project-memory-correction"
+  memory_files_read:
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0115-decision-backlog-trace-summary/PLAN.md"
+    - ".project-memory/pr/0115-decision-backlog-trace-summary/reviews/plan-review.yml"
+    - ".project-memory/pr/0115-decision-backlog-trace-summary/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - ".project-memory/pr/0116-pr0115-plan-file-shape-evidence-correction/PLAN.md"
+    - "services/task_intake/src/task_intake/decision_backlog_trace_summary.py"
+    - "services/task_intake/tests/test_decision_backlog_trace_summary.py"
+    - "services/task_intake/src/task_intake/app.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+    - "ROADMAP.md"
+  files_modified:
+    - ".project-memory/pr/0116-pr0115-plan-file-shape-evidence-correction/reviews/plan-review.yml"
+  files_intentionally_ignored:
+    - ".project-memory/pr/*/reviews/*.yml"
