@@ -1,0 +1,91 @@
+schema_version: 1
+pr_id: "0114-pr0113-precommit-evidence-backfill"
+review_type: plan-review
+reviewer: plan-review
+timestamp: "2026-07-03T10:53:41Z"
+verdict: warning
+snapshot_delta:
+  head: 285f1c8e0943e768333c6494c7b32e3ce0428d2a
+  git_status_short: "?? .project-memory/pr/0114-pr0113-precommit-evidence-backfill/"
+scope:
+  plan_path: .project-memory/pr/0114-pr0113-precommit-evidence-backfill/PLAN.md
+  review_path: .project-memory/pr/0114-pr0113-precommit-evidence-backfill/reviews/plan-review.yml
+files_checked:
+  - .project-memory/pr/0114-pr0113-precommit-evidence-backfill/PLAN.md
+  - .project-memory/pr/0114-pr0113-precommit-evidence-backfill/reviews/plan-review.yml
+  - .project-memory/post-0100/strategic-direction/agent-manifest.md
+  - .project-memory/review-artifact.schema.yml
+  - ROADMAP.md
+  - docs/adr/0011-pr-batching-and-roadmap-discipline.md
+  - docs/adr/0010-runner-execution-contract-boundary.md
+  - .project-memory/pr/0113-human-decision-history-surface/PLAN.md
+  - .project-memory/pr/0113-human-decision-history-surface/reviews/plan-review.yml
+  - services/task_intake/src/task_intake/decision_history.py
+  - services/task_intake/tests/test_decision_history.py
+  - services/task_intake/src/task_intake/app.py
+  - services/task_intake/src/task_intake/server.py
+  - services/task_intake/src/task_intake/backlog_decision.py
+  - services/task_intake/tests/test_backlog_decision.py
+  - services/task_intake/src/task_intake/backlog_review.py
+  - services/task_intake/tests/test_backlog_review.py
+  - services/runner/src/runner/backlog_surface.py
+  - services/runner/tests/test_backlog_surface.py
+validation:
+  - command: git rev-parse --verify HEAD
+    result: 285f1c8e0943e768333c6494c7b32e3ce0428d2a
+  - command: git branch --show-current
+    result: 0114-pr0113-precommit-evidence-backfill
+  - command: git status --short
+    result: "?? .project-memory/pr/0114-pr0113-precommit-evidence-backfill/"
+  - command: git diff --name-only
+    result: ""
+  - command: find .project-memory/pr/0114-pr0113-precommit-evidence-backfill -maxdepth 4 -type f | sort
+    result: ".project-memory/pr/0114-pr0113-precommit-evidence-backfill/PLAN.md\n.project-memory/pr/0114-pr0113-precommit-evidence-backfill/reviews/plan-review.yml"
+  - command: find .project-memory/pr/0114-decision-backlog-trace-summary -maxdepth 4 -type f | sort 2>/dev/null || true
+    result: ".project-memory/pr/0114-decision-backlog-trace-summary/PLAN.md\n.project-memory/pr/0114-decision-backlog-trace-summary/reviews/plan-review.yml"
+  - command: find .project-memory/pr/0113-human-decision-history-surface -maxdepth 4 -type f | sort
+    result: ".project-memory/pr/0113-human-decision-history-surface/PLAN.md\n.project-memory/pr/0113-human-decision-history-surface/reviews/plan-review.yml"
+  - command: test -f .project-memory/pr/0113-human-decision-history-surface/reviews/precommit-review.yml
+    result: "exit 1"
+  - command: test -f services/task_intake/src/task_intake/decision_history.py
+    result: "exit 0"
+  - command: test -f services/task_intake/tests/test_decision_history.py
+    result: "exit 0"
+  - command: grep -R -n "decision_history|DecisionHistory|PLAN DRIFT GATE|VERDICT|backfill|post-merge|fresh validation|No-drift" .project-memory/pr/0114-pr0113-precommit-evidence-backfill/PLAN.md .project-memory/pr/0113-human-decision-history-surface services/task_intake/src/task_intake/decision_history.py services/task_intake/tests/test_decision_history.py 2>/dev/null || true
+    result: "matches found in .project-memory/pr/0114-pr0113-precommit-evidence-backfill/PLAN.md only"
+  - command: date -u +%Y-%m-%dT%H:%M:%SZ
+    result: "2026-07-03T10:53:41Z"
+blockers: []
+warnings:
+  - The repair plan is repair-only and does not introduce runtime behavior.
+  - The repair PR directory contains only PLAN.md and the review artifact.
+  - The abandoned trace-summary directory is still present in the working tree, but the repair plan itself does not appear to implement it.
+decisions_made:
+  - The missing PR 0113 precommit evidence remains a repair target, not an automatic blocker for the repair plan.
+  - The repair plan is acceptable as a backfill-only evidence repair because it requires fresh validation and defers PR 0115 trace-summary implementation.
+  - The repair plan does not plan runtime/source/test changes, roadmap/schema/dependency changes, or provider/network/Docker/shell work.
+context_used:
+  files_modified:
+    - .project-memory/pr/0114-pr0113-precommit-evidence-backfill/reviews/plan-review.yml
+  files_read:
+    - .project-memory/pr/0114-pr0113-precommit-evidence-backfill/PLAN.md
+    - .project-memory/pr/0114-pr0113-precommit-evidence-backfill/reviews/plan-review.yml
+    - .project-memory/post-0100/strategic-direction/agent-manifest.md
+    - .project-memory/review-artifact.schema.yml
+    - ROADMAP.md
+    - docs/adr/0011-pr-batching-and-roadmap-discipline.md
+    - docs/adr/0010-runner-execution-contract-boundary.md
+    - .project-memory/pr/0113-human-decision-history-surface/PLAN.md
+    - .project-memory/pr/0113-human-decision-history-surface/reviews/plan-review.yml
+    - services/task_intake/src/task_intake/decision_history.py
+    - services/task_intake/tests/test_decision_history.py
+    - services/task_intake/src/task_intake/app.py
+    - services/task_intake/src/task_intake/server.py
+    - services/task_intake/src/task_intake/backlog_decision.py
+    - services/task_intake/tests/test_backlog_decision.py
+    - services/task_intake/src/task_intake/backlog_review.py
+    - services/task_intake/tests/test_backlog_review.py
+    - services/runner/src/runner/backlog_surface.py
+    - services/runner/tests/test_backlog_surface.py
+  files_written:
+    - .project-memory/pr/0114-pr0113-precommit-evidence-backfill/reviews/plan-review.yml
