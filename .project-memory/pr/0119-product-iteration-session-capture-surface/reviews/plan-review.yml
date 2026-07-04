@@ -1,0 +1,98 @@
+schema_version: "0.1"
+pr_id: "0119-product-iteration-session-capture-surface"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-04T10:10:48Z"
+related_plan: ".project-memory/pr/0119-product-iteration-session-capture-surface/PLAN.md"
+summary:
+  result: "PR 0119 PLAN is approved."
+  main_reason: "Architect-approved product iteration substrate/surface wiring; PR 0117 contract preserved; privacy/local-only boundaries explicit; not a UX-track reopen."
+snapshot_delta:
+  head: "f22003e773eb3aaa7d805a78c6eafe646b280e64"
+  branch: "0119-product-iteration-session-capture-surface"
+  status_short: |
+    A  .project-memory/pr/0119-product-iteration-session-capture-surface/PLAN.md
+  diff_names: |
+    <none>
+blockers: []
+warnings: []
+files_read:
+  - ".project-memory/pr/0119-product-iteration-session-capture-surface/PLAN.md"
+  - "ROADMAP.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - ".project-memory/pr/0117-product-iteration-signal-contract/reviews/plan-review.yml"
+files_written:
+  - ".project-memory/pr/0119-product-iteration-session-capture-surface/reviews/plan-review.yml"
+validation:
+  commands:
+    - cmd: "git rev-parse --verify HEAD"
+      exit: 0
+      output: "f22003e773eb3aaa7d805a78c6eafe646b280e64"
+    - cmd: "git branch --show-current"
+      exit: 0
+      output: "0119-product-iteration-session-capture-surface"
+    - cmd: "git status --short"
+      exit: 0
+      output: "A  .project-memory/pr/0119-product-iteration-session-capture-surface/PLAN.md"
+    - cmd: "git diff --name-only"
+      exit: 0
+      output: "<empty>"
+    - cmd: "grep -R -n -E ... (PLAN + ROADMAP + server.py/app.py/product_iteration.py)"
+      exit: 0
+      output_summary: "Roadmap alignment, architect sign-off phrase, /product/iterations routes, product_iteration contract, decision_trace forbiddance all present."
+    - cmd: "test -f .../reviews/plan-review.yml"
+      exit: 0
+      output: "exists"
+evidence_ledger:
+  - claim: "branch correct"
+    evidence: "git branch output = 0119-product-iteration-session-capture-surface"
+    result: pass
+  - claim: "dirty tree within planning scope"
+    evidence: "git status = 'A  PLAN.md' only; agents/plan-review.yml + agents/precommit-review.yml not dirty"
+    result: pass
+  - claim: "roadmap alignment present"
+    evidence: "PLAN.md has '## Roadmap alignment' section; track='architect-approved product iteration substrate/surface'; slot=PR 0119"
+    result: pass
+  - claim: "architect sign-off present"
+    evidence: "PLAN.md line 19 exact phrase 'экран тайм, product, итерации.' present"
+    result: pass
+  - claim: "closed UX track not reopened"
+    evidence: "PLAN.md section 'Why this is not reopened Local Interaction UX Track' present; ROADMAP.md L101 'Local Interaction UX Track (CLOSED)'"
+    result: pass
+  - claim: "not frontend-only"
+    evidence: "PLAN plans new product_iteration_surface.py module + test_product_iteration_surface.py tests"
+    result: pass
+  - claim: "PR 0117 contract reused"
+    evidence: "server.py L690 POST /product/iterations, L780 GET; app.py L68 _ROUTES entry; product_iteration.py present; PR 0117 plan-review verdict=approve"
+    result: pass
+  - claim: "privacy/local-only boundaries present"
+    evidence: "PLAN 'Privacy/local-only boundary' forbids external analytics/provider/Docker/shell/git; network limited to same-origin POST /product/iterations"
+    result: pass
+  - claim: "validation strategy complete"
+    evidence: "PLAN 'Validation commands' lists compileall, pytest for new + PR 0117 tests, --check, route grep, no-resurrection tests, .ariadne residue check"
+    result: pass
+  - claim: "artifact physically written/read back"
+    evidence: "test -f returns exists; file content read back"
+    result: pass
+checks:
+  branch: pass
+  dirty_tree: pass
+  roadmap_alignment: pass
+  architect_signoff: pass
+  closed_ux_track: pass
+  executable_first: pass
+  privacy_local_only: pass
+  validation_strategy: pass
+  artifact_write_readback: pass
+boundary_confirmations:
+  - "PLAN.md reviewed and not modified"
+  - "only plan-review artifact written"
+  - "artifact physically written and read back"
+  - "exact architect sign-off phrase found"
+  - "closed UX track not reopened"
+  - "PR 0117 backend contract preserved"
+  - "no external analytics/provider/Docker/shell/git runtime behavior planned"
+  - "no hidden reasoning/full transcript/unbounded text capture planned"
+  - "no backlog/decision mutation planned"
+  - "obsolete decision_trace.py names not resurrected"
