@@ -1,0 +1,213 @@
+schema_version: "0.1"
+pr_id: "0121-product-iteration-recommendation-candidate"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-04T12:32:00Z"
+related_plan: ".project-memory/pr/0121-product-iteration-recommendation-candidate/PLAN.md"
+related_commit: "e25bdee3baa0e85933f97ef80202295ba78f5104"
+summary:
+  result: "PR 0121 implementation matches PLAN.md. Deterministic read-only advisory candidate module + 24 focused tests. PR 0117/0119/0120 contracts preserved unchanged. No mutation, no AI/provider, no old-name resurrection, no .ariadne/ residue, no placeholders."
+snapshot_delta:
+  plan_base_sha: "7bb70d30057bf9ea4d835b42e3149edd59e4f826"
+  current_head: "e25bdee3baa0e85933f97ef80202295ba78f5104"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/task_intake/src/task_intake/product_iteration_candidate.py"
+    - "services/task_intake/tests/test_product_iteration_candidate.py"
+    - ".project-memory/pr/0121-product-iteration-recommendation-candidate/reviews/precommit-review.yml"
+  actual_files:
+    - "services/task_intake/src/task_intake/product_iteration_candidate.py"
+    - "services/task_intake/tests/test_product_iteration_candidate.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0121-product-iteration-recommendation-candidate/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0121-product-iteration-recommendation-candidate/PLAN.md"
+  - ".project-memory/pr/0121-product-iteration-recommendation-candidate/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0117-product-iteration-signal-contract/PLAN.md"
+  - ".project-memory/pr/0117-product-iteration-signal-contract/reviews/precommit-review.yml"
+  - ".project-memory/pr/0119-product-iteration-session-capture-surface/PLAN.md"
+  - ".project-memory/pr/0119-product-iteration-session-capture-surface/reviews/precommit-review.yml"
+  - ".project-memory/pr/0120-product-iteration-evidence-summary/PLAN.md"
+  - ".project-memory/pr/0120-product-iteration-evidence-summary/reviews/precommit-review.yml"
+  - "services/task_intake/src/task_intake/product_iteration.py"
+  - "services/task_intake/src/task_intake/product_iteration_surface.py"
+  - "services/task_intake/src/task_intake/product_iteration_summary.py"
+  - "services/task_intake/src/task_intake/product_iteration_candidate.py"
+  - "services/task_intake/tests/test_product_iteration.py"
+  - "services/task_intake/tests/test_product_iteration_surface.py"
+  - "services/task_intake/tests/test_product_iteration_summary.py"
+  - "services/task_intake/tests/test_product_iteration_candidate.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/app.py"
+files_modified: []
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "e25bdee3baa0e85933f97ef80202295ba78f5104"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0121-product-iteration-recommendation-candidate"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? product_iteration_candidate.py; ?? test_product_iteration_candidate.py; ?? precommit-review.yml"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty (no tracked file modifications)"
+  - command: "python -m compileall -f services/runner/src services/task_intake/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "all files compiled including product_iteration_candidate.py"
+  - command: "pytest test_product_iteration_candidate.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "24 passed in 0.05s"
+  - command: "pytest test_product_iteration.py + test_product_iteration_surface.py + test_product_iteration_summary.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "74 passed in 0.09s (PR 0117/0119/0120 contracts preserved)"
+  - command: "pytest regression subset (9 files)"
+    result: "passed"
+    exit_code: 0
+    evidence: "211 passed in 0.23s"
+  - command: "python -m task_intake.app --check --json"
+    result: "passed"
+    exit_code: 0
+    evidence: "/product/iterations route still in routes list"
+  - command: "grep candidate identifiers in src + tests + PLAN"
+    result: "passed"
+    exit_code: 0
+    evidence: "All candidate class/function/reason-code identifiers present in product_iteration_candidate.py"
+  - command: "test -f decision_trace.py / test_decision_trace.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "NOT RESURRECTED (both absent)"
+  - command: "find .ariadne -maxdepth 5 -type f"
+    result: "passed"
+    exit_code: 0
+    evidence: ".ariadne absent (no residue)"
+  - command: "grep forbidden runtime imports in candidate module"
+    result: "passed"
+    exit_code: 1
+    evidence: "no subprocess/os.system/requests/urllib.request/openai/anthropic; no open()/shutil/os.makedirs"
+  - command: "grep placeholders in candidate module + tests"
+    result: "passed"
+    exit_code: 1
+    evidence: "no PLACEHOLDER/TODO/TBD/??? in candidate module or tests"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Approve PR 0121 implementation"
+    reason: "All implementation files match PLAN.md scope; PR 0117/0119/0120 contracts preserved; validation passes; no mutation; no AI/provider; no forbidden patterns; no residue."
+context_used:
+  labels: [product-iteration-candidate, advisory-recommendation, pr-0117-contract, pr-0119-contract, pr-0120-contract]
+  memory_files_read:
+    - ".project-memory/pr/0121-product-iteration-recommendation-candidate/PLAN.md"
+    - ".project-memory/pr/0121-product-iteration-recommendation-candidate/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0117-product-iteration-signal-contract/PLAN.md"
+    - ".project-memory/pr/0117-product-iteration-signal-contract/reviews/precommit-review.yml"
+    - ".project-memory/pr/0119-product-iteration-session-capture-surface/PLAN.md"
+    - ".project-memory/pr/0119-product-iteration-session-capture-surface/reviews/precommit-review.yml"
+    - ".project-memory/pr/0120-product-iteration-evidence-summary/PLAN.md"
+    - ".project-memory/pr/0120-product-iteration-evidence-summary/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "services/task_intake/src/task_intake/product_iteration.py"
+    - "services/task_intake/src/task_intake/product_iteration_surface.py"
+    - "services/task_intake/src/task_intake/product_iteration_summary.py"
+    - "services/task_intake/src/task_intake/product_iteration_candidate.py"
+    - "services/task_intake/tests/test_product_iteration.py"
+    - "services/task_intake/tests/test_product_iteration_surface.py"
+    - "services/task_intake/tests/test_product_iteration_summary.py"
+    - "services/task_intake/tests/test_product_iteration_candidate.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/app.py"
+  files_modified:
+    - ".project-memory/pr/0121-product-iteration-recommendation-candidate/reviews/precommit-review.yml"
+  files_intentionally_ignored: [ROADMAP.md, "docs/**", "schemas/**", "agents/**"]
+checks:
+  branch: pass
+  plan_review: pass
+  dirty_tree: pass
+  implementation_shape: pass
+  pr_0117_0119_0120_preserved: pass
+  advisory_only_candidate: pass
+  no_ai_provider_analytics: pass
+  privacy_local_only: pass
+  old_name_resurrection: pass
+  validation: pass
+  artifact_write_readback: pass
+boundary_confirmations:
+  - "evidence-first precommit-review completed"
+  - "PLAN.md reviewed and not modified"
+  - "plan-review artifact reviewed and not modified"
+  - "only precommit-review artifact physically written"
+  - "precommit-review artifact read back"
+  - "correct PR 0121 branch confirmed"
+  - "implementation is not frontend-only"
+  - "product_iteration_candidate.py present"
+  - "test_product_iteration_candidate.py present"
+  - "PR 0117/0119/0120 contracts preserved unchanged"
+  - "server.py and app.py NOT modified"
+  - "advisory-only candidate: no backlog item creation, no decision execution, no source-record mutation"
+  - "deterministic threshold rules only; no AI/provider/LLM"
+  - "no external analytics/network/Docker/subprocess/git runtime behavior"
+  - "no hidden reasoning/full transcript/unbounded text capture"
+  - "obsolete decision_trace.py names not resurrected"
+  - "validation passed"
+evidence_ledger:
+  - claim: "branch correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0121-product-iteration-recommendation-candidate"
+    result: pass
+  - claim: "plan-review approved"
+    evidence_source: "plan-review.yml verdict field"
+    exact_observed_evidence: "verdict: approve (2026-07-04T12:23:49Z)"
+    result: pass
+  - claim: "dirty tree within scope"
+    evidence_source: "git status --short"
+    exact_observed_evidence: "?? product_iteration_candidate.py; ?? test_product_iteration_candidate.py"
+    result: pass
+  - claim: "implementation shape complete"
+    evidence_source: "candidate module + tests + grep"
+    exact_observed_evidence: "ProductIterationCandidateStatus/ProductIterationCandidate/Result, build_product_iteration_candidate(), build_product_iteration_candidate_from_store(), 9 reason codes, 7 threshold constants; 24 tests in 17 classes"
+    result: pass
+  - claim: "PR 0117/0119/0120 contracts preserved"
+    evidence_source: "git diff + pytest + app --check"
+    exact_observed_evidence: "git diff empty; 74 contract tests pass; /product/iterations still in routes list"
+    result: pass
+  - claim: "advisory-only candidate"
+    evidence_source: "module source + tests"
+    exact_observed_evidence: "no open()/os./shutil; no create_backlog/approve/finalize patterns; TestNoBacklogMutation, TestNoDecisionMutation, TestNoMutation, TestNoWrites all pass"
+    result: pass
+  - claim: "no AI/provider/external analytics"
+    evidence_source: "grep import scan"
+    exact_observed_evidence: "no openai/anthropic/requests/urllib.request/subprocess/docker imports; deterministic threshold rules"
+    result: pass
+  - claim: "privacy/local-only boundaries"
+    evidence_source: "grep + source read"
+    exact_observed_evidence: "no hidden reasoning; aggregate summary metrics only; no transcript; no unbounded raw text"
+    result: pass
+  - claim: "old-name resurrection absent"
+    evidence_source: "test -f checks"
+    exact_observed_evidence: "decision_trace.py and test_decision_trace.py both NOT RESURRECTED"
+    result: pass
+  - claim: "validation passed"
+    evidence_source: "compileall + pytest + app check"
+    exact_observed_evidence: "compileall exit 0; 24 + 74 + 211 tests pass; app --check exit 0 with /product/iterations visible"
+    result: pass
+  - claim: "artifact physically written/read back"
+    evidence_source: "write_file + test -f + sed readback"
+    exact_observed_evidence: "precommit-review.yml created, listed by find, read back and verified"
+    result: pass
