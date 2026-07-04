@@ -1,0 +1,198 @@
+schema_version: "0.1"
+pr_id: "0119-product-iteration-session-capture-surface"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-04T10:33:00Z"
+related_plan: ".project-memory/pr/0119-product-iteration-session-capture-surface/PLAN.md"
+related_commit: "16de72fe81cb833ef1fb1180d16f454fc77d37c2"
+summary:
+  result: "PR 0119 implementation matches PLAN.md. PR 0117 backend contract preserved unchanged. Surface module + focused tests + same-origin server.py wiring present. Validation passed. No PR 0117 file mutations, no old-name resurrection, no .ariadne/ residue, no external analytics."
+snapshot_delta:
+  plan_base_sha: "f22003e773eb3aaa7d805a78c6eafe646b280e64"
+  current_head: "16de72fe81cb833ef1fb1180d16f454fc77d37c2"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/task_intake/src/task_intake/product_iteration_surface.py"
+    - "services/task_intake/tests/test_product_iteration_surface.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - ".project-memory/pr/0119-product-iteration-session-capture-surface/reviews/precommit-review.yml"
+  actual_files:
+    - "services/task_intake/src/task_intake/product_iteration_surface.py"
+    - "services/task_intake/tests/test_product_iteration_surface.py"
+    - "services/task_intake/src/task_intake/server.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0119-product-iteration-session-capture-surface/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0119-product-iteration-session-capture-surface/PLAN.md"
+  - ".project-memory/pr/0119-product-iteration-session-capture-surface/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0117-product-iteration-signal-contract/PLAN.md"
+  - ".project-memory/pr/0117-product-iteration-signal-contract/reviews/precommit-review.yml"
+  - "services/task_intake/src/task_intake/product_iteration.py"
+  - "services/task_intake/tests/test_product_iteration.py"
+  - "services/task_intake/src/task_intake/product_iteration_surface.py"
+  - "services/task_intake/tests/test_product_iteration_surface.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/app.py"
+files_modified: []
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "16de72fe81cb833ef1fb1180d16f454fc77d37c2"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0119-product-iteration-session-capture-surface"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "M services/task_intake/src/task_intake/server.py; ?? product_iteration_surface.py; ?? test_product_iteration_surface.py"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "services/task_intake/src/task_intake/server.py"
+  - command: "python -m compileall -f services/runner/src services/task_intake/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "All files compiled cleanly (runner + task_intake, includes product_iteration_surface.py)"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_product_iteration_surface.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "33 passed in 0.05s"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest services/task_intake/tests/test_product_iteration.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "27 passed in 0.07s"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m pytest test_product_iteration_surface.py test_product_iteration.py test_decision_backlog_trace_summary.py test_decision_history.py test_backlog_decision.py test_backlog_review.py services/runner/tests/test_backlog_surface.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "173 passed in 0.22s (regression subset)"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python -m task_intake.app --check --json"
+    result: "passed"
+    exit_code: 0
+    evidence: "/product/iterations visible in routes list (PR 0117 contract preserved)"
+  - command: "grep -R -n -E product/iterations|ProductIteration|product_iteration_surface|screen_time|active_time|idle_time|session_ref services/task_intake/src/task_intake services/task_intake/tests .project-memory/pr/0119-product-iteration-session-capture-surface"
+    result: "passed"
+    exit_code: 0
+    evidence: "Server route L694/L784 (PR 0117), surface module wires session_ref/screen_time/active_time/idle_time/run_refs/confusion_refs to same-origin POST /product/iterations"
+  - command: "test -f services/task_intake/src/task_intake/decision_trace.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "NOT RESURRECTED"
+  - command: "test -f services/task_intake/tests/test_decision_trace.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "NOT RESURRECTED"
+  - command: "find .ariadne -maxdepth 5 -type f"
+    result: "passed"
+    exit_code: 0
+    evidence: ".ariadne absent (no residue)"
+  - command: "grep -R -n -E \"import subprocess|os\\.system|requests\\.|urllib\\.(?!parse)\" services/task_intake/src/task_intake/product_iteration_surface.py"
+    result: "passed"
+    exit_code: 1
+    evidence: "No forbidden runtime imports in surface module; urllib.parse in server.py is local query-string parsing only"
+  - command: "grep -n PLACEHOLDER|TODO|TBD|\\?\\?\\? services/task_intake/src/task_intake/product_iteration_surface.py services/task_intake/tests/test_product_iteration_surface.py"
+    result: "passed"
+    exit_code: 1
+    evidence: "No placeholders present"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Approve PR 0119 implementation"
+    reason: "All implementation files match PLAN.md scope; PR 0117 backend contract preserved; validation commands pass; no forbidden patterns; no residue."
+context_used:
+  labels:
+    - product-iteration-surface
+    - session-capture
+    - pr-0117-contract
+  memory_files_read:
+    - ".project-memory/pr/0119-product-iteration-session-capture-surface/PLAN.md"
+    - ".project-memory/pr/0119-product-iteration-session-capture-surface/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0117-product-iteration-signal-contract/PLAN.md"
+    - ".project-memory/pr/0117-product-iteration-signal-contract/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "services/task_intake/src/task_intake/product_iteration.py"
+    - "services/task_intake/tests/test_product_iteration.py"
+    - "services/task_intake/src/task_intake/product_iteration_surface.py"
+    - "services/task_intake/tests/test_product_iteration_surface.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/app.py"
+  files_modified:
+    - ".project-memory/pr/0119-product-iteration-session-capture-surface/reviews/precommit-review.yml"
+  files_intentionally_ignored:
+    - "ROADMAP.md"
+    - "docs/**"
+    - "schemas/**"
+    - "agents/**"
+checks:
+  branch: pass
+  plan_review: pass
+  dirty_tree: pass
+  implementation_shape: pass
+  pr_0117_contract_preserved: pass
+  same_origin_local_only: pass
+  privacy: pass
+  mutation_boundary: pass
+  old_name_resurrection: pass
+  validation: pass
+  artifact_write_readback: pass
+boundary_confirmations:
+  - "evidence-first precommit-review completed"
+  - "PLAN.md reviewed and not modified"
+  - "plan-review artifact reviewed and not modified"
+  - "only precommit-review artifact physically written"
+  - "precommit-review artifact read back"
+  - "correct PR 0119 branch confirmed"
+  - "implementation is not frontend-only"
+  - "product_iteration_surface.py present"
+  - "test_product_iteration_surface.py present"
+  - "server.py local surface wiring present"
+  - "PR 0117 backend contract preserved by default"
+  - "same-origin /product/iterations only"
+  - "no external analytics/provider/Docker/subprocess/git runtime behavior"
+  - "no hidden reasoning/full transcript/unbounded text capture"
+  - "no backlog/decision mutation"
+  - "obsolete decision_trace.py names not resurrected"
+  - "validation passed"
+evidence_ledger:
+  - claim: "branch correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0119-product-iteration-session-capture-surface"
+    result: pass
+  - claim: "dirty tree within scope"
+    evidence_source: "git status --short"
+    exact_observed_evidence: "M services/task_intake/src/task_intake/server.py; ?? services/task_intake/src/task_intake/product_iteration_surface.py; ?? services/task_intake/tests/test_product_iteration_surface.py"
+    result: pass
+  - claim: "all changed files were read"
+    evidence_source: "read_multiple_files"
+    exact_observed_evidence: "product_iteration.py (PR 0117 unchanged), test_product_iteration.py (PR 0117 unchanged), product_iteration_surface.py (new), test_product_iteration_surface.py (new), server.py (HTML/JS additions), app.py (unchanged)"
+    result: pass
+  - claim: "required validation passed"
+    evidence_source: "compileall + pytest + app check"
+    exact_observed_evidence: "compileall EXIT 0; 33 surface tests + 27 PR 0117 tests + 173 regression subset EXIT 0; app --check shows /product/iterations route"
+    result: pass
+  - claim: "feature-specific behavior exists"
+    evidence_source: "surface module + server.py JS"
+    exact_observed_evidence: "product_iteration_surface.py exposes record_session_signal() that builds ProductIterationInput via bounded helpers; server.py HTML contains record-session-btn, getOrCreateSessionRef(), recordSessionSignal() POSTing to /product/iterations"
+    result: pass
+  - claim: "forbidden behavior is absent"
+    evidence_source: "grep + absence checks"
+    exact_observed_evidence: "No fetch(http://...) calls; only fetch('/product/iterations'); no requests/urllib.client/httpx; no subprocess/os.system; no sendBeacon/analytics; no backlog/decision mutation; no decision_trace.py or test_decision_trace.py"
+    result: pass
+  - claim: "artifact physically written"
+    evidence_source: "write_file + test -f"
+    exact_observed_evidence: ".project-memory/pr/0119-product-iteration-session-capture-surface/reviews/precommit-review.yml created"
+    result: pass
+  - claim: "artifact read back"
+    evidence_source: "sed -n '1,180p' post-write"
+    exact_observed_evidence: "read-back performed and verified against schema"
+    result: pass

@@ -22,6 +22,10 @@ from task_intake.product_iteration import (
     record_product_iteration_signal,
     list_product_iteration_signals,
 )
+from task_intake.product_iteration_surface import (
+    generate_session_ref,
+    record_session_signal,
+)
 from task_intake.models import TaskIntakeRequest
 from task_intake.normalize import normalize_task_intake
 from task_intake.context_preview import generate_context_preview
@@ -1105,6 +1109,11 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 <button id="generate-session-report-btn">Generate session report</button>
 <button id="copy-report-btn" style="margin-left:0.5rem;">Copy report</button>
 <textarea id="session-report-output" rows="10" cols="80" readonly style="margin-top:0.5rem; display:block; width:100%;"></textarea>
+<hr>
+<h3>Product Iteration Session Capture</h3>
+<p>Record a product iteration signal with current session data.</p>
+<button id="record-session-btn">Record session signal</button>
+<span id="session-status" style="margin-left:0.5rem;"></span>
 </div>
 <script>
 var TRACE_STEPS = [
@@ -1517,6 +1526,7 @@ document.getElementById("reset-checklist-btn").addEventListener("click", functio
     updateChecklistCounter();
 });
 document.getElementById("clear-confusion-btn").addEventListener("click", clearConfusionSignals);
+document.getElementById("record-session-btn").addEventListener("click", recordSessionSignal);
 document.getElementById("download-run-report-btn").addEventListener("click", function() {
     var ta = document.getElementById("run-report-output");
     var text = ta.value;
@@ -1624,6 +1634,54 @@ function clearRunHistory() {
     __ariadne_run_history = [];
     renderRunHistory();
 }
+var __ariadne_session_ref = null;
+function getOrCreateSessionRef() {
+    if (!__ariadne_session_ref) {
+        __ariadne_session_ref = "session-" + Date.now().toString(36) + "-" + Math.random().toString(36).substring(2, 8);
+    }
+    return __ariadne_session_ref;
+}
+function recordSessionSignal() {
+    var btn = document.getElementById("record-session-btn");
+    var statusEl = document.getElementById("session-status");
+    btn.disabled = true;
+    statusEl.textContent = "Recording…";
+    var sessionRef = getOrCreateSessionRef();
+    var runRefs = __ariadne_run_history.map(function(e) { return e.timestamp + "-" + e.runner; });
+    var confusionRefs = __ariadne_confusion_signals.map(function(s) { return s.type + "-" + s.timestamp; });
+    var feedbackNote = document.getElementById("feedback_notes").value.trim();
+    var body = {
+        session_ref: sessionRef,
+        screen_time_seconds: Math.floor((Date.now() - window.__ariadne_session_start || Date.now()) / 1000),
+        active_time_seconds: Math.floor((Date.now() - window.__ariadne_session_start || Date.now()) / 1000),
+        idle_time_seconds: 0,
+        run_refs: runRefs,
+        confusion_refs: confusionRefs,
+        feedback_refs: feedbackNote ? ["feedback-" + Date.now().toString(36)] : [],
+        human_iteration_note: feedbackNote || "Session recorded via surface capture.",
+        source_surface: "task_intake",
+    };
+    fetch("/product/iterations", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(body),
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.status === "recorded") {
+            statusEl.innerHTML = "<span class=\"ok-true\">Recorded: " + data.iteration_ref + "</span>";
+        } else {
+            statusEl.innerHTML = "<span class=\"status-failed\">Rejected: " + (data.reason_codes || []).join(", ") + "</span>";
+        }
+    })
+    .catch(function(err) {
+        statusEl.innerHTML = "<span class=\"status-error\">Error: " + err.message + "</span>";
+    })
+    .finally(function() {
+        btn.disabled = false;
+    });
+}
+window.__ariadne_session_start = Date.now();
 </script>
 </body>
 </html>
