@@ -284,6 +284,101 @@ an explicit PR sequence that ends at PR 0100.
 
 ---
 
+## Product Iteration Substrate Stream (COMPLETED)
+
+| PR | Title | Status |
+|----|-------|--------|
+| 0117 | Product Iteration Signal Contract / Local Screen-Time Record | completed |
+| 0119 | Product Iteration Session Capture Surface | completed |
+| 0120 | Product Iteration Evidence Summary | completed |
+| 0121 | Product Iteration Recommendation Candidate | completed |
+| 0122 | Product Iteration Human Review Packet | completed |
+
+Stream status: closed. Not a reopened Local Interaction UX Track.
+Architect sign-off reference: "экран тайм, product, итерации."
+
+---
+
+## Production Line Stream (ACTIVE)
+
+### Stage 1 — Orchestrator (0123-0127)
+
+```
+0123 — production line roadmap realignment (this PR, bridge)
+0124 — Agent Runner Bridge: run a docker agent from Ariadne code via
+       docker_agent_adapter with a real agents/*.yml config;
+       input agent_name + task_prompt, output captured artifact
+0125 — Prompt Composer: generate planner/plan-review/coder/precommit
+       task prompts from templates + PR context
+0126 — Verdict Parser: parse review artifacts, extract verdict/blockers,
+       decide continue/stop/retry
+0127 — Pipeline Runner: planner → plan-review → gate → coder →
+       precommit → gate; one call, full cycle, stop on block
+```
+
+### Stage 2 — Closed loop (0128-0131)
+
+```
+0128 — Git Boundary: commit/push/PR creation only after explicit
+       human approve; the single git-mutation surface in the substrate
+0129 — ariadne task CLI: `ariadne task "description"` → full cycle → PR link
+0130 — Run Persistence: run state/artifacts/proofs in .ariadne/runs/
+0131 — DOGFOOD MILESTONE: PR 0131 is created by Ariadne itself
+       via ariadne task
+```
+
+### Stage 3 — Production hardening (0132-0136)
+
+```
+0132 — Failure Recovery: retry with refined prompt on block, max 2,
+       then human escalation
+0133 — Model Health live: block/violation counters per model,
+       automatic fallback model switch
+0134 — Run Report: single markdown per cycle (actions, evidence,
+       cost, time)
+0135 — Parallel-safe runs: branch lock, task queue
+0136 — Acceptance: 10 consecutive real tasks via ariadne task with
+       recorded metrics (success rate, cost, human interventions)
+```
+
+### Stage 4 — Public (0137+)
+
+```
+0137+ — README/quickstart, GitHub release v0.1, demo. Post-0100
+        capability streams (Decision Core, Context Warehouse, eval
+        harness, faithfulness audit, frontend) queue AFTER the
+        dogfood milestone.
+```
+
+### Frozen until PR 0136 acceptance
+
+The following capability streams are frozen until the Production Line reaches
+PR 0136 acceptance:
+
+- Decision Core / GRM
+- Context Warehouse Bronze/Silver/Gold
+- Eval harness / benchmarks
+- Faithfulness audit
+- Frontend
+- New product-iteration surface features
+
+All remain in the post-0100 manifest; their queue position is after the
+dogfood milestone.
+
+### Production Line stop conditions
+
+- any PR 0124+ that is docs-only/schemas-only → block
+- any PR that gives agents unattended git mutation rights → block
+- any PR that adds a capability stream before 0136 acceptance → block
+
+### Core principle
+
+Agent output is not evidence. Runtime-captured proof is evidence.
+The substrate exists to run the loop — the human must stop being the
+orchestrator.
+
+---
+
 ## Legacy Phase Reference (Superseded)
 
 The phase-based roadmap from PR 0041/0042 is preserved below for historical
