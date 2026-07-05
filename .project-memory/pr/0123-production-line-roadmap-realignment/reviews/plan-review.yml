@@ -1,0 +1,164 @@
+schema_version: "0.1"
+pr_id: "0123-production-line-roadmap-realignment"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-05T17:38:24Z"
+related_plan: ".project-memory/pr/0123-production-line-roadmap-realignment/PLAN.md"
+summary:
+  result: "PR 0123 PLAN is approved."
+  main_reason: "Docs/roadmap-only bridge PR; locks in PR 0117-0122 completion, defines Production Line stream, declares PR 0124 Agent Runner Bridge executable-first; no implementation; no ROADMAP/docs edits by planner."
+snapshot_delta:
+  head: "5a37663a763e8f3d8caa7cce00c7e2663a73cf9e"
+  branch: "0123-production-line-roadmap-realignment"
+  status_short: |
+    ?? .project-memory/pr/0123-production-line-roadmap-realignment/
+  diff_names: |
+    <none>
+blockers: []
+warnings: []
+files_read:
+  - ".project-memory/pr/0123-production-line-roadmap-realignment/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - ".project-memory/post-0100/strategic-direction/agent-manifest.md"
+  - ".project-memory/project_contract.yml"
+  - ".project-memory/pr/0117-product-iteration-signal-contract/PLAN.md"
+  - ".project-memory/pr/0119-product-iteration-session-capture-surface/PLAN.md"
+  - ".project-memory/pr/0120-product-iteration-evidence-summary/PLAN.md"
+  - ".project-memory/pr/0121-product-iteration-recommendation-candidate/PLAN.md"
+  - ".project-memory/pr/0122-product-iteration-human-review-packet/PLAN.md"
+  - ".project-memory/pr/0122-product-iteration-human-review-packet/reviews/precommit-review.yml"
+  - "services/runner/src/runner/docker_agent_adapter.py"
+  - "services/runner/src/runner/proof_capture.py"
+  - "services/runner/src/runner/handoff_packet.py"
+  - "services/runner/src/runner/acceptance_criteria.py"
+  - "services/runner/src/runner/gate_evidence.py"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+  - "agents/coder.yml"
+  - "agents/planner.yml"
+files_written:
+  - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/plan-review.yml"
+validation:
+  commands:
+    - cmd: "git rev-parse --verify HEAD"
+      exit: 0
+      output: "5a37663a763e8f3d8caa7cce00c7e2663a73cf9e"
+    - cmd: "git branch --show-current"
+      exit: 0
+      output: "0123-production-line-roadmap-realignment"
+    - cmd: "git status --short"
+      exit: 0
+      output: "?? .project-memory/pr/0123-production-line-roadmap-realignment/"
+    - cmd: "git diff --name-only"
+      exit: 0
+      output: "<empty>"
+    - cmd: "find .project-memory/pr -maxdepth 2 -type d | sort"
+      exit: 0
+      output_summary: "PR 0117-0122 directories all present; no 0118 (skipped)"
+    - cmd: "find agents -maxdepth 1 -type f | sort"
+      exit: 0
+      output_summary: "plan-review.yml, precommit-review.yml, coder.yml, planner.yml, architect.yml all present"
+    - cmd: "find services/runner/src/runner -maxdepth 1 -type f | sort"
+      exit: 0
+      output_summary: "docker_agent_adapter.py + proof_capture.py + handoff_packet.py + acceptance_criteria.py + gate_evidence.py all present"
+    - cmd: "grep -R -n -E 'Roadmap alignment|product iteration|0117|0122|Production Line|0124|Agent Runner Bridge|DOGFOOD|dogfood|post-0100|locked' ROADMAP.md docs/adr .../0123"
+      exit: 0
+      output_summary: "PLAN L23-27 Roadmap alignment (Production Line, slot 0123, bridge yes, next 0124 Agent Runner Bridge); L59 0124 Agent Runner Bridge defined; L77 DOGFOOD MILESTONE at 0131; L165-169 PRs 0117-0122 marked completed"
+    - cmd: "grep -R -n -E 'Product Iteration Human Review Packet|verdict: pass|review-packet|0122' .../0122/ services/task_intake"
+      exit: 0
+      output_summary: "PR 0122 PLAN + plan-review verdict=approve + precommit-review.yml verdict: pass; server.py L848 + app.py L69 confirm /product/iterations/review-packet route"
+    - cmd: "grep -R -n -E 'docker_agent_adapter|run_docker_agent_execution|allow_docker|Docker' .../docker_agent_adapter.py"
+      exit: 0
+      output_summary: "run_docker_agent_execution signature present L93 with allow_docker param L97"
+    - cmd: "grep -R -n -E 'PHYSICAL ARTIFACT WRITE GATE|EVIDENCE LEDGER|write_file:path=.project-memory/pr/.*/reviews' agents/plan-review.yml agents/precommit-review.yml"
+      exit: 0
+      output_summary: "agents/precommit-review.yml L95 references EVIDENCE LEDGER; write/readback flow confirmed"
+    - cmd: "if [ -d .ariadne ]; then find .ariadne ..."
+      exit: 0
+      output: ".ariadne absent"
+    - cmd: "test -f .../reviews/plan-review.yml (after write)"
+      exit: 0
+      output: "exists; read back"
+evidence_ledger:
+  - claim: "branch correct"
+    evidence: "git branch = 0123-production-line-roadmap-realignment"
+    result: pass
+  - claim: "dirty tree within planning scope"
+    evidence: "git status = '?? 0123 dir' only; ROADMAP/docs/services/agents/schemas not dirty"
+    result: pass
+  - claim: "roadmap alignment present"
+    evidence: "PLAN L23-27: track='Production Line (new stream, locked in by this PR)'; slot='0123'; bridge=yes; next='0124 Agent Runner Bridge'"
+    result: pass
+  - claim: "current roadmap drift diagnosed"
+    evidence: "PLAN 'Current ROADMAP drift diagnosis' L31-36 explicitly states ROADMAP.md lacks PR 0117-0122 stream and ADR 0011 requires sync before further feature PRs"
+    result: pass
+  - claim: "PR 0117-0122 stream completion recorded"
+    evidence: "PLAN L40-51 table records 0117/0119/0120/0121/0122 all precommit pass; L52 Stream status: closed; L52 architect sign-off phrase 'экран тайм, product, итерации.'"
+    result: pass
+  - claim: "Production Line stream defined"
+    evidence: "PLAN 'Production Line Stream proposal' L55-103 defines 4 stages: 0123-0127 Orchestrator, 0128-0131 Closed loop, 0132-0136 Production hardening, 0137+ Public"
+    result: pass
+  - claim: "PR 0124 Agent Runner Bridge defined"
+    evidence: "PLAN 'PR 0124 Agent Runner Bridge definition' L119-132: name, branch, purpose, input agent_name+task_prompt, output captured artifact, must not grant agents unattended git mutation rights; feasibility via docker_agent_adapter.py"
+    result: pass
+  - claim: "anti-committee-mode satisfied"
+    evidence: "PLAN L27 anti-committee-mode check; L143-148 ADR decision ROADMAP.md only; L149-152 future coder write paths restricted to ROADMAP.md (+ optional ADR) + precommit artifact"
+    result: pass
+  - claim: "frozen-until-0136 list present"
+    evidence: "PLAN 'Frozen until PR 0136 acceptance' L106-115 lists Decision Core/GRM, Context Warehouse, eval harness, faithfulness audit, frontend, new product-iteration surface features"
+    result: pass
+  - claim: "stop conditions present"
+    evidence: "PLAN L232-235 + 'Stream stop conditions' block: docs-only/schemas-only PR → block; unattended git mutation → block; capability stream before 0136 → block"
+    result: pass
+  - claim: "ADR decision justified"
+    evidence: "PLAN 'Decision on ADR 0012' L134-138: ROADMAP.md only, no ADR 0012; rationale: ADR 0011 is controlling authority; Production Line is roadmap replacement not architecture change"
+    result: pass
+  - claim: "coder write paths constrained"
+    evidence: "PLAN 'Future coder write paths' L150-156 restricts to ROADMAP.md (primary), docs/adr/0012 only if justified (current: no), precommit-review artifact only"
+    result: pass
+  - claim: "no implementation planned for PR 0123"
+    evidence: "PLAN 'Future coder write paths' L156 'No runtime code. No tests. No service changes. No agent config changes. No schema changes'; L311 'Block if PLAN.md would require runtime code changes — PASS: docs/roadmap only'"
+    result: pass
+  - claim: "PR 0122 evidence present"
+    evidence: ".project-memory/pr/0122-product-iteration-human-review-packet/{PLAN.md, reviews/plan-review.yml (verdict=approve), reviews/precommit-review.yml (verdict: pass)} all present"
+    result: pass
+  - claim: "PR 0124 feasibility present"
+    evidence: "services/runner/src/runner/docker_agent_adapter.py present with run_docker_agent_execution signature; proof_capture.py, handoff_packet.py, acceptance_criteria.py, gate_evidence.py all present"
+    result: pass
+  - claim: "artifact physically written/read back"
+    evidence: "test -f returns exists; file content read back; find lists file"
+    result: pass
+checks:
+  branch: pass
+  dirty_tree: pass
+  roadmap_alignment: pass
+  roadmap_drift_diagnosed: pass
+  pr_0117_0122_completion_recorded: pass
+  production_line_stream_defined: pass
+  pr_0124_agent_runner_bridge_defined: pass
+  anti_committee_mode: pass
+  frozen_until_0136: pass
+  stop_conditions: pass
+  adr_decision_justified: pass
+  coder_write_paths_constrained: pass
+  no_implementation_planned: pass
+  pr_0122_evidence: pass
+  pr_0124_feasibility: pass
+  artifact_write_readback: pass
+boundary_confirmations:
+  - "PLAN.md reviewed and not modified"
+  - "ROADMAP.md not modified by planner"
+  - "docs/**, agents/**, services/**, schemas/** not modified by planner"
+  - "only plan-review artifact written"
+  - "artifact physically written and read back"
+  - "PR 0123 is docs/roadmap-only bridge; no runtime code/tests/service/agent/schema changes planned"
+  - "ROADMAP.md is the primary coder write target; ADR 0012 explicitly not created"
+  - "Production Line stream defined with 4 stages and DOGFOOD milestone at PR 0131"
+  - "PR 0124 Agent Runner Bridge defined as next executable PR with full specification"
+  - "Frozen-until-PR-0136 list covers all 6 prohibited capability streams"
+  - "Stop conditions block docs-only/schemas-only PRs, unattended git mutation, premature capability streams"
+  - "PR 0117-0122 completion recorded with architect sign-off phrase and closed-stream status"
+  - "PR 0124 feasibility verified via docker_agent_adapter.py presence"
