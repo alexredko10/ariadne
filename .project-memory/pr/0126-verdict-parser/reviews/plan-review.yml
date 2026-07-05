@@ -1,0 +1,119 @@
+schema_version: "0.1"
+pr_id: "0126-verdict-parser"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-05T21:42:00Z"
+related_plan: ".project-memory/pr/0126-verdict-parser/PLAN.md"
+summary:
+  result: "PR 0126 Verdict Parser plan approved. Third executable Production Line PR. Parses plan/precommit-review artifacts, extracts verdict/blockers/warnings/evidence, normalizes gate result, returns deterministic continue/stop/continue_with_warning/retry-candidate decisions for PR 0127. Executable-first runtime module + focused tests. No agent execution, Docker, or full pipeline. All 18 mandatory checks pass."
+snapshot_delta:
+  plan_base_sha: "7a8c040f488934b30f83d0a514b94e7430385dba"
+  current_head: "7a8c040f488934b30f83d0a514b94e7430385dba"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files: [".project-memory/pr/0126-verdict-parser/PLAN.md", ".project-memory/pr/0126-verdict-parser/reviews/plan-review.yml"]
+  actual_files: [".project-memory/pr/0126-verdict-parser/PLAN.md", ".project-memory/pr/0126-verdict-parser/reviews/plan-review.yml"]
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - "ROADMAP.md (L302-380)"
+  - ".project-memory/review-artifact.schema.yml"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml"
+  - ".project-memory/pr/0124-agent-runner-bridge/reviews/precommit-review.yml"
+  - ".project-memory/pr/0125-prompt-composer/reviews/precommit-review.yml"
+  - "services/runner/src/runner/agent_runner_bridge.py"
+  - "services/runner/src/runner/prompt_composer.py"
+  - "services/runner/tests/test_agent_runner_bridge.py"
+  - "services/runner/tests/test_prompt_composer.py"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+files_modified: []
+validation:
+  - {command: "git rev-parse --verify HEAD", result: "passed", exit_code: 0, evidence: "7a8c040f"}
+  - {command: "git branch --show-current", result: "passed", exit_code: 0, evidence: "0126-verdict-parser"}
+  - {command: "git status --short", result: "passed", exit_code: 0, evidence: "?? .project-memory/pr/0126-verdict-parser/ only"}
+  - {command: "git diff --name-only", result: "passed", exit_code: 0, evidence: "empty (no tracked modifications)"}
+  - {command: "grep 'Production Line Stream|0126' ROADMAP.md", result: "passed", exit_code: 0, evidence: "L302 ACTIVE; L313 0126 Verdict Parser; L370 docs-only block; L371 git mutation block; L376 proof principle"}
+  - {command: "find services/runner/src/runner -maxdepth 1 -type f | sort", result: "passed", exit_code: 0, evidence: "34 files: agent_runner_bridge.py + prompt_composer.py + 32 others"}
+  - {command: "find services/runner/tests -maxdepth 1 -type f | sort", result: "passed", exit_code: 0, evidence: "35 test files"}
+  - {command: "grep VerdictParser/parse_review_artifact PLAN.md", result: "passed", exit_code: 0, evidence: "VerdictParserRequest, ParsedReviewArtifact, VerdictDecision, VerdictDecisionStatus, parse_review_artifact(), decide_next_action() defined"}
+  - {command: "grep normalized verdict PLAN.md", result: "passed", exit_code: 0, evidence: "L179-L192: plan-review approve→pass/warning→warning/block→block/unknown→invalid; precommit pass→pass/warning→warning/block→block/unknown→invalid"}
+  - {command: "grep 'control action|retry_candidate' PLAN.md", result: "passed", exit_code: 0, evidence: "L196-L218: continue/continue_with_warning/stop/invalid rules; retry is metadata only"}
+  - {command: "grep 'evidence extraction|artifact_hash' PLAN.md", result: "passed", exit_code: 0, evidence: "L231-L247: 14 fields extracted including schema_version/review_type/verdict/blockers/warnings/validation/evidence_ledger/files_checked/boundary_confirmations/artifact_hash/line_count"}
+  - {command: "grep safety boundary PLAN.md", result: "passed", exit_code: 0, evidence: "L252-L270: no execute/agents/Docker/git mutation/PR/.ariadne/bridge/composer imports"}
+  - {command: "grep 'verdict_parser.py|test_verdict_parser.py' PLAN.md", result: "passed", exit_code: 0, evidence: "L285-L291: only verdict_parser.py + test_verdict_parser.py proposed; agent_runner_bridge.py + prompt_composer.py NOT modified"}
+  - {command: "grep forbidden runtime calls PLAN.md", result: "passed", exit_code: 1, evidence: "grep subprocess.run/docker/git in PLAN implementation section → exit 1 (not present)"}
+  - {command: "grep subprocess.run prompt_composer.py", result: "passed", exit_code: 0, evidence: "L131-146: _FORBIDDEN_COMMANDS tuple (embedded in generated prompts), not runtime calls"}
+  - {command: "if [ -d .ariadne ]; then find .ariadne -maxdepth 5 -type f | sort; else echo '.ariadne absent'; fi", result: "passed", exit_code: 0, evidence: ".ariadne absent"}
+blockers: []
+warnings: []
+decisions_made:
+  - {decision: "Approve PR 0126 Verdict Parser plan", reason: "All 18 mandatory checks pass. Executable-first runtime module. Verdict Parser contract complete. Normalized verdict model correct. Control action rules deterministic. Evidence extraction contract complete. Safety boundary explicit. No agent/Docker/git mutation. Frozen streams not started. Proposed files constrained to 2 new files. Validation strategy complete. Artifact write/readback requirements included."}
+context_used:
+  labels: [verdict-parser, production-line, stage-1-orchestrator, pr-0126, executable-first, pr-0123-roadmap, pr-0124-bridge, pr-0125-composer]
+  memory_files_read: [".project-memory/pr/0126-verdict-parser/PLAN.md", ".project-memory/review-artifact.schema.yml", "ROADMAP.md", "docs/adr/0011-pr-batching-and-roadmap-discipline.md", ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml", ".project-memory/pr/0124-agent-runner-bridge/reviews/precommit-review.yml", ".project-memory/pr/0125-prompt-composer/reviews/precommit-review.yml", "services/runner/src/runner/agent_runner_bridge.py", "services/runner/src/runner/prompt_composer.py", "agents/plan-review.yml", "agents/precommit-review.yml"]
+  anchors_used: []
+  files_inspected: ["ROADMAP.md (L302-380)", ".project-memory/review-artifact.schema.yml", "agent_runner_bridge.py", "prompt_composer.py"]
+  files_modified: []
+  files_intentionally_ignored: [services/runner/src/**/*.py, services/task_intake/**, schemas/**, docs/**, agents/**, packages/**, apps/**, docker/**, .github/**, pyproject.toml, package.json, Makefile, .project-memory/post-0100/**]
+checks:
+  branch: pass
+  dirty_tree: pass
+  roadmap_alignment_present: pass
+  pr_0123_roadmap_evidence: pass
+  pr_0124_bridge_evidence: pass
+  pr_0125_composer_evidence: pass
+  executable_first: pass
+  verdict_parser_contract: pass
+  normalized_verdict_model: pass
+  control_action_rules: pass
+  evidence_extraction_contract: pass
+  agent_output_not_evidence: pass
+  safety_boundary_complete: pass
+  frozen_streams_not_started: pass
+  proposed_files_constrained: pass
+  validation_strategy_complete: pass
+  artifact_write_readback_requirements: pass
+boundary_confirmations:
+  - "evidence-first plan-review completed; PLAN.md not modified"
+  - "only plan-review artifact written; correct PR 0126 branch confirmed"
+  - "ROADMAP.md not modified; services/runner/** not modified; agents/** not modified"
+  - "Production Line Stream ACTIVE (ROADMAP L302); PR 0126 defined (L313)"
+  - "docs-only/schemas-only block (L370); unattended git mutation block (L371); proof principle (L376)"
+  - "PR 0123 precommit-review verdict:pass; PR 0124 precommit-review verdict:pass; PR 0125 precommit-review verdict:pass"
+  - "agent_runner_bridge.py present (PR 0124); prompt_composer.py present (PR 0125)"
+  - "VerdictParserRequest(input)+ParsedReviewArtifact(parsed)+VerdictDecision(output)+parse_review_artifact()+decide_next_action()"
+  - "normalized verdict mapping: plan-review approve→pass/warning→warning/block→block/unknown→invalid; precommit pass→pass/warning→warning/block→block/unknown→invalid"
+  - "control: continue(pass+no blockers), continue_with_warning(warning+no blockers), stop(block/any blockers/invalid/read failure/mismatch)"
+  - "retry_candidate is metadata only (true only if block+blockers+no critical+no safety violation+no git/docker evidence)"
+  - "14 evidence fields extracted: schema_version, review_type, pr_id, verdict, blockers, warnings, validation, evidence_ledger, files_checked, boundary_confirmations, artifact_hash, line_count"
+  - "safety: no execute/agents/Docker/git mutation/PR creation/.ariadne/bridge import/composer import"
+  - "proposed: verdict_parser.py + test_verdict_parser.py only; no other file modifications"
+  - "validation: compileall + pytest + grep checks + .ariadne residue check + status/diff"
+  - "artifact write/readback requirements in PLAN"
+  - "all 18 mandatory checks pass"
+evidence_ledger:
+  - {claim: "branch correct", evidence_source: "git branch --show-current", exact_observed_evidence: "0126-verdict-parser", result: pass}
+  - {claim: "dirty tree within planning scope", evidence_source: "git status --short + git diff --name-only", exact_observed_evidence: "?? .project-memory/pr/0126-verdict-parser/ only; git diff empty", result: pass}
+  - {claim: "PLAN.md was read", evidence_source: "PLAN.md content", exact_observed_evidence: "22468 bytes, 450+ lines, PR 0126 Verdict Parser Plan", result: pass}
+  - {claim: "required supporting files read", evidence_source: "files_checked list", exact_observed_evidence: "20 files: ROADMAP, schema, ADR, 3 prior PLAN, 3 prior precommit-review, 2 runtime modules, 2 test files, 3 agent configs", result: pass}
+  - {claim: "roadmap alignment present", evidence_source: "PLAN.md ### Roadmap alignment", exact_observed_evidence: "track: Production Line — Stage 1 Orchestrator; slot: 0126; proof principle: Agent output is not evidence; executable-first substrate PR", result: pass}
+  - {claim: "PR 0123/ROADMAP evidence present", evidence_source: "grep ROADMAP.md + precommit-review.yml read", exact_observed_evidence: "ROADMAP L302 Production Line Stream ACTIVE; L313 0126 Verdict Parser; L370-376 stop conditions+proof; PR 0123 precommit-review verdict:pass", result: pass}
+  - {claim: "PR 0124 bridge evidence present", evidence_source: "agent_runner_bridge.py exists + precommit-review verdict", exact_observed_evidence: "services/runner/src/runner/agent_runner_bridge.py present (483 lines); run_agent_runner_bridge() confirmed; precommit-review verdict:pass", result: pass}
+  - {claim: "PR 0125 composer evidence present", evidence_source: "prompt_composer.py exists + precommit-review verdict", exact_observed_evidence: "services/runner/src/runner/prompt_composer.py present (600+ lines); compose_pr_prompts() confirmed; precommit-review verdict:pass", result: pass}
+  - {claim: "executable-first scope", evidence_source: "PLAN.md proposed files", exact_observed_evidence: "services/runner/src/runner/verdict_parser.py (runtime module) + services/runner/tests/test_verdict_parser.py (focused tests); parse_review_artifact()+decide_next_action() runtime functions; not docs-only", result: pass}
+  - {claim: "Verdict Parser contract", evidence_source: "PLAN.md proposed contract section", exact_observed_evidence: "VerdictParserRequest(input)+ParsedReviewArtifact(parsed)+VerdictDecision(output)+VerdictDecisionStatus(enum)+parse_review_artifact()+decide_next_action(); SHA256[:16] artifact hash; YAML safe_load with fallback", result: pass}
+  - {claim: "normalized verdict model", evidence_source: "PLAN.md normalized verdict model L179-L192", exact_observed_evidence: "plan-review: approve→pass, warning→warning, block→block, else→invalid; precommit: pass→pass, warning→warning, block→block, else→invalid", result: pass}
+  - {claim: "control action rules", evidence_source: "PLAN.md control action decision rules L196-L218", exact_observed_evidence: "continue(pass+no blockers), continue_with_warning(warning+no blockers), stop(block+blockers), stop(any blockers), stop(invalid/read failure/mismatch); retry_candidate metadata only", result: pass}
+  - {claim: "evidence extraction contract", evidence_source: "PLAN.md evidence extraction contract L231-L247", exact_observed_evidence: "14 fields: schema_version, review_type, pr_id, verdict, blockers(id/desc/severity), warnings(id/desc), validation, evidence_ledger, files_checked, boundary_confirmations, artifact_hash, line_count", result: pass}
+  - {claim: "agent output not accepted as evidence", evidence_source: "PLAN.md safety boundary", exact_observed_evidence: "Parser reads structured YAML artifact fields; raw agent narrative alone not sufficient; 'Agent output is not evidence' principle; artifact field/file-captured proof are evidence", result: pass}
+  - {claim: "safety boundary complete", evidence_source: "PLAN.md safety and mutation boundaries L252-L270", exact_observed_evidence: "no execute from artifacts, no trust prose without fields, no mutate files, no call agents, no invoke Docker, no install deps, no git mutation, no create PRs, no .ariadne/runs/, no import agent_runner_bridge/composer", result: pass}
+  - {claim: "frozen streams not started", evidence_source: "PLAN.md non-goals + ROADMAP L353-L365", exact_observed_evidence: "PR 0126 non-goals include Decision Core/GRM, Context Warehouse, eval harness, faithfulness audit, frontend, new surface features (all frozen until PR 0136); ROADMAP L353-365 frozen list confirmed", result: pass}
+  - {claim: "proposed files constrained", evidence_source: "PLAN.md proposed implementation files L285-L291", exact_observed_evidence: "verdict_parser.py (NEW) + test_verdict_parser.py (NEW); agent_runner_bridge.py NOT modified; prompt_composer.py NOT modified; no ROADMAP/docs/agents/schemas/task_intake changes", result: pass}
+  - {claim: "validation strategy complete", evidence_source: "PLAN.md validation commands L379-L395", exact_observed_evidence: "compileall + pytest(test_verdict_parser.py) + pytest(regression) + grep(parser patterns) + grep(forbidden) + .ariadne residue + git status/diff; no real Docker/agent execution required", result: pass}
+  - {claim: "artifact physically written/read back", evidence_source: "write_file + test -f", exact_observed_evidence: "plan-review.yml written to .project-memory/pr/0126-verdict-parser/reviews/; test -f exits 0", result: pass}
