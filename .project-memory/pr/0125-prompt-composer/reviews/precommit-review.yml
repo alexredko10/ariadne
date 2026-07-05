@@ -1,0 +1,220 @@
+schema_version: "0.1"
+pr_id: "0125-prompt-composer"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-05T18:38:00Z"
+related_plan: ".project-memory/pr/0125-prompt-composer/PLAN.md"
+related_commit: "2949f869981b4a52be4b44d10df51dd0b8b8241e"
+summary:
+  result: "PR 0125 Prompt Composer implementation matches PLAN.md. compose_pr_prompts() returns exactly four packets (planner, plan-review, coder, precommit-review) ready for run_agent_runner_bridge. 30 focused tests pass; 124 regression tests pass; PR 0124 bridge intact; .ariadne absent."
+snapshot_delta:
+  plan_base_sha: "3148390e4881e199d5f7f911b462701352bfc81f"
+  current_head: "2949f869981b4a52be4b44d10df51dd0b8b8241e"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/runner/src/runner/prompt_composer.py"
+    - "services/runner/tests/test_prompt_composer.py"
+    - ".project-memory/pr/0125-prompt-composer/reviews/precommit-review.yml"
+  actual_files:
+    - "services/runner/src/runner/prompt_composer.py"
+    - "services/runner/tests/test_prompt_composer.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0125-prompt-composer/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0125-prompt-composer/PLAN.md"
+  - ".project-memory/pr/0125-prompt-composer/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md"
+  - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml"
+  - ".project-memory/pr/0124-agent-runner-bridge/reviews/precommit-review.yml"
+  - "services/runner/src/runner/agent_runner_bridge.py"
+  - "services/runner/src/runner/prompt_composer.py"
+  - "services/runner/tests/test_agent_runner_bridge.py"
+  - "services/runner/tests/test_prompt_composer.py"
+  - "agents/plan-review.yml"
+  - "agents/coder.yml"
+  - "agents/precommit-review.yml"
+files_modified: []
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "2949f869981b4a52be4b44d10df51dd0b8b8241e"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0125-prompt-composer"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? prompt_composer.py; ?? test_prompt_composer.py (no other files in dirty tree)"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty (no tracked file modifications)"
+  - command: "find agents -maxdepth 1 -type f | sort"
+    result: "passed"
+    exit_code: 0
+    evidence: "9 agent files: architect.yml, chief-architect.yml, coder.yml, plan-review.yml, precommit-review.yml + 4 .md specs"
+  - command: "find services/runner/src/runner -maxdepth 1 -type f | sort"
+    result: "passed"
+    exit_code: 0
+    evidence: "prompt_composer.py + agent_runner_bridge.py + all existing substrate"
+  - command: "find services/runner/tests -maxdepth 1 -type f | sort"
+    result: "passed"
+    exit_code: 0
+    evidence: "test_prompt_composer.py + test_agent_runner_bridge.py + 29 other tests"
+  - command: "python -m compileall -f services/runner/src services/task_intake/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "all files compiled including prompt_composer.py"
+  - command: "pytest test_prompt_composer.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "30 passed in 0.07s"
+  - command: "pytest regression subset (4 files)"
+    result: "passed"
+    exit_code: 0
+    evidence: "124 passed in 0.12s (composer + bridge + docker_adapter + execution_envelope)"
+  - command: "grep ROADMAP production line references"
+    result: "passed"
+    exit_code: 0
+    evidence: "ROADMAP L302 'Production Line Stream ACTIVE'; L308 '0124 — Agent Runner Bridge'; L311 '0125 — Prompt Composer'; L370 docs-only block; L371 unattended git mutation block; L376 'Agent output is not evidence. Runtime-captured proof is evidence.'"
+  - command: "grep composer identifier patterns"
+    result: "passed"
+    exit_code: 0
+    evidence: "All PromptComposer*/compose_pr_prompts/PromptPacket/prompt_hash/context_hash/source_template_hash/ready_for_agent_runner_bridge present in prompt_composer.py"
+  - command: "grep forbidden commands in composer + tests"
+    result: "passed"
+    exit_code: 1
+    evidence: "All matches are in _FORBIDDEN_COMMANDS constant (embedded into prompts) or test assertions; no actual git/docker/gh/pip runtime calls"
+  - command: "test -d .ariadne"
+    result: "passed"
+    exit_code: 0
+    evidence: ".ariadne absent (no residue)"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Approve PR 0125 implementation"
+    reason: "All implementation files match PLAN.md scope; runtime composer module + 30 focused tests pass; 124 regression subset tests pass; composes exactly 4 packets in correct order; all PromptPacket fields present; ready_for_agent_runner_bridge=True; PR 0124 bridge unchanged; PR 0123 roadmap evidence chain intact; .ariadne absent; no agent execution; no Docker CLI; no unattended git mutation."
+context_used:
+  labels: [prompt-composer, production-line, four-packets, pr-0124-bridge, pr-0123-roadmap, frozen-until-0136]
+  memory_files_read:
+    - ".project-memory/pr/0125-prompt-composer/PLAN.md"
+    - ".project-memory/pr/0125-prompt-composer/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml"
+    - ".project-memory/pr/0124-agent-runner-bridge/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "services/runner/src/runner/prompt_composer.py"
+    - "services/runner/tests/test_prompt_composer.py"
+    - "services/runner/src/runner/agent_runner_bridge.py"
+    - "services/runner/tests/test_agent_runner_bridge.py"
+    - "agents/coder.yml"
+    - "agents/plan-review.yml"
+    - "agents/precommit-review.yml"
+  files_modified:
+    - ".project-memory/pr/0125-prompt-composer/reviews/precommit-review.yml"
+  files_intentionally_ignored: [ROADMAP.md, "docs/**", "schemas/**", "services/task_intake/**", "pyproject.toml", "package.json", "Makefile"]
+checks:
+  branch: pass
+  plan_review: pass
+  dirty_tree: pass
+  executable_first: pass
+  composer_contract: pass
+  four_packets: pass
+  packet_contract: pass
+  template_context_evidence: pass
+  agent_output_not_evidence: pass
+  safety_boundary: pass
+  no_agent_or_docker: pass
+  frozen_streams_not_started: pass
+  validation: pass
+  artifact_write_readback: pass
+boundary_confirmations:
+  - "evidence-first precommit-review completed"
+  - "PLAN.md reviewed and not modified"
+  - "plan-review artifact reviewed and not modified"
+  - "ROADMAP.md not modified"
+  - "agents/*.yml not modified"
+  - "docs/**, schemas/**, services/task_intake/**, pyproject.toml/package.json/Makefile not modified"
+  - "services/runner/src/runner/agent_runner_bridge.py NOT modified"
+  - "services/runner/src/runner/docker_agent_adapter.py + other PR 0124 substrate NOT modified"
+  - "only precommit-review artifact physically written"
+  - "precommit-review artifact read back"
+  - "correct PR 0125 branch confirmed"
+  - "executable-first implementation: runtime composer module + 30 focused tests"
+  - "Composer accepts PR/task context; returns exactly 4 structured prompt packets"
+  - "Packets in exact order: planner, plan-review, coder, precommit-review"
+  - "Each packet has agent_name, prompt_kind, prompt_text, prompt_hash, required_inputs, expected_output_path, allowed/forbidden_write_paths, forbidden_commands, evidence_requirements, boundary_confirmations, source_template_hash, source_context_hash, ready_for_agent_runner_bridge=True"
+  - "Template/context evidence recorded from ROADMAP.md, agents/*.yml, .project-memory/review-artifact.schema.yml"
+  - "Agent output is not evidence — composed prompts embed this principle"
+  - "Generated prompts forbid git add/commit/push/checkout/switch/merge/rebase/reset/clean/tag + gh pr create/release + docker/docker compose + pip install/python -m pip install"
+  - "No agent execution; no Docker CLI invocation; no runs of agents"
+  - "No full 4-agent pipeline, no verdict parser, no git boundary, no ariadne task CLI, no run persistence, no frozen stream started"
+  - "All 30 composer tests pass; 124 regression subset tests pass; .ariadne absent"
+  - "validation passed"
+evidence_ledger:
+  - claim: "branch correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0125-prompt-composer"
+    result: pass
+  - claim: "plan-review approved"
+    evidence_source: "plan-review.yml verdict field"
+    exact_observed_evidence: "verdict: approve (2026-07-05T18:18:46Z)"
+    result: pass
+  - claim: "dirty tree within scope"
+    evidence_source: "git status --short + git diff --name-only"
+    exact_observed_evidence: "?? prompt_composer.py; ?? test_prompt_composer.py; git diff empty"
+    result: pass
+  - claim: "executable-first implementation"
+    evidence_source: "source + tests + pytest"
+    exact_observed_evidence: "prompt_composer.py runtime module (600+ lines); test_prompt_composer.py with 22 test classes; 30 pytest passes"
+    result: pass
+  - claim: "Prompt Composer contract"
+    evidence_source: "module signature + tests"
+    exact_observed_evidence: "compose_pr_prompts(PromptComposerRequest) returns PromptComposerResult with 4 prompt_packets; collects ROADMAP + agents + schema + context evidence"
+    result: pass
+  - claim: "four prompt packets generated"
+    evidence_source: "TestComposeFourPackets + TestPromptOrder"
+    exact_observed_evidence: "len(prompt_packets) == 4; kinds == ['planner', 'plan-review', 'coder', 'precommit-review']; prompt_order == ('planner','plan-review','coder','precommit-review')"
+    result: pass
+  - claim: "prompt packet contract complete"
+    evidence_source: "TestPacketFields + source"
+    exact_observed_evidence: "all fields present (agent_name, prompt_kind, prompt_text 16-char prompt_hash, required_inputs, expected_output_path, allowed_write_paths, forbidden_write_paths, forbidden_commands, evidence_requirements, boundary_confirmations, source_template_hash, source_context_hash, ready_for_agent_runner_bridge=True)"
+    result: pass
+  - claim: "template/context evidence recorded"
+    evidence_source: "_collect_source_evidence + TestContextHash"
+    exact_observed_evidence: "evidence['roadmap_content'], 'roadmap_hash', 'roadmap_production_line', 'roadmap_pr_0124', 'roadmap_frozen_streams', 'agent_configs' = comma-joined .yml filenames, 'agent_config_hash_{name}' per file, 'review_artifact_schema_hash'; context_hash = SHA256[:16] of canonical JSON of evidence dict"
+    result: pass
+  - claim: "agent output not accepted as evidence"
+    evidence_source: "TestNoRawAgentOutput + safety_boundaries_block"
+    exact_observed_evidence: "_safety_boundaries_block includes 'Agent output is not evidence. Runtime-captured proof is evidence.'; TestNoRawAgentOutput confirms generated prompts include this principle"
+    result: pass
+  - claim: "safety boundary complete"
+    evidence_source: "_FORBIDDEN_COMMANDS + TestForbiddenGitCommands/TestForbiddenDockerCommands/TestForbiddenAgentModification"
+    exact_observed_evidence: "_FORBIDDEN_COMMANDS tuple = (git add/commit/push/checkout/switch/merge/rebase/reset/clean/tag, gh pr create/release, docker, docker compose, pip install, python -m pip install); TestForbiddenGitCommands asserts each string appears in every packet's prompt_text; TestForbiddenAgentModification asserts 'agents/*.yml' in every packet"
+    result: pass
+  - claim: "no agent or Docker execution"
+    evidence_source: "module source + test grep"
+    exact_observed_evidence: "prompt_composer.py does not import run_agent_runner_bridge; no subprocess.run/docker/gh calls; reads ROADMAP/agents/schema/context paths only"
+    result: pass
+  - claim: "frozen streams not started"
+    evidence_source: "diff + source"
+    exact_observed_evidence: "git diff empty; prompt_composer.py does not import or reference improvement_backlog GRM, context compilation, eval harness, faithfulness, frontend, run persistence, run report, or new surface features"
+    result: pass
+  - claim: "validation passed"
+    evidence_source: "compileall + pytest + greps + .ariadne check"
+    exact_observed_evidence: "compileall exit 0; 30 + 124 pytest pass; all 6 grep validations pass; .ariadne absent"
+    result: pass
+  - claim: "artifact physically written/read back"
+    evidence_source: "write_file + test -f"
+    exact_observed_evidence: "precommit-review.yml created in .project-memory/pr/0125-prompt-composer/reviews/, listed by find, read back and verified"
+    result: pass
