@@ -1,0 +1,159 @@
+schema_version: "0.1"
+pr_id: "0122-product-iteration-human-review-packet"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-04T12:55:27Z"
+related_plan: ".project-memory/pr/0122-product-iteration-human-review-packet/PLAN.md"
+summary:
+  result: "PR 0122 PLAN is approved."
+  main_reason: "Deterministic read-only composition packet over PR 0117 store + PR 0120 summary + PR 0121 candidate; advisory-only; no AI/provider; not isolated helper; not UX-track reopen."
+snapshot_delta:
+  head: "f55f1a0858440dbf3212a41aa18da556172029dd"
+  branch: "0122-product-iteration-human-review-packet"
+  status_short: |
+    ?? .project-memory/pr/0122-product-iteration-human-review-packet/
+  diff_names: |
+    <none>
+blockers: []
+warnings: []
+files_read:
+  - ".project-memory/pr/0122-product-iteration-human-review-packet/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+  - ".project-memory/pr/0117-product-iteration-signal-contract/PLAN.md"
+  - ".project-memory/pr/0117-product-iteration-signal-contract/reviews/precommit-review.yml"
+  - ".project-memory/pr/0119-product-iteration-session-capture-surface/PLAN.md"
+  - ".project-memory/pr/0119-product-iteration-session-capture-surface/reviews/precommit-review.yml"
+  - ".project-memory/pr/0120-product-iteration-evidence-summary/PLAN.md"
+  - ".project-memory/pr/0120-product-iteration-evidence-summary/reviews/precommit-review.yml"
+  - ".project-memory/pr/0121-product-iteration-recommendation-candidate/PLAN.md"
+  - ".project-memory/pr/0121-product-iteration-recommendation-candidate/reviews/precommit-review.yml"
+  - "services/task_intake/src/task_intake/product_iteration.py"
+  - "services/task_intake/src/task_intake/product_iteration_surface.py"
+  - "services/task_intake/src/task_intake/product_iteration_summary.py"
+  - "services/task_intake/src/task_intake/product_iteration_candidate.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/app.py"
+files_written:
+  - ".project-memory/pr/0122-product-iteration-human-review-packet/reviews/plan-review.yml"
+validation:
+  commands:
+    - cmd: "git rev-parse --verify HEAD"
+      exit: 0
+      output: "f55f1a0858440dbf3212a41aa18da556172029dd"
+    - cmd: "git branch --show-current"
+      exit: 0
+      output: "0122-product-iteration-human-review-packet"
+    - cmd: "git status --short"
+      exit: 0
+      output: "?? .project-memory/pr/0122-product-iteration-human-review-packet/"
+    - cmd: "git diff --name-only"
+      exit: 0
+      output: "<empty>"
+    - cmd: "test -f services/task_intake/src/task_intake/product_iteration_candidate.py"
+      exit: 0
+      output: "PR0121_CANDIDATE_PRESENT"
+    - cmd: "test -f services/task_intake/tests/test_product_iteration_candidate.py"
+      exit: 0
+      output: "PR0121_TESTS_PRESENT"
+    - cmd: "test -f .project-memory/pr/0121-product-iteration-recommendation-candidate/reviews/precommit-review.yml"
+      exit: 0
+      output: "PR0121_PRECOMMIT_PRESENT"
+    - cmd: "grep -R -n -E (multi-pattern) ... 0122/0121/ROADMAP/services"
+      exit: 0
+      output_summary: "Roadmap alignment, exact sign-off phrase, ProductIterationCandidate/build_product_iteration_candidate, ProductIterationSummaryData/build_product_iteration_summary, accept_for_manual_planning/defer_until_more_evidence, decision_trace forbiddance all present."
+    - cmd: "grep -R -n -E 'Local Interaction UX Track|Status: CLOSED|frontend-only|Execution/Substrate Track|Roadmap alignment' ROADMAP.md docs/adr/0011 ..."
+      exit: 0
+      output_summary: "ROADMAP L101 'Local Interaction UX Track (CLOSED)'; L137 'Execution/Substrate Track'; ADR 0011 reaffirms closed track + Roadmap alignment mandatory."
+    - cmd: "grep -R -n -E 'PHYSICAL ARTIFACT WRITE GATE|EVIDENCE LEDGER|write_file:path=.project-memory/pr/.*/reviews' agents/plan-review.yml agents/precommit-review.yml"
+      exit: 0
+      output_summary: "agents/precommit-review.yml L95 references EVIDENCE LEDGER; write/readback flow confirmed."
+    - cmd: "if [ -d .ariadne ]; then find .ariadne ..."
+      exit: 0
+      output: ".ariadne absent"
+    - cmd: "test -f .../reviews/plan-review.yml (after write)"
+      exit: 0
+      output: "exists; read back"
+evidence_ledger:
+  - claim: "branch correct"
+    evidence: "git branch = 0122-product-iteration-human-review-packet"
+    result: pass
+  - claim: "PR 0121 present"
+    evidence: "product_iteration_candidate.py + test_product_iteration_candidate.py + PR 0121 precommit-review.yml + ProductIterationCandidate + build_product_iteration_candidate all PRESENT"
+    result: pass
+  - claim: "dirty tree within planning scope"
+    evidence: "git status = '?? 0122 dir' only; no agents/**, ROADMAP, services, or PR 0117/0119/0120/0121 artifacts dirty"
+    result: pass
+  - claim: "roadmap alignment present"
+    evidence: "PLAN.md L35 '## Roadmap alignment'; L37 track='architect-approved product iteration substrate/surface'; slot=PR 0122"
+    result: pass
+  - claim: "architect sign-off present"
+    evidence: "PLAN.md L43 exact phrase 'экран тайм, product, итерации.'"
+    result: pass
+  - claim: "closed UX track not reopened"
+    evidence: "PLAN.md 'Why this is not reopened Local Interaction UX Track' section; ROADMAP L101 'Local Interaction UX Track (CLOSED)'"
+    result: pass
+  - claim: "slowdown/drift assessed"
+    evidence: "PLAN.md 'Drift assessment against ROADMAP' section explicitly states PR 0122 is larger coherent composition, not isolated helper; slowdown assessment paragraph present"
+    result: pass
+  - claim: "not isolated helper-only"
+    evidence: "PLAN L9 'composes PR 0117 + PR 0120 + PR 0121 into one coherent human review packet'; composes 4 contracts"
+    result: pass
+  - claim: "not frontend-only"
+    evidence: "PLAN plans new product_iteration_review_packet.py backend module + test_product_iteration_review_packet.py; optional read-only API route only if justified"
+    result: pass
+  - claim: "human review packet contract"
+    evidence: "PLAN ProductIterationReviewPacket dataclass composes summary + candidate + record/session counts + decision_options + safety_boundaries + markdown/plain_text serialization; bounded"
+    result: pass
+  - claim: "advisory decision boundary"
+    evidence: "PLAN L117-121 _DECISION_OPTIONS are advisory labels only; 'Human decision boundary' section explicitly prohibits backlog creation, decision execution, source-record mutation"
+    result: pass
+  - claim: "PR 0117/0119/0120/0121 contracts preserved"
+    evidence: "PLAN L233-237 product_iteration.py, product_iteration_surface.py, product_iteration_summary.py, product_iteration_candidate.py + tests all NOT-modified"
+    result: pass
+  - claim: "no AI/provider/external analytics"
+    evidence: "PLAN L257 forbids AI/provider/LLM summarization; L150 'No AI or LLM was used'; deterministic composition only"
+    result: pass
+  - claim: "privacy/local-only boundaries present"
+    evidence: "PLAN 'Privacy/local-only boundary' forbids hidden reasoning, full transcript, unbounded raw text; _SAFETY_BOUNDARIES embedded in packet"
+    result: pass
+  - claim: "validation strategy complete"
+    evidence: "PLAN Validation commands: compileall, packet tests, PR 0117/0119/0120/0121 contract tests, regression subset, app --check, packet grep, route grep if added, no-resurrection, .ariadne residue check"
+    result: pass
+  - claim: "artifact physically written/read back"
+    evidence: "test -f returns exists; file content read back; find lists file"
+    result: pass
+checks:
+  branch: pass
+  pr_0121_present: pass
+  dirty_tree: pass
+  roadmap_alignment: pass
+  architect_signoff: pass
+  closed_ux_track: pass
+  slowdown_drift_assessed: pass
+  not_isolated_helper_only: pass
+  not_frontend_only: pass
+  review_packet_contract: pass
+  advisory_decision_boundary: pass
+  pr_0117_0119_0120_0121_preserved: pass
+  no_ai_provider_analytics: pass
+  privacy_local_only: pass
+  validation_strategy: pass
+  artifact_write_readback: pass
+boundary_confirmations:
+  - "PLAN.md reviewed and not modified"
+  - "only plan-review artifact written"
+  - "artifact physically written and read back"
+  - "exact architect sign-off phrase found"
+  - "closed UX track not reopened"
+  - "PR 0122 is a coherent composition of 4 existing contracts, not an isolated helper"
+  - "PR 0117, PR 0119, PR 0120, PR 0121 contracts preserved"
+  - "decision options are advisory labels only; no decision execution, no backlog mutation, no source-record mutation"
+  - "no AI/provider/LLM summarization; deterministic composition only"
+  - "no external analytics/network/Docker/shell/git behavior planned"
+  - "no hidden reasoning/full transcript/unbounded text capture planned"
+  - "obsolete decision_trace.py names not resurrected"

@@ -66,6 +66,7 @@ _ROUTES = [
     "/backlog/decision/trace",
     "/health",
     "/product/iterations",
+    "/product/iterations/review-packet",
     "/submit",
     "/task-intake/submit",
     "/task-intake/normalize",
