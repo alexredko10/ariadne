@@ -26,6 +26,10 @@ from task_intake.product_iteration_surface import (
     generate_session_ref,
     record_session_signal,
 )
+from task_intake.product_iteration_review_packet import (
+    ProductIterationReviewPacketStatus,
+    build_product_iteration_review_packet,
+)
 from task_intake.models import TaskIntakeRequest
 from task_intake.normalize import normalize_task_intake
 from task_intake.context_preview import generate_context_preview
@@ -837,6 +841,65 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
                 "status": "recorded",
                 "records": records_json,
                 "total_count": result.total_count,
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        return
+
+    if method == "GET" and path == "/product/iterations/review-packet":
+        # Parse query parameters
+        query_string = scope.get("query_string", b"").decode("utf-8")
+        params = parse_qs(query_string)
+        session_ref = params.get("session_ref", [None])[0]
+        max_results_str = params.get("max_results", ["1000"])[0]
+        try:
+            max_results = int(max_results_str)
+        except (ValueError, TypeError):
+            max_results = 1000
+
+        result = build_product_iteration_review_packet(
+            session_ref=session_ref,
+            max_results=max_results,
+        )
+
+        if result.status == ProductIterationReviewPacketStatus.REJECTED:
+            body = json.dumps({
+                "status": "rejected",
+                "reason_codes": list(result.reason_codes),
+                "details": result.details,
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        elif result.status == ProductIterationReviewPacketStatus.EMPTY:
+            body = json.dumps({
+                "status": "empty",
+                "packet": None,
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+        else:
+            p = result.packet
+            body = json.dumps({
+                "status": "ready",
+                "packet": {
+                    "packet_ref": p.packet_ref,
+                    "packet_status": p.packet_status,
+                    "generated_from": p.generated_from,
+                    "candidate_ref": p.candidate_ref,
+                    "candidate_status": p.candidate_status,
+                    "priority": p.priority,
+                    "confidence": p.confidence,
+                    "reason_codes": list(p.reason_codes),
+                    "recommended_focus": p.recommended_focus,
+                    "human_review_required": p.human_review_required,
+                    "evidence_counts": p.evidence_counts,
+                    "evidence_highlights": p.evidence_highlights,
+                    "recommended_human_questions": list(p.recommended_human_questions),
+                    "decision_options": list(p.decision_options),
+                    "safety_boundaries": list(p.safety_boundaries),
+                    "validation_notes": list(p.validation_notes),
+                    "record_count": p.record_count,
+                    "session_count": p.session_count,
+                    "markdown_text": p.markdown_text,
+                    "plain_text": p.plain_text,
+                },
             }, ensure_ascii=False).encode("utf-8")
             await _send_json(send, 200, body)
         return
