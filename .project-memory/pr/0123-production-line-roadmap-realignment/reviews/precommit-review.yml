@@ -1,0 +1,211 @@
+schema_version: "0.1"
+pr_id: "0123-production-line-roadmap-realignment"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-05T17:47:00Z"
+related_plan: ".project-memory/pr/0123-production-line-roadmap-realignment/PLAN.md"
+related_commit: "317d7b0b14802c966f32bd22c426baa05cda5af1"
+summary:
+  result: "PR 0123 docs/roadmap-only bridge implemented. ROADMAP.md primary target modified with PR 0117-0122 completion record, Production Line Stream (4 stages 0123-0137+), frozen-until-PR-0136 list (6 items), Production Line stop conditions (3 items), and core principle. No ADR 0012 created. No runtime code/test/service/agent/schema changes. PR 0122 evidence chain complete."
+snapshot_delta:
+  plan_base_sha: "5a37663a763e8f3d8caa7cce00c7e2663a73cf9e"
+  current_head: "317d7b0b14802c966f32bd22c426baa05cda5af1"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "ROADMAP.md"
+    - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml"
+  actual_files:
+    - "ROADMAP.md"
+    - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0123-production-line-roadmap-realignment/PLAN.md"
+  - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - "docs/adr/" (directory listing)
+  - ".project-memory/pr/0122-product-iteration-human-review-packet/reviews/precommit-review.yml"
+  - "services/runner/src/runner/docker_agent_adapter.py"
+files_modified: []
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "317d7b0b14802c966f32bd22c426baa05cda5af1"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0123-production-line-roadmap-realignment"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "M ROADMAP.md (only)"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "ROADMAP.md (only docs file modified)"
+  - command: "grep product iteration completion record"
+    result: "passed"
+    exit_code: 0
+    evidence: "ROADMAP L287 '## Product Iteration Substrate Stream (COMPLETED)'; L291-295 table with 0117/0119/0120/0121/0122 all marked 'completed'; L297 'Stream status: closed. Not a reopened Local Interaction UX Track.'; L298 architect sign-off 'экран тайм, product, итерации.'"
+  - command: "grep production line stream + stage 1"
+    result: "passed"
+    exit_code: 0
+    evidence: "ROADMAP L302 '## Production Line Stream (ACTIVE)'; L304 '### Stage 1 — Orchestrator (0123-0127)'; L307 0123; L308 0124 Agent Runner Bridge; L311 0125 Prompt Composer; L313 0126 Verdict Parser; L315 0127 Pipeline Runner"
+  - command: "grep stage 2 closed loop"
+    result: "passed"
+    exit_code: 0
+    evidence: "ROADMAP L319 '### Stage 2 — Closed loop (0128-0131)'; L322 0128 Git Boundary; L324 0129 ariadne task CLI; L325 0130 Run Persistence; L326-327 0131 DOGFOOD MILESTONE 'PR 0131 is created by Ariadne itself via ariadne task'"
+  - command: "grep stage 3 production hardening"
+    result: "passed"
+    exit_code: 0
+    evidence: "ROADMAP L330 '### Stage 3 — Production hardening (0132-0136)'; L333/L335/L337/L339/L340 PRs 0132-0136 all present"
+  - command: "grep stage 4 public"
+    result: "passed"
+    exit_code: 0
+    evidence: "ROADMAP L344 '### Stage 4 — Public (0137+)'; L347 '0137+ — README/quickstart, GitHub release v0.1'"
+  - command: "grep frozen streams + stop conditions + proof principle"
+    result: "passed"
+    exit_code: 0
+    evidence: "ROADMAP L353 '### Frozen until PR 0136 acceptance' header; L358-365 list with all 6 items (Decision Core/GRM, Context Warehouse, Eval harness, Faithfulness audit, Frontend, New product-iteration surface features); L370-372 stop conditions (docs-only/schemas-only block, unattended git mutation rights block, capability stream before 0136 block); L376-378 'Agent output is not evidence. Runtime-captured proof is evidence. ... the human must stop being the orchestrator.'"
+  - command: "grep PR 0124 Agent Runner Bridge fields"
+    result: "passed"
+    exit_code: 0
+    evidence: "ROADMAP L308-310: 0124 uses docker_agent_adapter, agents/*.yml config, 'input agent_name + task_prompt', 'output captured artifact'"
+  - command: "test ADR 0012 not created"
+    result: "passed"
+    exit_code: 1
+    evidence: "ls docs/adr/0012* shows only ADRs 0001-0011; ADR 0012 explicitly not created per PLAN decision"
+  - command: "find .ariadne -maxdepth 5 -type f"
+    result: "passed"
+    exit_code: 0
+    evidence: ".ariadne absent (no residue)"
+  - command: "git diff docs/ services/ agents/ schemas/ packages/ apps/ pyproject.toml package.json Makefile"
+    result: "passed"
+    exit_code: 0
+    evidence: "no docs/services/agents/schemas runtime files in git diff (ROADMAP.md only)"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Approve PR 0123 docs/roadmap-only implementation"
+    reason: "ROADMAP.md contains all 10 required elements (PR 0117-0122 completion, Production Line 4-stage stream, PR 0124 Agent Runner Bridge definition, DOGFOOD at PR 0131, frozen-until-0136 list of 6 items, 3 stop conditions, core principle); no ADR 0012; no runtime code/test/service/agent/schema changes; dirty tree contains only ROADMAP.md."
+context_used:
+  labels: [production-line-roadmap, docs-roadmap-only, bridge-pr, pr-0117-0122-completion, pr-0124-agent-runner-bridge, dogfood-milestone, frozen-until-0136]
+  memory_files_read:
+    - ".project-memory/pr/0123-production-line-roadmap-realignment/PLAN.md"
+    - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0122-product-iteration-human-review-packet/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "ROADMAP.md"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+    - "docs/adr/" (listing: 0001-0011 only; 0012 absent)
+    - "services/runner/src/runner/docker_agent_adapter.py"
+  files_modified:
+    - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml"
+  files_intentionally_ignored: ["schemas/**", "packages/**", "apps/**", "services/**", "agents/**", "docs/**", "pyproject.toml", "package.json", "Makefile"]
+checks:
+  branch: pass
+  plan_review: pass
+  dirty_tree: pass
+  roadmap_primary_target: pass
+  no_adr_0012: pass
+  product_iteration_stream_completed: pass
+  production_line_stream_defined: pass
+  pr_0124_agent_runner_bridge_defined: pass
+  dogfood_milestone: pass
+  frozen_until_0136: pass
+  stop_conditions: pass
+  proof_principle: pass
+  no_implementation: pass
+  validation: pass
+  artifact_write_readback: pass
+boundary_confirmations:
+  - "evidence-first precommit-review completed"
+  - "PLAN.md reviewed and not modified"
+  - "plan-review artifact reviewed and not modified"
+  - "ROADMAP.md is primary coder write target (modified by implementation)"
+  - "ADR 0012 not created (docs/adr/ contains only 0001-0011)"
+  - "only precommit-review artifact physically written by review"
+  - "precommit-review artifact read back"
+  - "correct PR 0123 branch confirmed"
+  - "PR 0117-0122 Product Iteration Substrate Stream recorded as completed"
+  - "Production Line Stream defined with all 4 stages (0123-0127, 0128-0131, 0132-0136, 0137+)"
+  - "PR 0124 Agent Runner Bridge defined with docker_agent_adapter, agents/*.yml, agent_name + task_prompt input, captured artifact output"
+  - "DOGFOOD MILESTONE at PR 0131 ('PR 0131 is created by Ariadne itself via ariadne task')"
+  - "Frozen-until-PR-0136 list contains all 6 items (Decision Core/GRM, Context Warehouse, Eval harness, Faithfulness audit, Frontend, New product-iteration surface features)"
+  - "Production Line stop conditions block docs-only/schemas-only, unattended git mutation, capability stream before 0136"
+  - "Core principle recorded: 'Agent output is not evidence. Runtime-captured proof is evidence. ... the human must stop being the orchestrator.'"
+  - "no runtime code/test/service/agent/schema changes"
+  - "no .ariadne/ residue"
+  - "validation passed"
+evidence_ledger:
+  - claim: "branch correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0123-production-line-roadmap-realignment"
+    result: pass
+  - claim: "plan-review approved"
+    evidence_source: "plan-review.yml verdict field"
+    exact_observed_evidence: "verdict: approve (2026-07-05T17:38:24Z)"
+    result: pass
+  - claim: "dirty tree within scope"
+    evidence_source: "git status --short + git diff --name-only"
+    exact_observed_evidence: "M ROADMAP.md (only); no docs/services/agents/schemas changes"
+    result: pass
+  - claim: "ROADMAP primary target"
+    evidence_source: "git diff --name-only"
+    exact_observed_evidence: "ROADMAP.md only modified file"
+    result: pass
+  - claim: "no ADR 0012 created"
+    evidence_source: "ls docs/adr/0012*"
+    exact_observed_evidence: "No ADR 0012 (docs/adr/ contains only 0001-0011)"
+    result: pass
+  - claim: "Product Iteration stream completed"
+    evidence_source: "grep ROADMAP.md + table read"
+    exact_observed_evidence: "ROADMAP L287 '## Product Iteration Substrate Stream (COMPLETED)'; table L291-295 all 5 PRs marked 'completed'; L297 stream closed + not reopened UX Track; L298 architect sign-off phrase"
+    result: pass
+  - claim: "Production Line stream defined"
+    evidence_source: "grep ROADMAP.md"
+    exact_observed_evidence: "L302 Production Line Stream ACTIVE; L304 Stage 1 Orchestrator 0123-0127; L319 Stage 2 Closed loop 0128-0131; L330 Stage 3 Production hardening 0132-0136; L344 Stage 4 Public 0137+"
+    result: pass
+  - claim: "PR 0124 Agent Runner Bridge defined"
+    evidence_source: "grep ROADMAP.md L308-310"
+    exact_observed_evidence: "0124 — Agent Runner Bridge uses docker_agent_adapter with agents/*.yml config; input agent_name + task_prompt; output captured artifact"
+    result: pass
+  - claim: "dogfood milestone present"
+    evidence_source: "grep ROADMAP.md L326-327"
+    exact_observed_evidence: "0131 — DOGFOOD MILESTONE: PR 0131 is created by Ariadne itself via ariadne task"
+    result: pass
+  - claim: "frozen-until-0136 list present"
+    evidence_source: "sed ROADMAP.md L353-365"
+    exact_observed_evidence: "L353 header 'Frozen until PR 0136 acceptance'; L358-365 list contains all 6 required items (Decision Core/GRM, Context Warehouse Bronze/Silver/Gold, Eval harness/benchmarks, Faithfulness audit, Frontend, New product-iteration surface features)"
+    result: pass
+  - claim: "stop conditions present"
+    evidence_source: "grep ROADMAP.md L370-372"
+    exact_observed_evidence: "3 stop conditions present: docs-only/schemas-only block, unattended git mutation rights block, capability stream before 0136 block"
+    result: pass
+  - claim: "proof principle present"
+    evidence_source: "grep ROADMAP.md L376-378"
+    exact_observed_evidence: "'Agent output is not evidence. Runtime-captured proof is evidence. The substrate exists to run the loop — the human must stop being the orchestrator.'"
+    result: pass
+  - claim: "no implementation files changed"
+    evidence_source: "git diff --name-only"
+    exact_observed_evidence: "only ROADMAP.md modified; no services/agents/schemas/packages/apps/docs/** runtime files changed"
+    result: pass
+  - claim: "validation passed"
+    evidence_source: "grep commands"
+    exact_observed_evidence: "all 11 grep validations passed (exit 0); ADR 0012 absence confirmed; no .ariadne residue"
+    result: pass
+  - claim: "artifact physically written/read back"
+    evidence_source: "write_file + test -f"
+    exact_observed_evidence: "precommit-review.yml created in .project-memory/pr/0123-production-line-roadmap-realignment/reviews/"
+    result: pass
