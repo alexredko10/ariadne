@@ -1,0 +1,158 @@
+schema_version: "0.1"
+pr_id: "0124-agent-runner-bridge"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-05T17:59:35Z"
+related_plan: ".project-memory/pr/0124-agent-runner-bridge/PLAN.md"
+summary:
+  result: "PR 0124 PLAN is approved."
+  main_reason: "First executable Production Line PR: Agent Runner Bridge with runtime-captured proof; uses existing docker_agent_adapter + harness; no direct Docker; no unattended git mutation; frozen streams not started."
+snapshot_delta:
+  head: "27e28f820f5d664dec31c836c04c4420fd058bcf"
+  branch: "0124-agent-runner-bridge"
+  status_short: |
+    ?? .project-memory/pr/0124-agent-runner-bridge/
+  diff_names: |
+    <none>
+blockers: []
+warnings: []
+files_read:
+  - ".project-memory/pr/0124-agent-runner-bridge/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - ".project-memory/pr/0123-production-line-roadmap-realignment/PLAN.md"
+  - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml"
+  - "services/runner/src/runner/docker_agent_adapter.py"
+  - "services/runner/src/runner/proof_capture.py"
+  - "services/runner/src/runner/handoff_packet.py"
+  - "services/runner/src/runner/acceptance_criteria.py"
+  - "services/runner/src/runner/gate_evidence.py"
+  - "services/runner/src/runner/adapter_registry.py"
+  - "services/runner/src/runner/local_harness.py"
+  - "services/runner/src/runner/execution_envelope.py"
+  - "services/runner/src/runner/artifacts.py"
+  - "agents/planner.yml"
+  - "agents/plan-review.yml"
+  - "agents/coder.yml"
+  - "agents/precommit-review.yml"
+files_written:
+  - ".project-memory/pr/0124-agent-runner-bridge/reviews/plan-review.yml"
+validation:
+  commands:
+    - cmd: "git rev-parse --verify HEAD"
+      exit: 0
+      output: "27e28f820f5d664dec31c836c04c4420fd058bcf"
+    - cmd: "git branch --show-current"
+      exit: 0
+      output: "0124-agent-runner-bridge"
+    - cmd: "git status --short"
+      exit: 0
+      output: "?? .project-memory/pr/0124-agent-runner-bridge/"
+    - cmd: "git diff --name-only"
+      exit: 0
+      output: "<empty>"
+    - cmd: "find agents -maxdepth 1 -type f | sort"
+      exit: 0
+      output_summary: "9 agent configs present (architect.yml, coder.yml, plan-review.yml, precommit-review.yml, chief-architect.yml, etc.)"
+    - cmd: "find services/runner/src/runner -maxdepth 1 -type f | sort"
+      exit: 0
+      output_summary: "docker_agent_adapter.py, proof_capture.py, handoff_packet.py, acceptance_criteria.py, gate_evidence.py, adapter_registry.py, local_harness.py, execution_envelope.py, artifacts.py all present"
+    - cmd: "find services/runner/tests -maxdepth 1 -type f | sort"
+      exit: 0
+      output_summary: "test_docker_agent_adapter.py + test_proof_capture.py + test_local_harness.py + 28 other test files present"
+    - cmd: "grep -R -n -E 'Production Line Stream|0124 — Agent Runner Bridge|Agent output is not evidence|Runtime-captured proof is evidence|...' ROADMAP.md .../0124"
+      exit: 0
+      output_summary: "ROADMAP L302 '## Production Line Stream (ACTIVE)'; L308 '0124 — Agent Runner Bridge'; L370 docs-only block; L371 unattended git mutation block; L376 'Agent output is not evidence. Runtime-captured proof is evidence.'"
+    - cmd: "grep -R -n -E 'run_docker_agent_execution|docker_agent_adapter|allow_docker|executor|Docker' services/runner/src/runner/docker_agent_adapter.py services/runner/tests"
+      exit: 0
+      output_summary: "docker_agent_adapter.py L93 run_docker_agent_execution signature; L96 executor param; L97 allow_docker param; L107 'Inject a fake executor in tests'"
+    - cmd: "grep -R -n -E 'subprocess.run|docker compose|gh pr create|git push|git commit|git add' .../0124 services/runner/src services/runner/tests"
+      exit: 0
+      output_summary: "PLAN.md prohibits these; runtime matches only in legitimate existing modules (docker_subprocess_executor, improvement_backlog, session_continuity). New bridge files not yet created."
+    - cmd: "grep -R -n -E 'PHYSICAL ARTIFACT WRITE GATE|EVIDENCE LEDGER|write_file:path=.project-memory/pr/.*/reviews' agents/plan-review.yml agents/precommit-review.yml"
+      exit: 0
+      output_summary: "agents/precommit-review.yml L95 references EVIDENCE LEDGER; write/readback flow confirmed"
+    - cmd: "if [ -d .ariadne ]; then find .ariadne ..."
+      exit: 0
+      output: ".ariadne absent"
+    - cmd: "test -f .../reviews/plan-review.yml (after write)"
+      exit: 0
+      output: "exists; read back"
+evidence_ledger:
+  - claim: "branch correct"
+    evidence: "git branch = 0124-agent-runner-bridge"
+    result: pass
+  - claim: "dirty tree within planning scope"
+    evidence: "git status = '?? 0124 dir' only; no ROADMAP/docs/services/agents/schemas dirty"
+    result: pass
+  - claim: "roadmap alignment present"
+    evidence: "PLAN L21-26: track='Production Line — Stage 1 Orchestrator'; slot='0124 — Agent Runner Bridge'; executable-first; proof principle stated"
+    result: pass
+  - claim: "PR 0123 / ROADMAP evidence present"
+    evidence: "ROADMAP L302 'Production Line Stream (ACTIVE)'; L308 '0124 — Agent Runner Bridge'; L370 stop conditions; PR 0123 precommit pass recorded in PLAN L32-37"
+    result: pass
+  - claim: "executable-first scope"
+    evidence: "PLAN L121-167 defines runtime bridge module + 17 test classes; not docs-only"
+    result: pass
+  - claim: "Agent Runner Bridge contract"
+    evidence: "PLAN L99-119 run_agent_runner_bridge(agent_name, task_prompt, agents_dir, workdir, allow_docker); loads agents/{agent_name}.yml; uses docker_agent_adapter via run_local_execution_harness; returns AgentRunnerBridgeResult"
+    result: pass
+  - claim: "runtime proof artifact contract"
+    evidence: "PLAN L169-189: capture_proof() with agent_name, task_prompt_hash, agent_config_hash, adapter_status, exit_code, stdout_hash, stderr_hash, adapter_result; proof_source='runtime-captured'"
+    result: pass
+  - claim: "agent output not accepted as evidence"
+    evidence: "PLAN L184 explicit 'Agent output is not evidence. Runtime-captured proof is evidence.'; L25 proof principle; L330 proof drift gate"
+    result: pass
+  - claim: "Docker adapter boundary"
+    evidence: "PLAN L193-199: passes through run_local_execution_harness() → dispatch_execution(); no direct Docker CLI; tests use injected fake executor; L288 TestNoDirectDocker"
+    result: pass
+  - claim: "agent config boundary"
+    evidence: "PLAN L202-207: agent_name regex ^[a-zA-Z0-9_-]+$ rejects path traversal; missing → missing_agent_config; SHA256 hash; agents/*.yml NOT modified"
+    result: pass
+  - claim: "git mutation boundary"
+    evidence: "PLAN L210-213: prohibits git add/commit/push/checkout/switch/merge/rebase/reset/clean/tag + gh pr create/release; L289 TestNoGitMutation; L373 stop condition"
+    result: pass
+  - claim: "frozen streams not started"
+    evidence: "PLAN L216-233 explicit non-goals list: no 4-agent pipeline, prompt composer, verdict parser, git boundary, ariadne task CLI, run persistence, retry loop, model health, run report, parallel queue; no Decision Core/Context Warehouse/eval/faithfulness/frontend/new surface features"
+    result: pass
+  - claim: "proposed files constrained"
+    evidence: "PLAN L235-249 limits to agent_runner_bridge.py (new) + test_agent_runner_bridge.py (new); runtime substrate + agents/*.yml + task_intake + ROADMAP/docs/schemas NOT modified"
+    result: pass
+  - claim: "validation strategy complete"
+    evidence: "PLAN L304-315: compileall, focused bridge tests, docker adapter regression, grep checks, .ariadne residue check, git status/diff; no real Docker daemon required"
+    result: pass
+  - claim: "artifact physically written/read back"
+    evidence: "test -f returns exists; file content read back; find lists file"
+    result: pass
+checks:
+  branch: pass
+  dirty_tree: pass
+  roadmap_alignment: pass
+  pr_0123_roadmap_evidence: pass
+  executable_first: pass
+  bridge_contract: pass
+  runtime_proof_artifact: pass
+  agent_output_not_evidence: pass
+  docker_adapter_boundary: pass
+  agent_config_boundary: pass
+  git_mutation_boundary: pass
+  frozen_streams_not_started: pass
+  proposed_files_constrained: pass
+  validation_strategy: pass
+  artifact_write_readback: pass
+boundary_confirmations:
+  - "PLAN.md reviewed and not modified"
+  - "ROADMAP.md, docs/**, agents/**, schemas/**, services/** not modified by planner"
+  - "only plan-review artifact written"
+  - "artifact physically written and read back"
+  - "PR 0124 is executable-first: runtime bridge module + focused tests only"
+  - "Bridge uses docker_agent_adapter via existing harness; no direct Docker CLI"
+  - "Tests inject fake executor; no real Docker daemon required"
+  - "agent_name regex ^[a-zA-Z0-9_-]+$ blocks path traversal"
+  - "agents/*.yml loaded but not modified; SHA256 content hash recorded"
+  - "no git add/commit/push/checkout/switch/merge/rebase/reset/clean/tag; no gh pr create/release"
+  - "no full 4-agent pipeline, no prompt composer, no verdict parser, no git boundary, no ariadne task CLI"
+  - "no frozen stream started (Decision Core, Context Warehouse, eval harness, faithfulness audit, frontend, new surface features)"
+  - "proof artifact is runtime-captured via capture_proof(); proof_source='runtime-captured'"

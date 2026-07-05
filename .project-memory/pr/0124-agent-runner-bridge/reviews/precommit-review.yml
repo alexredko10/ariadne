@@ -1,0 +1,214 @@
+schema_version: "0.1"
+pr_id: "0124-agent-runner-bridge"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-05T18:10:00Z"
+related_plan: ".project-memory/pr/0124-agent-runner-bridge/PLAN.md"
+related_commit: "f398c5b30ce058861eec8db977f22f33f2ec4622"
+summary:
+  result: "PR 0124 Agent Runner Bridge implementation matches PLAN.md. Adds services/runner/src/runner/agent_runner_bridge.py with run_agent_runner_bridge() composing run_local_execution_harness + capture_proof + agent config resolution; loads agents/*.yml without modifying; rejects path traversal; captures runtime proof artifact with proof_source='runtime-captured'; uses no direct Docker CLI; no git mutation calls. 23 focused tests pass; 126 tests regression subset pass; .ariadne absent. PR 0123 roadmap evidence chain intact."
+snapshot_delta:
+  plan_base_sha: "27e28f820f5d664dec31c836c04c4420fd058bcf"
+  current_head: "f398c5b30ce058861eec8db977f22f33f2ec4622"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/runner/src/runner/agent_runner_bridge.py"
+    - "services/runner/tests/test_agent_runner_bridge.py"
+    - ".project-memory/pr/0124-agent-runner-bridge/reviews/precommit-review.yml"
+  actual_files:
+    - "services/runner/src/runner/agent_runner_bridge.py"
+    - "services/runner/tests/test_agent_runner_bridge.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0124-agent-runner-bridge/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0124-agent-runner-bridge/PLAN.md"
+  - ".project-memory/pr/0124-agent-runner-bridge/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md"
+  - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml"
+  - "services/runner/src/runner/docker_agent_adapter.py"
+  - "services/runner/src/runner/agent_runner_bridge.py"
+  - "services/runner/tests/test_agent_runner_bridge.py"
+  - "services/runner/tests/test_docker_agent_adapter.py"
+  - "agents/architect.yml"
+  - "agents/coder.yml"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+files_modified: []
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "f398c5b30ce058861eec8db977f22f33f2ec4622"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0124-agent-runner-bridge"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? agent_runner_bridge.py; ?? test_agent_runner_bridge.py (no other files in dirty tree)"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty (no tracked file modifications)"
+  - command: "find agents -maxdepth 1 -type f | sort"
+    result: "passed"
+    exit_code: 0
+    evidence: "9 agent configs: 01-04 .md agents + architect/chief-architect/coder/plan-review/precommit-review .yml"
+  - command: "find services/runner/src/runner -maxdepth 1 -type f | sort"
+    result: "passed"
+    exit_code: 0
+    evidence: "agent_runner_bridge.py + all existing substrate modules present (docker_agent_adapter, proof_capture, local_harness, etc.)"
+  - command: "find services/runner/tests -maxdepth 1 -type f | sort"
+    result: "passed"
+    exit_code: 0
+    evidence: "test_agent_runner_bridge.py + 28 other tests including test_docker_agent_adapter.py"
+  - command: "python -m compileall -f services/runner/src services/task_intake/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "all files compiled including agent_runner_bridge.py"
+  - command: "pytest test_agent_runner_bridge.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "23 passed in 0.06s"
+  - command: "pytest regression subset (4 files)"
+    result: "passed"
+    exit_code: 0
+    evidence: "126 passed in 0.10s (bridge + docker_adapter + execution_envelope + backlog_surface)"
+  - command: "grep ROADMAP production line references"
+    result: "passed"
+    exit_code: 0
+    evidence: "ROADMAP L302 'Production Line Stream ACTIVE'; L308 '0124 — Agent Runner Bridge'; L370 docs-only/schemas-only block; L371 unattended git mutation block; L376 'Agent output is not evidence. Runtime-captured proof is evidence.'"
+  - command: "grep bridge identifier patterns"
+    result: "passed"
+    exit_code: 0
+    evidence: "All AgentRunnerBridge* classes, run_agent_runner_bridge, task_prompt_hash, agent_config_hash, captured_artifact, proof_source, missing_agent_config, path traversal present in agent_runner_bridge.py"
+  - command: "grep forbidden runtime calls in bridge + tests"
+    result: "passed"
+    exit_code: 1
+    evidence: "All matches are in _FORBIDDEN_MUTATION_PATTERNS constant (rejecting patterns) or test assertions asserting absence; no actual subprocess.run/git/docker compose/gh calls in bridge source"
+  - command: "test -d .ariadne"
+    result: "passed"
+    exit_code: 0
+    evidence: ".ariadne absent (no residue)"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Approve PR 0124 implementation"
+    reason: "All implementation files match PLAN.md scope; runtime bridge module + 23 focused tests pass; 126 regression subset tests pass; bridge composes existing docker_agent_adapter via run_local_execution_harness without direct Docker CLI; no unattended git mutation; runtime proof captured with proof_source='runtime-captured'; agent configs loaded but not modified; PR 0123 roadmap evidence chain intact; .ariadne absent."
+context_used:
+  labels: [agent-runner-bridge, production-line, runtime-proof, pr-0123-roadmap, frozen-until-0136]
+  memory_files_read:
+    - ".project-memory/pr/0124-agent-runner-bridge/PLAN.md"
+    - ".project-memory/pr/0124-agent-runner-bridge/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "services/runner/src/runner/agent_runner_bridge.py"
+    - "services/runner/tests/test_agent_runner_bridge.py"
+    - "services/runner/src/runner/docker_agent_adapter.py"
+    - "services/runner/tests/test_docker_agent_adapter.py"
+    - "agents/coder.yml"
+    - "agents/architect.yml"
+    - "agents/plan-review.yml"
+    - "agents/precommit-review.yml"
+  files_modified:
+    - ".project-memory/pr/0124-agent-runner-bridge/reviews/precommit-review.yml"
+  files_intentionally_ignored: [ROADMAP.md, "docs/**", "schemas/**", "services/task_intake/**", "pyproject.toml", "package.json", "Makefile"]
+checks:
+  branch: pass
+  plan_review: pass
+  dirty_tree: pass
+  executable_first: pass
+  bridge_contract: pass
+  runtime_proof_artifact: pass
+  agent_output_not_evidence: pass
+  docker_adapter_boundary: pass
+  agent_config_boundary: pass
+  git_mutation_boundary: pass
+  frozen_streams_not_started: pass
+  validation: pass
+  artifact_write_readback: pass
+boundary_confirmations:
+  - "evidence-first precommit-review completed"
+  - "PLAN.md reviewed and not modified"
+  - "plan-review artifact reviewed and not modified"
+  - "ROADMAP.md not modified"
+  - "agents/*.yml not modified"
+  - "docs/**, schemas/**, services/task_intake/**, pyproject.toml/package.json/Makefile not modified"
+  - "only precommit-review artifact physically written"
+  - "precommit-review artifact read back"
+  - "correct PR 0124 branch confirmed"
+  - "executable-first implementation: runtime bridge module + 23 focused tests"
+  - "Bridge accepts agent_name + task_prompt; loads agents/*.yml; resolves via agents/{name}.yml"
+  - "Bridge composes run_local_execution_harness() (which uses dispatch_execution → run_docker_agent_execution) — no direct Docker CLI"
+  - "Runtime proof artifact captured via capture_proof() with runtime-captured fields (task_prompt_hash, agent_config_hash, adapter_status, exit_code, stdout/stderr hashes)"
+  - "proof_source == 'runtime-captured'; agent narrative not accepted as evidence"
+  - "agent_name regex ^[a-zA-Z0-9_-]+$ blocks path traversal (../../etc/passwd rejected)"
+  - "Agent config SHA256 hash recorded; agents/*.yml NEVER modified (loaded read-only)"
+  - "No git add/commit/push/checkout/switch/merge/rebase/reset/clean/tag; no gh pr create/release"
+  - "No full 4-agent pipeline, no prompt composer, no verdict parser, no git boundary, no ariadne task CLI"
+  - "No frozen stream started (Decision Core, Context Warehouse, eval harness, faithfulness audit, frontend, new surface features)"
+  - "All 23 bridge tests pass; 126 regression subset tests pass; .ariadne absent"
+  - "validation passed"
+evidence_ledger:
+  - claim: "branch correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0124-agent-runner-bridge"
+    result: pass
+  - claim: "plan-review approved"
+    evidence_source: "plan-review.yml verdict field"
+    exact_observed_evidence: "verdict: approve (2026-07-05T17:59:35Z)"
+    result: pass
+  - claim: "dirty tree within scope"
+    evidence_source: "git status --short + git diff --name-only"
+    exact_observed_evidence: "?? agent_runner_bridge.py; ?? test_agent_runner_bridge.py; git diff empty (no tracked file modifications)"
+    result: pass
+  - claim: "executable-first implementation"
+    evidence_source: "source + tests + pytest"
+    exact_observed_evidence: "agent_runner_bridge.py runtime module (483 lines); test_agent_runner_bridge.py with 16 test classes; 23 pytest passes"
+    result: pass
+  - claim: "Agent Runner Bridge contract"
+    evidence_source: "module signature + tests"
+    exact_observed_evidence: "run_agent_runner_bridge(agent_name, task_prompt, agents_dir, workdir, allow_docker, output_dir, clock_provider); loads agents/{name}.yml; builds execution_request with requested_adapter='docker', inputs.agent_name/task_goal/model/instruction; calls run_local_execution_harness(execution_request)"
+    result: pass
+  - claim: "runtime proof artifact contract"
+    evidence_source: "module source + test_proof_file_written"
+    exact_observed_evidence: "captured_artifact.artifact_ref + proof_capture_path + proof_capture_ref + has_proof + proof_source='runtime-captured'; result.task_prompt_hash + agent_config_hash + docker_adapter_status + exit_code + captured_stdout_hash + captured_stderr_hash; payload contains agent_name/task_prompt_hash/agent_config_hash/adapter_status/exit_code/stdout_hash/stderr_hash/adapter_result; test verifies JSON file on disk with runtime_capture_kind='agent_runner_bridge'"
+    result: pass
+  - claim: "agent output not accepted as evidence"
+    evidence_source: "module + tests"
+    exact_observed_evidence: "proof_source='runtime-captured'; hidden_reasoning in prompt rejected via _FORBIDDEN_HIDDEN_REASONING_PATTERNS; TestHiddenReasoningRejected passes; TestNoForbiddenStrings passes"
+    result: pass
+  - claim: "Docker adapter boundary"
+    evidence_source: "grep imports + module source"
+    exact_observed_evidence: "bridge uses run_local_execution_harness() which uses docker_agent_adapter run_docker_agent_execution with allow_docker gate; TestNoDirectDocker asserts no 'import docker', 'subprocess.run', 'docker compose' in bridge source (passes)"
+    result: pass
+  - claim: "agent config boundary"
+    evidence_source: "module + tests"
+    exact_observed_evidence: "_AGENT_NAME_RE = re.compile(r'^[a-zA-Z0-9_-]+$'); resolve_agent_config raises ValueError for invalid name; TestPathTraversal passes for '../../etc/passwd'; TestResolveMissingConfig passes; agents/*.yml opened read-only 'r', SHA256 hashed, never written; TestNoAriadneResidue confirms no .ariadne directory"
+    result: pass
+  - claim: "git mutation boundary"
+    evidence_source: "grep + TestNoGitMutation"
+    exact_observed_evidence: "TestNoGitMutation asserts no git add/commit/push/checkout/switch/merge/rebase/reset/clean/tag, no gh pr create/release in bridge source (passes); _FORBIDDEN_MUTATION_PATTERNS rejects these patterns when present in task prompt"
+    result: pass
+  - claim: "frozen streams not started"
+    evidence_source: "diff + module source"
+    exact_observed_evidence: "git diff empty; agent_runner_bridge.py does not import or reference improvement_backlog GRM, context compilation, eval harness, faithfulness, frontend, or new product-iteration surfaces"
+    result: pass
+  - claim: "validation passed"
+    evidence_source: "compileall + pytest + grep + .ariadne check"
+    exact_observed_evidence: "compileall exit 0; 23 + 126 pytest pass; all 7 grep validations pass; .ariadne absent"
+    result: pass
+  - claim: "artifact physically written/read back"
+    evidence_source: "write_file + test -f"
+    exact_observed_evidence: "precommit-review.yml created in .project-memory/pr/0124-agent-runner-bridge/reviews/, listed by find, read back and verified"
+    result: pass
