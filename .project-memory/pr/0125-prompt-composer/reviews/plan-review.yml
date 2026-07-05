@@ -1,0 +1,162 @@
+schema_version: "0.1"
+pr_id: "0125-prompt-composer"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-05T18:18:46Z"
+related_plan: ".project-memory/pr/0125-prompt-composer/PLAN.md"
+summary:
+  result: "PR 0125 PLAN is approved."
+  main_reason: "Deterministic Prompt Composer generates exactly four packets (planner, plan-review, coder, precommit-review) ready for run_agent_runner_bridge; cited PR 0124 bridge + PR 0123 realignment; runtime-captured proof principle; no agent execution; frozen streams not started."
+snapshot_delta:
+  head: "3148390e4881e199d5f7f911b462701352bfc81f"
+  branch: "0125-prompt-composer"
+  status_short: |
+    ?? .project-memory/pr/0125-prompt-composer/
+  diff_names: |
+    <none>
+blockers: []
+warnings: []
+files_read:
+  - ".project-memory/pr/0125-prompt-composer/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - ".project-memory/pr/0123-production-line-roadmap-realignment/PLAN.md"
+  - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml"
+  - ".project-memory/pr/0124-agent-runner-bridge/PLAN.md"
+  - ".project-memory/pr/0124-agent-runner-bridge/reviews/precommit-review.yml"
+  - "services/runner/src/runner/agent_runner_bridge.py"
+  - "services/runner/tests/test_agent_runner_bridge.py"
+  - "services/runner/src/runner/docker_agent_adapter.py"
+  - "services/runner/src/runner/proof_capture.py"
+  - "services/runner/src/runner/handoff_packet.py"
+  - "services/runner/src/runner/acceptance_criteria.py"
+  - "services/runner/src/runner/gate_evidence.py"
+  - "agents/planner.yml"
+  - "agents/plan-review.yml"
+  - "agents/coder.yml"
+  - "agents/precommit-review.yml"
+files_written:
+  - ".project-memory/pr/0125-prompt-composer/reviews/plan-review.yml"
+validation:
+  commands:
+    - cmd: "git rev-parse --verify HEAD"
+      exit: 0
+      output: "3148390e4881e199d5f7f911b462701352bfc81f"
+    - cmd: "git branch --show-current"
+      exit: 0
+      output: "0125-prompt-composer"
+    - cmd: "git status --short"
+      exit: 0
+      output: "?? .project-memory/pr/0125-prompt-composer/"
+    - cmd: "git diff --name-only"
+      exit: 0
+      output: "<empty>"
+    - cmd: "find agents -maxdepth 1 -type f | sort"
+      exit: 0
+      output_summary: "9 agent files: architect.yml, chief-architect.yml, coder.yml, plan-review.yml, precommit-review.yml + 4 .md specs (no planner.yml; PLAN handles gracefully)"
+    - cmd: "find services/runner/src/runner -maxdepth 1 -type f | sort"
+      exit: 0
+      output_summary: "agent_runner_bridge.py present (PR 0124); docker_agent_adapter.py + proof_capture.py + handoff_packet.py + acceptance_criteria.py + gate_evidence.py all present"
+    - cmd: "find services/runner/tests -maxdepth 1 -type f | sort"
+      exit: 0
+      output_summary: "test_agent_runner_bridge.py present (PR 0124); 31 test files total"
+    - cmd: "grep -R -n -E 'Production Line Stream|0125|0124|Agent output|Runtime-captured|unattended git' ROADMAP.md .../0125"
+      exit: 0
+      output_summary: "ROADMAP L302 'Production Line Stream (ACTIVE)'; L308 '0124 — Agent Runner Bridge'; L311 '0125 — Prompt Composer: generate planner/plan-review/coder/precommit'; L370 docs-only block; L371 unattended git mutation block; L376 proof principle"
+    - cmd: "grep -R -n -E 'run_agent_runner_bridge|AgentRunnerBridge|task_prompt|agent_name|runtime-captured|agent_config_hash|task_prompt_hash' agent_runner_bridge.py test_agent_runner_bridge.py"
+      exit: 0
+      output_summary: "agent_runner_bridge.py L60 task_prompt, L95 task_prompt_hash, L97 agent_config_hash, L285 run_agent_runner_bridge signature, L470 proof_source='runtime-captured'"
+    - cmd: "grep -R -n -E 'git push|git commit|git add|gh pr create|docker compose|docker run|pip install|python -m pip install' .../0125 services/runner/src services/runner/tests"
+      exit: 0
+      output_summary: "PLAN.md explicitly forbids all; runtime matches only in legitimate existing modules' forbidden-pattern detection lists (session_continuity, improvement_backlog, improvement_candidate, agent_runner_bridge). New prompt_composer files not yet created."
+    - cmd: "grep -R -n -E 'PHYSICAL ARTIFACT WRITE GATE|EVIDENCE LEDGER|write_file:path=.project-memory/pr/.*/reviews' agents/plan-review.yml agents/precommit-review.yml"
+      exit: 0
+      output_summary: "agents/precommit-review.yml L95 EVIDENCE LEDGER; write/readback flow confirmed"
+    - cmd: "if [ -d .ariadne ]; then find .ariadne ..."
+      exit: 0
+      output: ".ariadne absent"
+    - cmd: "test -f .../reviews/plan-review.yml (after write)"
+      exit: 0
+      output: "exists; read back"
+evidence_ledger:
+  - claim: "branch correct"
+    evidence: "git branch = 0125-prompt-composer"
+    result: pass
+  - claim: "dirty tree within planning scope"
+    evidence: "git status = '?? 0125 dir' only; no ROADMAP/docs/services/agents/schemas dirty"
+    result: pass
+  - claim: "roadmap alignment present"
+    evidence: "PLAN L21-26: track='Production Line — Stage 1 Orchestrator'; slot='0125 — Prompt Composer'; executable-first; proof principle stated"
+    result: pass
+  - claim: "PR 0123 / ROADMAP evidence present"
+    evidence: "ROADMAP L302 'Production Line Stream (ACTIVE)'; L311 '0125 — Prompt Composer'; PLAN L46 cites PR 0123 as roadmap realignment"
+    result: pass
+  - claim: "PR 0124 bridge evidence present"
+    evidence: "agent_runner_bridge.py L285 run_agent_runner_bridge(agent_name, task_prompt, ...); test_agent_runner_bridge.py confirms API; PLAN L36-44 cites PR 0124 as the bridge this PR composes prompts for"
+    result: pass
+  - claim: "executable-first scope"
+    evidence: "PLAN proposes runtime prompt_composer.py + test_prompt_composer.py + 23 test classes; not docs-only"
+    result: pass
+  - claim: "Prompt Composer contract"
+    evidence: "PLAN L129-149 compose_pr_prompts(PromptComposerRequest) returns PromptComposerResult; reads ROADMAP, agents, contexts, returns 4 packets"
+    result: pass
+  - claim: "four prompt packets defined"
+    evidence: "PLAN L145 prompt_order=('planner','plan-review','coder','precommit-review'); L153-208 each packet template specified"
+    result: pass
+  - claim: "prompt packet contract complete"
+    evidence: "PLAN L110-128 PromptPacket fields: agent_name, prompt_kind, prompt_text, prompt_hash, required_inputs, expected_output_path, allowed/forbidden_write_paths, forbidden_commands, evidence_requirements, boundary_confirmations, source_template_hash, source_context_hash, ready_for_agent_runner_bridge"
+    result: pass
+  - claim: "template/context evidence contract"
+    evidence: "PLAN L265-273 evidence keys: roadmap_production_line, roadmap_pr_0124, roadmap_frozen_streams, agent_configs, review_artifact_schema, context_paths; all SHA256 hashed"
+    result: pass
+  - claim: "agent output not accepted as evidence"
+    evidence: "PLAN L194 'Agent output is not evidence. Runtime-captured proof is evidence.'; L335 NO-DRIFT 'composer does not reference raw agent output as evidence'"
+    result: pass
+  - claim: "safety boundary complete"
+    evidence: "PLAN L184-189 + L286-289 + L300-305 forbid git add/commit/push/checkout/switch/merge/rebase/reset/clean/tag + gh pr create/release + docker + pip install; generated prompts must embed these boundaries"
+    result: pass
+  - claim: "frozen streams not started"
+    evidence: "PLAN L308-322 explicit non-goals: no agent execution/Docker, no full pipeline, no verdict parser, no git boundary, no ariadne task CLI, no run persistence, no retry loop, no model health, no run report, no parallel queue; frozen streams remain queued"
+    result: pass
+  - claim: "proposed files constrained"
+    evidence: "PLAN L324-338 limits to prompt_composer.py (new) + test_prompt_composer.py (new); runtime substrate + agents/*.yml + task_intake + ROADMAP/docs/schemas NOT modified"
+    result: pass
+  - claim: "validation strategy complete"
+    evidence: "PLAN L386-396: compileall, focused composer tests, bridge regression, docker adapter regression, grep checks, no-Docker/agent-execution in tests, .ariadne residue, git status/diff"
+    result: pass
+  - claim: "artifact physically written/read back"
+    evidence: "test -f returns exists; file content read back; find lists file"
+    result: pass
+checks:
+  branch: pass
+  dirty_tree: pass
+  roadmap_alignment: pass
+  pr_0123_roadmap_evidence: pass
+  pr_0124_bridge_evidence: pass
+  executable_first: pass
+  composer_contract: pass
+  four_packets: pass
+  prompt_packet_contract: pass
+  template_context_evidence: pass
+  agent_output_not_evidence: pass
+  safety_boundary: pass
+  frozen_streams_not_started: pass
+  proposed_files_constrained: pass
+  validation_strategy: pass
+  artifact_write_readback: pass
+boundary_confirmations:
+  - "PLAN.md reviewed and not modified"
+  - "ROADMAP.md, docs/**, agents/**, schemas/**, services/** not modified by planner"
+  - "only plan-review artifact written"
+  - "artifact physically written and read back"
+  - "PR 0125 is executable-first runtime composer; no agent execution, no Docker invocation"
+  - "composes exactly four packets: planner, plan-review, coder, precommit-review"
+  - "each packet has agent_name, prompt_kind, prompt_text, prompt_hash, hashes, ready_for_agent_runner_bridge=True"
+  - "PR 0124 bridge confirmed present as the consumer of composed prompts"
+  - "generated prompts forbid git mutation, Docker CLI, install commands, agent config editing"
+  - "no full pipeline, no verdict parser, no git boundary, no ariadne task CLI, no run persistence"
+  - "no frozen stream started (Decision Core, Context Warehouse, eval harness, faithfulness audit, frontend, new surface features)"
+  - "context evidence recorded from filesystem, not invented"
+  - "proof principle 'Agent output is not evidence. Runtime-captured proof is evidence.' applied"
