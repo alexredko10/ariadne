@@ -1,0 +1,186 @@
+schema_version: "0.1"
+pr_id: "0128-git-boundary"
+review_type: "precommit-review"
+verdict: pass
+reviewer: precommit-review
+timestamp: "2026-07-06T13:43:00Z"
+related_plan: .project-memory/pr/0128-git-boundary/PLAN.md
+related_commit: ac86e2211315ff87808fb75ba1d14483639e295a
+summary:
+  result: "PR 0128 Git Boundary implementation matches PLAN.md. Human-approved git mutation boundary with argv command specs. Pipeline eligibility + dirty-tree allowlist + approval fields enforced. No subprocess/os.system/shell=True. 34 focused tests pass; 143 regression tests pass; .ariadne absent."
+snapshot_delta:
+  plan_base_sha: "21cc311992bc30281e37092a63a4e31a1998299c"
+  current_head: "ac86e2211315ff87808fb75ba1d14483639e295a"
+  action: continue
+  stale_snapshot: true
+scope:
+  expected_files: [services/runner/src/runner/git_boundary.py, services/runner/tests/test_git_boundary.py, .project-memory/pr/0128-git-boundary/reviews/precommit-review.yml]
+  actual_files: [services/runner/src/runner/git_boundary.py, services/runner/tests/test_git_boundary.py]
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: [.project-memory/pr/0128-git-boundary/reviews/precommit-review.yml]
+  scope_status: in_scope
+files_checked:
+  - .project-memory/pr/0128-git-boundary/PLAN.md
+  - .project-memory/pr/0128-git-boundary/reviews/plan-review.yml
+  - .project-memory/review-artifact.schema.yml
+  - ROADMAP.md
+  - .project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml
+  - .project-memory/pr/0127-pipeline-runner/reviews/precommit-review.yml
+  - services/runner/src/runner/git_boundary.py
+  - services/runner/tests/test_git_boundary.py
+  - services/runner/src/runner/pipeline_runner.py
+  - services/runner/tests/test_pipeline_runner.py
+  - services/runner/tests/test_verdict_parser.py
+  - services/runner/tests/test_prompt_composer.py
+  - services/runner/tests/test_agent_runner_bridge.py
+  - agents/plan-review.yml
+  - agents/precommit-review.yml
+files_modified: []
+validation:
+  - command: git rev-parse HEAD
+    result: passed
+    exit_code: 0
+    evidence: ac86e22113
+  - command: git branch
+    result: passed
+    exit_code: 0
+    evidence: 0128-git-boundary
+  - command: git status --short
+    result: passed
+    exit_code: 0
+    evidence: ?? git_boundary.py + test_git_boundary.py only
+  - command: git diff --name-only
+    result: passed
+    exit_code: 0
+    evidence: empty
+  - command: find runner/src + tests
+    result: passed
+    exit_code: 0
+    evidence: 36 src files incl. git_boundary.py+PR0124-0127; 37 test files
+  - command: compileall
+    result: passed
+    exit_code: 0
+    evidence: exit 0; git_boundary.py compiled
+  - command: pytest focused + regression
+    result: passed
+    exit_code: 0
+    evidence: 34 git_boundary + 109 regression = 143 passed
+  - command: grep ROADMAP + patterns + forbidden + .ariadne
+    result: passed
+    exit_code: 0
+    evidence: ROADMAP L302/L322/L370/L371/L376 OK; all git_boundary patterns found; no subprocess/os.system/docker; .ariadne absent
+blockers: []
+warnings: []
+decisions_made:
+  - decision: Approve PR 0128 implementation
+    reason: All implementation files match PLAN.md scope; runtime git boundary + 34 focused tests pass; 143 regression tests pass; human approval gate enforced; argv command specs; injectable executor; PR 0124-0127 unchanged; no real git/gh execution in tests; .ariadne absent.
+context_used:
+  labels: [git-boundary, production-line, stage-2-closed-loop, pr-0128, executable-first, competitive-pressure, human-approval]
+  memory_files_read: [.project-memory/pr/0128-git-boundary/PLAN.md, .project-memory/pr/0128-git-boundary/reviews/plan-review.yml, .project-memory/review-artifact.schema.yml, ROADMAP.md, .project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml, .project-memory/pr/0127-pipeline-runner/reviews/precommit-review.yml]
+  anchors_used: []
+  files_inspected: [services/runner/src/runner/git_boundary.py, services/runner/tests/test_git_boundary.py, services/runner/src/runner/pipeline_runner.py, agents/plan-review.yml, agents/precommit-review.yml]
+  files_modified: [.project-memory/pr/0128-git-boundary/reviews/precommit-review.yml]
+  files_intentionally_ignored: [ROADMAP.md, docs/**, schemas/**, services/task_intake/**, pyproject.toml, package.json, Makefile]
+checks:
+  branch: pass
+  plan_review: pass
+  dirty_tree: pass
+  executable_first: pass
+  competitive_pressure: pass
+  git_boundary_contract: pass
+  human_approval_contract: pass
+  dirty_tree_allowlist: pass
+  pipeline_eligibility: pass
+  command_plan_model: pass
+  injected_executor: pass
+  safety_boundary: pass
+  no_real_git_gh_docker: pass
+  no_cli_persistence_retry: pass
+  frozen_streams: pass
+  validation: pass
+  artifact_write_readback: pass
+boundary_confirmations:
+  - evidence-first precommit-review completed
+  - PLAN.md reviewed; plan-review reviewed; ROADMAP/agents/schemas/docs/task_intake unchanged
+  - agent_runner_bridge.py + prompt_composer.py + verdict_parser.py + pipeline_runner.py NOT modified
+  - only precommit-review artifact written; correct PR 0128 branch confirmed
+  - executable-first: runtime git boundary module (~430 lines) + 25 test classes
+  - GitBoundaryRequest/CommandSpec/Plan/Result/Status + prepare_git_boundary_plan()+execute_git_boundary_plan() + 10 reason codes
+  - human_approval gate: human_approved=True + approved_by + approval_reason all required for execution
+  - approval does NOT override pipeline ineligibility/forbidden paths/missing commit message/PR title
+  - _FORBIDDEN_PATHS (agents//schemas///services/task_intake///.project-memory/post-0100/) + _ADDITIONAL_BLOCKED_PATHS (ROADMAP/docs/pyproject.toml/package.json/Makefile)
+  - pipeline eligibility: status in (completed/completed_with_warning) + final_action in (continue/continue_with_warning) + has_blockers==False + artifact_hashes non-empty
+  - argv command specs: git_status→git_add→git_commit→git_push→gh_pr_create; tuple argv; side_effecting on commit/push/pr
+  - injectable executor: no subprocess.run/os.system/shell=True; executor callable injected; dry_run skips; _fake_executor in tests
+  - competitive pressure: no roadmap/ADR/control-plane/persistence/CLI/retry/model health/run report/parallel queue
+  - 34 git_boundary tests pass; 143 regression tests pass; .ariadne absent
+evidence_ledger:
+  - claim: branch correct
+    evidence_source: git branch --show-current
+    exact_observed_evidence: 0128-git-boundary
+    result: pass
+  - claim: plan-review approved
+    evidence_source: plan-review.yml verdict field
+    exact_observed_evidence: verdict approve (2026-07-06T13:21:00Z)
+    result: pass
+  - claim: dirty tree within scope
+    evidence_source: git status --short + git diff --name-only
+    exact_observed_evidence: ?? git_boundary.py + test_git_boundary.py only; git diff empty
+    result: pass
+  - claim: executable-first implementation
+    evidence_source: source + tests + pytest
+    exact_observed_evidence: git_boundary.py runtime module (~430 lines); test_git_boundary.py with 25 test classes; 34 pytest passes
+    result: pass
+  - claim: competitive pressure handled without scope expansion
+    evidence_source: source + git diff
+    exact_observed_evidence: git diff empty; git_boundary.py does not implement CLI/persistence/retry/model health/run report/parallel queue; PLAN L58-65 respected
+    result: pass
+  - claim: Git Boundary contract
+    evidence_source: git_boundary.py dataclasses + functions
+    exact_observed_evidence: GitBoundaryRequest/CommandSpec/Plan/Result/Status + prepare_git_boundary_plan()+execute_git_boundary_plan(); 10 reason codes
+    result: pass
+  - claim: human approval contract
+    evidence_source: execute_git_boundary_plan() in git_boundary.py
+    exact_observed_evidence: requires human_approved=True + approved_by.strip!= + approval_reason.strip!=; execute returns blocked without all three; Plan L180-200 respected
+    result: pass
+  - claim: dirty-tree allowlist contract
+    evidence_source: _is_forbidden_path() + prepare_git_boundary_plan() in git_boundary.py
+    exact_observed_evidence: _FORBIDDEN_PATHS blocks agents//schemas///services/task_intake///.project-memory/post-0100/; _ADDITIONAL_BLOCKED_PATHS blocks ROADMAP/docs/pyproject.toml/package.json/Makefile; dirty files must be in allowed_files
+    result: pass
+  - claim: pipeline eligibility contract
+    evidence_source: pipeline_eligible logic in git_boundary.py
+    exact_observed_evidence: pipeline_status in (completed/completed_with_warning) + final_action in (continue/continue_with_warning) + has_blockers==False + artifact_hashes non-empty required; stopped/failed/blocked → blocked
+    result: pass
+  - claim: command plan model
+    evidence_source: command spec construction in git_boundary.py
+    exact_observed_evidence: argv tuples in order git_status→git_add→git_commit→git_push→gh_pr_create; side_effecting=True on commit/push/pr; gh_pr_create only when pr_title present
+    result: pass
+  - claim: injected executor model
+    evidence_source: execute_git_boundary_plan() signature + test helpers
+    exact_observed_evidence: executor:Optional[Callable] parameter; None → no execution (approved but not executed); fake executor in tests; TestNoSubprocessRunOsSystemShell passes
+    result: pass
+  - claim: safety boundary complete
+    evidence_source: grep + module imports
+    exact_observed_evidence: grep subprocess.run/os.system/shell=True/docker in git_boundary.py → NONE FOUND; module imports: dataclasses/enum/os/typing only
+    result: pass
+  - claim: no real git/gh/Docker/agent execution in tests
+    evidence_source: test helpers + git diff
+    exact_observed_evidence: _fake_executor returns {exit_code:0}; no real subprocess/git/gh in test_git_boundary.py; git diff empty
+    result: pass
+  - claim: no CLI/persistence/retry/control-plane scope
+    evidence_source: git diff + source grep
+    exact_observed_evidence: git diff empty; no ariadne task CLI/run persistence/retry/failure recovery/control plane imports
+    result: pass
+  - claim: frozen streams not started
+    evidence_source: diff + source
+    exact_observed_evidence: git diff empty; git_boundary.py does not import improvement_backlog GRM/context/eval/faithfulness/frontend
+    result: pass
+  - claim: validation passed
+    evidence_source: compileall + pytest + grep + .ariadne check
+    exact_observed_evidence: compileall exit 0; 34+109 pytest pass; all grep pass; .ariadne absent
+    result: pass
+  - claim: artifact physically written/read back
+    evidence_source: write_file + test -f
+    exact_observed_evidence: precommit-review.yml written to .project-memory/pr/0128-git-boundary/reviews/
+    result: pass

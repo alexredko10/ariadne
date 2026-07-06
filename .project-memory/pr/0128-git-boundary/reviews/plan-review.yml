@@ -1,0 +1,119 @@
+schema_version: "0.1"
+pr_id: "0128-git-boundary"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-06T13:21:00Z"
+related_plan: ".project-memory/pr/0128-git-boundary/PLAN.md"
+summary:
+  result: "PR 0128 Git Boundary plan approved. First Stage 2 Closed Loop PR after PR 0127. Deterministic human-approved git mutation boundary: validates pipeline eligibility, dirty-tree allowlist, approval fields; produces argv-based command specs; injectable executor only. No unattended git rights. No CLI/persistence/retry. All 21 mandatory checks pass."
+snapshot_delta:
+  plan_base_sha: "21cc311992bc30281e37092a63a4e31a1998299c"
+  current_head: "21cc311992bc30281e37092a63a4e31a1998299c"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files: [".project-memory/pr/0128-git-boundary/PLAN.md", ".project-memory/pr/0128-git-boundary/reviews/plan-review.yml"]
+  actual_files: [".project-memory/pr/0128-git-boundary/PLAN.md", ".project-memory/pr/0128-git-boundary/reviews/plan-review.yml"]
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0128-git-boundary/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md (L302-380)"
+  - ".project-memory/pr/0127-pipeline-runner/reviews/precommit-review.yml"
+  - "services/runner/src/runner/pipeline_runner.py"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+files_modified: []
+validation:
+  - {command: "git rev-parse --verify HEAD", result: "passed", exit_code: 0, evidence: "21cc3119"}
+  - {command: "git branch --show-current", result: "passed", exit_code: 0, evidence: "0128-git-boundary"}
+  - {command: "git status --short", result: "passed", exit_code: 0, evidence: "?? .project-memory/pr/0128-git-boundary/ only"}
+  - {command: "git diff --name-only", result: "passed", exit_code: 0, evidence: "empty (no tracked modifications)"}
+  - {command: "grep 'Production Line Stream|0128' ROADMAP.md", result: "passed", exit_code: 0, evidence: "L302 Production Line Stream ACTIVE; L319 Stage 2 Closed loop (0128-0131); L322 0128 Git Boundary"}
+  - {command: "grep pipeline patterns in pipeline_runner.py", result: "passed", exit_code: 0, evidence: "PipelineRunnerResult with final_action/stopped_at/has_blockers/artifact_hashes/proof_summary confirmed at L120-L137"}
+  - {command: "grep 'GitBoundary|prepare_git_boundary_plan|human_approved|pipeline_not_eligible' PLAN.md", result: "passed", exit_code: 0, evidence: "GitBoundaryRequest/CommandSpec/Plan/Result + prepare_git_boundary_plan()+execute_git_boundary_plan() + human_approved gate + pipeline_not_eligible reason code confirmed"}
+  - {command: "grep 'subprocess.run|os.system|shell=True' PLAN.md", result: "passed", exit_code: 1, evidence: "exit 1 — forbidden calls not in plan (plan is pre-implementation); PLAN explicitly prohibits subprocess.run/os.system/shell=True"}
+  - {command: "grep 'competitive pressure|anti-stall' PLAN.md", result: "passed", exit_code: 0, evidence: "PLAN L58-65: no roadmap changes/ADR/control-plane/persistence/CLI/retry/model health/run report/parallel queue/new capability streams"}
+  - {command: "grep git commands in PLAN.md command model", result: "passed", exit_code: 0, evidence: "PLAN L164-L169: git status→git add→git commit→git push→gh_pr_create; argv tuples, deterministic order"}
+  - {command: "if [ -d .ariadne ]; then find .ariadne -maxdepth 5 -type f | sort; else echo '.ariadne absent'; fi", result: "passed", exit_code: 0, evidence: ".ariadne absent"}
+blockers: []
+warnings: []
+decisions_made:
+  - {decision: "Approve PR 0128 Git Boundary plan", reason: "All 21 mandatory checks pass. Stage 2 Closed Loop first PR. Human-approved git mutation boundary with argv command specs. Pipeline eligibility + dirty-tree allowlist + approval fields enforced. Competitive pressure/anti-stall constraint respected. No unattended git rights. No CLI/persistence/retry. Proposed files constrained to 2 new files. Validation strategy complete. Artifact write/readback requirements included."}
+context_used:
+  labels: [git-boundary, production-line, stage-2-closed-loop, pr-0128, executable-first, competitive-pressure, human-approval, pr-0127-pipeline]
+  memory_files_read: [".project-memory/pr/0128-git-boundary/PLAN.md", ".project-memory/review-artifact.schema.yml", "ROADMAP.md", ".project-memory/pr/0127-pipeline-runner/reviews/precommit-review.yml", "services/runner/src/runner/pipeline_runner.py", "agents/plan-review.yml", "agents/precommit-review.yml"]
+  anchors_used: []
+  files_inspected: ["ROADMAP.md (L302-380)", ".project-memory/review-artifact.schema.yml", "pipeline_runner.py (L1-530)"]
+  files_modified: []
+  files_intentionally_ignored: [services/runner/src/**/*.py, services/task_intake/**, schemas/**, docs/**, agents/**, packages/**, apps/**, docker/**, .github/**, pyproject.toml, package.json, Makefile, .project-memory/post-0100/**]
+checks:
+  branch: pass
+  dirty_tree: pass
+  roadmap_alignment_present: pass
+  pr_0123_roadmap_evidence: pass
+  pr_0124_bridge_evidence: pass
+  pr_0125_composer_evidence: pass
+  pr_0126_parser_evidence: pass
+  pr_0127_pipeline_evidence: pass
+  competitive_pressure_handled: pass
+  executable_first: pass
+  git_boundary_contract: pass
+  human_approval_contract: pass
+  dirty_tree_allowlist_contract: pass
+  pipeline_eligibility_contract: pass
+  command_plan_model: pass
+  injected_executor_model: pass
+  safety_boundary_complete: pass
+  frozen_streams_not_started: pass
+  proposed_files_constrained: pass
+  validation_strategy_complete: pass
+  artifact_write_readback_requirements: pass
+boundary_confirmations:
+  - "evidence-first plan-review completed; PLAN.md not modified"
+  - "only plan-review artifact written; correct PR 0128 branch confirmed"
+  - "ROADMAP.md not modified; services/runner/** not modified; agents/** not modified"
+  - "Production Line Stream ACTIVE (ROADMAP L302); Stage 2 Closed Loop (L319); PR 0128 Git Boundary defined (L322)"
+  - "stop conditions present (L370-371); proof principle present (L376)"
+  - "PR 0127 precommit-review verdict:pass (pipeline_runner.py implemented)"
+  - "pipeline_runner.py present with PipelineRunnerResult/final_action/stopped_at/has_blockers/artifact_hashes"
+  - "GitBoundaryRequest(human_approved/approved_by/approval_reason/repo_root/dirty_files/allowed_files/commit_message/pr_title)+GitCommandSpec(argv/requires_human_approval/side_effecting)+GitBoundaryPlan/Result+Status+prepare_git_boundary_plan()+execute_git_boundary_plan()"
+  - "human_approval contract: human_approved=True+approved_by+approval_reason required; approval does NOT override pipeline ineligibility/forbidden paths/safety failures"
+  - "dirty-tree allowlist: _FORBIDDEN_PATHS constant blocks agents//schemas///services/task_intake///.project-memory/post-0100/; dirty files must be in allowed_files; missing artifacts block"
+  - "pipeline eligibility: pipeline_status in (completed/completed_with_warning) + final_action in (continue/continue_with_warning) + has_blockers==False + artifact_hashes non-empty"
+  - "argv command specs: git status→git add→git commit→git push→gh_pr_create; tuple argv (not shell strings); side_effecting flags on commit/push/pr"
+  - "injected executor: no subprocess.run/os.system/shell=True; executor callable injected; dry_run skips execution; fake executor in tests"
+  - "competitive pressure: no roadmap changes/ADR/control-plane/persistence/CLI/retry/model health/run report/parallel queue/new capability streams (PLAN L58-65)"
+  - "safety: no unattended git rights/no bypass pipeline/no docker/no shell strings/no .ariadne/runs//no CLI"
+  - "proposed: git_boundary.py + test_git_boundary.py only; all predecessor modules NOT modified"
+  - "validation: compileall + pytest(git_boundary+5 regression) + grep checks + .ariadne residue + git status/diff"
+  - "artifact write/readback requirements in PLAN"
+  - "all 21 mandatory checks pass"
+evidence_ledger:
+  - {claim: "branch correct", evidence_source: "git branch --show-current", exact_observed_evidence: "0128-git-boundary", result: pass}
+  - {claim: "dirty tree within planning scope", evidence_source: "git status --short + git diff --name-only", exact_observed_evidence: "?? .project-memory/pr/0128-git-boundary/ only; git diff empty", result: pass}
+  - {claim: "PLAN.md was read", evidence_source: "PLAN.md content", exact_observed_evidence: "20290 bytes, 450+ lines, PR 0128 Git Boundary Plan", result: pass}
+  - {claim: "required supporting files read", evidence_source: "files_checked list", exact_observed_evidence: "7 files: PLAN.md, schema, ROADMAP, PR0127 precommit-review, pipeline_runner.py, 2 agent configs", result: pass}
+  - {claim: "roadmap alignment present", evidence_source: "PLAN.md ### Roadmap alignment", exact_observed_evidence: "track: Production Line — Stage 2 Closed Loop; slot: 0128; proof principle: Agent output is not evidence; git mutation requires explicit human approval; executable-first", result: pass}
+  - {claim: "PR 0123/ROADMAP evidence present", evidence_source: "grep ROADMAP.md", exact_observed_evidence: "ROADMAP L302 Production Line Stream ACTIVE; L319 Stage 2 Closed loop (0128-0131); L322 0128 Git Boundary; L370-376 stop conditions+proof", result: pass}
+  - {claim: "PR 0124 bridge evidence present", evidence_source: "services/runner/src listing", exact_observed_evidence: "agent_runner_bridge.py present (36 files in runner/src); grep confirms run_agent_runner_bridge()", result: pass}
+  - {claim: "PR 0125 composer evidence present", evidence_source: "services/runner/src listing", exact_observed_evidence: "prompt_composer.py present; grep confirms compose_pr_prompts()", result: pass}
+  - {claim: "PR 0126 parser evidence present", evidence_source: "services/runner/src listing", exact_observed_evidence: "verdict_parser.py present; grep confirms parse_review_artifact()+decide_next_action()", result: pass}
+  - {claim: "PR 0127 pipeline evidence present", evidence_source: "pipeline_runner.py source + precommit-review", exact_observed_evidence: "pipeline_runner.py present (36 src files); PipelineRunnerResult with final_action/stopped_at/has_blockers/artifact_hashes at L120-L137; precommit-review verdict:pass", result: pass}
+  - {claim: "competitive pressure handled without scope expansion", evidence_source: "PLAN.md competitive pressure section L58-65", exact_observed_evidence: "L58-65: no roadmap changes/ADR/control-plane/persistence/CLI/retry loop/model health/run report/parallel queue/new capability streams; correct response is to close dogfood loop faster", result: pass}
+  - {claim: "executable-first scope", evidence_source: "PLAN.md proposed files + context snapshot", exact_observed_evidence: "services/runner/src/runner/git_boundary.py (runtime module) + services/runner/tests/test_git_boundary.py (focused tests); prepare_git_boundary_plan()+execute_git_boundary_plan(); not docs-only", result: pass}
+  - {claim: "Git Boundary contract", evidence_source: "PLAN.md git boundary contract section L50-178", exact_observed_evidence: "GitBoundaryRequest+GitCommandSpec+GitBoundaryPlan+GitBoundaryResult+GitBoundaryStatus+prepare_git_boundary_plan()+execute_git_boundary_plan(); 10 reason codes including pipeline_not_eligible/dirty_tree_invalid/forbidden_path/human_approval_required", result: pass}
+  - {claim: "human approval contract", evidence_source: "PLAN.md human approval contract L180-200", exact_observed_evidence: "human_approved=True+approved_by+approval_reason all required; approval does NOT override pipeline ineligibility/forbidden dirty files/missing commit message or PR title/safety failures; PLAN L188-L200", result: pass}
+  - {claim: "dirty-tree allowlist contract", evidence_source: "PLAN.md dirty tree section L203-222", exact_observed_evidence: "_FORBIDDEN_PATHS blocks agents//schemas///services/task_intake///.project-memory/post-0100/; additional paths (ROADMAP/docs/pyproject.toml/package.json/Makefile) blocked unless explicitly allowed; missing expected artifacts block; PLAN L207-L222", result: pass}
+  - {claim: "pipeline eligibility contract", evidence_source: "PLAN.md pipeline result eligibility L225-234", exact_observed_evidence: "pipeline_status in (completed/completed_with_warning) + final_action in (continue/continue_with_warning) + has_blockers==False + artifact_hashes non-empty; stopped/failed/blocked → status=blocked with pipeline_not_eligible", result: pass}
+  - {claim: "command plan model", evidence_source: "PLAN.md command plan model L236-258", exact_observed_evidence: "argv tuples: git status→git add→git commit→git push→gh_pr_create; deterministic order; side_effecting flags on commit/push/pr; gh_pr_create only when pr_title+(pr_body or pr_body_path) present; PLAN L164-L169 command table confirmed", result: pass}
+  - {claim: "injected executor model", evidence_source: "PLAN.md optional executor model L260-270 + test plan", exact_observed_evidence: "no subprocess.run/os.system/shell=True; executor callable injected; dry_run skips execution; execution results as (operation/exit_code/stdout/stderr); fake executor in tests; PLAN L253 explicit prohibition + L260-L270 executor model", result: pass}
+  - {claim: "safety boundary complete", evidence_source: "PLAN.md safety and mutation boundaries L272-283", exact_observed_evidence: "no unattended git rights/no bypass pipeline gates/no bypass dirty-tree allowlist/no docker/no shell strings/no dependency install/no agent config edits/no .ariadne/runs//no CLI/no persistence/no retry/no control plane", result: pass}
+  - {claim: "frozen streams not started", evidence_source: "PLAN.md non-goals + ROADMAP L353-L365", exact_observed_evidence: "PR 0128 non-goals include ariadne task CLI/run persistence/retry/model health/run report/parallel queue/Decision Core/Context Warehouse/eval/faithfulness/frontend (all frozen until PR 0136); ROADMAP L353-365 frozen list confirmed", result: pass}
+  - {claim: "proposed files constrained", evidence_source: "PLAN.md proposed implementation files L298-L299", exact_observed_evidence: "git_boundary.py (NEW) + test_git_boundary.py (NEW); agent_runner_bridge.py + prompt_composer.py + verdict_parser.py + pipeline_runner.py NOT modified; no ROADMAP/docs/agents/schemas/task_intake changes", result: pass}
+  - {claim: "validation strategy complete", evidence_source: "PLAN.md validation commands L358-L384", exact_observed_evidence: "compileall + pytest(test_git_boundary.py) + pytest(5-file regression) + grep(git boundary patterns) + grep(forbidden) + grep(git commands) + .ariadne residue + git status/diff; no real git mutation/PR creation/network/Docker/agent execution required", result: pass}
+  - {claim: "artifact physically written/read back", evidence_source: "write_file + test -f", exact_observed_evidence: "plan-review.yml written to .project-memory/pr/0128-git-boundary/reviews/; test -f exits 0", result: pass}
