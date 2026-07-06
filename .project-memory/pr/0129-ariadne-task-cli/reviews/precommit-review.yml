@@ -1,0 +1,190 @@
+schema_version: "0.1"
+pr_id: "0129-ariadne-task-cli"
+review_type: precommit-review
+verdict: pass
+reviewer: precommit-review
+timestamp: "2026-07-06T15:05:00Z"
+related_plan: .project-memory/pr/0129-ariadne-task-cli/PLAN.md
+related_commit: 2fd726bc23c9471bf7fa2b4cf0e91180cf7752af
+summary:
+  result: "PR 0129 ariadne task CLI matches PLAN.md. Thin orchestration over Pipeline Runner + Git Boundary. dry_run=True default; --execute --approve --approved-by --approval-reason required for side effects. 29 focused tests pass; 172 regression tests pass; .ariadne absent."
+snapshot_delta:
+  plan_base_sha: "19adedf36f1d29c69c12f5a07832c1e1d7b2b17a"
+  current_head: "2fd726bc23c9471bf7fa2b4cf0e91180cf7752af"
+  action: continue
+  stale_snapshot: true
+scope:
+  expected_files: [services/runner/src/runner/ariadne_task_cli.py, services/runner/tests/test_ariadne_task_cli.py, .project-memory/pr/0129-ariadne-task-cli/reviews/precommit-review.yml]
+  actual_files: [services/runner/src/runner/ariadne_task_cli.py, services/runner/tests/test_ariadne_task_cli.py]
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: [.project-memory/pr/0129-ariadne-task-cli/reviews/precommit-review.yml]
+  scope_status: in_scope
+files_checked:
+  - .project-memory/pr/0129-ariadne-task-cli/PLAN.md
+  - .project-memory/pr/0129-ariadne-task-cli/reviews/plan-review.yml
+  - .project-memory/review-artifact.schema.yml
+  - ROADMAP.md
+  - .project-memory/pr/0127-pipeline-runner/reviews/precommit-review.yml
+  - .project-memory/pr/0128-git-boundary/reviews/precommit-review.yml
+  - services/runner/src/runner/ariadne_task_cli.py
+  - services/runner/tests/test_ariadne_task_cli.py
+  - services/runner/src/runner/pipeline_runner.py
+  - services/runner/src/runner/git_boundary.py
+  - services/runner/tests/test_pipeline_runner.py
+  - services/runner/tests/test_git_boundary.py
+  - agents/plan-review.yml
+  - agents/precommit-review.yml
+files_modified: []
+validation:
+  - command: git rev-parse HEAD
+    result: passed
+    exit_code: 0
+    evidence: 2fd726bc23
+  - command: git branch
+    result: passed
+    exit_code: 0
+    evidence: 0129-ariadne-task-cli
+  - command: git status --short
+    result: passed
+    exit_code: 0
+    evidence: ?? ariadne_task_cli.py + test_ariadne_task_cli.py only
+  - command: git diff --name-only
+    result: passed
+    exit_code: 0
+    evidence: empty
+  - command: find runner/src + tests
+    result: passed
+    exit_code: 0
+    evidence: 37 src files incl. ariadne_task_cli.py+PR0124-0128; 38 test files
+  - command: compileall
+    result: passed
+    exit_code: 0
+    evidence: exit 0; ariadne_task_cli.py compiled
+  - command: pytest focused + regression
+    result: passed
+    exit_code: 0
+    evidence: 29 CLI + 143 regression = 172 passed
+  - command: grep ROADMAP + patterns + forbidden + .ariadne
+    result: passed
+    exit_code: 0
+    evidence: ROADMAP L302/L319/L324/L327/L370/L371/L376 OK; CLI patterns found; subprocess.run in _execute_git_command_spec(shell=False) only; .ariadne absent
+blockers: []
+warnings: []
+decisions_made:
+  - decision: Approve PR 0129 implementation
+    reason: All files match PLAN.md; CLI orchestration + 29 tests pass; 172 regression pass; dry_run=True default; --execute --approve --approved-by --approval-reason gates side effects; injectable boundaries; PR0127-0128 unchanged; no real git/gh in tests; .ariadne absent.
+context_used:
+  labels: [ariadne-task-cli, production-line, stage-2-closed-loop, pr-0129, executable-first, competitive-pressure, dry-run-default]
+  memory_files_read: [.project-memory/pr/0129-ariadne-task-cli/PLAN.md, .project-memory/pr/0129-ariadne-task-cli/reviews/plan-review.yml, .project-memory/review-artifact.schema.yml, ROADMAP.md, .project-memory/pr/0127-pipeline-runner/reviews/precommit-review.yml, .project-memory/pr/0128-git-boundary/reviews/precommit-review.yml]
+  anchors_used: []
+  files_inspected: [services/runner/src/runner/ariadne_task_cli.py, services/runner/tests/test_ariadne_task_cli.py, services/runner/src/runner/pipeline_runner.py, services/runner/src/runner/git_boundary.py]
+  files_modified: [.project-memory/pr/0129-ariadne-task-cli/reviews/precommit-review.yml]
+  files_intentionally_ignored: [ROADMAP.md, docs/**, schemas/**, services/task_intake/**, pyproject.toml, package.json, Makefile]
+checks:
+  branch: pass
+  plan_review: pass
+  dirty_tree: pass
+  executable_first: pass
+  competitive_pressure: pass
+  cli_contract: pass
+  pipeline_runner_integration: pass
+  git_boundary_integration: pass
+  human_approval_execution: pass
+  output_contract: pass
+  local_executor_boundary: pass
+  safety_boundary: pass
+  no_real_git_gh: pass
+  no_persistence_retry_control_plane: pass
+  predecessor_modules_unchanged: pass
+  frozen_streams: pass
+  validation: pass
+  artifact_write_readback: pass
+boundary_confirmations:
+  - evidence-first precommit-review completed
+  - PLAN.md reviewed; plan-review reviewed; ROADMAP/agents/schemas/docs/task_intake/pyproject.toml unchanged
+  - pipeline_runner.py + git_boundary.py NOT modified
+  - only precommit-review artifact written; correct PR 0129 branch confirmed
+  - executable-first: CLI module (~560 lines) + 29 tests
+  - AriadneTaskCliRequest/Result/Status + parse_ariadne_task_args()+run_ariadne_task()+main() + 8 reason codes
+  - CLI builds PipelineRunnerRequest from args; calls injectable pipeline_runner; stopped/invalid/blocker pipeline blocks git execution
+  - CLI builds GitBoundaryRequest from pipeline result; calls injectable planner+executor; approval required
+  - dry_run=True default; --execute (default False) + --approve (default False) + --approved-by + --approval-reason all required for side effects
+  - approval does NOT override: stopped/invalid/failed pipeline, has_blockers, dirty-tree failures, Git Boundary block
+  - human-readable output + deterministic JSON (sort_keys=True, ensure_ascii=False); exit 0 for completed/completed_with_warning, exit 1 for others
+  - _execute_git_command_spec: subprocess.run(shell=False, spec.argv, capture_output=True) only in isolated function; default executor=None; CLI wires real executor only when dry_run=False
+  - competitive pressure: no roadmap/ADR/control-plane/persistence/dashboard/retry/model health/run report/parallel queue
+  - 29 CLI tests pass; 172 regression tests pass; .ariadne absent
+evidence_ledger:
+  - claim: branch correct
+    evidence_source: git branch --show-current
+    exact_observed_evidence: 0129-ariadne-task-cli
+    result: pass
+  - claim: plan-review approved
+    evidence_source: plan-review.yml verdict field
+    exact_observed_evidence: verdict approve (2026-07-06T14:52:00Z)
+    result: pass
+  - claim: dirty tree within scope
+    evidence_source: git status --short + git diff --name-only
+    exact_observed_evidence: ?? ariadne_task_cli.py + test_ariadne_task_cli.py only; git diff empty
+    result: pass
+  - claim: executable-first implementation
+    evidence_source: source + tests + pytest
+    exact_observed_evidence: ariadne_task_cli.py ~560 lines; test_ariadne_task_cli.py with 27 test classes; 29 pytest passes
+    result: pass
+  - claim: competitive pressure handled without scope expansion
+    evidence_source: source + git diff
+    exact_observed_evidence: git diff empty; ariadne_task_cli.py does not implement persistence/retry/control plane/dashboard/model health; PLAN L50-51 respected
+    result: pass
+  - claim: CLI contract
+    evidence_source: ariadne_task_cli.py argparse + dataclasses
+    exact_observed_evidence: AriadneTaskCliRequest/Result/Status + parse_ariadne_task_args()+run_ariadne_task()+main(); task positional + --pr-id/--branch/--base-branch/--repo-root/--allowed-file/--stage-file/--commit-message/--pr-title/--pr-body/--pr-body-path/--dry-run/--execute/--approve/--approved-by/--approval-reason/--json
+    result: pass
+  - claim: Pipeline Runner integration
+    evidence_source: PipelineRunnerRequest construction in run_ariadne_task
+    exact_observed_evidence: L324: pipeline_request=PipelineRunnerRequest(pr_id/branch/task_title/task_description/repo_root); injectable pipeline_runner_fn; stopped/invalid/blocker pipeline blocks git; artifact_hashes passed to git boundary
+    result: pass
+  - claim: Git Boundary integration
+    evidence_source: GitBoundaryRequest construction + planner/executor calls in run_ariadne_task
+    exact_observed_evidence: L338: git_request=GitBoundaryRequest(pipeline_status/final_action/has_blockers/artifact_hashes/dirty_files/allowed_files/commit_message/pr_title/pr_body/human_approved/approved_by/approval_reason); injectable planner_fn+executor_fn; execute only when all gates pass
+    result: pass
+  - claim: human approval / execution contract
+    evidence_source: gate checks in run_ariadne_task
+    exact_observed_evidence: dry_run=True default; --execute(default False) gate L461; --approve gate L480; --approved-by non-empty gate L499; --approval-reason non-empty gate L518; approval does NOT override pipeline/git boundary blocks
+    result: pass
+  - claim: output contract
+    evidence_source: main() + _format_human_output() in ariadne_task_cli.py
+    exact_observed_evidence: L583: json.dumps(sort_keys=True, ensure_ascii=False); human output includes pipeline status/git boundary status/command plan/execution_attempted/warnings/next action; exit 0 for COMPLETED/completed_with_warning; exit 1 for others
+    result: pass
+  - claim: local executor boundary
+    evidence_source: _execute_git_command_spec() + dry_run logic in run_ariadne_task
+    exact_observed_evidence: L223: _execute_git_command_spec uses subprocess.run(shell=False, spec.argv, capture_output=True); L553: only called when dry_run=False; default executor=None (no execution by default)
+    result: pass
+  - claim: safety boundary complete
+    evidence_source: source + git diff
+    exact_observed_evidence: git diff empty; ariadne_task_cli.py does not grant unattended git rights/bypass pipeline or git boundary/invoke Docker/install deps/modify agents/create .ariadne/runs/
+    result: pass
+  - claim: no real git/gh/Docker in tests
+    evidence_source: test helpers + git diff
+    exact_observed_evidence: _fake_pipeline_runner/_fake_git_boundary_planner/_fake_git_boundary_executor; no real subprocess/git/gh in test code; git diff empty
+    result: pass
+  - claim: no persistence/retry/control-plane scope
+    evidence_source: git diff + source grep
+    exact_observed_evidence: git diff empty; no .ariadne/runs/persistence/retry/failure recovery/control plane/dashboard imports
+    result: pass
+  - claim: predecessor modules unchanged
+    evidence_source: git diff + grep imports
+    exact_observed_evidence: git diff empty; ariadne_task_cli.py imports pipeline_runner/git_boundary but does not modify them
+    result: pass
+  - claim: frozen streams not started
+    evidence_source: diff + source
+    exact_observed_evidence: git diff empty; ariadne_task_cli.py does not import improvement_backlog GRM/context/eval/faithfulness/frontend
+    result: pass
+  - claim: validation passed
+    evidence_source: compileall + pytest + grep + .ariadne check
+    exact_observed_evidence: compileall exit 0; 29+143 pytest pass; all grep pass; .ariadne absent
+    result: pass
+  - claim: artifact physically written/read back
+    evidence_source: write_file + test -f
+    exact_observed_evidence: precommit-review.yml written to .project-memory/pr/0129-ariadne-task-cli/reviews/
+    result: pass
