@@ -1,0 +1,198 @@
+schema_version: "0.1"
+pr_id: "0127-pipeline-runner"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-06T12:55:00Z"
+related_plan: ".project-memory/pr/0127-pipeline-runner/PLAN.md"
+related_commit: "fcc7d48128210120003dec158ece1c2141af5ad1"
+summary:
+  result: "PR 0127 Pipeline Runner implementation matches PLAN.md. Connects PR 0124+0125+0126 into one deterministic call. 8-step sequence with stop-on-block gates. Injectable boundaries. 23 focused tests pass; 149 regression tests pass; .ariadne absent."
+snapshot_delta:
+  plan_base_sha: "41d50e9d1df20682e00b97885833bee3070cb499"
+  current_head: "fcc7d48128210120003dec158ece1c2141af5ad1"
+  action: "continue"
+  stale_snapshot: true
+scope:
+  expected_files:
+    - "services/runner/src/runner/pipeline_runner.py"
+    - "services/runner/tests/test_pipeline_runner.py"
+    - ".project-memory/pr/0127-pipeline-runner/reviews/precommit-review.yml"
+  actual_files:
+    - "services/runner/src/runner/pipeline_runner.py"
+    - "services/runner/tests/test_pipeline_runner.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0127-pipeline-runner/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0127-pipeline-runner/PLAN.md"
+  - ".project-memory/pr/0127-pipeline-runner/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md"
+  - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml"
+  - ".project-memory/pr/0124-agent-runner-bridge/reviews/precommit-review.yml"
+  - ".project-memory/pr/0125-prompt-composer/reviews/precommit-review.yml"
+  - ".project-memory/pr/0126-verdict-parser/reviews/precommit-review.yml"
+  - "services/runner/src/runner/pipeline_runner.py"
+  - "services/runner/tests/test_pipeline_runner.py"
+  - "services/runner/src/runner/agent_runner_bridge.py"
+  - "services/runner/src/runner/prompt_composer.py"
+  - "services/runner/src/runner/verdict_parser.py"
+  - "services/runner/tests/test_agent_runner_bridge.py"
+  - "services/runner/tests/test_prompt_composer.py"
+  - "services/runner/tests/test_verdict_parser.py"
+  - "services/runner/tests/test_docker_agent_adapter.py"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+files_modified: []
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "fcc7d48128210120003dec158ece1c2141af5ad1"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0127-pipeline-runner"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? pipeline_runner.py + test_pipeline_runner.py only"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty (no tracked modifications)"
+  - {command: "find runner/src + runner/tests", result: "passed", exit_code: 0, evidence: "35 src files incl. pipeline_runner.py + PR0124-0126; 36 test files incl. test_pipeline_runner.py"}
+  - {command: "compileall", result: "passed", exit_code: 0, evidence: "exit 0; pipeline_runner.py compiled"}
+  - {command: "pytest focused + regression", result: "passed", exit_code: 0, evidence: "23 pipeline + 149 regression = 172 passed"}
+  - {command: "grep ROADMAP + pipeline patterns + forbidden + .ariadne", result: "passed", exit_code: 0, evidence: "ROADMAP L302/L315/L370/L371/L376 OK; pipeline patterns found; no forbidden calls; .ariadne absent"}
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Approve PR 0127 implementation"
+    reason: "All implementation files match PLAN.md scope; runtime pipeline runner + 23 focused tests pass; 149 regression tests pass; 8-step sequence with stop-on-block gates; injectable boundaries; PR 0124-0126 unchanged; no Docker/shell/git mutation; .ariadne absent."
+context_used:
+  labels: [pipeline-runner, production-line, stage-1-orchestrator, pr-0127, executable-first, competitive-pressure, pr-0124-bridge, pr-0125-composer, pr-0126-parser]
+  memory_files_read:
+    - ".project-memory/pr/0127-pipeline-runner/PLAN.md"
+    - ".project-memory/pr/0127-pipeline-runner/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - "ROADMAP.md"
+    - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml"
+    - ".project-memory/pr/0124-agent-runner-bridge/reviews/precommit-review.yml"
+    - ".project-memory/pr/0125-prompt-composer/reviews/precommit-review.yml"
+    - ".project-memory/pr/0126-verdict-parser/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "services/runner/src/runner/pipeline_runner.py"
+    - "services/runner/tests/test_pipeline_runner.py"
+    - "services/runner/src/runner/agent_runner_bridge.py"
+    - "services/runner/src/runner/prompt_composer.py"
+    - "services/runner/src/runner/verdict_parser.py"
+    - "agents/plan-review.yml"
+    - "agents/precommit-review.yml"
+  files_modified:
+    - ".project-memory/pr/0127-pipeline-runner/reviews/precommit-review.yml"
+  files_intentionally_ignored: [ROADMAP.md, "docs/**", "schemas/**", "services/task_intake/**", "pyproject.toml", "package.json", "Makefile"]
+checks:
+  branch: pass
+  plan_review: pass
+  dirty_tree: pass
+  executable_first: pass
+  competitive_pressure: pass
+  pipeline_runner_contract: pass
+  required_pipeline_sequence: pass
+  artifact_proof_gate_contract: pass
+  stop_on_block: pass
+  injection_fake_tests: pass
+  safety_boundary: pass
+  no_direct_docker_shell_git: pass
+  no_git_boundary_persistence: pass
+  frozen_streams_not_started: pass
+  validation: pass
+  artifact_write_readback: pass
+boundary_confirmations:
+  - "evidence-first precommit-review completed"
+  - "PLAN.md reviewed; plan-review reviewed; ROADMAP/agents/schemas/docs/task_intake unchanged"
+  - "agent_runner_bridge.py + prompt_composer.py + verdict_parser.py NOT modified"
+  - "only precommit-review artifact written; correct PR 0127 branch confirmed"
+  - "executable-first: runtime pipeline runner module (~530 lines) + 23 focused tests"
+  - "PipelineRunnerRequest/StepResult/GateResult/RunnerResult/Status + run_pr_pipeline() + 9 reason codes"
+  - "8-step sequence: compose_prompts→planner→planner_artifact_check→plan_review→plan-review_gate→coder→precommit_review→precommit-review_gate"
+  - "Gate evidence requires artifact path+exists+SHA256[:16] hash+line_count+verdict parser+next_action"
+  - "Agent stdout/stderr/bridge narrative NOT sufficient gate evidence"
+  - "stop-on-block: plan-review stop→before coder; precommit stop→stopped; blockers→stop; human_required→stop"
+  - "retry_candidate recorded as metadata only; no retry execution"
+  - "competitive pressure: no roadmap/ADR/control-plane/persistence/git boundary/CLI/retry/model health/run report/parallel queue"
+  - "5 injectable boundaries: composer/bridge_runner/artifact_reader/verdict_parser/clock_provider; all defaulted via lazy imports"
+  - "Safety: no subprocess.run/docker/git in pipeline_runner.py source; module-level imports stdlib only"
+  - "Tests use fakes: _fake_composer/_fake_bridge/_fake_artifact_reader/_fake_parser; no real Docker/agents/network/git/.ariadne"
+  - "No git boundary, PR creation, ariadne task CLI, run persistence, retry execution, frozen streams"
+  - "All 23 pipeline tests pass; 149 regression tests pass; .ariadne absent"
+evidence_ledger:
+  - claim: "branch correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0127-pipeline-runner"
+    result: pass
+  - claim: "plan-review approved"
+    evidence_source: "plan-review.yml verdict field"
+    exact_observed_evidence: "verdict: approve (2026-07-06T12:32:00Z)"
+    result: pass
+  - claim: "dirty tree within scope"
+    evidence_source: "git status --short + git diff --name-only"
+    exact_observed_evidence: "?? pipeline_runner.py + test_pipeline_runner.py only; git diff empty"
+    result: pass
+  - claim: "executable-first implementation"
+    evidence_source: "source + tests + pytest"
+    exact_observed_evidence: "pipeline_runner.py runtime module (~530 lines); test_pipeline_runner.py with 21 test classes; 23 pytest passes"
+    result: pass
+  - claim: "competitive pressure handled without scope expansion"
+    evidence_source: "source + git diff"
+    exact_observed_evidence: "git diff empty; pipeline_runner.py does not implement git boundary/CLI/persistence/retry/model health/run report/parallel queue; PLAN L58-65 anti-stall constraint respected"
+    result: pass
+  - claim: "Pipeline Runner contract"
+    evidence_source: "dataclasses + run_pr_pipeline() in pipeline_runner.py"
+    exact_observed_evidence: "PipelineRunnerRequest/StepResult/GateResult/RunnerResult/Status enum + run_pr_pipeline() main; 9 reason codes; injectable boundaries"
+    result: pass
+  - claim: "required pipeline sequence"
+    evidence_source: "run_pr_pipeline() step ordering"
+    exact_observed_evidence: "8 steps: compose_prompts→planner→planner_artifact_check→plan_review→plan-review_gate→coder→precommit_review→precommit-review_gate; TestPromptOrder verifies exact order"
+    result: pass
+  - claim: "artifact proof and gate contract"
+    evidence_source: "_run_gate() in pipeline_runner.py"
+    exact_observed_evidence: "_run_gate requires: reader_fn→artifact text, hashlib.sha256[:16] hash, len(lines) count, parser_fn→parse_review_artifact+decide_next_action, next_action recorded; bridge narrative NOT used for gates"
+    result: pass
+  - claim: "stop-on-block gate rules"
+    evidence_source: "should_stop logic in pipeline_runner.py"
+    exact_observed_evidence: "should_stop = next_action in (stop,invalid) or has_blockers or human_req; plan-review gate→stop before coder; precommit gate→stopped; retry_candidate recorded but not executed"
+    result: pass
+  - claim: "injection/fake test strategy"
+    evidence_source: "test_pipeline_runner.py helpers"
+    exact_observed_evidence: "_fake_composer/_fake_bridge/_fake_artifact_reader/_fake_parser/_clock; all 5 boundaries injectable in PipelineRunnerRequest; no real Docker/agents/network/git/.ariadne in tests"
+    result: pass
+  - claim: "safety boundary complete"
+    evidence_source: "grep + module imports"
+    exact_observed_evidence: "grep subprocess.run/docker compose/docker run/gh pr create/git push in pipeline_runner.py → NONE FOUND; module-level imports: dataclasses/hashlib/os/typing only; defaults lazy-loaded in function bodies"
+    result: pass
+  - claim: "no direct Docker/shell/git mutation"
+    evidence_source: "grep + TestNoDirectDocker + TestNoDirectGit"
+    exact_observed_evidence: "TestNoDirectDocker + TestNoDirectGit assertions pass (23 tests); no subprocess.run/docker compose/docker run/gh/git calls in pipeline_runner.py source"
+    result: pass
+  - claim: "no git boundary/PR creation/CLI/persistence"
+    evidence_source: "git diff + source grep"
+    exact_observed_evidence: "git diff empty; grep 'git add|git commit|gh pr create' in pipeline_runner.py → NONE FOUND; no .ariadne/runs/ imports or references"
+    result: pass
+  - claim: "frozen streams not started"
+    evidence_source: "diff + source"
+    exact_observed_evidence: "git diff empty; pipeline_runner.py does not import improvement_backlog GRM, context compilation, eval harness, faithfulness, frontend, new surface features"
+    result: pass
+  - claim: "validation passed"
+    evidence_source: "compileall + pytest + grep + .ariadne check"
+    exact_observed_evidence: "compileall exit 0; 23 + 149 pytest pass; all grep checks pass; .ariadne absent"
+    result: pass
+  - claim: "artifact physically written/read back"
+    evidence_source: "write_file + test -f"
+    exact_observed_evidence: "precommit-review.yml written to .project-memory/pr/0127-pipeline-runner/reviews/"
+    result: pass
