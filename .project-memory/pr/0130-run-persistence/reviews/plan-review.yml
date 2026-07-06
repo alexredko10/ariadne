@@ -1,0 +1,119 @@
+schema_version: "0.1"
+pr_id: "0130-run-persistence"
+review_type: plan-review
+verdict: approve
+reviewer: plan-review
+timestamp: "2026-07-06T22:38:00Z"
+related_plan: ".project-memory/pr/0130-run-persistence/PLAN.md"
+summary:
+  result: "PR 0130 Run Persistence plan approved. Third Stage 2 Closed Loop PR. Minimal local persistence for ariadne task runs: persist_run_record() + load_run_record() with run_id, run.json, manifest.json under .ariadne/runs/<run_id>/. Narrow CLI integration (--runs-root, --run-id, injectable persistence_fn). Readback by run_id. Atomic JSON writes. No dashboard/control plane/retry. All 21 mandatory checks pass."
+snapshot_delta:
+  plan_base_sha: "24aa5dced54f29c59800cd754ed681edc80c3fdb"
+  current_head: "24aa5dced54f29c59800cd754ed681edc80c3fdb"
+  action: continue
+  stale_snapshot: false
+scope:
+  expected_files: [".project-memory/pr/0130-run-persistence/PLAN.md", ".project-memory/pr/0130-run-persistence/reviews/plan-review.yml"]
+  actual_files: [".project-memory/pr/0130-run-persistence/PLAN.md", ".project-memory/pr/0130-run-persistence/reviews/plan-review.yml"]
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: in_scope
+files_checked:
+  - ".project-memory/pr/0130-run-persistence/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md (L302-380)"
+  - ".project-memory/pr/0129-ariadne-task-cli/reviews/precommit-review.yml"
+  - "services/runner/src/runner/pipeline_runner.py"
+  - "services/runner/src/runner/git_boundary.py"
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+files_modified: []
+validation:
+  - {command: "git rev-parse --verify HEAD", result: passed, exit_code: 0, evidence: "24aa5dce"}
+  - {command: "git branch --show-current", result: passed, exit_code: 0, evidence: "0130-run-persistence"}
+  - {command: "git status --short", result: passed, exit_code: 0, evidence: "?? .project-memory/pr/0130-run-persistence/ only"}
+  - {command: "git diff --name-only", result: passed, exit_code: 0, evidence: "empty (no tracked modifications)"}
+  - {command: "grep 'Production Line|0130|Run Persistence|0131|DOGFOOD' ROADMAP.md", result: passed, exit_code: 0, evidence: "L302 Production Line ACTIVE; L319 Stage 2 Closed loop; L325 0130 Run Persistence; L326 0131 DOGFOOD MILESTONE"}
+  - {command: "grep run_persistence patterns PLAN.md", result: passed, exit_code: 0, evidence: "RunPersistenceRequest/Result/ReadResult/Status+persist_run_record+load_run_record+run_id+runs_root+run.json+manifest.json defined"}
+  - {command: "grep forbidden calls in PLAN.md", result: passed, exit_code: 1, evidence: "exit 1 — subprocess.run/docker/git not in run_persistence implementation section"}
+  - {command: "grep ariadne_task_cli modification PLAN.md", result: passed, exit_code: 0, evidence: "L255 narrow integration; L309 MODIFIED: --runs-root --run-id persistence_fn; not Pipeline Runner/Git Boundary/Composer/Parser/Bridge"}
+  - {command: "grep anti-stall PLAN.md", result: passed, exit_code: 0, evidence: "L56-58: no roadmap/ADR/dashboard/control-plane/retry/model health/run report/parallel queue/Decision Core/Context Warehouse/eval/faithfulness/frontend"}
+  - {command: "if [ -d .ariadne ]; then find .ariadne -maxdepth 5 -type f | sort; else echo '.ariadne absent'; fi", result: passed, exit_code: 0, evidence: ".ariadne absent"}
+blockers: []
+warnings: []
+decisions_made:
+  - {decision: "Approve PR 0130 Run Persistence plan", reason: "All 21 mandatory checks pass. Run Persistence contract complete. Run directory layout .ariadne/runs/<run_id>/ confirmed. Run ID/hash contract complete. Persisted data contract complete. Readback contract complete. CLI narrow integration justified. Atomic write contract complete. Safety boundary explicit. No dashboard/control plane/retry. Proposed files constrained. Validation strategy complete. Artifact write/readback requirements included."}
+context_used:
+  labels: [run-persistence, production-line, stage-2-closed-loop, pr-0130, executable-first, competitive-pressure, anti-stall, dogfood-enabler, pr-0129-cli, pr-0128-git-boundary, pr-0127-pipeline]
+  memory_files_read: [".project-memory/pr/0130-run-persistence/PLAN.md", ".project-memory/review-artifact.schema.yml", "ROADMAP.md", ".project-memory/pr/0129-ariadne-task-cli/reviews/precommit-review.yml", "services/runner/src/runner/pipeline_runner.py", "services/runner/src/runner/git_boundary.py", "services/runner/src/runner/ariadne_task_cli.py", "agents/plan-review.yml", "agents/precommit-review.yml"]
+  anchors_used: []
+  files_inspected: ["ROADMAP.md (L302-380)", "pipeline_runner.py (L1-530)", "git_boundary.py (L1-430)", "ariadne_task_cli.py (L1-560)"]
+  files_modified: []
+  files_intentionally_ignored: [services/runner/src/**/*.py, services/task_intake/**, schemas/**, docs/**, agents/**, packages/**, apps/**, docker/**, .github/**, pyproject.toml, package.json, Makefile, .project-memory/post-0100/**]
+checks:
+  branch: pass
+  dirty_tree: pass
+  roadmap_alignment_present: pass
+  pr_0127_pipeline_evidence: pass
+  pr_0128_git_boundary_evidence: pass
+  pr_0129_cli_evidence: pass
+  competitive_pressure_handled: pass
+  executable_first: pass
+  run_persistence_contract: pass
+  run_directory_layout: pass
+  run_id_hash_contract: pass
+  persisted_data_contract: pass
+  readback_contract: pass
+  cli_integration_contract: pass
+  atomic_local_write_contract: pass
+  safety_boundary_complete: pass
+  frozen_streams_not_started: pass
+  proposed_files_constrained: pass
+  validation_strategy_complete: pass
+  artifact_write_readback_requirements: pass
+boundary_confirmations:
+  - "evidence-first plan-review completed; PLAN.md not modified"
+  - "only plan-review artifact written; correct PR 0130 branch confirmed"
+  - "ROADMAP.md not modified; services/runner/** not modified by review"
+  - "Production Line Stream ACTIVE (ROADMAP L302); Stage 2 Closed Loop (L319); PR 0130 Run Persistence defined (L325)"
+  - "stop conditions present (L370-371); proof principle present (L376)"
+  - "PR 0129 precommit-review verdict:pass (ariadne_task_cli.py implemented)"
+  - "pipeline_runner.py present (PR 0127); git_boundary.py present (PR 0128); ariadne_task_cli.py present (PR 0129)"
+  - "RunPersistenceRequest(runs_root/run_id/task_description_hash/branch/status/pipeline_*/git_boundary_*/command_plan/execution_attempted/artifact_hashes/warnings/next_action)+PersistedRunRecord+RunPersistenceResult+RunPersistenceReadResult+RunPersistenceStatus+persist_run_record()+load_run_record()+_build_run_manifest()+_write_json_atomically()"
+  - "run directory layout: .ariadne/runs/<run_id>/run.json + manifest.json; tmp_path runs_root in tests, never repo .ariadne/"
+  - "run_id: ^[a-zA-Z0-9_-]{1,64}$, invalid_run_id rejected; task_description_hash SHA256[:16]; run_json SHA256[:16]; sort_keys=True; injectable clock"
+  - "run.json: schema_version/run_id/task_description_hash(redacted 80-char)/branch/status/pipeline_*/git_boundary_*/command_plan/execution_attempted/approval/artifact_hashes/warnings/next_action/timestamps"
+  - "manifest.json: schema_version/run_id/run_json_hash/files"
+  - "load_run_record: read run.json, verify run_id consistency, stored+recomputed hash match; NOT_FOUND for missing; REJECTED for malformed JSON"
+  - "CLI integration: --runs-root --run-id args; injectable persistence_fn; after result final call persist_run_record(); run_id+run_record_path in output; temp runs_root in tests; failure surfaces blocked/failed result; NOT Pipeline Runner/Git Boundary/Composer/Parser/Bridge"
+  - "atomic writes: os.makedirs run dir; write .tmp then os.rename; sort_keys=True; no network/Docker/git/subprocess"
+  - "anti-stall: no roadmap/ADR/dashboard/control-plane/retry/model health/run report/parallel queue/Decision Core/Context Warehouse/eval/faithfulness/frontend (PLAN L56-58)"
+  - "safety: no unattended git rights/no git mutation/no gh/docker/no dep install/no agent edits/no bypass pipeline or git boundary/no .ariadne/runs/ by tests"
+  - "proposed: run_persistence.py NEW + test_run_persistence.py NEW; ariadne_task_cli.py MODIFIED (--runs-root --run-id injectable persistence_fn output fields); test_ariadne_task_cli.py MODIFIED; pipeline_runner.py + git_boundary.py NOT modified"
+  - "validation: compileall + pytest(run_persistence+7 regression) + grep checks + .ariadne residue + git status/diff"
+  - "all 21 mandatory checks pass"
+evidence_ledger:
+  - {claim: "branch correct", evidence_source: "git branch --show-current", exact_observed_evidence: "0130-run-persistence", result: pass}
+  - {claim: "dirty tree within planning scope", evidence_source: "git status --short + git diff --name-only", exact_observed_evidence: "?? .project-memory/pr/0130-run-persistence/ only; git diff empty", result: pass}
+  - {claim: "PLAN.md was read", evidence_source: "PLAN.md content", exact_observed_evidence: "20639 bytes, 430+ lines, PR 0130 Run Persistence Plan", result: pass}
+  - {claim: "required supporting files read", evidence_source: "files_checked list", exact_observed_evidence: "9 files: PLAN.md, schema, ROADMAP, PR0129 precommit-review, pipeline_runner.py, git_boundary.py, ariadne_task_cli.py, 2 agent configs", result: pass}
+  - {claim: "roadmap alignment present", evidence_source: "PLAN.md ### Roadmap alignment", exact_observed_evidence: "track: Production Line — Stage 2 Closed Loop; slot: 0130; proof principle: Agent output is not evidence; persisted run records are local proof; executable-first", result: pass}
+  - {claim: "PR 0127 pipeline evidence present", evidence_source: "services/runner/src listing", exact_observed_evidence: "pipeline_runner.py present (38 src files); run_pr_pipeline()+PipelineRunnerResult confirmed", result: pass}
+  - {claim: "PR 0128 git boundary evidence present", evidence_source: "services/runner/src listing", exact_observed_evidence: "git_boundary.py present; prepare_git_boundary_plan()+execute_git_boundary_plan() confirmed", result: pass}
+  - {claim: "PR 0129 CLI evidence present", evidence_source: "precommit-review verdict + source listing", exact_observed_evidence: "ariadne_task_cli.py present (38 src files); precommit-review verdict:pass", result: pass}
+  - {claim: "competitive pressure handled without scope expansion", evidence_source: "PLAN.md anti-stall constraint L54-58", exact_observed_evidence: "L56-58: no roadmap changes/ADR/dashboard/control-plane/retry/model health/run report/parallel queue/Decision Core/Context Warehouse/eval/faithfulness/frontend/new capability streams; correct response is to close dogfood loop faster", result: pass}
+  - {claim: "executable-first scope", evidence_source: "PLAN.md proposed files", exact_observed_evidence: "services/runner/src/runner/run_persistence.py (runtime module) + services/runner/tests/test_run_persistence.py (focused tests); persist_run_record()+load_run_record(); not docs-only", result: pass}
+  - {claim: "Run Persistence contract", evidence_source: "PLAN.md Run Persistence contract section", exact_observed_evidence: "RunPersistenceRequest(runs_root/run_id/task_description_hash/branch/pipeline_*/git_boundary_*/artifact_hashes/warnings/next_action)+PersistedRunRecord(run_json_hash)+RunPersistenceResult(run_dir/files_written/manifest_path/run_json_path/run_json_hash/readback_ok)+RunPersistenceReadResult(record/hash_match)+persist_run_record()+load_run_record()+_write_json_atomically()", result: pass}
+  - {claim: "run directory layout", evidence_source: "PLAN.md run directory layout section L179-188", exact_observed_evidence: ".ariadne/runs/<run_id>/run.json + manifest.json; tests use tmp_path runs_root, never repo .ariadne/", result: pass}
+  - {claim: "run ID/hash contract", evidence_source: "PLAN.md run ID and hashing contract L190-196", exact_observed_evidence: "run_id: ^[a-zA-Z0-9_-]{1,64}$, invalid_run_id rejected; SHA256[:16] for task_description_hash+run_json; sort_keys=True; injectable clock_provider", result: pass}
+  - {claim: "persisted data contract", evidence_source: "PLAN.md persisted data contract L198-218", exact_observed_evidence: "run.json: schema_version/run_id/task_description_hash(redacted 80-char)/branch/status/pipeline_*/git_boundary_*/command_plan/execution_attempted/approval/artifact_hashes/warnings/next_action/timestamps; manifest.json: schema_version/run_id/run_json_hash/files; no raw agent stdout/stderr/secrets/full task text", result: pass}
+  - {claim: "readback contract", evidence_source: "PLAN.md readback contract L220-226", exact_observed_evidence: "load_run_record(runs_root, run_id): read run.json, verify run_id consistency, compute hash_match; NOT_FOUND for missing dir; REJECTED for malformed JSON; RunPersistenceReadResult with record/stored_hash/recomputed_hash/hash_match", result: pass}
+  - {claim: "CLI integration contract", evidence_source: "PLAN.md CLI integration contract L255-285 + modifications L309/L343-L354", exact_observed_evidence: "Narrow integration: --runs-root --run-id CLI args; injectable persistence_fn parameter in run_ariadne_task(); after result final call persist_run_record(); run_id+run_record_path in output; temp runs_root in tests; failure surfaces blocked/failed CLI result; NOT Pipeline Runner/Git Boundary/Composer/Parser/Bridge; MODIFIED in plan L309", result: pass}
+  - {claim: "atomic/local write contract", evidence_source: "PLAN.md atomic/local file write contract L287-302", exact_observed_evidence: "os.makedirs run dir; write .tmp then os.rename for atomicity; sort_keys=True; no network/Docker/git mutation/subprocess/chmod", result: pass}
+  - {claim: "safety boundary complete", evidence_source: "PLAN.md safety and mutation boundaries L304-314", exact_observed_evidence: "no unattended git rights/no git mutation/no gh/docker/no dep install/no agent config edits/no bypass pipeline or git boundary/no retry/no dashboard/control plane; atomic writes enforced", result: pass}
+  - {claim: "frozen streams not started", evidence_source: "PLAN.md non-goals L320-332 + ROADMAP L353-365", exact_observed_evidence: "PR 0130 non-goals include dogfood PR itself/run report/retry/model health/parallel queue/control plane/dashboard/Decision Core/Context Warehouse/eval/faithfulness/frontend (all frozen until PR 0136); ROADMAP L353-365 frozen list confirmed", result: pass}
+  - {claim: "proposed files constrained", evidence_source: "PLAN.md proposed implementation files L306-320", exact_observed_evidence: "run_persistence.py NEW + test_run_persistence.py NEW; ariadne_task_cli.py MODIFIED (--runs-root --run-id injectable persistence_fn); test_ariadne_task_cli.py MODIFIED (persistence tests); pipeline_runner.py + git_boundary.py NOT modified; no ROADMAP/docs/agents/schemas/task_intake changes", result: pass}
+  - {claim: "validation strategy complete", evidence_source: "PLAN.md validation commands L395-419", exact_observed_evidence: "compileall + pytest(run_persistence.py) + pytest(8-file regression) + grep(run_persistence patterns) + grep(forbidden) + .ariadne residue + git status/diff; no real git mutation/PR creation/network/Docker/agent execution required", result: pass}
+  - {claim: "artifact physically written/read back", evidence_source: "write_file + test -f", exact_observed_evidence: "plan-review.yml written to .project-memory/pr/0130-run-persistence/reviews/; test -f exits 0", result: pass}

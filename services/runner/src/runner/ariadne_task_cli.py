@@ -36,6 +36,11 @@ from runner.pipeline_runner import (
     PipelineRunnerStatus,
     run_pr_pipeline,
 )
+from runner.run_persistence import (
+    RunPersistenceRequest,
+    RunPersistenceStatus,
+    persist_run_record,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -79,6 +84,8 @@ class AriadneTaskCliRequest:
     approved_by: Optional[str] = None
     approval_reason: Optional[str] = None
     json_output: bool = False
+    runs_root: Optional[str] = None
+    run_id: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------
@@ -106,6 +113,8 @@ class AriadneTaskCliResult:
     started_at: Optional[str]
     finished_at: Optional[str]
     details: Optional[str]
+    run_id: Optional[str] = None
+    run_record_path: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------
@@ -170,6 +179,8 @@ def parse_ariadne_task_args(argv: Optional[list[str]] = None) -> argparse.Namesp
     parser.add_argument("--approved-by", default=None, help="Approval identity")
     parser.add_argument("--approval-reason", default=None, help="Approval justification")
     parser.add_argument("--json", action="store_true", default=False, help="Machine-readable JSON output")
+    parser.add_argument("--runs-root", default=None, help="Run persistence root directory (default: no persistence)")
+    parser.add_argument("--run-id", default=None, help="Run identifier (default: auto-generated)")
 
     args = parser.parse_args(argv)
     return args
@@ -212,6 +223,8 @@ def _build_cli_request(args: argparse.Namespace) -> AriadneTaskCliRequest:
         approved_by=args.approved_by,
         approval_reason=args.approval_reason,
         json_output=args.json,
+        runs_root=args.runs_root,
+        run_id=args.run_id,
     )
 
 
@@ -262,6 +275,7 @@ def run_ariadne_task(
     pipeline_runner_fn: Optional[Callable] = None,
     git_boundary_planner_fn: Optional[Callable] = None,
     git_boundary_executor_fn: Optional[Callable] = None,
+    persistence_fn: Optional[Callable] = None,
     clock_provider: Optional[Callable] = None,
 ) -> AriadneTaskCliResult:
     """Run the ariadne task orchestration.
@@ -587,7 +601,7 @@ def run_ariadne_task(
 
     finished_at = clock_provider() if clock_provider else None
 
-    return AriadneTaskCliResult(
+    result = AriadneTaskCliResult(
         status=final_status,
         reason_codes=tuple(codes),
         task_description=request.task_description,
@@ -605,6 +619,79 @@ def run_ariadne_task(
         finished_at=finished_at,
         details=None,
     )
+
+    # 11. Persist run record
+    if request.runs_root and persistence_fn:
+        run_id = request.run_id or f"run-{task_description_hash}"
+        persist_request = RunPersistenceRequest(
+            runs_root=request.runs_root,
+            run_id=run_id,
+            task_description_hash=task_description_hash,
+            task_description_redacted=request.task_description[:80],
+            branch=request.branch,
+            base_branch=request.base_branch,
+            status=result.status,
+            reason_codes=result.reason_codes,
+            pipeline_status=result.pipeline_status,
+            pipeline_final_action=result.pipeline_final_action,
+            pipeline_has_blockers=result.pipeline_has_blockers,
+            pipeline_step_summary=(),
+            pipeline_gate_summary=(),
+            git_boundary_status=result.git_boundary_status,
+            command_plan_summary=tuple(result.command_plan or []),
+            execution_attempted=result.execution_attempted,
+            execution_results_summary=result.execution_results,
+            approval_summary=request.approval_reason or "",
+            artifact_hashes={},
+            warnings=result.warnings,
+            next_action=result.next_action,
+            started_at=result.started_at,
+            finished_at=result.finished_at,
+            clock_provider=clock_provider,
+        )
+        persist_result = persistence_fn(persist_request)
+        if persist_result.status == RunPersistenceStatus.PERSISTED.value:
+            result = AriadneTaskCliResult(
+                status=result.status,
+                reason_codes=result.reason_codes,
+                task_description=result.task_description,
+                task_description_hash=result.task_description_hash,
+                pipeline_status=result.pipeline_status,
+                pipeline_final_action=result.pipeline_final_action,
+                pipeline_has_blockers=result.pipeline_has_blockers,
+                git_boundary_status=result.git_boundary_status,
+                command_plan=result.command_plan,
+                execution_attempted=result.execution_attempted,
+                execution_results=result.execution_results,
+                warnings=result.warnings,
+                next_action=result.next_action,
+                started_at=result.started_at,
+                finished_at=result.finished_at,
+                details=result.details,
+                run_id=run_id,
+                run_record_path=persist_result.run_json_path,
+            )
+        else:
+            result = AriadneTaskCliResult(
+                status=AriadneTaskCliStatus.FAILED,
+                reason_codes=tuple(list(result.reason_codes) + list(persist_result.reason_codes)),
+                task_description=result.task_description,
+                task_description_hash=result.task_description_hash,
+                pipeline_status=result.pipeline_status,
+                pipeline_final_action=result.pipeline_final_action,
+                pipeline_has_blockers=result.pipeline_has_blockers,
+                git_boundary_status=result.git_boundary_status,
+                command_plan=result.command_plan,
+                execution_attempted=result.execution_attempted,
+                execution_results=result.execution_results,
+                warnings=result.warnings,
+                next_action="stop",
+                started_at=result.started_at,
+                finished_at=result.finished_at,
+                details=f"Persistence failed: {persist_result.details}",
+            )
+
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -663,6 +750,11 @@ def _format_human_output(result: AriadneTaskCliResult) -> str:
             lines.append(f"  - {w}")
         lines.append("")
 
+    if result.run_id:
+        lines.append(f"Run ID: {result.run_id}")
+    if result.run_record_path:
+        lines.append(f"Run record: {result.run_record_path}")
+
     lines.append(f"Next action: {result.next_action}")
 
     if result.details:
@@ -711,6 +803,8 @@ def main(argv: Optional[list[str]] = None) -> int:
             "started_at": result.started_at,
             "finished_at": result.finished_at,
             "details": result.details,
+            "run_id": result.run_id,
+            "run_record_path": result.run_record_path,
         }
         print(json.dumps(output_dict, sort_keys=True, ensure_ascii=False))
     else:

@@ -1,0 +1,202 @@
+schema_version: "0.1"
+pr_id: "0130-run-persistence"
+review_type: precommit-review
+verdict: pass
+reviewer: precommit-review
+timestamp: "2026-07-06T22:47:00Z"
+related_plan: .project-memory/pr/0130-run-persistence/PLAN.md
+related_commit: 7e2d787ddfbd942746e49af4f8e2f0f894f4b69a
+summary:
+  result: "PR 0130 Run Persistence matches PLAN.md. New run_persistence.py + tests + narrow ariadne_task_cli.py integration. persist_run_record()+load_run_record() with run.json+manifest.json. Injectable boundaries. 25 focused tests pass; 197 regression tests pass; .ariadne absent."
+snapshot_delta:
+  plan_base_sha: "24aa5dced54f29c59800cd754ed681edc80c3fdb"
+  current_head: "7e2d787ddfbd942746e49af4f8e2f0f894f4b69a"
+  action: continue
+  stale_snapshot: true
+scope:
+  expected_files: [services/runner/src/runner/run_persistence.py, services/runner/tests/test_run_persistence.py, services/runner/src/runner/ariadne_task_cli.py, services/runner/tests/test_ariadne_task_cli.py (unchanged), .project-memory/pr/0130-run-persistence/reviews/precommit-review.yml]
+  actual_files: [services/runner/src/runner/run_persistence.py, services/runner/tests/test_run_persistence.py, services/runner/src/runner/ariadne_task_cli.py]
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: [.project-memory/pr/0130-run-persistence/reviews/precommit-review.yml]
+  scope_status: in_scope
+files_checked:
+  - .project-memory/pr/0130-run-persistence/PLAN.md
+  - .project-memory/pr/0130-run-persistence/reviews/plan-review.yml
+  - .project-memory/review-artifact.schema.yml
+  - ROADMAP.md
+  - .project-memory/pr/0127-pipeline-runner/reviews/precommit-review.yml
+  - .project-memory/pr/0128-git-boundary/reviews/precommit-review.yml
+  - .project-memory/pr/0129-ariadne-task-cli/reviews/precommit-review.yml
+  - services/runner/src/runner/run_persistence.py
+  - services/runner/tests/test_run_persistence.py
+  - services/runner/src/runner/ariadne_task_cli.py
+  - services/runner/tests/test_ariadne_task_cli.py
+  - services/runner/src/runner/pipeline_runner.py
+  - services/runner/src/runner/git_boundary.py
+  - agents/plan-review.yml
+  - agents/precommit-review.yml
+files_modified: []
+validation:
+  - command: git rev-parse HEAD
+    result: passed
+    exit_code: 0
+    evidence: 7e2d787ddf
+  - command: git branch
+    result: passed
+    exit_code: 0
+    evidence: 0130-run-persistence
+  - command: git status --short
+    result: passed
+    exit_code: 0
+    evidence: M ariadne_task_cli.py (tracked mod); ?? run_persistence.py + test_run_persistence.py (new)
+  - command: git diff --name-only
+    result: passed
+    exit_code: 0
+    evidence: ariadne_task_cli.py only (tracked modification; plan-review approved)
+  - command: find runner/src + tests
+    result: passed
+    exit_code: 0
+    evidence: 38 src files incl. run_persistence.py+PR0127-0129; 40 test files
+  - command: compileall
+    result: passed
+    exit_code: 0
+    evidence: exit 0; run_persistence.py compiled
+  - command: pytest focused + regression
+    result: passed
+    exit_code: 0
+    evidence: 25 persistence + 172 regression = 197 passed
+  - command: grep ROADMAP + persistence patterns + forbidden + .ariadne
+    result: passed
+    exit_code: 0
+    evidence: ROADMAP L302/L319/L325/L326/L327/L370/L371/L376 OK; persistence patterns found; no subprocess/docker/git; .ariadne absent
+blockers: []
+warnings: []
+decisions_made:
+  - decision: Approve PR 0130 implementation
+    reason: All files match PLAN.md; run_persistence.py + tests + narrow CLI integration; 25 focused tests pass; 197 regression pass; injectable boundaries; no repo .ariadne/ residue; plan-review approved ariadne_task_cli.py modification.
+context_used:
+  labels: [run-persistence, production-line, stage-2-closed-loop, pr-0130, executable-first, competitive-pressure, anti-stall, dogfood-enabler, pr-0129-cli]
+  memory_files_read: [.project-memory/pr/0130-run-persistence/PLAN.md, .project-memory/pr/0130-run-persistence/reviews/plan-review.yml, .project-memory/review-artifact.schema.yml, ROADMAP.md, .project-memory/pr/0127-pipeline-runner/reviews/precommit-review.yml, .project-memory/pr/0128-git-boundary/reviews/precommit-review.yml, .project-memory/pr/0129-ariadne-task-cli/reviews/precommit-review.yml]
+  anchors_used: []
+  files_inspected: [services/runner/src/runner/run_persistence.py, services/runner/tests/test_run_persistence.py, services/runner/src/runner/ariadne_task_cli.py]
+  files_modified: [.project-memory/pr/0130-run-persistence/reviews/precommit-review.yml]
+  files_intentionally_ignored: [ROADMAP.md, docs/**, schemas/**, services/task_intake/**, pyproject.toml, package.json, Makefile]
+checks:
+  branch: pass
+  plan_review: pass
+  dirty_tree: pass
+  executable_first: pass
+  competitive_pressure: pass
+  run_persistence_contract: pass
+  run_directory_layout: pass
+  run_id_hash: pass
+  persisted_data: pass
+  readback_contract: pass
+  cli_integration: pass
+  atomic_local_writes: pass
+  safety_boundary: pass
+  no_repo_ariadne_residue: pass
+  no_git_gh_docker: pass
+  predecessor_modules_unchanged: pass
+  no_dashboard_retry_control_plane: pass
+  frozen_streams: pass
+  validation: pass
+  artifact_write_readback: pass
+boundary_confirmations:
+  - evidence-first precommit-review completed
+  - PLAN.md reviewed; plan-review reviewed; ROADMAP/agents/schemas/docs/task_intake unchanged
+  - pipeline_runner.py + git_boundary.py NOT modified (plan confirmed)
+  - ariadne_task_cli.py MODIFIED per plan (narrow integration only)
+  - only precommit-review artifact physically written; correct PR 0130 branch confirmed
+  - executable-first: run_persistence.py ~430 lines + 21 test classes; ariadne_task_cli.py narrow integration
+  - RunPersistenceRequest/Result/ReadResult/Status + persist_run_record()+load_run_record()+_write_json_atomically()
+  - run directory: <runs_root>/<run_id>/run.json + manifest.json; tests use tmp_path
+  - run_id: ^[a-zA-Z0-9_-]{1,64}$, invalid_run_id rejected; SHA256[:16] task+json hashes; sort_keys=True
+  - run.json: schema_version/run_id/pipeline/git_boundary/command_plan/execution/approval/artifact_hashes/warnings; no raw agent stdout/stderr/secrets
+  - load_run_record: read run.json, verify run_id consistency, stored+recomputed hash match; NOT_FOUND/REJECTED on failure
+  - CLI integration: --runs-root --run-id args; injectable persistence_fn; run_id+run_record_path in output; temp runs_root in tests
+  - atomic writes: os.makedirs + write .tmp + os.rename; no network/Docker/git/subprocess
+  - competitive pressure: no dashboard/control-plane/retry/run report/parallel queue/Decision Core/Context Warehouse/eval/faithfulness/frontend
+  - 25 persistence tests pass; 197 regression tests pass; .ariadne absent
+evidence_ledger:
+  - claim: branch correct
+    evidence_source: git branch --show-current
+    exact_observed_evidence: 0130-run-persistence
+    result: pass
+  - claim: plan-review approved
+    evidence_source: plan-review.yml verdict field
+    exact_observed_evidence: verdict approve (2026-07-06T22:38:00Z)
+    result: pass
+  - claim: dirty tree within scope
+    evidence_source: git status --short + git diff --name-only
+    exact_observed_evidence: M ariadne_task_cli.py (approved modification) + ?? run_persistence.py + ?? test_run_persistence.py (new files); no forbidden paths
+    result: pass
+  - claim: executable-first implementation
+    evidence_source: source + tests + pytest
+    exact_observed_evidence: run_persistence.py ~430 lines; test_run_persistence.py with 21 test classes; 25 pytest passes
+    result: pass
+  - claim: competitive pressure handled without scope expansion
+    evidence_source: source + git diff
+    exact_observed_evidence: git diff shows only ariadne_task_cli.py modification (narrow); no dashboard/control plane/retry/reports; PLAN L56-58 respected
+    result: pass
+  - claim: Run Persistence contract
+    evidence_source: run_persistence.py dataclasses + functions
+    exact_observed_evidence: RunPersistenceRequest/Result/ReadResult/Status + persist_run_record()+load_run_record()+_write_json_atomically()
+    result: pass
+  - claim: run directory layout
+    evidence_source: persist_run_record() in run_persistence.py
+    exact_observed_evidence: os.makedirs run_dir + write run.json + manifest.json; tests use tmp_path; no repo .ariadne/
+    result: pass
+  - claim: run ID/hash contract
+    evidence_source: _RUN_ID_RE + SHA256 in run_persistence.py
+    exact_observed_evidence: ^[a-zA-Z0-9_-]{1,64}$ validated; SHA256[:16] task_description_hash + run_json_hash; sort_keys=True; injectable clock
+    result: pass
+  - claim: persisted data contract
+    evidence_source: persist_run_record() in run_persistence.py
+    exact_observed_evidence: run.json includes schema_version/run_id/pipeline_status/git_boundary_status/command_plan_summary/execution_attempted/approval_summary/artifact_hashes/warnings; no raw agent stdout/stderr/secrets
+    result: pass
+  - claim: readback contract
+    evidence_source: load_run_record() in run_persistence.py
+    exact_observed_evidence: read run.json, verify run_id consistency, stored+recomputed hash_match; NOT_FOUND for missing dir; REJECTED for malformed JSON
+    result: pass
+  - claim: CLI integration
+    evidence_source: ariadne_task_cli.py modification
+    exact_observed_evidence: --runs-root --run-id args; injectable persistence_fn; run_id+run_record_path in output; tests use temp runs_root; pipeline_runner.py + git_boundary.py NOT modified
+    result: pass
+  - claim: atomic/local write contract
+    evidence_source: _write_json_atomically() in run_persistence.py
+    exact_observed_evidence: os.makedirs + write .tmp + os.rename; no network/Docker/git/subprocess; no chmod/chown
+    result: pass
+  - claim: safety boundary complete
+    evidence_source: source + git diff
+    exact_observed_evidence: git diff shows only ariadne_task_cli.py modification; no unattended git rights/git mutation/Docker/dep install/agent edits/bypass pipeline or git boundary
+    result: pass
+  - claim: no repo .ariadne residue
+    evidence_source: tests + find .ariadne
+    exact_observed_evidence: tests use tmp_path; find .ariadne → absent
+    result: pass
+  - claim: no git/gh/Docker/agent execution
+    evidence_source: source + grep
+    exact_observed_evidence: no subprocess.run/os.system/shell=True/docker/git/gh in run_persistence.py source; tests use fakes
+    result: pass
+  - claim: predecessor modules unchanged
+    evidence_source: git diff
+    exact_observed_evidence: only ariadne_task_cli.py modified; pipeline_runner.py + git_boundary.py NOT touched
+    result: pass
+  - claim: no dashboard/control-plane/retry scope
+    evidence_source: git diff + source grep
+    exact_observed_evidence: git diff empty for dashboard/control-plane/retry imports; run_persistence.py is pure local file storage
+    result: pass
+  - claim: frozen streams not started
+    evidence_source: diff + source
+    exact_observed_evidence: git diff empty; run_persistence.py does not import improvement_backlog GRM/context/eval/faithfulness/frontend
+    result: pass
+  - claim: validation passed
+    evidence_source: compileall + pytest + grep + .ariadne check
+    exact_observed_evidence: compileall exit 0; 25+172 pytest pass; all grep pass; .ariadne absent
+    result: pass
+  - claim: artifact physically written/read back
+    evidence_source: write_file + test -f
+    exact_observed_evidence: precommit-review.yml written to .project-memory/pr/0130-run-persistence/reviews/
+    result: pass
