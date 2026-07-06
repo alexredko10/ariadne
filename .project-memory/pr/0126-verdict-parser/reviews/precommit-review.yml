@@ -1,0 +1,216 @@
+schema_version: "0.1"
+pr_id: "0126-verdict-parser"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-05T21:50:00Z"
+related_plan: ".project-memory/pr/0126-verdict-parser/PLAN.md"
+related_commit: "978d9c82727c65a880e47633b71a17ae9f0e4f74"
+summary:
+  result: "PR 0126 Verdict Parser implementation matches PLAN.md. Adds services/runner/src/runner/verdict_parser.py with parse_review_artifact() + decide_next_action(); 33 focused tests pass; 126 regression tests pass; PR 0124 bridge + PR 0125 composer intact; .ariadne absent."
+snapshot_delta:
+  plan_base_sha: "7a8c040f488934b30f83d0a514b94e7430385dba"
+  current_head: "978d9c82727c65a880e47633b71a17ae9f0e4f74"
+  action: "continue"
+  stale_snapshot: true
+scope:
+  expected_files:
+    - "services/runner/src/runner/verdict_parser.py"
+    - "services/runner/tests/test_verdict_parser.py"
+    - ".project-memory/pr/0126-verdict-parser/reviews/precommit-review.yml"
+  actual_files:
+    - "services/runner/src/runner/verdict_parser.py"
+    - "services/runner/tests/test_verdict_parser.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0126-verdict-parser/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0126-verdict-parser/PLAN.md"
+  - ".project-memory/pr/0126-verdict-parser/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md"
+  - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml"
+  - ".project-memory/pr/0124-agent-runner-bridge/reviews/precommit-review.yml"
+  - ".project-memory/pr/0125-prompt-composer/reviews/precommit-review.yml"
+  - "services/runner/src/runner/verdict_parser.py"
+  - "services/runner/tests/test_verdict_parser.py"
+  - "services/runner/src/runner/agent_runner_bridge.py"
+  - "services/runner/src/runner/prompt_composer.py"
+  - "services/runner/tests/test_agent_runner_bridge.py"
+  - "services/runner/tests/test_prompt_composer.py"
+  - "services/runner/tests/test_docker_agent_adapter.py"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+files_modified: []
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "978d9c82727c65a880e47633b71a17ae9f0e4f74"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0126-verdict-parser"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? verdict_parser.py + test_verdict_parser.py (no other files)"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty (no tracked modifications)"
+  - command: "find services/runner/src/runner -maxdepth 1 -type f | sort"
+    result: "passed"
+    exit_code: 0
+    evidence: "34 files: verdict_parser.py + agent_runner_bridge.py + prompt_composer.py + 31 others"
+  - command: "find services/runner/tests -maxdepth 1 -type f | sort"
+    result: "passed"
+    exit_code: 0
+    evidence: "35 test files: test_verdict_parser.py + test_agent_runner_bridge.py + test_prompt_composer.py + 32 others"
+  - command: "python -m compileall -f services/runner/src services/task_intake/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "all files compiled; verdict_parser.py included"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest services/runner/tests/test_verdict_parser.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "33 passed in 0.08s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest test_verdict_parser.py test_prompt_composer.py test_agent_runner_bridge.py test_docker_agent_adapter.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "126 passed in 0.16s"
+  - command: "grep 'Production Line Stream|0126|proof principle' ROADMAP.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "L302 Production Line Stream ACTIVE; L313 0126 Verdict Parser; L370 docs-only block; L371 git mutation block; L376 proof principle"
+  - command: "grep 'VerdictParser|parse_review_artifact|decide_next_action|normalized_verdict|retry_candidate|artifact_hash|evidence_ledger|boundary_confirmations' verdict_parser.py test_verdict_parser.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "All 9 patterns present in verdict_parser.py source"
+  - command: "grep 'subprocess.run|docker compose|gh pr create|git push|git add|pip install' verdict_parser.py test_verdict_parser.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "All matches in _SAFETY_VIOLATION_PATTERNS constant (pattern-reject, not runtime call) or test assertions"
+  - {command: "grep forbidden+bridge+ariadne checks", result: "passed", exit_code: 0, evidence: "Forbidden in _SAFETY_VIOLATION_PATTERNS only; bridge/composer NOT imported (grep exit 1); .ariadne absent"}
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Approve PR 0126 implementation"
+    reason: "All implementation files match PLAN.md scope; runtime verdict parser module + 33 focused tests pass; 126 regression tests pass; normalized verdict model correct; control action rules deterministic; evidence extraction complete; no agent/Docker/git mutation; PR 0124 bridge + PR 0125 composer unchanged; .ariadne absent."
+context_used:
+  labels: [verdict-parser, production-line, stage-1-orchestrator, pr-0126, executable-first, pr-0123-roadmap, pr-0124-bridge, pr-0125-composer]
+  memory_files_read:
+    - ".project-memory/pr/0126-verdict-parser/PLAN.md"
+    - ".project-memory/pr/0126-verdict-parser/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - "ROADMAP.md"
+    - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml"
+    - ".project-memory/pr/0124-agent-runner-bridge/reviews/precommit-review.yml"
+    - ".project-memory/pr/0125-prompt-composer/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "services/runner/src/runner/verdict_parser.py"
+    - "services/runner/tests/test_verdict_parser.py"
+    - "services/runner/src/runner/agent_runner_bridge.py"
+    - "services/runner/src/runner/prompt_composer.py"
+    - "agents/plan-review.yml"
+    - "agents/precommit-review.yml"
+  files_modified:
+    - ".project-memory/pr/0126-verdict-parser/reviews/precommit-review.yml"
+  files_intentionally_ignored: [ROADMAP.md, "docs/**", "schemas/**", "services/task_intake/**", "pyproject.toml", "package.json", "Makefile"]
+checks:
+  branch: pass
+  plan_review: pass
+  dirty_tree: pass
+  executable_first: pass
+  verdict_parser_contract: pass
+  normalized_verdict_model: pass
+  control_action_rules: pass
+  evidence_extraction_contract: pass
+  agent_output_not_evidence: pass
+  safety_boundary_complete: pass
+  no_agent_or_docker: pass
+  frozen_streams_not_started: pass
+  validation: pass
+  artifact_write_readback: pass
+boundary_confirmations:
+  - "evidence-first precommit-review completed"
+  - "PLAN.md reviewed and not modified"
+  - "plan-review artifact reviewed and not modified"
+  - "ROADMAP.md not modified"
+  - "agents/*.yml not modified"
+  - "services/runner/src/runner/agent_runner_bridge.py NOT modified"
+  - "services/runner/src/runner/prompt_composer.py NOT modified"
+  - "only precommit-review artifact physically written"
+  - "precommit-review artifact read back"
+  - "correct PR 0126 branch confirmed"
+  - "executable-first implementation: runtime verdict parser module + 33 focused tests"
+  - "VerdictParserRequest + ParsedReviewArtifact + VerdictDecision + parse_review_artifact() + decide_next_action()"
+  - "Normalized verdict: plan-review approve→pass/warning→warning/block→block/unknown→invalid; precommit pass→pass/warning→warning/block→block/unknown→invalid"
+  - "Control: continue(pass+no blockers), continue_with_warning(warning+no blockers), stop(block/any blockers/invalid/read failure)"
+  - "retry_candidate is metadata only (true if block+blockers+no critical+no safety violation)"
+  - "14 evidence fields extracted: schema_version, review_type, pr_id, verdict, blockers, warnings, validation, evidence_ledger, files_read, files_written, boundary_confirmations, checks, artifact_hash, line_count"
+  - "SHA256[:16] artifact hash; line count; YAML safe_load with line-oriented fallback"
+  - "Safety: no subprocess.run/docker/git/agent execution in verdict_parser.py"
+  - "verdict_parser.py does NOT import agent_runner_bridge or prompt_composer"
+  - "No frozen stream started (Decision Core, Context Warehouse, eval harness, faithfulness audit, frontend, new surface features)"
+  - "All 33 verdict parser tests pass; 126 regression tests pass; .ariadne absent"
+evidence_ledger:
+  - claim: "branch correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0126-verdict-parser"
+    result: pass
+  - claim: "plan-review approved"
+    evidence_source: "plan-review.yml verdict field"
+    exact_observed_evidence: "verdict: approve (2026-07-05T21:42:00Z)"
+    result: pass
+  - claim: "dirty tree within scope"
+    evidence_source: "git status --short + git diff --name-only"
+    exact_observed_evidence: "?? verdict_parser.py + test_verdict_parser.py only; git diff empty"
+    result: pass
+  - claim: "executable-first implementation"
+    evidence_source: "source + tests + pytest"
+    exact_observed_evidence: "verdict_parser.py runtime module (~530 lines); test_verdict_parser.py with 28 test classes; 33 pytest passes"
+    result: pass
+  - claim: "Verdict Parser contract"
+    evidence_source: "module dataclasses + functions"
+    exact_observed_evidence: "VerdictParserRequest(input) + ParsedReviewArtifact(parsed) + VerdictDecision(output) + VerdictDecisionStatus enum + parse_review_artifact() + decide_next_action(); SHA256[:16] artifact hash"
+    result: pass
+  - claim: "normalized verdict model"
+    evidence_source: "_PLAN_REVIEW_VERDICT_MAP + _PRECOMMIT_REVIEW_VERDICT_MAP in verdict_parser.py"
+    exact_observed_evidence: "plan-review: approve→pass, warning→warning, block→block, else→invalid; precommit: pass→pass, warning→warning, block→block, else→invalid"
+    result: pass
+  - claim: "control action rules"
+    evidence_source: "decide_next_action() in verdict_parser.py"
+    exact_observed_evidence: "continue(pass+no blockers), continue_with_warning(warning+no blockers), stop(block+blockers), stop(any blockers), stop(invalid/read failure); retry_candidate metadata only"
+    result: pass
+  - claim: "evidence extraction contract"
+    evidence_source: "ParsedReviewArtifact dataclass + parse_review_artifact()"
+    exact_observed_evidence: "14 fields: schema_version, review_type, pr_id, verdict, has_blockers, blockers(id/desc/severity), warnings(id/desc), validation_summary, evidence_ledger_summary, files_read, files_written, boundary_confirmations, checks, artifact_hash, line_count"
+    result: pass
+  - claim: "agent output not accepted as evidence"
+    evidence_source: "module docstring + parse_review_artifact()"
+    exact_observed_evidence: "Module docstring: 'Agent output is not evidence. Runtime/file-captured review artifact proof is evidence.'; parser reads structured YAML artifact fields, not raw narrative"
+    result: pass
+  - claim: "safety boundary complete"
+    evidence_source: "grep + TestNoCommandExecution + TestNoAgentImport"
+    exact_observed_evidence: "_SAFETY_VIOLATION_PATTERNS tuple (for blocking), not runtime calls; TestNoCommandExecution passes (no subprocess.run/docker/git in source); TestNoAgentImport passes (no bridge/composer import); grep exit 1 for bridge/composer references"
+    result: pass
+  - claim: "no prompt composition / agent / Docker execution"
+    evidence_source: "grep + module imports"
+    exact_observed_evidence: "grep 'compose_pr_prompts|PromptComposer|run_agent_runner_bridge|AgentRunnerBridge' in verdict_parser.py → exit 1 (not found); no docker/git/subprocess in source except safety patterns"
+    result: pass
+  - claim: "frozen streams not started"
+    evidence_source: "diff + module source"
+    exact_observed_evidence: "git diff empty; verdict_parser.py does not import improvement_backlog GRM, context compilation, eval harness, faithfulness, frontend, or new surface features"
+    result: pass
+  - claim: "validation passed"
+    evidence_source: "compileall + pytest + grep + .ariadne check"
+    exact_observed_evidence: "compileall exit 0; 33 + 126 pytest pass; all grep checks pass; .ariadne absent"
+    result: pass
+  - claim: "artifact physically written/read back"
+    evidence_source: "write_file + test -f"
+    exact_observed_evidence: "precommit-review.yml written to .project-memory/pr/0126-verdict-parser/reviews/"
+    result: pass
