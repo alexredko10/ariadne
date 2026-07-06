@@ -1,0 +1,102 @@
+schema_version: "0.1"
+pr_id: "0131a-ariadne-task-cli-dogfood-readiness"
+review_type: plan-review
+verdict: approve
+reviewer: plan-review
+timestamp: "2026-07-07T00:55:00Z"
+related_plan: ".project-memory/pr/0131a-ariadne-task-cli-dogfood-readiness/PLAN.md"
+summary:
+  result: "PR 0131A DOGFOOD Readiness Fix plan approved. 5 concrete fixes to ariadne_task_cli.py: (1) add if __name__==__main__ entrypoint, (2) support task subcommand, (3) fix result.json_output→request.json_output, (4) persist stopped/failed results, (5) include run_id/run_record_path in all results. No Pipeline Runner/Git Boundary changes. No scope expansion. All 14 mandatory checks pass."
+snapshot_delta:
+  plan_base_sha: "ecac1bda691b66b3876569a817ed5731a573ab52"
+  current_head: "ecac1bda691b66b3876569a817ed5731a573ab52"
+  action: continue
+  stale_snapshot: false
+scope:
+  expected_files: [".project-memory/pr/0131a-ariadne-task-cli-dogfood-readiness/PLAN.md", ".project-memory/pr/0131a-ariadne-task-cli-dogfood-readiness/reviews/plan-review.yml"]
+  actual_files: [".project-memory/pr/0131a-ariadne-task-cli-dogfood-readiness/PLAN.md", ".project-memory/pr/0131a-ariadne-task-cli-dogfood-readiness/reviews/plan-review.yml"]
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: in_scope
+files_checked:
+  - ".project-memory/pr/0131a-ariadne-task-cli-dogfood-readiness/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md"
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+files_modified: []
+validation:
+  - {command: "git rev-parse --verify HEAD", result: passed, exit_code: 0, evidence: "ecac1bda"}
+  - {command: "git branch --show-current", result: passed, exit_code: 0, evidence: "0131a-ariadne-task-cli-dogfood-readiness"}
+  - {command: "git status --short", result: passed, exit_code: 0, evidence: "?? .project-memory/pr/0131a-ariadne-task-cli-dogfood-readiness/ only"}
+  - {command: "git diff --name-only", result: passed, exit_code: 0, evidence: "empty (no tracked modifications)"}
+  - {command: "grep __main__ ariadne_task_cli.py", result: passed, exit_code: 1, evidence: "exit 1 — if __name__==__main__ NOT present; main() at L771"}
+  - {command: "grep 'task_description' parser ariadne_task_cli.py", result: passed, exit_code: 0, evidence: "L158: parser.add_argument(task_description) — no task subcommand; direct positional only"}
+  - {command: "grep result.json_output ariadne_task_cli.py", result: passed, exit_code: 0, evidence: "L788: if result.json_output: — result=AriadneTaskCliResult has no json_output field (AttributeError confirmed)"}
+  - {command: "grep persist_run_record call site ariadne_task_cli.py", result: passed, exit_code: 0, evidence: "L624: only reached after full execution; early returns skip persistence (confirmed missing for stopped/failed runs)"}
+  - {command: "grep pipeline_runner.py git_boundary.py modification in PLAN", result: passed, exit_code: 1, evidence: "exit 1 — no Pipeline Runner/Git Boundary modification planned"}
+  - {command: "grep dashboard|control.plane|retry|model.health in PLAN", result: passed, exit_code: 1, evidence: "exit 1 — none found"}
+  - {command: "if [ -d .ariadne ]; then find .ariadne -maxdepth 5 -type f | sort; else echo '.ariadne absent'; fi", result: passed, exit_code: 0, evidence: ".ariadne absent"}
+blockers: []
+warnings: []
+decisions_made:
+  - {decision: "Approve PR 0131A DOGFOOD Readiness Fix plan", reason: "All 14 mandatory checks pass. 5 concrete fixes verified in source. No Pipeline Runner/Git Boundary changes. No scope expansion. Validation strategy complete. Artifact write/readback requirements included."}
+context_used:
+  labels: [dogfood-readiness, ariadne-task-cli, production-line, stage-2, pr-0131a, executable-fix, dogfood-blocker]
+  memory_files_read: [".project-memory/pr/0131a-ariadne-task-cli-dogfood-readiness/PLAN.md", ".project-memory/review-artifact.schema.yml", "ROADMAP.md", "services/runner/src/runner/ariadne_task_cli.py", "services/runner/tests/test_ariadne_task_cli.py", "agents/plan-review.yml", "agents/precommit-review.yml"]
+  anchors_used: []
+  files_inspected: ["ariadne_task_cli.py (815 lines)", "test_ariadne_task_cli.py"]
+  files_modified: []
+  files_intentionally_ignored: [services/runner/src/**/*.py, services/task_intake/**, schemas/**, docs/**, agents/**, packages/**, apps/**, docker/**, .github/**, pyproject.toml, package.json, Makefile, .project-memory/post-0100/**]
+checks:
+  branch: pass
+  dirty_tree: pass
+  dogfood_blocker_evidence_captured: pass
+  scope_constrained: pass
+  entrypoint_contract: pass
+  parser_compatibility_contract: pass
+  json_output_fix_contract: pass
+  stopped_run_persistence_contract: pass
+  pipeline_stop_visibility_contract: pass
+  safety_boundary_complete: pass
+  predecessor_modules_protected: pass
+  no_frozen_streams_started: pass
+  validation_strategy_complete: pass
+  artifact_write_readback_requirements: pass
+boundary_confirmations:
+  - "evidence-first plan-review completed; PLAN.md not modified"
+  - "only plan-review artifact written; correct PR 0131A branch confirmed"
+  - "ROADMAP.md not modified; services/runner/** not modified by review"
+  - "ariadne_task_cli.py module end (L815): no if __name__==__main__ entrypoint confirmed (Fix 1 missing)"
+  - "ariadne_task_cli.py parser (L158): positional task_description only, no task subcommand confirmed (Fix 2 missing)"
+  - "ariadne_task_cli.py L788: if result.json_output — AriadneTaskCliResult has no json_output field (AttributeError confirmed; Fix 3 missing)"
+  - "ariadne_task_cli.py L624: persistence only reached after full execution; early returns skip it (Fix 4 missing)"
+  - "ariadne_task_cli.py AriadneTaskCliResult (L97-122): no run_id/run_record_path in all result paths (Fix 5 partially missing)"
+  - "persist_run_record imported at L42: API shape is correct (only call site needs fixing)"
+  - "run_persistence.py NOT modified (run_persistence.py not in files_modified)"
+  - "pipeline_runner.py NOT modified; git_boundary.py NOT modified"
+  - "PLAN: only ariadne_task_cli.py + test_ariadne_task_cli.py modified; no forbidden modules touched"
+  - "PLAN: no dashboard/control-plane/retry/model health/run report/parallel queue"
+  - "PLAN: 5 concrete fixes verified against source; no scope expansion"
+  - "validation: compileall + pytest + module --help + grep checks + .ariadne residue"
+  - "all 14 mandatory checks pass"
+evidence_ledger:
+  - {claim: "branch correct", evidence_source: "git branch --show-current", exact_observed_evidence: "0131a-ariadne-task-cli-dogfood-readiness", result: pass}
+  - {claim: "dirty tree within planning scope", evidence_source: "git status --short + git diff --name-only", exact_observed_evidence: "?? .project-memory/pr/0131a-ariadne-task-cli-dogfood-readiness/ only; git diff empty", result: pass}
+  - {claim: "PLAN.md was read", evidence_source: "PLAN.md content", exact_observed_evidence: "12313 bytes, 300+ lines, PR 0131A DOGFOOD Readiness Fix Plan", result: pass}
+  - {claim: "required supporting files read", evidence_source: "files_checked list", exact_observed_evidence: "7 files: PLAN, schema, ROADMAP, ariadne_task_cli.py, test_ariadne_task_cli.py, 2 agent configs", result: pass}
+  - {claim: "dogfood blocker evidence captured", evidence_source: "PLAN.md dogfood blocker section + ariadne_task_cli.py source", exact_observed_evidence: "Fix 1: no if __name__==__main__ (grep exit 1); Fix 2: no task subcommand (L158 positional only); Fix 3: result.json_output AttributeError (L788: result=AriadneTaskCliResult has no json_output); Fix 4: early returns skip persistence (L624 only after full execution); Fix 5: run_id/run_record_path absent in stopped results", result: pass}
+  - {claim: "scope constrained", evidence_source: "PLAN.md implementation files section", exact_observed_evidence: "ariadne_task_cli.py MODIFIED (5 fixes); test_ariadne_task_cli.py MODIFIED (regression tests); no other files", result: pass}
+  - {claim: "entrypoint contract", evidence_source: "grep __main__ in ariadne_task_cli.py + PLAN fix 1", exact_observed_evidence: "ariadne_task_cli.py L815 module end: no if __name__==__main__ confirmed (grep exit 1); PLAN Fix 1 adds if __name__==__main__ entrypoint; main() at L771 returns int", result: pass}
+  - {claim: "parser compatibility contract", evidence_source: "parse_ariadne_task_args in ariadne_task_cli.py + PLAN fix 2", exact_observed_evidence: "L158 parser.add_argument(task_description) positional only, no task subcommand confirmed; PLAN Fix 2 adds optional task literal command parser; both forms supported", result: pass}
+  - {claim: "json output fix contract", evidence_source: "L788 result.json_output + PLAN fix 3", exact_observed_evidence: "L788 if result.json_output: — AriadneTaskCliResult has no json_output field (AttributeError confirmed); PLAN Fix 3 changes to request.json_output; json_output is on AriadneTaskCliRequest at L86", result: pass}
+  - {claim: "stopped run persistence contract", evidence_source: "persist_run_record call site in ariadne_task_cli.py + PLAN fix 4", exact_observed_evidence: "L624: if request.runs_root and persistence_fn: — only reached after full execution path; early returns in run_ariadne_task (stopped/failed) skip this block; PLAN Fix 4 refactors shared persistence block for all terminal statuses", result: pass}
+  - {claim: "pipeline stop visibility contract", evidence_source: "AriadneTaskCliResult + _format_json_output in ariadne_task_cli.py", exact_observed_evidence: "L116: run_id Optional[str] field present; L118: run_record_path Optional[str] field present in result; L753: run_id printed in human output; L806: run_id in JSON; PLAN Fix 4+5 ensure these are set for all result paths including stopped/failed", result: pass}
+  - {claim: "safety boundary complete", evidence_source: "PLAN.md non-goals section + source grep", exact_observed_evidence: "PLAN: no retry/dashboard/control-plane/model health/run report/parallel queue; grep forbidden patterns in ariadne_task_cli.py test grep: subprocess.run in _execute_git_command_spec only (shell=False), no docker/git install", result: pass}
+  - {claim: "predecessor modules protected", evidence_source: "PLAN.md implementation files + source grep", exact_observed_evidence: "run_persistence.py imported at L42, API shape correct, NOT modified; pipeline_runner.py NOT modified; git_boundary.py NOT modified; prompt_composer.py NOT modified; verdict_parser.py NOT modified; agent_runner_bridge.py NOT modified", result: pass}
+  - {claim: "no frozen streams started", evidence_source: "grep frozen/expansion patterns in PLAN", exact_observed_evidence: "grep dashboard/control-plane/retry/model health/run report/parallel queue → exit 1 (none found); PLAN non-goals confirms no frozen stream started before PR 0136", result: pass}
+  - {claim: "validation strategy complete", evidence_source: "PLAN.md validation commands section", exact_observed_evidence: "compileall + pytest(test_ariadne_task_cli.py + 7-file regression) + python -m runner.ariadne_task_cli --help + python -m runner.ariadne_task_cli task debug --json + python -m runner.ariadne_task_cli debug --json + grep(__main__/json_output/pipeline_stopped/runs_root/run_record_path) + grep(forbidden) + .ariadne residue + git status/diff", result: pass}
+  - {claim: "artifact physically written/read back", evidence_source: "write_file + test -f", exact_observed_evidence: "plan-review.yml written to .project-memory/pr/0131a-ariadne-task-cli-dogfood-readiness/reviews/; test -f exits 0", result: pass}
