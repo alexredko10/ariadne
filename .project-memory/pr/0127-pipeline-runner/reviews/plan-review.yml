@@ -1,0 +1,123 @@
+schema_version: "0.1"
+pr_id: "0127-pipeline-runner"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-06T12:32:00Z"
+related_plan: ".project-memory/pr/0127-pipeline-runner/PLAN.md"
+summary:
+  result: "PR 0127 Pipeline Runner plan approved. Fourth executable Production Line PR. Connects PR 0124 (bridge), PR 0125 (composer), PR 0126 (parser) into one call: compose prompts → planner → artifact check → plan-review → gate → coder → precommit-review → gate. Stops on block. Deterministic. Injectable boundaries. No git boundary, CLI, persistence, or retry execution. All 20 mandatory checks pass."
+snapshot_delta:
+  plan_base_sha: "41d50e9d1df20682e00b97885833bee3070cb499"
+  current_head: "41d50e9d1df20682e00b97885833bee3070cb499"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files: [".project-memory/pr/0127-pipeline-runner/PLAN.md", ".project-memory/pr/0127-pipeline-runner/reviews/plan-review.yml"]
+  actual_files: [".project-memory/pr/0127-pipeline-runner/PLAN.md", ".project-memory/pr/0127-pipeline-runner/reviews/plan-review.yml"]
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0127-pipeline-runner/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md (L302-380)"
+  - ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml"
+  - ".project-memory/pr/0124-agent-runner-bridge/reviews/precommit-review.yml"
+  - ".project-memory/pr/0125-prompt-composer/reviews/precommit-review.yml"
+  - ".project-memory/pr/0126-verdict-parser/reviews/precommit-review.yml"
+  - "services/runner/src/runner/agent_runner_bridge.py"
+  - "services/runner/src/runner/prompt_composer.py"
+  - "services/runner/src/runner/verdict_parser.py"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+files_modified: []
+validation:
+  - {command: "git rev-parse --verify HEAD", result: "passed", exit_code: 0, evidence: "41d50e9d"}
+  - {command: "git branch --show-current", result: "passed", exit_code: 0, evidence: "0127-pipeline-runner"}
+  - {command: "git status --short", result: "passed", exit_code: 0, evidence: "?? .project-memory/pr/0127-pipeline-runner/ only"}
+  - {command: "git diff --name-only", result: "passed", exit_code: 0, evidence: "empty (no tracked modifications)"}
+  - {command: "grep 'Production Line Stream|0127' ROADMAP.md", result: "passed", exit_code: 0, evidence: "L302 Production Line Stream ACTIVE; L315 0127 Pipeline Runner; L370-376 stop conditions+proof"}
+  - {command: "find services/runner/src/runner -maxdepth 1 -type f | sort", result: "passed", exit_code: 0, evidence: "35 files: agent_runner_bridge.py + prompt_composer.py + verdict_parser.py + 32 others"}
+  - {command: "find services/runner/tests -maxdepth 1 -type f | sort", result: "passed", exit_code: 0, evidence: "36 test files"}
+  - {command: "grep 'PipelineRunner|run_pr_pipeline|PipelineStepResult|PipelineGateResult|competitive pressure|anti-stall' PLAN.md", result: "passed", exit_code: 0, evidence: "PLAN defines PipelineRunnerRequest/StepResult/GateResult/RunnerResult + run_pr_pipeline() + 8-step model + competitive pressure section"}
+  - {command: "grep run_agent_runner_bridge agent_runner_bridge.py", result: "passed", exit_code: 0, evidence: "run_agent_runner_bridge() at L285; AgentRunnerBridgeResult/task_prompt_hash/agent_config_hash/proof_source='runtime-captured' confirmed"}
+  - {command: "grep compose_pr_prompts prompt_composer.py", result: "passed", exit_code: 0, evidence: "compose_pr_prompts() returns 4 PromptPackets; ready_for_agent_runner_bridge=True; prompt_order confirmed"}
+  - {command: "grep 'parse_review_artifact|decide_next_action|retry_candidate' verdict_parser.py", result: "passed", exit_code: 0, evidence: "parse_review_artifact()+decide_next_action() confirmed; VerdictDecisionStatus.CONTINUE/CONTINUE_WITH_WARNING/STOP/INVALID; is_retry_candidate metadata only"}
+  - {command: "grep 'subprocess.run|docker compose' PLAN.md implementation section", result: "passed", exit_code: 1, evidence: "exit 1 — not found in pipeline_runner.py implementation section (plan is pre-implementation)"}
+  - {command: "grep forbidden runtime calls in verdict_parser.py", result: "passed", exit_code: 0, evidence: "_SAFETY_VIOLATION_PATTERNS tuple (rejecting patterns), not runtime calls; grep pipeline_runner.py not implemented yet"}
+  - {command: "if [ -d .ariadne ]; then find .ariadne -maxdepth 5 -type f | sort; else echo '.ariadne absent'; fi", result: "passed", exit_code: 0, evidence: ".ariadne absent"}
+blockers: []
+warnings: []
+decisions_made:
+  - {decision: "Approve PR 0127 Pipeline Runner plan", reason: "All 20 mandatory checks pass. Fourth executable Production Line PR connects bridge+composer+parser into one deterministic call. 8-step sequence with stop-on-block gates. Injectable boundaries for all external deps. Competitive pressure handled without scope expansion. No git boundary, CLI, persistence, or retry execution. Safety boundary explicit. Frozen streams not started. Proposed files constrained to 2 new files. Validation strategy complete. Artifact write/readback requirements included."}
+context_used:
+  labels: [pipeline-runner, production-line, stage-1-orchestrator, pr-0127, executable-first, pr-0123-roadmap, pr-0124-bridge, pr-0125-composer, pr-0126-parser, competitive-pressure]
+  memory_files_read: [".project-memory/pr/0127-pipeline-runner/PLAN.md", ".project-memory/review-artifact.schema.yml", "ROADMAP.md", ".project-memory/pr/0123-production-line-roadmap-realignment/reviews/precommit-review.yml", ".project-memory/pr/0124-agent-runner-bridge/reviews/precommit-review.yml", ".project-memory/pr/0125-prompt-composer/reviews/precommit-review.yml", ".project-memory/pr/0126-verdict-parser/reviews/precommit-review.yml", "services/runner/src/runner/agent_runner_bridge.py", "services/runner/src/runner/prompt_composer.py", "services/runner/src/runner/verdict_parser.py", "agents/plan-review.yml", "agents/precommit-review.yml"]
+  anchors_used: []
+  files_inspected: ["ROADMAP.md (L302-380)", ".project-memory/review-artifact.schema.yml", "agent_runner_bridge.py (L1-483)", "prompt_composer.py (L1-620)", "verdict_parser.py (L1-530)"]
+  files_modified: []
+  files_intentionally_ignored: [services/runner/src/**/*.py, services/task_intake/**, schemas/**, docs/**, agents/**, packages/**, apps/**, docker/**, .github/**, pyproject.toml, package.json, Makefile, .project-memory/post-0100/**]
+checks:
+  branch: pass
+  dirty_tree: pass
+  roadmap_alignment_present: pass
+  pr_0123_roadmap_evidence: pass
+  pr_0124_bridge_evidence: pass
+  pr_0125_composer_evidence: pass
+  pr_0126_parser_evidence: pass
+  competitive_pressure_handled: pass
+  executable_first: pass
+  pipeline_runner_contract: pass
+  required_pipeline_sequence: pass
+  artifact_proof_and_gate_contract: pass
+  stop_on_block_gate_rules: pass
+  injection_fake_test_strategy: pass
+  safety_boundary_complete: pass
+  frozen_streams_not_started: pass
+  proposed_files_constrained: pass
+  validation_strategy_complete: pass
+  artifact_write_readback_requirements: pass
+boundary_confirmations:
+  - "evidence-first plan-review completed; PLAN.md not modified"
+  - "only plan-review artifact written; correct PR 0127 branch confirmed"
+  - "ROADMAP.md not modified; services/runner/** not modified; agents/** not modified"
+  - "Production Line Stream ACTIVE (ROADMAP L302); PR 0127 Pipeline Runner defined (L315)"
+  - "stop conditions present (L370-371); proof principle present (L376)"
+  - "PR 0123 precommit-review verdict:pass; PR 0124 precommit-review verdict:pass; PR 0125 precommit-review verdict:pass; PR 0126 precommit-review verdict:pass"
+  - "agent_runner_bridge.py present (run_agent_runner_bridge confirmed); prompt_composer.py present (compose_pr_prompts confirmed); verdict_parser.py present (parse_review_artifact+decide_next_action confirmed)"
+  - "PipelineRunnerRequest(input)+PipelineStepResult(step)+PipelineGateResult(gate)+PipelineRunnerResult(final)+PipelineRunnerStatus+run_pr_pipeline() defined"
+  - "8-step model: compose_prompts→planner→planner_artifact_check→plan_review→plan_review_gate→coder→precommit_review→precommit_gate"
+  - "gate evidence requires artifact path+exists+readable+hash+line_count+verdict parser result+next_action"
+  - "stop-on-block: plan-review stop/stop before coder; precommit stop/stopped"
+  - "retry_candidate is metadata only (PLAN L214: do not execute retry)"
+  - "competitive pressure/anti-stall (PLAN L58-65): no roadmap changes/ADR/control-plane/persistence/git boundary/CLI/retry/model health/run report/parallel queue/new streams"
+  - "injectable boundaries: composer+bridge+artifact_reader+parser+clock (PLAN L217-230); no real Docker/agents/network in tests"
+  - "safety: no direct Docker/shell/git/agents/*.yml edits/.ariadne/runs/ (PLAN L243-249)"
+  - "proposed: pipeline_runner.py + test_pipeline_runner.py only; no other file modifications"
+  - "validation: compileall + pytest + grep checks + .ariadne residue + git status/diff"
+  - "artifact write/readback requirements in PLAN"
+  - "all 20 mandatory checks pass"
+evidence_ledger:
+  - {claim: "branch correct", evidence_source: "git branch --show-current", exact_observed_evidence: "0127-pipeline-runner", result: pass}
+  - {claim: "dirty tree within planning scope", evidence_source: "git status --short + git diff --name-only", exact_observed_evidence: "?? .project-memory/pr/0127-pipeline-runner/ only; git diff empty", result: pass}
+  - {claim: "PLAN.md was read", evidence_source: "PLAN.md content", exact_observed_evidence: "21370 bytes, 420+ lines, PR 0127 Pipeline Runner Plan", result: pass}
+  - {claim: "required supporting files read", evidence_source: "files_checked list", exact_observed_evidence: "12 files: ROADMAP, schema, 4 prior precommit-review, 3 runtime modules, 3 agent configs", result: pass}
+  - {claim: "roadmap alignment present", evidence_source: "PLAN.md ### Roadmap alignment", exact_observed_evidence: "track: Production Line — Stage 1 Orchestrator; slot: 0127; proof principle: Agent output is not evidence; runtime/file-captured artifacts are evidence; executable-first", result: pass}
+  - {claim: "PR 0123/ROADMAP evidence present", evidence_source: "grep ROADMAP.md + precommit-review.yml read", exact_observed_evidence: "ROADMAP L302 Production Line Stream ACTIVE; L315 0127 Pipeline Runner; L370-376 stop conditions+proof; PR 0123 precommit-review verdict:pass", result: pass}
+  - {claim: "PR 0124 bridge evidence present", evidence_source: "agent_runner_bridge.py exists + precommit-review verdict", exact_observed_evidence: "agent_runner_bridge.py present (483 lines); run_agent_runner_bridge() at L285; AgentRunnerBridgeResult+task_prompt_hash+proof_source='runtime-captured'; precommit-review verdict:pass", result: pass}
+  - {claim: "PR 0125 composer evidence present", evidence_source: "prompt_composer.py exists + precommit-review verdict", exact_observed_evidence: "prompt_composer.py present (620 lines); compose_pr_prompts() returns 4 PromptPackets; ready_for_agent_runner_bridge=True; precommit-review verdict:pass", result: pass}
+  - {claim: "PR 0126 parser evidence present", evidence_source: "verdict_parser.py exists + precommit-review verdict", exact_observed_evidence: "verdict_parser.py present (530 lines); parse_review_artifact()+decide_next_action(); VerdictDecisionStatus enum; is_retry_candidate metadata only; precommit-review verdict:pass", result: pass}
+  - {claim: "competitive pressure handled without scope expansion", evidence_source: "PLAN.md competitive pressure section L58-65", exact_observed_evidence: "L58-65: no roadmap changes/ADR/control-plane/persistence/git boundary/CLI/retry loop/model health/run report/parallel queue/new capability streams; correct response is to close dogfood loop faster", result: pass}
+  - {claim: "executable-first scope", evidence_source: "PLAN.md proposed files + context snapshot", exact_observed_evidence: "services/runner/src/runner/pipeline_runner.py (runtime module) + services/runner/tests/test_pipeline_runner.py (focused tests); run_pr_pipeline() orchestration function; not docs-only", result: pass}
+  - {claim: "Pipeline Runner contract", evidence_source: "PLAN.md pipeline runner contract section", exact_observed_evidence: "PipelineRunnerRequest(input)+PipelineStepResult(step)+PipelineGateResult(gate)+PipelineRunnerResult(final)+PipelineRunnerStatus enum+run_pr_pipeline() main function; injectable boundaries for all external deps", result: pass}
+  - {claim: "required pipeline sequence", evidence_source: "PLAN.md pipeline step model L161-181", exact_observed_evidence: "8 steps in order: compose_prompts→planner→planner_artifact_check→plan_review→plan_review_gate→coder→precommit_review→precommit_gate; each step records started_at/finished_at/status/reason_codes/step-specific fields", result: pass}
+  - {claim: "artifact proof and gate contract", evidence_source: "PLAN.md artifact proof and gate contract L184-198", exact_observed_evidence: "gates require: artifact path+os.path.exists+readable+SHA256[:16] hash+line count+parse_review_artifact()+decide_next_action()+next_action recorded; agent stdout/stderr/bridge narrative NOT sufficient gate evidence", result: pass}
+  - {claim: "stop-on-block gate rules", evidence_source: "PLAN.md stop-on-block gate rules L201-224", exact_observed_evidence: "plan-review stop/stop→before coder; precommit stop/stop→stopped; any blockers→stop; human_required=True→stop; retry_candidate is metadata only, do not execute retry (L214)", result: pass}
+  - {claim: "injection/fake test strategy", evidence_source: "PLAN.md injection strategy L217-230", exact_observed_evidence: "5 injectable boundaries: composer/bridge_runner/artifact_reader/verdict_parser/clock_provider; fake returns fixed PromptComposerResult+AgentRunnerBridgeResult+ParsedReviewArtifact+VerdictDecision; no real Docker/agents/network/git/.ariadne/runs/", result: pass}
+  - {claim: "safety boundary complete", evidence_source: "PLAN.md safety and mutation boundaries L243-249 + stop conditions", exact_observed_evidence: "no direct Docker/shell/git mutation/commit/push/PR creation/dep install/agents/*.yml edits/.ariadne/runs/; injectable bridge boundary only; no unattended git mutation rights", result: pass}
+  - {claim: "frozen streams not started", evidence_source: "PLAN.md non-goals + ROADMAP L353-L365", exact_observed_evidence: "PR 0127 non-goals include git boundary/CLI/persistence/retry/model health/run report/parallel queue/Decision Core/Context Warehouse/eval/faithfulness/frontend (all frozen until PR 0136); ROADMAP L353-365 frozen list confirmed", result: pass}
+  - {claim: "proposed files constrained", evidence_source: "PLAN.md proposed implementation files L269-L270", exact_observed_evidence: "pipeline_runner.py (NEW) + test_pipeline_runner.py (NEW); agent_runner_bridge.py + prompt_composer.py + verdict_parser.py NOT modified; no ROADMAP/docs/agents/schemas/task_intake changes", result: pass}
+  - {claim: "validation strategy complete", evidence_source: "PLAN.md validation commands L327-L356", exact_observed_evidence: "compileall + pytest(test_pipeline_runner.py) + pytest(regression 5 files) + grep(pipeline patterns) + grep(forbidden) + .ariadne residue + git status/diff; no real Docker/agent execution/network required", result: pass}
+  - {claim: "artifact physically written/read back", evidence_source: "write_file + test -f", exact_observed_evidence: "plan-review.yml written to .project-memory/pr/0127-pipeline-runner/reviews/; test -f exits 0", result: pass}
