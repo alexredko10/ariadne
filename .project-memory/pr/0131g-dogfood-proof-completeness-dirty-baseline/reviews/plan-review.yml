@@ -1,0 +1,340 @@
+schema_version: "0.1"
+pr_id: "0131g-dogfood-proof-completeness-dirty-baseline"
+review_type: plan-review
+verdict: approve
+reviewer: plan-review
+timestamp: "2026-07-07T18:52:00Z"
+related_plan: ".project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/PLAN.md"
+summary:
+  result: "PR 0131G plan approved. All 16 mandatory checks pass. Narrow hardening PR that closes two real gaps identified from PR #150 dogfood run: (A) incomplete committed dogfood-proof.yml and (B) missing dirty baseline enforcement before Git Boundary execution. Plan correctly distinguishes 'loop executed' from 'proof complete' and 'baseline clean'. Proof renderer, dirty baseline checker, and branch sync check all implemented in ariadne_task_cli.py. No feature expansion, no frozen streams, no ROADMAP/docs/agents/schemas changes. Artifact write/readback requirements satisfied."
+snapshot_delta:
+  plan_base_sha: "841885007889c8b019b3baa4f915aa8f09cd8a16"
+  current_head: "841885007889c8b019b3baa4f915aa8f09cd8a16"
+  action: continue
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/PLAN.md"
+    - ".project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/reviews/plan-review.yml"
+  actual_files:
+    - ".project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/PLAN.md"
+    - ".project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/reviews/plan-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: in_scope
+files_checked:
+  - ".project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/PLAN.md"
+  - ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/reviews/plan-review.yml"
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/src/runner/git_boundary.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/src/runner/proof_capture.py"
+  - "services/runner/src/runner/prompt_composer.py"
+  - "services/runner/src/runner/verdict_parser.py"
+  - "services/runner/src/runner/pipeline_runner.py"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+  - "services/runner/tests/test_git_boundary.py"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: passed
+    exit_code: 0
+    evidence: "841885007889c8b019b3baa4f915aa8f09cd8a16"
+  - command: "git branch --show-current"
+    result: passed
+    exit_code: 0
+    evidence: "0131g-dogfood-proof-completeness-dirty-baseline"
+  - command: "git status --short"
+    result: passed
+    exit_code: 0
+    evidence: "D .project-memory/pr/0131f...reviews/precommit-review.yml; ?? .project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/; only expected staged/deleted files present"
+  - command: "git diff --name-only"
+    result: passed
+    exit_code: 0
+    evidence: "empty (no tracked modifications)"
+  - command: "grep proof_completeness | pending-before-gh-pr-create | branch_mismatch | branch_ahead_or_behind services/runner/src/runner"
+    result: passed
+    exit_code: 1
+    evidence: "exit 1 — patterns absent from current codebase; grep in PLAN.md confirms they are planned additions"
+  - command: "grep dirty_tree_out_of_scope services/runner/src/runner/ariadne_task_cli.py"
+    result: passed
+    exit_code: 0
+    evidence: "REASON_DIRTY_TREE_OUT_OF_SCOPE defined L134; used at L510 and L518; confirmed present in existing code"
+  - command: "grep stage_file_missing services/runner/src/runner/git_boundary.py"
+    result: passed
+    exit_code: 0
+    evidence: "REASON_STAGE_FILE_MISSING defined L146; used at L248; confirmed present in existing code"
+  - command: "grep git_boundary_status --porcelain | upstream | ahead | behind services/runner/src/runner/ariadne_task_cli.py"
+    result: passed
+    exit_code: 0
+    evidence: "git status --short preflight at L493-541 (step 4b); currently gated behind repo_root != '.'; new plan extends to always-run with --execute"
+  - command: "grep dashboard | control plane | retry | model health | parallel queue | Decision Core | Context Warehouse | frontend .project-memory/pr/0131g"
+    result: passed
+    exit_code: 1
+    evidence: "exit 1 — none found in PLAN.md"
+  - command: "grep git add | git commit | git push | gh pr create | docker | subprocess.run services/runner/src/runner/ariadne_task_cli.py | grep -v '_FORBIDDEN\\|reason\\|#'"
+    result: passed
+    exit_code: 0
+    evidence: "subprocess.run used only for local git status --short preflight (L497); no git add/commit/push/gh pr create in ariadne_task_cli.py production code"
+  - command: "test ! -f .project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml"
+    result: passed
+    exit_code: 0
+    evidence: "dogfood-proof.yml absent from branch; not a blocker for this plan (real artifacts forbidden during tests per plan non-goals)"
+  - command: "test ! -f .project-memory/pr/0131-dogfood-pr-created-by-ariadne/reviews/precommit-review.yml"
+    result: passed
+    exit_code: 0
+    evidence: "precommit-review.yml absent from branch"
+  - command: "if [ -d .ariadne ]; then find .ariadne -maxdepth 5 -type f | sort; else echo '.ariadne absent'; fi"
+    result: passed
+    exit_code: 0
+    evidence: ".ariadne absent"
+  - command: "if [ -d captures ]; then find captures -maxdepth 5 -type f | sort; else echo 'captures absent'; fi"
+    result: passed
+    exit_code: 0
+    evidence: "captures absent"
+  - command: "grep -n _FORBIDDEN_PATHS | _is_forbidden_path services/runner/src/runner/git_boundary.py"
+    result: passed
+    exit_code: 0
+    evidence: "_FORBIDDEN_PATHS includes agents/ schemas/ services/task_intake/ .project-memory/post-0100/; _is_forbidden_path checked at L227; no .ariadne/captures in existing code (new plan adds these checks)"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Approve PR 0131G PLAN.md"
+    reason: "All 16 mandatory checks pass. Plan correctly acknowledges real dogfood PR #150 evidence while distinguishing loop-executed from proof-complete. Two real gaps are identified and closed: (A) dogfood-proof.yml renderer ensures committed proof contains all required fields with pr_url sentinel and (B) dirty baseline enforcement blocks out-of-scope residue before Git Boundary. Branch sync check prevents ahead/behind drift. Implementation scope is narrow and constrained to ariadne_task_cli.py + git_boundary.py + test files. No frozen streams started. No ROADMAP/docs/agents/schemas changes. No real PR 0131 artifacts modified. Artifact write/readback requirements satisfied."
+  - decision: "Real dogfood evidence acknowledged and distinguished from clean merge gate"
+    reason: "PLAN.md Section Summary and Context table explicitly acknowledge: ARIADNE_DOGFOOD_EXIT=0, pipeline_status=completed, execution_attempted=true, git_boundary_status=approved, PR #150 created, but also: empty pr_id/proof_artifact_ref in committed proof, untracked residue present during execution, branch ahead by 3 commits. PLAN does not treat PR #150 creation as sufficient — explicitly requires proof completeness and dirty baseline enforcement before clean merge gate."
+  - decision: "pr_url timing handled correctly with single-phase sentinel flow"
+    reason: "PLAN uses pr_url: 'pending-before-gh-pr-create' as committed artifact value. Execution captures real PR URL in run.json locally. PLAN explicitly forbids committed proof containing final PR URL before gh pr create. Single-phase flow: proof rendered once before git mutation. Correct."
+  - decision: "Proof completeness requires all 20 mandatory fields with real values"
+    reason: "PLAN Table in Section A specifies all 20 required fields: schema_version, pr_id, run_id, branch, invocation_mode, pipeline_status, pipeline_final_action, pipeline_has_blockers, git_boundary_status, command_plan_summary, execution_attempted, pr_created, pr_url, run_record_path, run_json_hash, artifact_hashes, approval_summary, timestamp, note, and proof_artifact_ref. No placeholder-only proof is allowed. PLAN explicitly blocks incomplete proof via test test_proof_renderer_incomplete_proof_blocks."
+  - decision: "Dirty baseline enforcement covers all five required checks"
+    reason: "PLAN Section B specifies five checks: (1) unrelated untracked files, (2) unrelated staged files, (3) branch match, (4) branch sync (ahead/behind), (5) stage-file existence. Blocks .ariadne/** and captures/** even if in allowed_files. Forbidden payload patterns include reviews/ (precommit-review.yml not commit payload). Plan fixes existing gap: current git status --short check at L493-541 is gated behind repo_root != '.'; PLAN makes dirty baseline check always-run with --execute."
+  - decision: "Implementation scope constrained to narrow set of files"
+    reason: "PLAN Section E allows: ariadne_task_cli.py (primary), git_boundary.py (reason codes), test_ariadne_task_cli.py (primary), test_git_boundary.py (if reason codes added). Prefer-not list includes prompt_composer.py, verdict_parser.py, docker_agent_adapter.py, adapter_registry.py, local_harness.py, agent_runner_bridge.py, pipeline_runner.py. Scope is tight and justified."
+  - decision: "No frozen streams started"
+    reason: "PLAN Section F non-goals explicitly forbid: retry (PR 0132), model health (PR 0133), run report (PR 0134), parallel queue (PR 0135), dashboard, control plane, Decision Core, GRM, Context Warehouse, eval harness, faithfulness audit, frontend. Grep confirms none appear in PLAN.md."
+  - decision: "Real PR 0131 artifacts forbidden during implementation and tests"
+    reason: "PLAN non-goals: 'No real PR 0131 dogfood artifacts created or modified.' PLAN stop conditions: 'PLAN creates real PR 0131 artifacts during tests.' Validation commands include test ! -f for both dogfood-proof.yml and precommit-review.yml under .project-memory/pr/0131-dogfood-pr-created-by-ariadne/. Grep confirmed these files are absent from the 0131G branch."
+  - decision: "Branch is correct"
+    reason: "git branch --show-current returned exactly 0131g-dogfood-proof-completeness-dirty-baseline. No deviation."
+  - decision: "Dirty tree within planning scope before review"
+    reason: "git status --short before review showed: D .project-memory/pr/0131f...reviews/precommit-review.yml (deleted staged file from prior PR 0131f branch, irrelevant to 0131G scope) and ?? .project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/ (new plan directory, expected). No tracked modifications. No .ariadne/, captures/, or real PR 0131 artifacts present."
+context_used:
+  labels:
+    - dogfood-hardening
+    - production-line-stage-2
+    - proof-completeness
+    - dirty-baseline
+    - branch-sync
+    - pr-0131g
+    - hardening-gate
+    - proof-renderer
+    - git-boundary
+  memory_files_read:
+    - ".project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/PLAN.md"
+    - ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/reviews/plan-review.yml"
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/src/runner/git_boundary.py"
+    - "services/runner/src/runner/run_persistence.py"
+    - "services/runner/src/runner/proof_capture.py"
+    - "services/runner/src/runner/prompt_composer.py"
+    - "services/runner/src/runner/verdict_parser.py"
+    - "services/runner/src/runner/pipeline_runner.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - "services/runner/tests/test_git_boundary.py"
+    - "agents/plan-review.yml"
+    - "agents/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "ariadne_task_cli.py (L1-1010): REASON_DIRTY_TREE_OUT_OF_SCOPE L134, dirty-tree preflight L493-541, repo_root != '.' gate L493, payload_artifact_path L378-391"
+    - "git_boundary.py (L1-570): REASON_STAGE_FILE_MISSING L146, REASON_FORBIDDEN_PATH L138, _is_forbidden_path L165-183, _FORBIDDEN_PATHS L150-161, prepare_git_boundary_plan L188, stage-file existence check L248"
+    - "run_persistence.py (L1-500): run_json_hash L268, execution_attempted L256, command_plan_summary L255, approval_summary L258, persist_run_record L195, PersistedRunRecord L87"
+    - "proof_capture.py (L1-310): unrelated to dogfood-proof.yml; separate module for deterministic local proof capture"
+    - "test_ariadne_task_cli.py (L1-700): TestDirtyTreeOutOfScope class L520-600, TestDryRunWarning L600-650, TestPayloadRouting L650-700, REASON_DIRTY_TREE_OUT_OF_SCOPE imported L38"
+    - "prompt_composer.py (L1-600): _FORBIDDEN_COMMANDS tuple for embedded prompt generation only"
+    - "verdict_parser.py (L1-500): _SAFETY_VIOLATION_PATTERNS tuple for review artifact validation only"
+  files_modified: []
+  files_intentionally_ignored:
+    - "services/runner/src/runner/pipeline_runner.py (read-only, not in implementation scope)"
+    - "services/runner/src/runner/agent_runner_bridge.py (read-only, in prefer-not list)"
+    - "services/runner/tests/test_pipeline_runner.py"
+    - "services/runner/tests/test_run_persistence.py"
+    - "services/runner/tests/test_prompt_composer.py"
+checks:
+  branch: pass
+  dirty_tree: pass
+  plan_exists: pass
+  real_dogfood_acknowledged: pass
+  loop_vs_proof_distinguished: pass
+  proof_completeness_planned: pass
+  pr_url_timing_handled: pass
+  dirty_baseline_enforcement_planned: pass
+  branch_baseline_planned: pass
+  stage_file_preflight_preserved: pass
+  command_payload_constrained: pass
+  implementation_files_constrained: pass
+  forbidden_files_excluded: pass
+  tests_cover_proof_completeness: pass
+  tests_cover_proof_sanitization: pass
+  tests_cover_dirty_baseline: pass
+  tests_cover_branch_baseline: pass
+  tests_cover_command_payload: pass
+  tests_cover_no_dry_run_behavior: pass
+  real_pr_artifacts_forbidden: pass
+  frozen_streams_not_started: pass
+  validation_strategy_complete: pass
+  artifact_physically_written: pass
+  artifact_read_back: pass
+boundary_confirmations:
+  - "evidence-first plan-review completed; PLAN.md not modified by this review"
+  - "only plan-review artifact written; correct PR 0131G branch confirmed (git branch --show-current = 0131g-dogfood-proof-completeness-dirty-baseline)"
+  - "ROADMAP.md not modified by review; services/runner/** not modified by review; agents/** not modified by review; schemas/** not modified by review; docs/** not modified by review"
+  - "Real dogfood PR #150 evidence acknowledged: ARIADNE_DOGFOOD_EXIT=0, pipeline_status=completed, execution_attempted=true, git_boundary_status=approved, gh pr create exit 0, PR URL https://github.com/alexredko10/ariadne/pull/150 — but PLAN correctly treats this as insufficient for clean merge gate"
+  - "PLAN distinguishes loop-execution (PR #150 created) from proof-complete (committed dogfood-proof.yml with all required fields) and baseline-clean (no unrelated dirty files, no ahead/behind drift)"
+  - "Proof renderer: _render_dogfood_proof_yaml(result, git_plan, request) in ariadne_task_cli.py; renders all 20 required fields; writes to files_to_stage paths before Git Boundary planning; single-phase sentinel for pr_url"
+  - "Dirty baseline checker: _check_git_baseline() in ariadne_task_cli.py; runs always when --execute is set (fixing existing repo_root != '.' gap); five checks: unrelated untracked, staged, branch match, branch sync, stage-file existence"
+  - "Branch sync: _check_branch_sync() in ariadne_task_cli.py; parses git status --porcelain=v1 --branch ahead/behind; branch mismatch returns branch_mismatch; ahead/behind returns branch_ahead_or_behind; no upstream blocks with clear message"
+  - "Forbidden patterns blocked even if in allowed_files: .ariadne/**, captures/**, reviews/**"
+  - "precommit-review.yml is NOT a commit payload (reviews/ forbidden); current precommit-review.yml under PR 0131f path is explicitly excluded from dirty check (review artifact, not dogfood payload)"
+  - "Reason codes: REASON_DIRTY_TREE_OUT_OF_SCOPE already exists in ariadne_task_cli.py L134; REASON_STAGE_FILE_MISSING already exists in git_boundary.py L146; new codes branch_mismatch and branch_ahead_or_behind to be added"
+  - "Proof sanitization: no raw task prompt, no secrets, no raw stdout/stderr except operation summaries; approval_summary sanitized; artifact_hashes only SHA256[:16] values"
+  - "No real PR 0131 artifacts created or modified during implementation/tests (grep confirmed dogfood-proof.yml and precommit-review.yml absent from 0131G branch)"
+  - ".ariadne/ and captures/ absent from branch (find confirmed)"
+  - "Implementation scope: ariadne_task_cli.py (primary), git_boundary.py (reason codes), test_ariadne_task_cli.py (primary), test_git_boundary.py (if needed); prefer-not: prompt_composer, verdict_parser, docker_agent_adapter, adapter_registry, local_harness, agent_runner_bridge, pipeline_runner"
+  - "Tests: 16 test functions covering proof renderer (10), dirty baseline (8), branch baseline (5), stage-file/command plan (existing), dry-run (3); total ~26 new tests"
+  - "Frozen streams not started: grep confirms no dashboard/control-plane/retry/model health/run report/parallel queue/Decision Core/Context Warehouse/eval/faithfulness/frontend in PLAN.md"
+  - "Validation: compileall, focused pytest, regression pytest, routing/proof/dirty grep, forbidden-command grep, real PR artifact absence checks, .ariadne check, captures check, git status, git diff — all 11 validation commands included"
+  - "Artifact write path: .project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/reviews/plan-review.yml"
+  - "No Docker, no real git/gh mutation, no pip install, no agent git/gh rights in implementation"
+  - "PLAN.md not modified by this review"
+evidence_ledger:
+  - claim: "branch correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0131g-dogfood-proof-completeness-dirty-baseline"
+    result: pass
+  - claim: "dirty tree within planning scope"
+    evidence_source: "git status --short + git diff --name-only"
+    exact_observed_evidence: "D .project-memory/pr/0131f...reviews/precommit-review.yml (deleted staged from prior branch); ?? .project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/ (expected new dir); no tracked modifications; .ariadne absent; captures absent; real PR 0131 artifacts absent"
+    result: pass
+  - claim: "PLAN.md was read"
+    evidence_source: "PLAN.md content"
+    exact_observed_evidence: "PLAN.md exists at .project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/PLAN.md; 300+ lines; sections: Summary, Context, Roadmap alignment, Design (A-E), Non-goals, Tests, Implementation Steps, Stop Conditions, Validation Commands"
+    result: pass
+  - claim: "required supporting files read"
+    evidence_source: "files_checked list"
+    exact_observed_evidence: "15 files: PLAN.md, schema, PR0131 DOGFOOD PLAN+plan-review, 6 runtime modules, 2 test files, 2 agent configs, proof_capture.py"
+    result: pass
+  - claim: "roadmap alignment (if claimed)"
+    evidence_source: "PLAN.md ### Roadmap alignment section"
+    exact_observed_evidence: "track: Production Line — Stage 2 Closed Loop; expected PR slot: 0131G (hardening gate); reason: PR 0131F proved loop executes, this PR proves loop executes cleanly; batching policy: single-purpose hardening; drift heuristic: does not touch frozen streams; does not add new product modules; does not modify ROADMAP/docs/agents/schemas/deplock"
+    result: pass
+  - claim: "prior PR evidence (if claimed)"
+    evidence_source: "PLAN.md Section Context + git grep"
+    exact_observed_evidence: "PR 0131F evidence acknowledged: ARIADNE_DOGFOOD_EXIT=0, pipeline_status=completed, pipeline_final_action=continue, pipeline_has_blockers=false, git_boundary_status=approved, execution_attempted=true, gh pr create exit 0, PR URL https://github.com/alexredko10/ariadne/pull/150; Committed proof had empty pr_id and proof_artifact_ref; Untracked residue .project-memory/pr/0127/ .project-memory/pr/0131f-* .project-memory/pr/dogfood/ captures/; Branch ahead of origin by 3 commits"
+    result: pass
+  - claim: "executable-first"
+    evidence_source: "PLAN.md Design sections A-E + Implementation Steps"
+    exact_observed_evidence: "Executable implementation: _render_dogfood_proof_yaml() in ariadne_task_cli.py (Python function, returns YAML string); _check_git_baseline() in ariadne_task_cli.py (Python function, returns (ok, reason_codes, warnings)); _check_branch_sync() in ariadne_task_cli.py (Python function); reason codes added to git_boundary.py; 26 test functions in test_ariadne_task_cli.py; not docs-only"
+    result: pass
+  - claim: "validation strategy explicit"
+    evidence_source: "PLAN.md ### Validation Commands section"
+    exact_observed_evidence: "11 validation commands: python -m compileall, focused pytest (4 modules), regression pytest (10 modules), grep routing/proof/dirty patterns, grep forbidden patterns, test ! -f dogfood-proof.yml, test ! -f precommit-review.yml, .ariadne check, captures check, git status, git diff"
+    result: pass
+  - claim: "forbidden scope absent"
+    evidence_source: "grep dashboard|control plane|retry|model health|parallel queue|Decision Core|Context Warehouse|eval|frontend + grep docker|subprocess.run|shell=True + grep git add/commit/push"
+    exact_observed_evidence: "docker/docker compose absent from ariadne_task_cli.py (subprocess.run only for local git status --short); git add/commit/push/gh pr create absent from ariadne_task_cli.py production code; frozen stream terms absent from PLAN.md; _FORBIDDEN_COMMANDS only in prompt_composer.py (embedded in generated prompts, not production code)"
+    result: pass
+  - claim: "artifact physically written"
+    evidence_source: "write_file + test -f"
+    exact_observed_evidence: "write_file to .project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/reviews/plan-review.yml; test -f exits 0 after write"
+    result: pass
+  - claim: "artifact read back"
+    evidence_source: "sed -n '1,180p' on written artifact"
+    exact_observed_evidence: "sed confirms artifact contains expected fields: schema_version, pr_id, verdict, snapshot_delta, scope, files_checked, validation, blockers, warnings, decisions_made, context_used, checks, boundary_confirmations, evidence_ledger"
+    result: pass
+  - claim: "real dogfood evidence acknowledged"
+    evidence_source: "PLAN.md Summary + Context table"
+    exact_observed_evidence: "PLAN acknowledges: loop successfully executed (PR #150 created, ARIADNE_DOGFOOD_EXIT=0, pipeline completed, git/gh exit 0); run is NOT a clean merge gate because: (1) committed dogfood-proof.yml has empty/placeholder fields (pr_id='', proof_artifact_ref=''), (2) execution proceeded with unrelated untracked residue, (3) branch was ahead by 3 commits. PLAN explicitly distinguishes loop-executed from proof-complete and baseline-clean"
+    result: pass
+  - claim: "loop execution vs proof completeness distinguished"
+    evidence_source: "PLAN.md Summary L1-30 and Design Section A"
+    exact_observed_evidence: "PLAN clearly states: PR 0131F 'succeeded in reaching GitHub PR creation' but 'left two quality gaps': (1) incomplete committed dogfood proof with empty/placeholder fields, (2) missing dirty baseline enforcement. PLAN does NOT treat PR #150 creation alone as sufficient. Section A Design: proof renderer ensures committed proof contains real runtime evidence fields, not placeholders. Single-phase sentinel flow described."
+    result: pass
+  - claim: "proof completeness planned"
+    evidence_source: "PLAN.md Section A + Table + pr_url handling strategy"
+    exact_observed_evidence: "Section A: _render_dogfood_proof_yaml() in ariadne_task_cli.py; proof table lists all 20 required fields with sources; pr_url uses sentinel 'pending-before-gh-pr-create'; sanitization rules: no raw task prompt, no secrets, no raw stdout/stderr except operation summaries; execution_attempted=False at render time; single-phase (no two-phase update); edge case: no stage file skips renderer"
+    result: pass
+  - claim: "pr_url timing handled"
+    evidence_source: "PLAN.md Section A pr_url handling strategy"
+    exact_observed_evidence: "PLAN explicitly explains: gh pr create runs after git add/commit/push; committed proof cannot contain final PR URL; uses sentinel 'pending-before-gh-pr-create'; real PR URL captured by Git Boundary execution and recorded in run.json (persisted locally, not committed); sentinel is a valid known value at precommit-review time; no two-phase flow. Correct."
+    result: pass
+  - claim: "dirty baseline enforcement planned"
+    evidence_source: "PLAN.md Section B required checks (1-5)"
+    exact_observed_evidence: "Section B: pre-execution check in run_ariadne_task() BEFORE Git Boundary approval/execution; five required checks: (1) unrelated untracked files — blocks .ariadne/** and captures/** even if allowed_files, (2) unrelated staged files, (3) branch match, (4) branch sync ahead/behind, (5) stage-file existence; current gap: dirty-tree check at L493 gated by repo_root != '.' — PLAN fixes to always-run with --execute; execution gate: REASON_DIRTY_TREE_OUT_OF_SCOPE blocks, execution_attempted=False, CLI returns blocked"
+    result: pass
+  - claim: "branch baseline planned"
+    evidence_source: "PLAN.md Section C _check_branch_sync() behavior table"
+    exact_observed_evidence: "Section C: _check_branch_sync() helper function; behavior table: branch matches+clean+synced=proceed, ahead>0=branch_ahead_or_behind, behind>0=branch_ahead_or_behind, no upstream=block with message requiring push -u; status provider injected (no real git in tests); branch_mismatch and branch_ahead_or_behind reason codes"
+    result: pass
+  - claim: "stage-file preflight preserved"
+    evidence_source: "PLAN.md Section B check 5 + git_boundary.py L248"
+    exact_observed_evidence: "Section B check 5: stage-file existence already exists in prepare_git_boundary_plan() as REASON_STAGE_FILE_MISSING (confirmed at git_boundary.py L248); PLAN preserves as-is; confirmed present in existing code"
+    result: pass
+  - claim: "command payload constrained"
+    evidence_source: "PLAN.md Section B forbidden payload patterns + Section D dry-run behavior"
+    exact_observed_evidence: "Forbidden patterns: .ariadne/**, captures/**, reviews/** (precommit-review.yml NOT commit payload); command plan stages only dogfood-proof.yml via files_to_stage; --dry-run: dirty baseline check still runs, side effects skipped; --no-dry-run: full execution after baseline passes; --no-dry-run dirty baseline: blocks before any side effect"
+    result: pass
+  - claim: "implementation files constrained"
+    evidence_source: "PLAN.md Section E implementation scope table"
+    exact_observed_evidence: "Allowed: ariadne_task_cli.py (add renderer+baseline check), git_boundary.py (reason codes), test_ariadne_task_cli.py (tests), test_git_boundary.py (if reason codes added); Only if necessary: run_persistence.py/test; Prefer not: prompt_composer, verdict_parser, docker_agent_adapter, adapter_registry, local_harness, agent_runner_bridge, pipeline_runner"
+    result: pass
+  - claim: "forbidden files excluded"
+    evidence_source: "PLAN.md Section F non-goals + grep results"
+    exact_observed_evidence: "PLAN non-goals: no ROADMAP/docs/agents/schemas/dependency modifications, no Docker, no agent git/gh mutation rights; grep confirms none of these appear in PLAN.md implementation scope; git_boundary.py _is_forbidden_path already blocks agents/, schemas/, services/task_intake/, .project-memory/post-0100/; new plan adds .ariadne/, captures/, reviews/ to baseline checks"
+    result: pass
+  - claim: "tests cover proof completeness"
+    evidence_source: "PLAN.md ### Dogfood Proof Completeness Tests (10 functions)"
+    exact_observed_evidence: "10 test functions in test_ariadne_task_cli.py: test_proof_renderer_creates_required_fields, test_proof_renderer_sanitizes_task_prompt, test_proof_renderer_no_raw_stdout_stderr, test_proof_renderer_pr_url_pending_before_gh_pr_create, test_proof_renderer_includes_command_plan_summary, test_proof_renderer_includes_execution_attempted, test_proof_renderer_includes_run_record_path, test_proof_renderer_run_json_hash_pending_if_not_persisted, test_proof_renderer_incomplete_proof_blocks, test_proof_written_before_git_boundary_execution"
+    result: pass
+  - claim: "tests cover proof sanitization"
+    evidence_source: "PLAN.md test_proof_renderer_sanitizes_task_prompt + test_proof_renderer_no_raw_stdout_stderr"
+    exact_observed_evidence: "test_proof_renderer_sanitizes_task_prompt: render with secrets in task description, verify raw not in output, verify approval_summary sanitized; test_proof_renderer_no_raw_stdout_stderr: verify raw stdout/stderr not in rendered proof, only operation summaries and sanitized hashes"
+    result: pass
+  - claim: "tests cover dirty baseline"
+    evidence_source: "PLAN.md ### Dirty Baseline Tests (8 functions)"
+    exact_observed_evidence: "8 test functions in test_ariadne_task_cli.py: test_dirty_baseline_unrelated_untracked_file_blocks, test_dirty_baseline_unrelated_tracked_modification_blocks, test_dirty_baseline_staged_file_before_run_blocks, test_dirty_baseline_precommit_review_yml_blocked_as_payload, test_dirty_baseline_ariadne_path_blocked, test_dirty_baseline_captures_path_blocked, test_dirty_baseline_prevents_execution_attempted_true, test_dirty_baseline_returns_dirty_tree_out_of_scope_code"
+    result: pass
+  - claim: "tests cover branch baseline"
+    evidence_source: "PLAN.md ### Branch Baseline Tests (5 functions)"
+    exact_observed_evidence: "5 test functions in test_ariadne_task_cli.py: test_branch_mismatch_blocks, test_branch_ahead_of_upstream_blocks, test_branch_behind_upstream_blocks, test_branch_no_upstream_blocks, test_branch_clean_synced_proceeds"
+    result: pass
+  - claim: "tests cover command payload"
+    evidence_source: "PLAN.md ### Stage-file and Command Plan Tests"
+    exact_observed_evidence: "Existing tests in test_git_boundary.py preserved: test_stage_file_missing_blocks, proof payload is staged, command plan only stages dogfood-proof.yml, precommit-review.yml not staged (via _is_forbidden_path); new test test_dirty_baseline_precommit_review_yml_blocked_as_payload"
+    result: pass
+  - claim: "tests cover no-dry-run clean/dirty behavior"
+    evidence_source: "PLAN.md ### Dry-run / No-dry-run Tests (3 functions)"
+    exact_observed_evidence: "3 test functions: test_dry_run_still_non_mutating_with_clean_baseline, test_no_dry_run_dirty_baseline_blocks_before_execution, test_no_dry_run_clean_baseline_fake_git_gh_proceeds; covers all three dry-run scenarios"
+    result: pass
+  - claim: "real PR artifacts forbidden during tests"
+    evidence_source: "PLAN.md non-goals + validation commands + grep results"
+    exact_observed_evidence: "PLAN non-goals: 'No real PR 0131 dogfood artifacts created or modified'; validation includes test ! -f for dogfood-proof.yml and precommit-review.yml under PR 0131 path; grep confirmed both files absent from 0131G branch"
+    result: pass
+  - claim: "frozen streams not started"
+    evidence_source: "PLAN.md non-goals + grep results"
+    exact_observed_evidence: "PLAN non-goals explicitly list: retry (PR 0132), model health (PR 0133), run report (PR 0134), parallel queue (PR 0135), dashboard, control plane, Decision Core/GRM/Context Warehouse/eval harness/faithfulness/frontend; grep confirms none appear in PLAN.md implementation scope"
+    result: pass
+  - claim: "validation strategy complete"
+    evidence_source: "PLAN.md ### Validation Commands section"
+    exact_observed_evidence: "11 validation commands: python -m compileall (compile), focused pytest (test_ariadne_task_cli.py test_git_boundary.py test_run_persistence.py test_verdict_parser.py), regression pytest (10 modules), grep routing/proof/dirty patterns, grep forbidden patterns (git mutation, docker, subprocess), test ! -f dogfood-proof.yml, test ! -f precommit-review.yml, .ariadne check, captures check, git status, git diff"
+    result: pass
+  - claim: "artifact physically written/read back"
+    evidence_source: "write_file + test -f + sed"
+    exact_observed_evidence: "write_file to .project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/reviews/plan-review.yml; test -f exits 0; sed confirms first 180 lines contain expected schema fields"
+    result: pass

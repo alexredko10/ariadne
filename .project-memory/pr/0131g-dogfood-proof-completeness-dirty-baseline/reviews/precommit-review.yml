@@ -1,0 +1,128 @@
+schema_version: "0.1"
+pr_id: "0131g-dogfood-proof-completeness-dirty-baseline"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-07T19:28:00Z"
+snapshot_delta:
+  plan_base_sha: "841885007889c8b019b3baa4f915aa8f09cd8a16"
+  current_head: "67d1bc9d66f2c05732116f410e65877cee0855ee"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/src/runner/git_boundary.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - "services/runner/tests/test_git_boundary.py"
+  actual_files:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/src/runner/git_boundary.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/src/runner/git_boundary.py"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+  - "services/runner/tests/test_git_boundary.py"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "67d1bc9d66f2c05732116f410e65877cee0855ee"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0131g-dogfood-proof-completeness-dirty-baseline"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "M test_ariadne_task_cli.py (+23/-13 lines); M precommit-review.yml"
+  - command: "python -m compileall -f services/runner/src services/task_intake/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "Compiles without errors"
+  - command: "PYTHONPATH=... pytest targeted test -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "1 passed in 0.07s"
+  - command: "PYTHONPATH=... pytest focused (4 modules) -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "170 passed in 0.55s"
+  - command: "PYTHONPATH=... pytest regression (10 modules) -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "387 passed in 2.01s"
+  - command: "python -c verify 20 proof fields"
+    result: "passed"
+    exit_code: 0
+    evidence: "missing=[]; proof_artifact_ref='.project-memory/pr/test/dogfood-proof.yml'"
+  - command: "git diff test_ariadne_task_cli.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "+23/-13 lines; stage_file=.project-memory/pr/test-dogfood/dogfood-proof.yml; real git removed; fake planner injected; proof_artifact_ref asserted"
+  - command: "grep git init|checkout|add|commit test_ariadne_task_cli.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "0 matches (real git commands removed)"
+  - command: "test ! -f .project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml"
+    result: "passed"
+    exit_code: 0
+    evidence: "ABSENT_OK"
+  - command: "test ! -f .project-memory/pr/0131-dogfood-pr-created-by-ariadne/reviews/precommit-review.yml"
+    result: "passed"
+    exit_code: 0
+    evidence: "ABSENT_OK"
+  - command: ".ariadne check"
+    result: "passed"
+    exit_code: 0
+    evidence: ".ariadne absent"
+  - command: "captures check"
+    result: "passed"
+    exit_code: 0
+    evidence: "5 untracked bridge-captures (prior dogfood residue, not in git)"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Pass — CI failure corrected, all checks verified"
+    reason: "All 13 mandatory checks pass. test_proof_written_before_git_boundary_execution corrected: project-memory path + fake/injected planner + real git removed. 387 tests pass."
+  - decision: "CI failure fixed — test corrected per specification"
+    reason: "git diff confirms: (1) stage_file='.project-memory/pr/test-dogfood/dogfood-proof.yml' ✓; (2) real git commands removed (git init/checkout/add/commit — 0 matches) ✓; (3) fake planner_injects_proof_exists injection ✓; (4) proof_artifact_ref assertion added ✓; (5) baseline_check_fn and branch_sync_fn injected ✓; (6) pr_url sentinel asserted ✓"
+  - decision: "All 20 proof fields present and non-empty"
+    reason: "python -c: missing=[]; proof_artifact_ref='.project-memory/pr/test/dogfood-proof.yml'"
+  - decision: "Real PR 0131 artifacts absent"
+    reason: "test ! -f both PASS. .ariadne absent. captures/ untracked prior residue."
+context_used:
+  labels:
+    - "dogfood-hardening"
+    - "production-line-stage-2"
+    - "pr-0131g"
+  memory_files_read:
+    - ".project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/PLAN.md"
+    - ".project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/reviews/plan-review.yml"
+  files_inspected:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/src/runner/git_boundary.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - "services/runner/tests/test_git_boundary.py"
+  files_modified: []
+  files_intentionally_ignored:
+    - "captures/ (untracked prior dogfood residue)"
+    - ".ariadne/ (absent)"
+checks:
+  branch_correct: "pass"
+  proof_artifact_ref_present: "pass"
+  proof_artifact_ref_nonempty: "pass"
+  all_20_fields: "pass"
+  ci_failure_fixed: "pass"
+  project_memory_path: "pass"
+  fake_git_instead_of_real: "pass"
+  test_asserts_proof_artifact_ref: "pass"
+  validation_passed: "pass"
+  real_pr_artifacts_absent: "pass"
+  dirty_tree_within_scope: "pass"
+  artifact_written_read: "pass"

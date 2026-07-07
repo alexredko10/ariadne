@@ -144,6 +144,8 @@ REASON_MISSING_APPROVED_BY = "missing_approved_by"
 REASON_MISSING_APPROVAL_REASON = "missing_approval_reason"
 REASON_EXECUTION_FAILED = "execution_failed"
 REASON_STAGE_FILE_MISSING = "stage_file_missing"
+REASON_BRANCH_MISMATCH = "branch_mismatch"
+REASON_BRANCH_AHEAD_OR_BEHIND = "branch_ahead_or_behind"
 
 # ---------------------------------------------------------------------------
 # Forbidden paths
