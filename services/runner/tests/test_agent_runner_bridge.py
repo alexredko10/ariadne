@@ -20,6 +20,7 @@ from runner.agent_runner_bridge import (
     _build_default_precommit_artifact,
     _build_default_plan_review_artifact,
     _build_default_dogfood_proof,
+    _is_protected_artifact,
     REASON_MISSING_AGENT_CONFIG,
     REASON_UNBOUNDED_AGENT_NAME,
     REASON_MISSING_TASK_PROMPT,
@@ -731,6 +732,154 @@ class TestNonMutatingPromptAllowed:
             assert "git_mutation" not in rc
             assert "hidden_reasoning" not in rc
             assert "action" not in rc
+
+
+# ---------------------------------------------------------------------------
+# Overwrite protection behavior (PR 0131F)
+# ---------------------------------------------------------------------------
+
+
+class TestOverwriteProtection:
+    """Overwrite protection prevents silent overwrite of protected artifacts."""
+
+    def test_overwrite_protection_blocks_plan_md(self, tmp_path):
+        """Existing PLAN.md is not overwritten by coder materialization."""
+        artifact_path = ".project-memory/pr/test/PLAN.md"
+        full_path = tmp_path / artifact_path
+        os.makedirs(full_path.parent, exist_ok=True)
+        full_path.write_text("# Existing PLAN.md content", encoding="utf-8")
+
+        import pytest
+        with pytest.raises(ValueError, match="artifact_overwrite_blocked"):
+            _materialize_local_artifact(
+                artifact_path=artifact_path,
+                content="# New content",
+                workdir=str(tmp_path),
+                task_prompt_hash="abc123",
+                agent_config_hash="def456",
+                overwrite_allowed=False,
+            )
+
+    def test_overwrite_protection_blocks_plan_review(self, tmp_path):
+        """Existing plan-review.yml is not silently overwritten."""
+        artifact_path = ".project-memory/pr/test/reviews/plan-review.yml"
+        full_path = tmp_path / artifact_path
+        os.makedirs(full_path.parent, exist_ok=True)
+        full_path.write_text("verdict: approve", encoding="utf-8")
+
+        import pytest
+        with pytest.raises(ValueError, match="artifact_overwrite_blocked"):
+            _materialize_local_artifact(
+                artifact_path=artifact_path,
+                content="verdict: block",
+                workdir=str(tmp_path),
+                task_prompt_hash="abc123",
+                agent_config_hash="def456",
+                overwrite_allowed=False,
+            )
+
+    def test_overwrite_protection_blocks_precommit(self, tmp_path):
+        """Existing precommit-review.yml is not silently overwritten."""
+        artifact_path = ".project-memory/pr/test/reviews/precommit-review.yml"
+        full_path = tmp_path / artifact_path
+        os.makedirs(full_path.parent, exist_ok=True)
+        full_path.write_text("verdict: pass", encoding="utf-8")
+
+        import pytest
+        with pytest.raises(ValueError, match="artifact_overwrite_blocked"):
+            _materialize_local_artifact(
+                artifact_path=artifact_path,
+                content="verdict: fail",
+                workdir=str(tmp_path),
+                task_prompt_hash="abc123",
+                agent_config_hash="def456",
+                overwrite_allowed=False,
+            )
+
+    def test_overwrite_allowed_flag_works(self, tmp_path):
+        """overwrite_allowed=True allows overwriting protected artifact."""
+        artifact_path = ".project-memory/pr/test/PLAN.md"
+        full_path = tmp_path / artifact_path
+        os.makedirs(full_path.parent, exist_ok=True)
+        full_path.write_text("# Old content", encoding="utf-8")
+
+        evidence = _materialize_local_artifact(
+            artifact_path=artifact_path,
+            content="# New content",
+            workdir=str(tmp_path),
+            task_prompt_hash="abc123",
+            agent_config_hash="def456",
+            overwrite_allowed=True,
+        )
+        assert evidence["path"] == str(full_path)
+        assert full_path.read_text(encoding="utf-8") == "# New content"
+
+    def test_overwrite_protection_does_not_block_new_path(self, tmp_path):
+        """New path under .project-memory/pr/ is not blocked."""
+        artifact_path = ".project-memory/pr/test/new-file.yml"
+        evidence = _materialize_local_artifact(
+            artifact_path=artifact_path,
+            content="key: value",
+            workdir=str(tmp_path),
+            task_prompt_hash="abc123",
+            agent_config_hash="def456",
+            overwrite_allowed=False,
+        )
+        assert (tmp_path / artifact_path).exists()
+        assert evidence["hash"] is not None
+
+    def test_overwrite_protection_does_not_block_dogfood(self, tmp_path):
+        """dogfood-proof.yml on nonexistent path is not blocked."""
+        artifact_path = ".project-memory/pr/test/dogfood-proof.yml"
+        evidence = _materialize_local_artifact(
+            artifact_path=artifact_path,
+            content="dogfood_type: local",
+            workdir=str(tmp_path),
+            task_prompt_hash="abc123",
+            agent_config_hash="def456",
+            overwrite_allowed=False,
+        )
+        assert (tmp_path / artifact_path).exists()
+        assert evidence["hash"] is not None
+
+    def test_overwrite_blocked_reason_code_in_result(self, tmp_path):
+        """Refused overwrite returns blocked with clear reason code."""
+        artifact_path = ".project-memory/pr/test/PLAN.md"
+        full_path = tmp_path / artifact_path
+        os.makedirs(full_path.parent, exist_ok=True)
+        full_path.write_text("# Existing", encoding="utf-8")
+
+        import pytest
+        with pytest.raises(ValueError) as excinfo:
+            _materialize_local_artifact(
+                artifact_path=artifact_path,
+                content="# New",
+                workdir=str(tmp_path),
+                task_prompt_hash="abc123",
+                agent_config_hash="def456",
+                overwrite_allowed=False,
+            )
+        assert "artifact_overwrite_blocked" in str(excinfo.value)
+
+    def test_is_protected_artifact_plan_md(self):
+        """_is_protected_artifact returns True for PLAN.md under .project-memory/pr/."""
+        assert _is_protected_artifact(".project-memory/pr/test/PLAN.md") is True
+
+    def test_is_protected_artifact_plan_review(self):
+        """_is_protected_artifact returns True for plan-review.yml under reviews/."""
+        assert _is_protected_artifact(".project-memory/pr/test/reviews/plan-review.yml") is True
+
+    def test_is_protected_artifact_precommit(self):
+        """_is_protected_artifact returns True for precommit-review.yml under reviews/."""
+        assert _is_protected_artifact(".project-memory/pr/test/reviews/precommit-review.yml") is True
+
+    def test_is_protected_artifact_dogfood_proof(self):
+        """_is_protected_artifact returns False for dogfood-proof.yml."""
+        assert _is_protected_artifact(".project-memory/pr/test/dogfood-proof.yml") is False
+
+    def test_is_protected_artifact_non_project_memory(self):
+        """_is_protected_artifact returns False for non-project-memory paths."""
+        assert _is_protected_artifact("services/runner/src/runner/foo.py") is False
 
 
 # ---------------------------------------------------------------------------

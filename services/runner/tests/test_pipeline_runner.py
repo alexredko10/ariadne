@@ -1621,3 +1621,137 @@ class TestPipelineRunnerNoMissingReviewArtifact:
         real_precommit = Path(".project-memory/pr/0131-dogfood-pr-created-by-ariadne/reviews/precommit-review.yml")
         assert not real_dogfood_proof.exists()
         assert not real_precommit.exists()
+
+
+# ---------------------------------------------------------------------------
+# Payload routing behavior (PR 0131F)
+# ---------------------------------------------------------------------------
+
+
+class TestPayloadRouting:
+    """Payload artifact path routing from PipelineRunnerRequest to coder."""
+
+    def test_payload_artifact_path_overrides_coder(self):
+        """Coder expected_output_path overridden by payload_artifact_path."""
+        packets = _default_packets()
+        # Coder packet has PLAN.md as expected_output_path
+        request = PipelineRunnerRequest(
+            pr_id="0131f",
+            branch="0131f-test",
+            task_title="Test payload routing",
+            task_description="Test payload routing",
+            prompt_composer=_fake_composer(packets),
+            bridge_runner=_fake_bridge("completed", "Proof captured"),
+            artifact_reader=_fake_artifact_reader("test content"),
+            verdict_parser=_fake_parser("pass", "continue"),
+            clock_provider=_clock,
+            payload_artifact_path=".project-memory/pr/test/dogfood-proof.yml",
+        )
+        result = run_pr_pipeline(request)
+        assert result.status == PipelineRunnerStatus.COMPLETED
+        # Coder step should have the payload path, not PLAN.md
+        coder_step = [s for s in result.step_results if s.step_name == "coder"]
+        assert len(coder_step) == 1
+        assert coder_step[0].expected_artifact_path == ".project-memory/pr/test/dogfood-proof.yml"
+
+    def test_payload_artifact_path_preserves_other_steps(self):
+        """Planner/plan-review/precommit paths not affected by payload_artifact_path."""
+        packets = _default_packets()
+        request = PipelineRunnerRequest(
+            pr_id="0131f",
+            branch="0131f-test",
+            task_title="Test payload routing",
+            task_description="Test payload routing",
+            prompt_composer=_fake_composer(packets),
+            bridge_runner=_fake_bridge("completed", "Proof captured"),
+            artifact_reader=_fake_artifact_reader("test content"),
+            verdict_parser=_fake_parser("pass", "continue"),
+            clock_provider=_clock,
+            payload_artifact_path=".project-memory/pr/test/dogfood-proof.yml",
+        )
+        result = run_pr_pipeline(request)
+        assert result.status == PipelineRunnerStatus.COMPLETED
+        # Planner should still have PLAN.md
+        planner_step = [s for s in result.step_results if s.step_name == "planner"]
+        assert len(planner_step) == 1
+        assert planner_step[0].expected_artifact_path == ".project-memory/pr/0127/PLAN.md"
+        # Plan-review should still have plan-review.yml
+        plan_review_step = [s for s in result.step_results if s.step_name == "plan_review"]
+        assert len(plan_review_step) == 1
+        assert plan_review_step[0].expected_artifact_path == ".project-memory/pr/0127/reviews/plan-review.yml"
+
+    def test_payload_artifact_path_empty_default(self):
+        """Empty payload_artifact_path keeps coder PLAN.md path."""
+        packets = _default_packets()
+        request = PipelineRunnerRequest(
+            pr_id="0131f",
+            branch="0131f-test",
+            task_title="Test payload routing",
+            task_description="Test payload routing",
+            prompt_composer=_fake_composer(packets),
+            bridge_runner=_fake_bridge("completed", "Proof captured"),
+            artifact_reader=_fake_artifact_reader("test content"),
+            verdict_parser=_fake_parser("pass", "continue"),
+            clock_provider=_clock,
+            payload_artifact_path="",
+        )
+        result = run_pr_pipeline(request)
+        assert result.status == PipelineRunnerStatus.COMPLETED
+        # Coder should still have PLAN.md (from prompt packet)
+        coder_step = [s for s in result.step_results if s.step_name == "coder"]
+        assert len(coder_step) == 1
+        assert coder_step[0].expected_artifact_path == ".project-memory/pr/0127/PLAN.md"
+
+
+# ---------------------------------------------------------------------------
+# Overwrite protection in pipeline (PR 0131F)
+# ---------------------------------------------------------------------------
+
+
+class TestOverwriteProtectionInPipeline:
+    """Overwrite protection through pipeline bridge calls."""
+
+    def test_overwrite_protection_in_pipeline_planner(self):
+        """Planner writes PLAN.md successfully with overwrite_allowed."""
+        packets = _default_packets()
+        request = PipelineRunnerRequest(
+            pr_id="0131f",
+            branch="0131f-test",
+            task_title="Test overwrite",
+            task_description="Test overwrite",
+            prompt_composer=_fake_composer(packets),
+            bridge_runner=_fake_bridge("completed", "Proof captured"),
+            artifact_reader=_fake_artifact_reader("test content"),
+            verdict_parser=_fake_parser("pass", "continue"),
+            clock_provider=_clock,
+            overwrite_allowed=True,
+        )
+        result = run_pr_pipeline(request)
+        assert result.status == PipelineRunnerStatus.COMPLETED
+        # Planner step should have completed
+        planner_step = [s for s in result.step_results if s.step_name == "planner"]
+        assert len(planner_step) == 1
+        assert planner_step[0].bridge_status == "completed"
+
+    def test_overwrite_protection_in_pipeline_coder(self):
+        """Coder with payload path writes to new path (no overwrite)."""
+        packets = _default_packets()
+        request = PipelineRunnerRequest(
+            pr_id="0131f",
+            branch="0131f-test",
+            task_title="Test overwrite",
+            task_description="Test overwrite",
+            prompt_composer=_fake_composer(packets),
+            bridge_runner=_fake_bridge("completed", "Proof captured"),
+            artifact_reader=_fake_artifact_reader("test content"),
+            verdict_parser=_fake_parser("pass", "continue"),
+            clock_provider=_clock,
+            payload_artifact_path=".project-memory/pr/test/dogfood-proof.yml",
+            overwrite_allowed=True,
+        )
+        result = run_pr_pipeline(request)
+        assert result.status == PipelineRunnerStatus.COMPLETED
+        # Coder step should have completed
+        coder_step = [s for s in result.step_results if s.step_name == "coder"]
+        assert len(coder_step) == 1
+        assert coder_step[0].bridge_status == "completed"

@@ -131,6 +131,7 @@ REASON_APPROVAL_REQUIRED = "approval_required"
 REASON_MISSING_APPROVED_BY = "missing_approved_by"
 REASON_MISSING_APPROVAL_REASON = "missing_approval_reason"
 REASON_EXECUTION_FAILED = "execution_failed"
+REASON_DIRTY_TREE_OUT_OF_SCOPE = "dirty_tree_out_of_scope"
 
 
 # ---------------------------------------------------------------------------
@@ -235,6 +236,33 @@ def _build_cli_request(args: argparse.Namespace) -> AriadneTaskCliRequest:
         runs_root=args.runs_root,
         run_id=args.run_id,
     )
+
+
+# ---------------------------------------------------------------------------
+# Detect payload artifact path from files_to_stage
+# ---------------------------------------------------------------------------
+
+
+def _detect_payload_artifact_path(files_to_stage: tuple[str, ...]) -> str:
+    """Detect the user-intended payload artifact from files_to_stage.
+
+    The payload is the first file in files_to_stage that:
+    - Is under ``.project-memory/pr/<pr_id>/``
+    - Is not ``PLAN.md``
+    - Is not under ``reviews/``
+
+    Returns empty string if no such file.
+    """
+    for f in files_to_stage:
+        if not f.startswith(".project-memory/pr/"):
+            continue
+        basename = os.path.basename(f)
+        if basename == "PLAN.md":
+            continue
+        if "/reviews/" in f:
+            continue
+        return f
+    return ""
 
 
 # ---------------------------------------------------------------------------
@@ -346,7 +374,10 @@ def run_ariadne_task(
 
     task_description_hash = hashlib.sha256(request.task_description.encode("utf-8")).hexdigest()[:16]
 
-    # 2. Build PipelineRunnerRequest
+    # 2. Detect payload artifact path
+    payload_artifact_path = _detect_payload_artifact_path(request.files_to_stage)
+
+    # 2b. Build PipelineRunnerRequest
     pipeline_request = PipelineRunnerRequest(
         pr_id=request.pr_id,
         branch=request.branch,
@@ -357,6 +388,7 @@ def run_ariadne_task(
         project_memory_dir=os.path.join(request.repo_root, ".project-memory"),
         workdir=request.repo_root,
         allow_docker=False,
+        payload_artifact_path=payload_artifact_path,
     )
 
     # 3. Run pipeline
@@ -440,6 +472,70 @@ def run_ariadne_task(
                 started_at=started_at,
                 finished_at=finished_at,
                 details="Pipeline has blockers",
+            ),
+        )
+
+    # 4b. Dirty-tree preflight — check actual git status
+    # Only run when repo_root is explicitly set (not the default ".")
+    LOCAL_RESIDUE_PREFIXES = (".ariadne/", "captures/")
+    if request.repo_root and request.repo_root != ".":
+        try:
+            status_result = subprocess.run(
+                ["git", "status", "--short"],
+                capture_output=True,
+                text=True,
+                shell=False,
+                cwd=request.repo_root,
+            )
+            if status_result.returncode == 0:
+                actual_dirty = set()
+                for line in status_result.stdout.splitlines():
+                    line = line.strip()
+                    if not line:
+                        continue
+                    # Format: "XY filename" where X,Y are status codes
+                    filename = line[3:].strip() if len(line) > 3 else ""
+                    if filename:
+                        # Exclude local residue
+                        is_residue = any(
+                            filename.startswith(p) for p in LOCAL_RESIDUE_PREFIXES
+                        )
+                        if not is_residue:
+                            actual_dirty.add(filename)
+
+                # Intersect with allowed_files
+                allowed_set = set(request.allowed_files)
+                for dirty_file in actual_dirty:
+                    if dirty_file not in allowed_set:
+                        codes.append(REASON_DIRTY_TREE_OUT_OF_SCOPE)
+                        warnings.append(
+                            f"Unrelated dirty file: {dirty_file}"
+                        )
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            pass  # Not in a git repo — skip
+
+    # If dirty tree is out of scope, block before Git Boundary
+    if REASON_DIRTY_TREE_OUT_OF_SCOPE in codes:
+        finished_at = clock_provider() if clock_provider else None
+        return _persist_and_return(
+            request, persistence_fn, clock_provider,
+            AriadneTaskCliResult(
+                status=AriadneTaskCliStatus.BLOCKED,
+                reason_codes=tuple(codes),
+                task_description=request.task_description,
+                task_description_hash=task_description_hash,
+                pipeline_status=pipeline_status,
+                pipeline_final_action=pipeline_final_action,
+                pipeline_has_blockers=pipeline_has_blockers,
+                git_boundary_status=None,
+                command_plan=None,
+                execution_attempted=False,
+                execution_results=(),
+                warnings=tuple(warnings),
+                next_action="stop",
+                started_at=started_at,
+                finished_at=finished_at,
+                details="Dirty tree out of scope",
             ),
         )
 
@@ -595,6 +691,10 @@ def run_ariadne_task(
                 details="Missing --approval-reason",
             ),
         )
+
+    # 8b. Dry-run warning
+    if request.dry_run and request.execute:
+        warnings.append("Dry-run mode active (--no-dry-run required for execution)")
 
     # 9. Execute git boundary
     execution_attempted = False

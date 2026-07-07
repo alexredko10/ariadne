@@ -26,6 +26,7 @@ from runner.git_boundary import (
     REASON_MISSING_APPROVED_BY,
     REASON_MISSING_APPROVAL_REASON,
     REASON_EXECUTION_FAILED,
+    REASON_STAGE_FILE_MISSING,
     _FORBIDDEN_PATHS,
     _ADDITIONAL_BLOCKED_PATHS,
     _is_forbidden_path,
@@ -43,9 +44,18 @@ def _clock() -> str:
 
 
 def _valid_request(**overrides: Any) -> GitBoundaryRequest:
-    """Create a valid GitBoundaryRequest."""
+    """Create a valid GitBoundaryRequest.
+
+    Uses a tmp_path-based repo_root so that stage-file existence checks
+    pass.  Creates the files_to_stage files on disk.
+    """
+    import tempfile
+    repo_root = overrides.pop("repo_root", None) if "repo_root" in overrides else None
+    if repo_root is None:
+        repo_root = tempfile.mkdtemp(prefix="git-boundary-test-")
+
     kwargs = {
-        "repo_root": "/tmp/test-repo",
+        "repo_root": repo_root,
         "base_branch": "main",
         "head_branch": "0128-git-boundary",
         "current_branch": "0128-git-boundary",
@@ -68,6 +78,17 @@ def _valid_request(**overrides: Any) -> GitBoundaryRequest:
         "approval_reason": "Pipeline completed, all gates passed.",
     }
     kwargs.update(overrides)
+
+    # Create files_to_stage files on disk so stage-file existence check passes
+    for stage_file in kwargs.get("files_to_stage", ()):
+        full_path = os.path.join(kwargs["repo_root"], stage_file)
+        parent_dir = os.path.dirname(full_path)
+        if parent_dir:
+            os.makedirs(parent_dir, exist_ok=True)
+        if not os.path.exists(full_path):
+            with open(full_path, "w", encoding="utf-8") as f:
+                f.write("test content")
+
     return GitBoundaryRequest(**kwargs)  # type: ignore[arg-type]
 
 
@@ -543,6 +564,82 @@ class TestProductName:
         import runner.git_boundary
         doc = runner.git_boundary.__doc__ or ""
         assert "Ariadne" in doc
+
+
+# ---------------------------------------------------------------------------
+# Stage-file missing behavior (PR 0131F)
+# ---------------------------------------------------------------------------
+
+
+class TestStageFileMissing:
+    """Stage-file existence preflight blocks when files are missing."""
+
+    def test_stage_file_missing_blocks(self):
+        """Missing file in files_to_stage → codes contain REASON_STAGE_FILE_MISSING."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="git-boundary-missing-")
+        request = GitBoundaryRequest(
+            repo_root=repo_root,
+            base_branch="main",
+            head_branch="test",
+            current_branch="test",
+            pipeline_status="completed",
+            pipeline_final_action="continue",
+            pipeline_has_blockers=False,
+            pipeline_artifact_hashes={"test": "abc"},
+            dirty_files=("nonexistent-file.py",),
+            allowed_files=("nonexistent-file.py",),
+            files_to_stage=("nonexistent-file.py",),
+            commit_message="Test commit",
+            pr_title="Test PR",
+            pr_body="Test body",
+            human_approved=True,
+            approved_by="tester",
+            approval_reason="Testing",
+        )
+        plan, codes = prepare_git_boundary_plan(request)
+        assert REASON_STAGE_FILE_MISSING in codes
+        assert plan.dirty_tree_valid is False
+
+    def test_stage_file_missing_prevents_approval(self):
+        """Missing stage file prevents Git Boundary approval."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="git-boundary-missing2-")
+        request = GitBoundaryRequest(
+            repo_root=repo_root,
+            base_branch="main",
+            head_branch="test",
+            current_branch="test",
+            pipeline_status="completed",
+            pipeline_final_action="continue",
+            pipeline_has_blockers=False,
+            pipeline_artifact_hashes={"test": "abc"},
+            dirty_files=("missing.yml",),
+            allowed_files=("missing.yml",),
+            files_to_stage=("missing.yml",),
+            commit_message="Test commit",
+            pr_title="Test PR",
+            pr_body="Test body",
+            human_approved=True,
+            approved_by="tester",
+            approval_reason="Testing",
+        )
+        plan, codes = prepare_git_boundary_plan(request)
+        assert REASON_STAGE_FILE_MISSING in codes
+        # Execute should be blocked
+        result = execute_git_boundary_plan(request, plan, executor=_fake_executor)
+        assert result.status == GitBoundaryStatus.BLOCKED.value
+
+    def test_stage_file_exists_passes(self):
+        """Existing file in files_to_stage → no REASON_STAGE_FILE_MISSING."""
+        request = _valid_request()
+        plan, codes = prepare_git_boundary_plan(request)
+        assert REASON_STAGE_FILE_MISSING not in codes
+        assert plan.dirty_tree_valid is True
+
+    def test_stage_file_missing_reason_code_defined(self):
+        """REASON_STAGE_FILE_MISSING is defined and equals 'stage_file_missing'."""
+        assert REASON_STAGE_FILE_MISSING == "stage_file_missing"
 
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,189 @@
+schema_version: "0.1"
+pr_id: "0131f-dogfood-payload-routing-execution-preflight"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-07T17:10:00Z"
+snapshot_delta:
+  plan_base_sha: "cdb72041b8358b98bba2cabf46bc9288b213db18"
+  current_head: "cdb72041b8358b98bba2cabf46bc9288b213db18"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/runner/src/runner/agent_runner_bridge.py"
+    - "services/runner/src/runner/pipeline_runner.py"
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/src/runner/git_boundary.py"
+    - "services/runner/tests/test_agent_runner_bridge.py"
+    - "services/runner/tests/test_pipeline_runner.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - "services/runner/tests/test_git_boundary.py"
+  actual_files:
+    - "services/runner/src/runner/agent_runner_bridge.py"
+    - "services/runner/src/runner/pipeline_runner.py"
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/src/runner/git_boundary.py"
+    - "services/runner/tests/test_agent_runner_bridge.py"
+    - "services/runner/tests/test_pipeline_runner.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - "services/runner/tests/test_git_boundary.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - "services/runner/src/runner/agent_runner_bridge.py"
+  - "services/runner/src/runner/pipeline_runner.py"
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/src/runner/git_boundary.py"
+  - "services/runner/tests/test_agent_runner_bridge.py"
+  - "services/runner/tests/test_pipeline_runner.py"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+  - "services/runner/tests/test_git_boundary.py"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "cdb72041b8358b98bba2cabf46bc9288b213db18"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0131f-dogfood-payload-routing-execution-preflight"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "8 files: 4 src + 4 test modified; untracked: .project-memory/pr/0127/, 0131f/, dogfood/, captures/"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "8 files: agent_runner_bridge.py, ariadne_task_cli.py, git_boundary.py, pipeline_runner.py + test files"
+  - command: "python -m compileall -f services/runner/src services/task_intake/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "Compiles without errors"
+  - command: "PYTHONPATH=... pytest focused (5 modules) -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "226 passed in 0.44s (vs 194 prior — +32 new tests)"
+  - command: "PYTHONPATH=... pytest regression (10 modules) -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "359 passed in 1.53s (vs 327 prior — +32 new tests)"
+  - command: "grep REASON_STAGE_FILE_MISSING test_git_boundary.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "6 matches: import + reason def + test_stage_file_missing_blocks + test_stage_file_missing_prevents_approval + test_stage_file_exists_passes + test_stage_file_missing_reason_code_defined"
+  - command: "grep dirty_tree_out_of_scope test_ariadne_task_cli.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "8 matches: import + test_dirty_tree_out_of_scope_blocks + 3 assertions + test_dirty_tree_allows_clean_tree + 2 residue assertions"
+  - command: "grep overwrite_allowed test_agent_runner_bridge.py test_pipeline_runner.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "15+ matches: 5 overwrite tests in test_agent_runner_bridge.py + 2 in test_pipeline_runner.py (blocks plan_md, plan_review, precommit, allowed flag, new path, dogfood, pipeline planner+coder)"
+  - command: "grep dry_run.*execute.*warning test_ariadne_task_cli.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "4 matches: docstring + test_dry_run_execute_without_no_dry_run_warning + 2 assertions including no-dry-run warning check"
+  - command: "grep payload_routing test_ariadne_task_cli.py test_pipeline_runner.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "25+ matches: _detect_payload_artifact_path imported + 5 test methods in CLI + 4 payload_artifact_path tests in pipeline + 10+ dogfood-proof.yml path tests"
+  - command: "grep execution_attempted.*True test_ariadne_task_cli.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "Line 468: execution_attempted is True assertion; line 956: no_dry_run_execution_attempted test"
+  - command: "grep forbidden files in git diff"
+    result: "passed"
+    exit_code: 1
+    evidence: "No forbidden files (ROADMAP/docs/agents/schemas/prompt_composer/verdict_parser/docker_adapter/adapter_registry/local_harness/pyproject.toml) in diff"
+  - command: "grep git add/commit/push shell=True in runner source"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only in docstrings/prompts/backlog (non-executable); shell=False enforced in ariadne_task_cli.py:502,505"
+  - command: "test ! -f .project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml"
+    result: "passed"
+    exit_code: 0
+    evidence: "ABSENT_OK_dogfood_proof"
+  - command: "test ! -f .project-memory/pr/0131-dogfood-pr-created-by-ariadne/reviews/precommit-review.yml"
+    result: "passed"
+    exit_code: 0
+    evidence: "ABSENT_OK_precommit_review"
+  - command: "find .ariadne -maxdepth 5"
+    result: "passed"
+    exit_code: 0
+    evidence: ".ariadne absent"
+  - command: "find captures -maxdepth 5"
+    result: "passed"
+    exit_code: 0
+    evidence: "5 bridge-captures (untracked, prior dogfood residue, not in git diff)"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Pass — prior blocker resolved by test additions"
+    reason: "All 6 required test categories now have grep-visible evidence. test_pipeline_runner.py and test_agent_runner_bridge.py added to git diff (were absent prior). +32 new tests confirmed by pytest count increase."
+  - decision: "Stage-file missing tests confirmed"
+    reason: "test_git_boundary.py: REASON_STAGE_FILE_MISSING imported; test_stage_file_missing_blocks (codes contain REASON_STAGE_FILE_MISSING); test_stage_file_missing_prevents_approval; test_stage_file_exists_passes; test_stage_file_missing_reason_code_defined (asserts value equals 'stage_file_missing')"
+  - decision: "Dirty-tree out-of-scope tests confirmed"
+    reason: "test_ariadne_task_cli.py: REASON_DIRTY_TREE_OUT_OF_SCOPE imported; test_dirty_tree_out_of_scope_blocks (blocks result.reason_codes); test_dirty_tree_allows_clean_tree; test_dirty_tree_allows_allowed_files_only; test_ariadne_residue_excluded_from_dirty_check (excludes .ariadne/ and captures/)"
+  - decision: "Overwrite protection tests confirmed"
+    reason: "test_agent_runner_bridge.py: test_overwrite_protection_blocks_plan_md/precommit_review/precommit; test_overwrite_allowed_flag_works; test_overwrite_protection_does_not_block_new_path/dogfood. test_pipeline_runner.py: test_overwrite_protection_in_pipeline_planner/coder"
+  - decision: "Dry-run warning tests confirmed"
+    reason: "test_ariadne_task_cli.py: test_dry_run_execute_without_no_dry_run_warning (docstring); assert any('no-dry-run' in w for w in result.warnings); test_dry_run_execute_blocks_execution; test_no_dry_run_execution_attempted (dry_run=False → execution_attempted=True)"
+  - decision: "Payload routing tests confirmed"
+    reason: "test_ariadne_task_cli.py: _detect_payload_artifact_path imported + 5 tests (dogfood-proof.yml detection, excludes PLAN.md/reviews, empty when no payload). test_pipeline_runner.py: test_payload_artifact_path_overrides_coder + preserves other steps + empty default"
+  - decision: "Fake no-dry-run execution persistence confirmed"
+    reason: "test_ariadne_task_cli.py: line 459 (dry_run=False, execution_attempted=True); line 468 assertion; line 940 (test_no_dry_run_execution_attempted docstring); line 947 (dry_run=False); line 956 (execution_attempted=True + execution_results)"
+  - decision: "Real PR 0131 artifacts absent"
+    reason: "test ! -f for dogfood-proof.yml and precommit-review.yml in PR 0131 dir both PASS"
+  - decision: "Git Boundary authority preserved"
+    reason: "ariadne_task_cli.py subprocess.run only for 'git status --short' with shell=False; no git add/commit/push/shell=True in modified source; forbidden git patterns only in docstrings/prompts/backlog (non-executable)"
+  - decision: "Forbidden files unchanged"
+    reason: "grep forbidden files in git diff → exit code 1 (no matches)"
+context_used:
+  labels:
+    - "dogfood-milestone"
+    - "production-line"
+    - "stage-2-closed-loop"
+    - "pr-0131f"
+  memory_files_read:
+    - ".project-memory/pr/0131f-dogfood-payload-routing-execution-preflight/PLAN.md"
+    - ".project-memory/pr/0131f-dogfood-payload-routing-execution-preflight/reviews/plan-review.yml"
+  files_inspected:
+    - "services/runner/src/runner/agent_runner_bridge.py"
+    - "services/runner/src/runner/pipeline_runner.py"
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/src/runner/git_boundary.py"
+    - "services/runner/tests/test_agent_runner_bridge.py"
+    - "services/runner/tests/test_pipeline_runner.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - "services/runner/tests/test_git_boundary.py"
+  files_modified: []
+  files_intentionally_ignored:
+    - "captures/ (untracked prior dogfood residue, Jul 18 date)"
+    - ".ariadne/ (absent)"
+    - ".project-memory/pr/dogfood/ (untracked)"
+checks:
+  branch_correct: "pass"
+  plan_md_exists: "pass"
+  plan_review_verdict: "approve"
+  dirty_tree_within_scope: "pass"
+  compileall: "pass"
+  focused_pytest: "pass"
+  regression_pytest: "pass"
+  stage_file_missing_tests: "pass"
+  dirty_tree_out_of_scope_tests: "pass"
+  overwrite_protection_tests: "pass"
+  dry_run_warning_tests: "pass"
+  payload_routing_tests: "pass"
+  fake_no_dry_run_execution_tests: "pass"
+  no_pr_0131_hardcoding: "pass"
+  git_boundary_authority: "pass"
+  real_pr_0131_artifacts_absent: "pass"
+  forbidden_files_unchanged: "pass"
+  no_docker: "pass"
+  .ariadne_absent: "pass"
+  captures_untracked: "pass"
+  artifact_physically_written: "pass"
+  artifact_read_back: "pass"
