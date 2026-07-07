@@ -27,6 +27,7 @@ from runner.ariadne_task_cli import (
     REASON_MISSING_APPROVAL_REASON,
     REASON_EXECUTION_FAILED,
 )
+from runner.run_persistence import persist_run_record, load_run_record
 from runner.pipeline_runner import (
     PipelineRunnerRequest,
     PipelineRunnerResult,
@@ -783,3 +784,167 @@ class TestNoForbiddenNames:
         ]
         for f in forbidden:
             assert f not in source, f"Forbidden string found: {f!r}"
+
+
+# ---------------------------------------------------------------------------
+# Stopped pipeline persistence (PR 0131B)
+# ---------------------------------------------------------------------------
+
+
+class TestStoppedPipelinePersistence:
+    """Stopped pipeline with runs_root/run_id persists run records."""
+
+    def test_stopped_pipeline_writes_run_json(self, tmp_path: Path):
+        """Stopped pipeline with runs_root writes run.json."""
+        runs_root = str(tmp_path / "runs")
+        request = _valid_request(
+            runs_root=runs_root,
+            run_id="stopped-test",
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(status="stopped"),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+        )
+        assert result.run_id == "stopped-test"
+        assert result.run_record_path is not None
+        run_json = Path(result.run_record_path)
+        assert run_json.exists()
+        data = json.loads(run_json.read_text(encoding="utf-8"))
+        assert data["status"] == "stopped"
+        assert "pipeline_stopped" in data["reason_codes"]
+
+    def test_stopped_pipeline_writes_manifest_json(self, tmp_path: Path):
+        """Stopped pipeline writes manifest.json."""
+        runs_root = str(tmp_path / "runs")
+        request = _valid_request(
+            runs_root=runs_root,
+            run_id="stopped-test-manifest",
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(status="stopped"),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+        )
+        assert result.run_record_path is not None
+        manifest_path = Path(result.run_record_path).parent / "manifest.json"
+        assert manifest_path.exists()
+        manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
+        assert manifest_data["run_json_hash"] is not None
+        assert "run.json" in manifest_data.get("files", [])
+
+    def test_stopped_pipeline_json_includes_run_id_and_path(self, tmp_path: Path):
+        """JSON output includes run_id and run_record_path."""
+        runs_root = str(tmp_path / "runs")
+        request = _valid_request(
+            runs_root=runs_root,
+            run_id="stopped-test-json",
+            json_output=True,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(status="stopped"),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+        )
+        # Build the same output dict as main()
+        output_dict = {
+            "status": result.status,
+            "reason_codes": list(result.reason_codes),
+            "task_description": result.task_description,
+            "task_description_hash": result.task_description_hash,
+            "pipeline_status": result.pipeline_status,
+            "pipeline_final_action": result.pipeline_final_action,
+            "pipeline_has_blockers": result.pipeline_has_blockers,
+            "git_boundary_status": result.git_boundary_status,
+            "command_plan": result.command_plan,
+            "execution_attempted": result.execution_attempted,
+            "execution_results": list(result.execution_results),
+            "warnings": list(result.warnings),
+            "next_action": result.next_action,
+            "started_at": result.started_at,
+            "finished_at": result.finished_at,
+            "details": result.details,
+            "run_id": result.run_id,
+            "run_record_path": result.run_record_path,
+        }
+        assert output_dict["run_id"] == "stopped-test-json"
+        assert output_dict["run_record_path"] is not None
+        assert "stopped" in output_dict["status"]
+
+    def test_load_run_record_can_read_stopped_run(self, tmp_path: Path):
+        """load_run_record can read a stopped persisted run."""
+        runs_root = str(tmp_path / "runs")
+        request = _valid_request(
+            runs_root=runs_root,
+            run_id="stopped-test-readback",
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(status="stopped"),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+        )
+        read_result = load_run_record(runs_root, "stopped-test-readback")
+        assert read_result.status == "read_ok"
+        assert read_result.record is not None
+        assert read_result.record.status == "stopped"
+        assert "pipeline_stopped" in read_result.record.reason_codes
+        assert read_result.record.execution_attempted is False
+        assert read_result.record.git_boundary_status is None
+
+    def test_stopped_run_git_boundary_not_called(self, tmp_path: Path):
+        """Stopped run does not call git boundary planner."""
+        planner_call_count = [0]
+        executor_call_count = [0]
+
+        def counting_planner(request):
+            planner_call_count[0] += 1
+            return _fake_git_boundary_planner()(request)
+
+        def counting_executor(request, plan, executor=None, clock_provider=None):
+            executor_call_count[0] += 1
+            return _fake_git_boundary_executor()(request, plan, executor, clock_provider)
+
+        runs_root = str(tmp_path / "runs")
+        request = _valid_request(
+            runs_root=runs_root,
+            run_id="stopped-test-no-git",
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(status="stopped"),
+            git_boundary_planner_fn=counting_planner,
+            git_boundary_executor_fn=counting_executor,
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+        )
+        assert planner_call_count[0] == 0
+        assert executor_call_count[0] == 0
+
+    def test_stopped_run_no_repo_ariadne_residue(self, tmp_path: Path):
+        """Stopped run uses tmp_path, not .ariadne/."""
+        runs_root = str(tmp_path / "runs")
+        request = _valid_request(
+            runs_root=runs_root,
+            run_id="stopped-test-residue",
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(status="stopped"),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+        )
+        assert not Path(".ariadne").exists()

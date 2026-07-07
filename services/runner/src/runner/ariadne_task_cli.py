@@ -21,6 +21,7 @@ import json
 import os
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -844,6 +845,11 @@ def _format_human_output(result: AriadneTaskCliResult) -> str:
 # ---------------------------------------------------------------------------
 
 
+def _utc_clock() -> str:
+    """Return an ISO-8601 UTC timestamp."""
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def main(argv: Optional[list[str]] = None) -> int:
     """Main entry point for the ariadne task CLI.
 
@@ -859,7 +865,11 @@ def main(argv: Optional[list[str]] = None) -> int:
     """
     args = parse_ariadne_task_args(argv)
     request = _build_cli_request(args)
-    result = run_ariadne_task(request)
+    result = run_ariadne_task(
+        request,
+        persistence_fn=persist_run_record,
+        clock_provider=_utc_clock,
+    )
 
     if request.json_output:
         output_dict = {
