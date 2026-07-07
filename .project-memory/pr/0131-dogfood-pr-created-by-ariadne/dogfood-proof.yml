@@ -1,0 +1,8 @@
+schema_version: "0.1"
+pr_id: ""
+dogfood_type: "local-non-docker"
+status: "completed"
+bridge_task_prompt_hash: "2f9ce39861f63621"
+bridge_agent_config_hash: "c71ae80615a6823e"
+proof_artifact_ref: ""
+materialized_at: "2026-07-07T18:36:40Z"
