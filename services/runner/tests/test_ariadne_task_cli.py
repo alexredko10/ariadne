@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from runner.ariadne_task_cli import (
+    _build_cli_request,
     AriadneTaskCliRequest,
     AriadneTaskCliResult,
     AriadneTaskCliStatus,
@@ -181,12 +182,14 @@ class TestParseTaskDescription:
     def test_parse_task_description(self):
         """Parses 'ariadne task \"do x\"' → task_description set."""
         args = parse_ariadne_task_args(["do x"])
-        assert args.task_description == "do x"
+        request = _build_cli_request(args)
+        assert request.task_description == "do x"
 
     def test_parse_missing_task_description(self):
         """No description → task_description is None."""
         args = parse_ariadne_task_args([])
-        assert args.task_description is None
+        request = _build_cli_request(args)
+        assert request.task_description == ""
 
 
 # ---------------------------------------------------------------------------
@@ -215,7 +218,8 @@ class TestParseOptions:
             "--approval-reason", "Testing",
             "--json",
         ])
-        assert args.task_description == "test task"
+        request = _build_cli_request(args)
+        assert request.task_description == "test task"
         assert args.pr_id == "0129"
         assert args.branch == "0129-test"
         assert args.base_branch == "develop"

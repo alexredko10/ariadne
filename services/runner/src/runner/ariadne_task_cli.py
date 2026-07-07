@@ -157,7 +157,7 @@ def parse_ariadne_task_args(argv: Optional[list[str]] = None) -> argparse.Namesp
 
     parser.add_argument(
         "task_description",
-        nargs="?",
+        nargs="*",
         default=None,
         help="Task description string (required)",
     )
@@ -193,7 +193,15 @@ def parse_ariadne_task_args(argv: Optional[list[str]] = None) -> argparse.Namesp
 
 def _build_cli_request(args: argparse.Namespace) -> AriadneTaskCliRequest:
     """Build an AriadneTaskCliRequest from parsed CLI arguments."""
-    task_description = args.task_description or ""
+    # Handle task_description as a list (nargs="*")
+    raw_parts = args.task_description or []
+    if isinstance(raw_parts, list) and len(raw_parts) > 0:
+        # If first part is literal "task", skip it
+        if raw_parts[0] == "task":
+            raw_parts = raw_parts[1:]
+        task_description = " ".join(raw_parts)
+    else:
+        task_description = ""
 
     # Auto-generate PR ID and branch if not provided
     pr_id = args.pr_id
@@ -313,23 +321,26 @@ def run_ariadne_task(
     if not request.task_description or request.task_description.strip() == "":
         codes.append(REASON_MISSING_TASK_DESCRIPTION)
         finished_at = clock_provider() if clock_provider else None
-        return AriadneTaskCliResult(
-            status=AriadneTaskCliStatus.FAILED,
-            reason_codes=tuple(codes),
-            task_description=request.task_description,
-            task_description_hash="",
-            pipeline_status=None,
-            pipeline_final_action=None,
-            pipeline_has_blockers=None,
-            git_boundary_status=None,
-            command_plan=None,
-            execution_attempted=False,
-            execution_results=(),
-            warnings=tuple(warnings),
-            next_action="stop",
-            started_at=started_at,
-            finished_at=finished_at,
-            details="Missing task description",
+        return _persist_and_return(
+            request, persistence_fn, clock_provider,
+            AriadneTaskCliResult(
+                status=AriadneTaskCliStatus.FAILED,
+                reason_codes=tuple(codes),
+                task_description=request.task_description,
+                task_description_hash="",
+                pipeline_status=None,
+                pipeline_final_action=None,
+                pipeline_has_blockers=None,
+                git_boundary_status=None,
+                command_plan=None,
+                execution_attempted=False,
+                execution_results=(),
+                warnings=tuple(warnings),
+                next_action="stop",
+                started_at=started_at,
+                finished_at=finished_at,
+                details="Missing task description",
+            ),
         )
 
     task_description_hash = hashlib.sha256(request.task_description.encode("utf-8")).hexdigest()[:16]
@@ -359,67 +370,76 @@ def run_ariadne_task(
     if pipeline_status in (PipelineRunnerStatus.STOPPED,):
         codes.append(REASON_PIPELINE_STOPPED)
         finished_at = clock_provider() if clock_provider else None
-        return AriadneTaskCliResult(
-            status=AriadneTaskCliStatus.STOPPED,
-            reason_codes=tuple(codes),
-            task_description=request.task_description,
-            task_description_hash=task_description_hash,
-            pipeline_status=pipeline_status,
-            pipeline_final_action=pipeline_final_action,
-            pipeline_has_blockers=pipeline_has_blockers,
-            git_boundary_status=None,
-            command_plan=None,
-            execution_attempted=False,
-            execution_results=(),
-            warnings=tuple(warnings),
-            next_action="stop",
-            started_at=started_at,
-            finished_at=finished_at,
-            details="Pipeline stopped",
+        return _persist_and_return(
+            request, persistence_fn, clock_provider,
+            AriadneTaskCliResult(
+                status=AriadneTaskCliStatus.STOPPED,
+                reason_codes=tuple(codes),
+                task_description=request.task_description,
+                task_description_hash=task_description_hash,
+                pipeline_status=pipeline_status,
+                pipeline_final_action=pipeline_final_action,
+                pipeline_has_blockers=pipeline_has_blockers,
+                git_boundary_status=None,
+                command_plan=None,
+                execution_attempted=False,
+                execution_results=(),
+                warnings=tuple(warnings),
+                next_action="stop",
+                started_at=started_at,
+                finished_at=finished_at,
+                details="Pipeline stopped",
+            ),
         )
 
     if pipeline_status in (PipelineRunnerStatus.FAILED,):
         codes.append(REASON_PIPELINE_FAILED)
         finished_at = clock_provider() if clock_provider else None
-        return AriadneTaskCliResult(
-            status=AriadneTaskCliStatus.FAILED,
-            reason_codes=tuple(codes),
-            task_description=request.task_description,
-            task_description_hash=task_description_hash,
-            pipeline_status=pipeline_status,
-            pipeline_final_action=pipeline_final_action,
-            pipeline_has_blockers=pipeline_has_blockers,
-            git_boundary_status=None,
-            command_plan=None,
-            execution_attempted=False,
-            execution_results=(),
-            warnings=tuple(warnings),
-            next_action="stop",
-            started_at=started_at,
-            finished_at=finished_at,
-            details="Pipeline failed",
+        return _persist_and_return(
+            request, persistence_fn, clock_provider,
+            AriadneTaskCliResult(
+                status=AriadneTaskCliStatus.FAILED,
+                reason_codes=tuple(codes),
+                task_description=request.task_description,
+                task_description_hash=task_description_hash,
+                pipeline_status=pipeline_status,
+                pipeline_final_action=pipeline_final_action,
+                pipeline_has_blockers=pipeline_has_blockers,
+                git_boundary_status=None,
+                command_plan=None,
+                execution_attempted=False,
+                execution_results=(),
+                warnings=tuple(warnings),
+                next_action="stop",
+                started_at=started_at,
+                finished_at=finished_at,
+                details="Pipeline failed",
+            ),
         )
 
     if pipeline_has_blockers:
         codes.append(REASON_PIPELINE_STOPPED)
         finished_at = clock_provider() if clock_provider else None
-        return AriadneTaskCliResult(
-            status=AriadneTaskCliStatus.STOPPED,
-            reason_codes=tuple(codes),
-            task_description=request.task_description,
-            task_description_hash=task_description_hash,
-            pipeline_status=pipeline_status,
-            pipeline_final_action=pipeline_final_action,
-            pipeline_has_blockers=pipeline_has_blockers,
-            git_boundary_status=None,
-            command_plan=None,
-            execution_attempted=False,
-            execution_results=(),
-            warnings=tuple(warnings),
-            next_action="stop",
-            started_at=started_at,
-            finished_at=finished_at,
-            details="Pipeline has blockers",
+        return _persist_and_return(
+            request, persistence_fn, clock_provider,
+            AriadneTaskCliResult(
+                status=AriadneTaskCliStatus.STOPPED,
+                reason_codes=tuple(codes),
+                task_description=request.task_description,
+                task_description_hash=task_description_hash,
+                pipeline_status=pipeline_status,
+                pipeline_final_action=pipeline_final_action,
+                pipeline_has_blockers=pipeline_has_blockers,
+                git_boundary_status=None,
+                command_plan=None,
+                execution_attempted=False,
+                execution_results=(),
+                warnings=tuple(warnings),
+                next_action="stop",
+                started_at=started_at,
+                finished_at=finished_at,
+                details="Pipeline has blockers",
+            ),
         )
 
     # 5. Build GitBoundaryRequest
@@ -452,112 +472,127 @@ def run_ariadne_task(
         codes.extend(git_codes)
         codes.append(REASON_GIT_BOUNDARY_BLOCKED)
         finished_at = clock_provider() if clock_provider else None
-        return AriadneTaskCliResult(
-            status=AriadneTaskCliStatus.BLOCKED,
-            reason_codes=tuple(codes),
-            task_description=request.task_description,
-            task_description_hash=task_description_hash,
-            pipeline_status=pipeline_status,
-            pipeline_final_action=pipeline_final_action,
-            pipeline_has_blockers=pipeline_has_blockers,
-            git_boundary_status=GitBoundaryStatus.BLOCKED.value,
-            command_plan=[_spec_to_dict(s) for s in git_plan.command_specs],
-            execution_attempted=False,
-            execution_results=(),
-            warnings=tuple(warnings),
-            next_action="stop",
-            started_at=started_at,
-            finished_at=clock_provider() if clock_provider else None,
-            details="Git boundary blocked",
+        return _persist_and_return(
+            request, persistence_fn, clock_provider,
+            AriadneTaskCliResult(
+                status=AriadneTaskCliStatus.BLOCKED,
+                reason_codes=tuple(codes),
+                task_description=request.task_description,
+                task_description_hash=task_description_hash,
+                pipeline_status=pipeline_status,
+                pipeline_final_action=pipeline_final_action,
+                pipeline_has_blockers=pipeline_has_blockers,
+                git_boundary_status=GitBoundaryStatus.BLOCKED.value,
+                command_plan=[_spec_to_dict(s) for s in git_plan.command_specs],
+                execution_attempted=False,
+                execution_results=(),
+                warnings=tuple(warnings),
+                next_action="stop",
+                started_at=started_at,
+                finished_at=clock_provider() if clock_provider else None,
+                details="Git boundary blocked",
+            ),
         )
 
     # 8. Check execution requirements
     if not request.execute:
         codes.append(REASON_EXECUTION_REQUIRED)
         finished_at = clock_provider() if clock_provider else None
-        return AriadneTaskCliResult(
-            status=AriadneTaskCliStatus.BLOCKED,
-            reason_codes=tuple(codes),
-            task_description=request.task_description,
-            task_description_hash=task_description_hash,
-            pipeline_status=pipeline_status,
-            pipeline_final_action=pipeline_final_action,
-            pipeline_has_blockers=pipeline_has_blockers,
-            git_boundary_status=GitBoundaryStatus.APPROVED.value,
-            command_plan=[_spec_to_dict(s) for s in git_plan.command_specs],
-            execution_attempted=False,
-            execution_results=(),
-            warnings=tuple(warnings),
-            next_action="execute_required",
-            started_at=started_at,
-            finished_at=clock_provider() if clock_provider else None,
-            details="Execution required (use --execute)",
+        return _persist_and_return(
+            request, persistence_fn, clock_provider,
+            AriadneTaskCliResult(
+                status=AriadneTaskCliStatus.BLOCKED,
+                reason_codes=tuple(codes),
+                task_description=request.task_description,
+                task_description_hash=task_description_hash,
+                pipeline_status=pipeline_status,
+                pipeline_final_action=pipeline_final_action,
+                pipeline_has_blockers=pipeline_has_blockers,
+                git_boundary_status=GitBoundaryStatus.APPROVED.value,
+                command_plan=[_spec_to_dict(s) for s in git_plan.command_specs],
+                execution_attempted=False,
+                execution_results=(),
+                warnings=tuple(warnings),
+                next_action="execute_required",
+                started_at=started_at,
+                finished_at=clock_provider() if clock_provider else None,
+                details="Execution required (use --execute)",
+            ),
         )
 
     if not request.approve:
         codes.append(REASON_APPROVAL_REQUIRED)
         finished_at = clock_provider() if clock_provider else None
-        return AriadneTaskCliResult(
-            status=AriadneTaskCliStatus.BLOCKED,
-            reason_codes=tuple(codes),
-            task_description=request.task_description,
-            task_description_hash=task_description_hash,
-            pipeline_status=pipeline_status,
-            pipeline_final_action=pipeline_final_action,
-            pipeline_has_blockers=pipeline_has_blockers,
-            git_boundary_status=GitBoundaryStatus.APPROVED.value,
-            command_plan=[_spec_to_dict(s) for s in git_plan.command_specs],
-            execution_attempted=False,
-            execution_results=(),
-            warnings=tuple(warnings),
-            next_action="approval_required",
-            started_at=started_at,
-            finished_at=clock_provider() if clock_provider else None,
-            details="Approval required (use --approve)",
+        return _persist_and_return(
+            request, persistence_fn, clock_provider,
+            AriadneTaskCliResult(
+                status=AriadneTaskCliStatus.BLOCKED,
+                reason_codes=tuple(codes),
+                task_description=request.task_description,
+                task_description_hash=task_description_hash,
+                pipeline_status=pipeline_status,
+                pipeline_final_action=pipeline_final_action,
+                pipeline_has_blockers=pipeline_has_blockers,
+                git_boundary_status=GitBoundaryStatus.APPROVED.value,
+                command_plan=[_spec_to_dict(s) for s in git_plan.command_specs],
+                execution_attempted=False,
+                execution_results=(),
+                warnings=tuple(warnings),
+                next_action="approval_required",
+                started_at=started_at,
+                finished_at=clock_provider() if clock_provider else None,
+                details="Approval required (use --approve)",
+            ),
         )
 
     if not request.approved_by or request.approved_by.strip() == "":
         codes.append(REASON_MISSING_APPROVED_BY)
         finished_at = clock_provider() if clock_provider else None
-        return AriadneTaskCliResult(
-            status=AriadneTaskCliStatus.BLOCKED,
-            reason_codes=tuple(codes),
-            task_description=request.task_description,
-            task_description_hash=task_description_hash,
-            pipeline_status=pipeline_status,
-            pipeline_final_action=pipeline_final_action,
-            pipeline_has_blockers=pipeline_has_blockers,
-            git_boundary_status=GitBoundaryStatus.APPROVED.value,
-            command_plan=[_spec_to_dict(s) for s in git_plan.command_specs],
-            execution_attempted=False,
-            execution_results=(),
-            warnings=tuple(warnings),
-            next_action="approval_required",
-            started_at=started_at,
-            finished_at=clock_provider() if clock_provider else None,
-            details="Missing --approved-by",
+        return _persist_and_return(
+            request, persistence_fn, clock_provider,
+            AriadneTaskCliResult(
+                status=AriadneTaskCliStatus.BLOCKED,
+                reason_codes=tuple(codes),
+                task_description=request.task_description,
+                task_description_hash=task_description_hash,
+                pipeline_status=pipeline_status,
+                pipeline_final_action=pipeline_final_action,
+                pipeline_has_blockers=pipeline_has_blockers,
+                git_boundary_status=GitBoundaryStatus.APPROVED.value,
+                command_plan=[_spec_to_dict(s) for s in git_plan.command_specs],
+                execution_attempted=False,
+                execution_results=(),
+                warnings=tuple(warnings),
+                next_action="approval_required",
+                started_at=started_at,
+                finished_at=clock_provider() if clock_provider else None,
+                details="Missing --approved-by",
+            ),
         )
 
     if not request.approval_reason or request.approval_reason.strip() == "":
         codes.append(REASON_MISSING_APPROVAL_REASON)
         finished_at = clock_provider() if clock_provider else None
-        return AriadneTaskCliResult(
-            status=AriadneTaskCliStatus.BLOCKED,
-            reason_codes=tuple(codes),
-            task_description=request.task_description,
-            task_description_hash=task_description_hash,
-            pipeline_status=pipeline_status,
-            pipeline_final_action=pipeline_final_action,
-            pipeline_has_blockers=pipeline_has_blockers,
-            git_boundary_status=GitBoundaryStatus.APPROVED.value,
-            command_plan=[_spec_to_dict(s) for s in git_plan.command_specs],
-            execution_attempted=False,
-            execution_results=(),
-            warnings=tuple(warnings),
-            next_action="approval_required",
-            started_at=started_at,
-            finished_at=clock_provider() if clock_provider else None,
-            details="Missing --approval-reason",
+        return _persist_and_return(
+            request, persistence_fn, clock_provider,
+            AriadneTaskCliResult(
+                status=AriadneTaskCliStatus.BLOCKED,
+                reason_codes=tuple(codes),
+                task_description=request.task_description,
+                task_description_hash=task_description_hash,
+                pipeline_status=pipeline_status,
+                pipeline_final_action=pipeline_final_action,
+                pipeline_has_blockers=pipeline_has_blockers,
+                git_boundary_status=GitBoundaryStatus.APPROVED.value,
+                command_plan=[_spec_to_dict(s) for s in git_plan.command_specs],
+                execution_attempted=False,
+                execution_results=(),
+                warnings=tuple(warnings),
+                next_action="approval_required",
+                started_at=started_at,
+                finished_at=clock_provider() if clock_provider else None,
+                details="Missing --approval-reason",
+            ),
         )
 
     # 9. Execute git boundary
@@ -572,23 +607,26 @@ def run_ariadne_task(
             codes.append(REASON_EXECUTION_FAILED)
             execution_results = git_result.execution_results
             finished_at = clock_provider() if clock_provider else None
-            return AriadneTaskCliResult(
-                status=AriadneTaskCliStatus.FAILED,
-                reason_codes=tuple(codes),
-                task_description=request.task_description,
-                task_description_hash=task_description_hash,
-                pipeline_status=pipeline_status,
-                pipeline_final_action=pipeline_final_action,
-                pipeline_has_blockers=pipeline_has_blockers,
-                git_boundary_status=git_result.status,
-                command_plan=[_spec_to_dict(s) for s in git_plan.command_specs],
-                execution_attempted=execution_attempted,
-                execution_results=execution_results,
-                warnings=tuple(warnings),
-                next_action="stop",
-                started_at=started_at,
-                finished_at=clock_provider() if clock_provider else None,
-                details="Execution failed",
+            return _persist_and_return(
+                request, persistence_fn, clock_provider,
+                AriadneTaskCliResult(
+                    status=AriadneTaskCliStatus.FAILED,
+                    reason_codes=tuple(codes),
+                    task_description=request.task_description,
+                    task_description_hash=task_description_hash,
+                    pipeline_status=pipeline_status,
+                    pipeline_final_action=pipeline_final_action,
+                    pipeline_has_blockers=pipeline_has_blockers,
+                    git_boundary_status=git_result.status,
+                    command_plan=[_spec_to_dict(s) for s in git_plan.command_specs],
+                    execution_attempted=execution_attempted,
+                    execution_results=execution_results,
+                    warnings=tuple(warnings),
+                    next_action="stop",
+                    started_at=started_at,
+                    finished_at=clock_provider() if clock_provider else None,
+                    details="Execution failed",
+                ),
             )
 
         execution_results = git_result.execution_results
@@ -620,78 +658,7 @@ def run_ariadne_task(
         details=None,
     )
 
-    # 11. Persist run record
-    if request.runs_root and persistence_fn:
-        run_id = request.run_id or f"run-{task_description_hash}"
-        persist_request = RunPersistenceRequest(
-            runs_root=request.runs_root,
-            run_id=run_id,
-            task_description_hash=task_description_hash,
-            task_description_redacted=request.task_description[:80],
-            branch=request.branch,
-            base_branch=request.base_branch,
-            status=result.status,
-            reason_codes=result.reason_codes,
-            pipeline_status=result.pipeline_status,
-            pipeline_final_action=result.pipeline_final_action,
-            pipeline_has_blockers=result.pipeline_has_blockers,
-            pipeline_step_summary=(),
-            pipeline_gate_summary=(),
-            git_boundary_status=result.git_boundary_status,
-            command_plan_summary=tuple(result.command_plan or []),
-            execution_attempted=result.execution_attempted,
-            execution_results_summary=result.execution_results,
-            approval_summary=request.approval_reason or "",
-            artifact_hashes={},
-            warnings=result.warnings,
-            next_action=result.next_action,
-            started_at=result.started_at,
-            finished_at=result.finished_at,
-            clock_provider=clock_provider,
-        )
-        persist_result = persistence_fn(persist_request)
-        if persist_result.status == RunPersistenceStatus.PERSISTED.value:
-            result = AriadneTaskCliResult(
-                status=result.status,
-                reason_codes=result.reason_codes,
-                task_description=result.task_description,
-                task_description_hash=result.task_description_hash,
-                pipeline_status=result.pipeline_status,
-                pipeline_final_action=result.pipeline_final_action,
-                pipeline_has_blockers=result.pipeline_has_blockers,
-                git_boundary_status=result.git_boundary_status,
-                command_plan=result.command_plan,
-                execution_attempted=result.execution_attempted,
-                execution_results=result.execution_results,
-                warnings=result.warnings,
-                next_action=result.next_action,
-                started_at=result.started_at,
-                finished_at=result.finished_at,
-                details=result.details,
-                run_id=run_id,
-                run_record_path=persist_result.run_json_path,
-            )
-        else:
-            result = AriadneTaskCliResult(
-                status=AriadneTaskCliStatus.FAILED,
-                reason_codes=tuple(list(result.reason_codes) + list(persist_result.reason_codes)),
-                task_description=result.task_description,
-                task_description_hash=result.task_description_hash,
-                pipeline_status=result.pipeline_status,
-                pipeline_final_action=result.pipeline_final_action,
-                pipeline_has_blockers=result.pipeline_has_blockers,
-                git_boundary_status=result.git_boundary_status,
-                command_plan=result.command_plan,
-                execution_attempted=result.execution_attempted,
-                execution_results=result.execution_results,
-                warnings=result.warnings,
-                next_action="stop",
-                started_at=result.started_at,
-                finished_at=result.finished_at,
-                details=f"Persistence failed: {persist_result.details}",
-            )
-
-    return result
+    return _persist_and_return(request, persistence_fn, clock_provider, result)
 
 
 # ---------------------------------------------------------------------------
@@ -709,6 +676,115 @@ def _spec_to_dict(spec: GitCommandSpec) -> dict[str, Any]:
         "redacted_display": spec.redacted_display,
         "details": spec.details,
     }
+
+
+# ---------------------------------------------------------------------------
+# Persist helper
+# ---------------------------------------------------------------------------
+
+
+def _persist_and_return(
+    request: AriadneTaskCliRequest,
+    persistence_fn: Optional[Callable],
+    clock_provider: Optional[Callable],
+    result: AriadneTaskCliResult,
+) -> AriadneTaskCliResult:
+    """Persist a run record if configured, then return the result.
+
+    Parameters
+    ----------
+    request:
+        The CLI request (may contain runs_root and run_id).
+    persistence_fn:
+        Injectable persistence function.
+    clock_provider:
+        Optional clock provider.
+    result:
+        The CLI result to persist and return.
+
+    Returns
+    -------
+    AriadneTaskCliResult
+        The result, possibly updated with run_id and run_record_path.
+    """
+    if not request.runs_root or not persistence_fn:
+        return result
+
+    task_description_hash = result.task_description_hash
+    if not task_description_hash and result.task_description:
+        task_description_hash = hashlib.sha256(result.task_description.encode("utf-8")).hexdigest()[:16]
+
+    run_id = request.run_id or f"run-{task_description_hash or 'unknown'}"
+
+    persist_request = RunPersistenceRequest(
+        runs_root=request.runs_root,
+        run_id=run_id,
+        task_description_hash=task_description_hash or "",
+        task_description_redacted=result.task_description[:80] if result.task_description else "",
+        branch=request.branch,
+        base_branch=request.base_branch,
+        status=result.status,
+        reason_codes=result.reason_codes,
+        pipeline_status=result.pipeline_status,
+        pipeline_final_action=result.pipeline_final_action,
+        pipeline_has_blockers=result.pipeline_has_blockers,
+        pipeline_step_summary=(),
+        pipeline_gate_summary=(),
+        git_boundary_status=result.git_boundary_status,
+        command_plan_summary=tuple(result.command_plan or []),
+        execution_attempted=result.execution_attempted,
+        execution_results_summary=result.execution_results,
+        approval_summary=request.approval_reason or "",
+        artifact_hashes={},
+        warnings=result.warnings,
+        next_action=result.next_action,
+        started_at=result.started_at,
+        finished_at=result.finished_at,
+        clock_provider=clock_provider,
+    )
+
+    persist_result = persistence_fn(persist_request)
+
+    if persist_result.status == RunPersistenceStatus.PERSISTED.value:
+        return AriadneTaskCliResult(
+            status=result.status,
+            reason_codes=result.reason_codes,
+            task_description=result.task_description,
+            task_description_hash=result.task_description_hash,
+            pipeline_status=result.pipeline_status,
+            pipeline_final_action=result.pipeline_final_action,
+            pipeline_has_blockers=result.pipeline_has_blockers,
+            git_boundary_status=result.git_boundary_status,
+            command_plan=result.command_plan,
+            execution_attempted=result.execution_attempted,
+            execution_results=result.execution_results,
+            warnings=result.warnings,
+            next_action=result.next_action,
+            started_at=result.started_at,
+            finished_at=result.finished_at,
+            details=result.details,
+            run_id=run_id,
+            run_record_path=persist_result.run_json_path,
+        )
+
+    return AriadneTaskCliResult(
+        status=AriadneTaskCliStatus.FAILED,
+        reason_codes=tuple(list(result.reason_codes) + list(persist_result.reason_codes)),
+        task_description=result.task_description,
+        task_description_hash=result.task_description_hash,
+        pipeline_status=result.pipeline_status,
+        pipeline_final_action=result.pipeline_final_action,
+        pipeline_has_blockers=result.pipeline_has_blockers,
+        git_boundary_status=result.git_boundary_status,
+        command_plan=result.command_plan,
+        execution_attempted=result.execution_attempted,
+        execution_results=result.execution_results,
+        warnings=result.warnings,
+        next_action="stop",
+        started_at=result.started_at,
+        finished_at=result.finished_at,
+        details=f"Persistence failed: {persist_result.details}",
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -785,7 +861,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     request = _build_cli_request(args)
     result = run_ariadne_task(request)
 
-    if result.json_output:
+    if request.json_output:
         output_dict = {
             "status": result.status,
             "reason_codes": list(result.reason_codes),
@@ -813,3 +889,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     if result.status in (AriadneTaskCliStatus.COMPLETED, AriadneTaskCliStatus.COMPLETED_WITH_WARNING):
         return 0
     return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
