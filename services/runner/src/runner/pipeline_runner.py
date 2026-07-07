@@ -294,7 +294,11 @@ def run_pr_pipeline(
         bridge_codes: list[str] = []
 
         if bridge_fn is not None:
-            bridge_result = bridge_fn(agent_name, prompt_text)
+            bridge_result = bridge_fn(
+                agent_name,
+                prompt_text,
+                expected_artifact_path=expected_path,
+            )
         else:
             from runner.agent_runner_bridge import run_agent_runner_bridge
             bridge_result = run_agent_runner_bridge(
@@ -304,6 +308,7 @@ def run_pr_pipeline(
                 workdir=request.workdir,
                 allow_docker=request.allow_docker,
                 output_dir=request.repo_root,
+                expected_artifact_path=expected_path,
             )
 
         bridge_status = getattr(bridge_result, "status", "failed")

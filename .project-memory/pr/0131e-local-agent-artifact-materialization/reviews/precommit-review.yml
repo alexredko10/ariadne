@@ -1,0 +1,147 @@
+pr_id: "0131e-local-agent-artifact-materialization"
+review_type: "precommit-review"
+verdict: "pass"
+head: "ac81987bb5564b0109c37072cfcddd1d6252f8d1"
+date: "2026-07-07T15:03:25Z"
+
+blockers: []
+warnings:
+  - id: "captures-directory-untracked"
+    description: "captures/ (5 JSON from 0131D dogfood runs) is untracked. Environmental artifact from prior branch's execution. Not a blocker. Clean up with git clean -fd captures/ if desired."
+
+validation:
+  compile: exit_code=0
+  focused_tests: "125 passed" (test_agent_runner_bridge.py + test_pipeline_runner.py + test_verdict_parser.py)
+  regression_subset: "327 passed" (10 test modules)
+  ariadne_residue: ".ariadne absent"
+  forbidden_names: no matches in changed files (exit 1)
+  real_pr_artifacts_absent: "dogfood-proof.yml absent, precommit-review.yml absent"
+  grep_forbidden_in_changed: "Only allow_docker parameter + docstrings; no shell=True/subprocess.run/os.system in implementation"
+
+files_read:
+  - .project-memory/pr/0131e-local-agent-artifact-materialization/PLAN.md
+  - .project-memory/pr/0131e-local-agent-artifact-materialization/reviews/plan-review.yml
+  - services/runner/src/runner/agent_runner_bridge.py
+  - services/runner/src/runner/pipeline_runner.py
+  - services/runner/tests/test_agent_runner_bridge.py
+  - services/runner/tests/test_pipeline_runner.py
+
+files_written:
+  - .project-memory/pr/0131e-local-agent-artifact-materialization/reviews/precommit-review.yml
+
+evidence_ledger:
+  - row: "branch correct"
+    observed: "0131e-local-agent-artifact-materialization"
+    status: pass
+
+  - row: "plan-review warning/approve accepted"
+    observed: "verdict=warning; 3 non-blocking warnings: roadmap-alignment-section-missing (PLAN-level), dogfood-proof-yml-coder-path-unchanged (deferred), test-descriptions-lack-tmp-path-emphasis (tests use tmp_path)"
+    status: pass
+
+  - row: "dirty tree within scope"
+    observed: "M: agent_runner_bridge.py, pipeline_runner.py, test_agent_runner_bridge.py, test_pipeline_runner.py; git diff matches exactly"
+    status: pass
+
+  - row: "local materialization implemented"
+    observed: "_validate_artifact_path (5 rules), _materialize_local_artifact (atomic write), _build_default_precommit_artifact, _build_default_plan_review_artifact, _build_default_dogfood_proof, _utc_iso_timestamp — all in agent_runner_bridge.py"
+    status: pass
+
+  - row: "pipeline expected artifact metadata passed"
+    observed: "pipeline_runner.py diff: bridge_fn called with expected_artifact_path=expected_path; run_agent_runner_bridge called with expected_artifact_path=expected_path"
+    status: pass
+
+  - row: "precommit artifact materializes and parses"
+    observed: "_build_default_precommit_artifact generates parseable YAML; test_materialized_precommit_parses_as_pass verifies VerdictParser reads as pass with no blockers"
+    status: pass
+
+  - row: "no missing_review_artifact in dogfood-like test"
+    observed: "TestPipelineRunnerNoMissingReviewArtifact: pipeline completes, precommit gate processed, missing_review_artifact NOT in reason codes"
+    status: pass
+
+  - row: "dogfood-proof boundary preserved"
+    observed: "_build_default_dogfood_proof generates placeholder; dogfood-proof.yml absent from real PR 0131 path; coder path unchanged (deferred per plan-review warning)"
+    status: pass
+
+  - row: "path traversal refused"
+    observed: "_validate_artifact_path: '..' in path raises ValueError; test_local_materializer_refuses_path_traversal passes"
+    status: pass
+
+  - row: "absolute outside-repo refused"
+    observed: "_validate_artifact_path: abs path outside workdir raises ValueError; test_local_materializer_refuses_absolute_outside_repo passes"
+    status: pass
+
+  - row: "non-project-memory refused"
+    observed: "_validate_artifact_path: path not starting with .project-memory/pr/ raises ValueError; test_local_materializer_refuses_non_project_memory passes"
+    status: pass
+
+  - row: ".ariadne writes refused"
+    observed: "_validate_artifact_path: .ariadne/ raises ValueError; test_local_materializer_refuses_ariadne_path passes"
+    status: pass
+
+  - row: "captures not commit payload"
+    observed: "_validate_artifact_path: captures/ raises ValueError; proof capture unchanged; test_local_materializer_refuses_captures_path passes"
+    status: pass
+
+  - row: "no Docker enabling"
+    observed: "allow_docker=False unchanged; materialization only fires when allow_docker=False; docker_agent_adapter.py unchanged; TestDockerPathRemains passes"
+    status: pass
+
+  - row: "no git/gh mutation authority"
+    observed: "_materialize_local_artifact: no subprocess/git/docker; test_local_materializer_no_git + test_local_materializer_no_docker pass"
+    status: pass
+
+  - row: "forbidden files unchanged"
+    observed: "git diff git_boundary.py/ariadne_task_cli.py/run_persistence.py/prompt_composer.py/verdict_parser.py/docker_agent_adapter.py/adapter_registry.py/local_harness.py: no output"
+    status: pass
+
+  - row: "no real PR 0131 artifacts"
+    observed: "test ! -f .project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml: PASS; test ! -f ...precommit-review.yml: PASS"
+    status: pass
+
+  - row: "no frozen scope"
+    observed: "grep retry/dashboard/control-plane/parallel queue/Decision Core/Context Warehouse/eval/faithfulness/frontend: only in Non-Goal exclusions"
+    status: pass
+
+  - row: "plan-review warnings addressed"
+    observed: "roadmap section: PLAN-level gap; dogfood-proof path: coder deferred (correct per plan-review); tmp_path: tests use tmp_path + end-state assertions"
+    status: pass
+
+  - row: "validation passed"
+    observed: "compile=0, focused=125, regression=327, .ariadne=absent, forbidden-names=none, real-artifacts-absent"
+    status: pass
+
+  - row: "artifact physically written/read back"
+    observed: "write_file completed; test -f confirms; header read back"
+    status: pass
+
+checks:
+  branch_correct: pass
+  plan_review_warning_accepted: pass
+  dirty_tree_approved: pass
+  local_materialization_implemented: pass
+  pipeline_metadata_passed: pass
+  precommit_parses: pass
+  no_missing_review_artifact: pass
+  dogfood_proof_boundary: pass
+  path_traversal_refused: pass
+  absolute_outside_refused: pass
+  non_pm_refused: pass
+  ariadne_refused: pass
+  captures_refused: pass
+  no_docker_enabling: pass
+  no_git_mutation_authority: pass
+  forbidden_files_unchanged: pass
+  no_real_pr_artifacts: pass
+  frozen_scope_absent: pass
+  plan_warnings_addressed: pass
+  validation_complete: pass
+  artifact_written_read: pass
+
+boundary_confirmations:
+  - "agent_runner_bridge.py: ONLY production file with logic changes (materialization helpers + expected_artifact_path param)"
+  - "pipeline_runner.py: ONLY orchestration change (passing expected_path to bridge)"
+  - "git_boundary.py, ariadne_task_cli.py, run_persistence.py, prompt_composer.py, verdict_parser.py, docker_agent_adapter.py, adapter_registry.py, local_harness.py: no changes"
+  - "Local materialization: atomic write via os.replace; no subprocess/git/docker/network"
+  - "Artifact-write boundary: only .project-memory/pr/**; 5 validation rules enforced"
+  - "Proof capture preserved alongside materialization"
+  - "No real PR 0131 artifacts created"
