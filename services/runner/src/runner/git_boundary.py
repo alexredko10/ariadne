@@ -143,6 +143,7 @@ REASON_HUMAN_APPROVAL_REQUIRED = "human_approval_required"
 REASON_MISSING_APPROVED_BY = "missing_approved_by"
 REASON_MISSING_APPROVAL_REASON = "missing_approval_reason"
 REASON_EXECUTION_FAILED = "execution_failed"
+REASON_STAGE_FILE_MISSING = "stage_file_missing"
 
 # ---------------------------------------------------------------------------
 # Forbidden paths
@@ -239,6 +240,14 @@ def prepare_git_boundary_plan(
         elif stage_file not in request.allowed_files:
             codes.append(REASON_REJECTED_FILE)
             rejected_files.append(stage_file)
+
+    # 3b. Stage file existence check
+    for stage_file in request.files_to_stage:
+        full_path = os.path.join(request.repo_root, stage_file)
+        if not os.path.exists(full_path):
+            codes.append(REASON_STAGE_FILE_MISSING)
+            rejected_files.append(stage_file)
+            dirty_tree_valid = False
 
     # 4. Commit message
     if not request.commit_message or request.commit_message.strip() == "":

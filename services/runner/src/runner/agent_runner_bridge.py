@@ -121,6 +121,18 @@ REASON_ARTIFACT_PATH_ABSOLUTE = "artifact_path_absolute"
 REASON_ARTIFACT_PATH_NOT_PROJECT_MEMORY = "artifact_path_not_project_memory"
 REASON_ARTIFACT_PATH_ARIAONE = "artifact_path_ariadne"
 REASON_ARTIFACT_PATH_CAPTURES = "artifact_path_captures"
+REASON_ARTIFACT_OVERWRITE_BLOCKED = "artifact_overwrite_blocked"
+
+# ---------------------------------------------------------------------------
+# Protected artifact patterns (overwrite protection)
+# ---------------------------------------------------------------------------
+
+_PROTECTED_ARTIFACT_PATTERNS: tuple[str, ...] = (
+    ".project-memory/pr/**/PLAN.md",
+    ".project-memory/pr/**/reviews/plan-review.yml",
+    ".project-memory/pr/**/reviews/precommit-review.yml",
+)
+
 
 # ---------------------------------------------------------------------------
 # Agent name validation
@@ -429,12 +441,46 @@ def _utc_iso_timestamp() -> str:
 # ---------------------------------------------------------------------------
 
 
+def _is_protected_artifact(path: str) -> bool:
+    """Check if a path matches any protected artifact pattern.
+
+    Protected paths are:
+    - ``.project-memory/pr/**/PLAN.md``
+    - ``.project-memory/pr/**/reviews/plan-review.yml``
+    - ``.project-memory/pr/**/reviews/precommit-review.yml``
+
+    Parameters
+    ----------
+    path:
+        The relative artifact path to check.
+
+    Returns
+    -------
+    bool
+        ``True`` if the path matches a protected pattern.
+    """
+    basename = os.path.basename(path)
+    dirname = os.path.dirname(path)
+
+    # Check PLAN.md anywhere under .project-memory/pr/
+    if basename == "PLAN.md" and dirname.startswith(".project-memory/pr/"):
+        return True
+
+    # Check reviews/*.yml under .project-memory/pr/
+    if basename in ("plan-review.yml", "precommit-review.yml"):
+        if "/reviews" in dirname and dirname.startswith(".project-memory/pr/"):
+            return True
+
+    return False
+
+
 def _materialize_local_artifact(
     artifact_path: str,
     content: str,
     workdir: str,
     task_prompt_hash: str,
     agent_config_hash: str,
+    overwrite_allowed: bool = False,
 ) -> dict:
     """Materialize a local artifact file with proof metadata.
 
@@ -474,6 +520,14 @@ def _materialize_local_artifact(
     # Compute hash and line count
     content_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()[:16]
     line_count = len(content.split("\n"))
+
+    # Overwrite protection: check if file exists and is protected
+    if os.path.exists(abs_path) and os.path.getsize(abs_path) > 0:
+        if _is_protected_artifact(artifact_path) and not overwrite_allowed:
+            raise ValueError(
+                f"artifact_overwrite_blocked: {artifact_path} already exists "
+                f"and is a protected artifact. Set overwrite_allowed=True to overwrite."
+            )
 
     # Ensure parent directory exists
     parent_dir = os.path.dirname(abs_path)
@@ -596,6 +650,7 @@ def run_agent_runner_bridge(
     output_dir: str = ".",
     clock_provider: Optional[Callable[[], str]] = None,
     expected_artifact_path: str = "",
+    overwrite_allowed: bool = False,
 ) -> AgentRunnerBridgeResult:
     """Run the agent runner bridge.
 
@@ -620,6 +675,10 @@ def run_agent_runner_bridge(
     expected_artifact_path:
         Optional expected artifact path to materialize after local
         non-Docker execution.  Must be under ``.project-memory/pr/**``.
+    overwrite_allowed:
+        Whether overwriting an existing protected artifact is allowed.
+        Default ``False``.  Set to ``True`` when the current step owns
+        the expected artifact path.
 
     Returns
     -------
@@ -758,9 +817,10 @@ def run_agent_runner_bridge(
                     workdir=resolved_workdir,
                     task_prompt_hash=task_prompt_hash,
                     agent_config_hash=config_hash,
+                    overwrite_allowed=overwrite_allowed,
                 )
             except ValueError as e:
-                # Path validation failed — record but don't fail the bridge
+                # Path validation or overwrite protection failed
                 codes.append(f"materialization_failed: {e}")
     else:
         # 7. Build execution request (Docker path)

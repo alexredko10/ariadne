@@ -11,6 +11,7 @@ from typing import Any, Optional
 
 from runner.ariadne_task_cli import (
     _build_cli_request,
+    _detect_payload_artifact_path,
     AriadneTaskCliRequest,
     AriadneTaskCliResult,
     AriadneTaskCliStatus,
@@ -26,6 +27,7 @@ from runner.ariadne_task_cli import (
     REASON_MISSING_APPROVED_BY,
     REASON_MISSING_APPROVAL_REASON,
     REASON_EXECUTION_FAILED,
+    REASON_DIRTY_TREE_OUT_OF_SCOPE,
 )
 from runner.run_persistence import persist_run_record, load_run_record
 from runner.pipeline_runner import (
@@ -619,12 +621,16 @@ class TestFakeGitBoundaryExecutor:
 
 class TestNoRealGitMutationInTests:
     def test_no_subprocess_run_in_test_code(self):
-        """Test code does not use subprocess.run for execution."""
+        """Test code does not use subprocess.run for git mutation."""
         import inspect
         from runner.ariadne_task_cli import run_ariadne_task
         source = inspect.getsource(run_ariadne_task)
-        # run_ariadne_task should not contain subprocess.run
-        assert "subprocess.run" not in source
+        # run_ariadne_task may contain subprocess.run for dirty-tree preflight
+        # (git status --short), but must not contain git mutation commands
+        assert "git add" not in source
+        assert "git commit" not in source
+        assert "git push" not in source
+        assert "gh pr create" not in source
 
 
 # ---------------------------------------------------------------------------
@@ -784,6 +790,215 @@ class TestNoForbiddenNames:
         ]
         for f in forbidden:
             assert f not in source, f"Forbidden string found: {f!r}"
+
+
+# ---------------------------------------------------------------------------
+# Dirty-tree out-of-scope behavior (PR 0131F)
+# ---------------------------------------------------------------------------
+
+
+class TestDirtyTreeOutOfScope:
+    """Dirty-tree preflight blocks when unrelated dirty files exist."""
+
+    def test_dirty_tree_out_of_scope_blocks(self):
+        """Unrelated dirty file blocks before Git Boundary."""
+        # Use a tmp_path-based repo_root so dirty-tree preflight runs
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="dirty-tree-test-")
+        request = _valid_request(
+            repo_root=repo_root,
+            allowed_files=("allowed.py",),
+            files_to_stage=("allowed.py",),
+        )
+        # Create allowed file
+        with open(os.path.join(repo_root, "allowed.py"), "w") as f:
+            f.write("# allowed")
+        # Create an unrelated dirty file
+        with open(os.path.join(repo_root, "unrelated.py"), "w") as f:
+            f.write("# unrelated")
+        # Init git repo and stage the unrelated file
+        import subprocess
+        subprocess.run(["git", "init"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "add", "unrelated.py"], cwd=repo_root, capture_output=True)
+
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            clock_provider=_clock,
+        )
+        assert result.status == AriadneTaskCliStatus.BLOCKED
+        assert REASON_DIRTY_TREE_OUT_OF_SCOPE in result.reason_codes
+
+    def test_dirty_tree_allows_allowed_files_only(self):
+        """Only allowed dirty payload file can proceed."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="dirty-tree-allow-test-")
+        request = _valid_request(
+            repo_root=repo_root,
+            allowed_files=("allowed.py",),
+            files_to_stage=("allowed.py",),
+        )
+        # Create only the allowed file
+        with open(os.path.join(repo_root, "allowed.py"), "w") as f:
+            f.write("# allowed")
+        import subprocess
+        subprocess.run(["git", "init"], cwd=repo_root, capture_output=True)
+
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            clock_provider=_clock,
+        )
+        # Should reach git boundary (blocked on execute, not dirty tree)
+        assert REASON_DIRTY_TREE_OUT_OF_SCOPE not in result.reason_codes
+
+    def test_dirty_tree_excludes_ariadne_captures_residue(self):
+        """.ariadne/ and captures/ are local residue, not commit payload."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="dirty-tree-residue-test-")
+        request = _valid_request(
+            repo_root=repo_root,
+            allowed_files=("allowed.py",),
+            files_to_stage=("allowed.py",),
+        )
+        # Create allowed file
+        with open(os.path.join(repo_root, "allowed.py"), "w") as f:
+            f.write("# allowed")
+        # Create local residue files (should be excluded from dirty check)
+        os.makedirs(os.path.join(repo_root, ".ariadne"), exist_ok=True)
+        with open(os.path.join(repo_root, ".ariadne/run.json"), "w") as f:
+            f.write("{}")
+        os.makedirs(os.path.join(repo_root, "captures"), exist_ok=True)
+        with open(os.path.join(repo_root, "captures/proof.json"), "w") as f:
+            f.write("{}")
+        import subprocess
+        subprocess.run(["git", "init"], cwd=repo_root, capture_output=True)
+
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            clock_provider=_clock,
+        )
+        # Residue files should not trigger dirty_tree_out_of_scope
+        assert REASON_DIRTY_TREE_OUT_OF_SCOPE not in result.reason_codes
+
+
+# ---------------------------------------------------------------------------
+# Dry-run warning behavior (PR 0131F)
+# ---------------------------------------------------------------------------
+
+
+class TestDryRunWarning:
+    """--execute without --no-dry-run produces explicit dry-run warning."""
+
+    def test_dry_run_execute_without_no_dry_run_warning(self):
+        """--execute without --no-dry-run adds dry-run warning."""
+        request = _valid_request(
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing",
+            dry_run=True,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            clock_provider=_clock,
+        )
+        # Should have dry-run warning
+        assert any("Dry-run mode active" in w for w in result.warnings)
+        assert any("no-dry-run" in w for w in result.warnings)
+        # Execution should not be attempted
+        assert result.execution_attempted is False
+
+    def test_dry_run_execution_not_attempted(self):
+        """execute=True, dry_run=True → execution_attempted=False."""
+        request = _valid_request(
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing",
+            dry_run=True,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            clock_provider=_clock,
+        )
+        assert result.execution_attempted is False
+
+    def test_no_dry_run_execution_attempted(self):
+        """execute=True, dry_run=False → execution_attempted=True with fake executor."""
+        request = _valid_request(
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing",
+            dry_run=False,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            clock_provider=_clock,
+        )
+        assert result.execution_attempted is True
+        assert len(result.execution_results) > 0
+
+
+# ---------------------------------------------------------------------------
+# Payload routing behavior (PR 0131F)
+# ---------------------------------------------------------------------------
+
+
+class TestPayloadRouting:
+    """Payload artifact path routing from CLI to Pipeline Runner."""
+
+    def test_payload_routing_via_cli_detected(self):
+        """CLI stage-file payload path reaches PipelineRunnerRequest."""
+        # Test _detect_payload_artifact_path directly
+        files = (
+            ".project-memory/pr/test/PLAN.md",
+            ".project-memory/pr/test/reviews/plan-review.yml",
+            ".project-memory/pr/test/dogfood-proof.yml",
+        )
+        result = _detect_payload_artifact_path(files)
+        assert result == ".project-memory/pr/test/dogfood-proof.yml"
+
+    def test_payload_routing_excludes_plan_md(self):
+        """PLAN.md is excluded from payload routing."""
+        files = (".project-memory/pr/test/PLAN.md",)
+        result = _detect_payload_artifact_path(files)
+        assert result == ""
+
+    def test_payload_routing_excludes_reviews(self):
+        """reviews/*.yml files are excluded from payload routing."""
+        files = (".project-memory/pr/test/reviews/plan-review.yml",)
+        result = _detect_payload_artifact_path(files)
+        assert result == ""
+
+    def test_payload_routing_empty_when_no_payload(self):
+        """No payload candidate → empty string."""
+        files = ("services/runner/src/runner/foo.py",)
+        result = _detect_payload_artifact_path(files)
+        assert result == ""
+
+    def test_payload_routing_dogfood_proof_yml(self):
+        """dogfood-proof.yml is detected as payload."""
+        files = (".project-memory/pr/test/dogfood-proof.yml",)
+        result = _detect_payload_artifact_path(files)
+        assert result == ".project-memory/pr/test/dogfood-proof.yml"
 
 
 # ---------------------------------------------------------------------------
