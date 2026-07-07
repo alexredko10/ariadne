@@ -1,0 +1,115 @@
+schema_version: "0.1"
+pr_id: "0131-dogfood-pr-created-by-ariadne"
+review_type: plan-review
+verdict: approve
+reviewer: plan-review
+timestamp: "2026-07-07T00:15:00Z"
+related_plan: ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/PLAN.md"
+summary:
+  result: "PR 0131 DOGFOOD plan approved. Operational proof PR, not feature expansion. No new runtime modules, no existing module modifications. Full Ariadne path: ariadne task CLI → Pipeline Runner → Git Boundary (human-approved) → Run Persistence → local run record. Small dogfood-proof.yml artifact staged via Ariadne Git Boundary. load_run_record readback validated. All 19 mandatory checks pass."
+snapshot_delta:
+  plan_base_sha: "ecac1bda691b66b3876569a817ed5731a573ab52"
+  current_head: "ecac1bda691b66b3876569a817ed5731a573ab52"
+  action: continue
+  stale_snapshot: false
+scope:
+  expected_files: [".project-memory/pr/0131-dogfood-pr-created-by-ariadne/PLAN.md", ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/reviews/plan-review.yml"]
+  actual_files: [".project-memory/pr/0131-dogfood-pr-created-by-ariadne/PLAN.md", ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/reviews/plan-review.yml"]
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: in_scope
+files_checked:
+  - ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md (L302-380)"
+  - ".project-memory/pr/0130-run-persistence/reviews/precommit-review.yml"
+  - "services/runner/src/runner/pipeline_runner.py"
+  - "services/runner/src/runner/git_boundary.py"
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+files_modified: []
+validation:
+  - {command: "git rev-parse --verify HEAD", result: passed, exit_code: 0, evidence: "ecac1bda"}
+  - {command: "git branch --show-current", result: passed, exit_code: 0, evidence: "0131-dogfood-pr-created-by-ariadne"}
+  - {command: "git status --short", result: passed, exit_code: 0, evidence: "?? .project-memory/pr/0131-dogfood-pr-created-by-ariadne/ only"}
+  - {command: "git diff --name-only", result: passed, exit_code: 0, evidence: "empty (no tracked modifications)"}
+  - {command: "grep 'Production Line|0131|DOGFOOD' ROADMAP.md", result: passed, exit_code: 0, evidence: "L302 Production Line ACTIVE; L326 0131 DOGFOOD MILESTONE"}
+  - {command: "grep run_ariadne_task/CLI flags in ariadne_task_cli.py", result: passed, exit_code: 0, evidence: "--execute L177 --approve L178 --approved-by L179 --runs-root L182 --run-id L183 --approval-reason L180 confirmed"}
+  - {command: "grep git_boundary_plan/execute in git_boundary.py", result: passed, exit_code: 0, evidence: "prepare_git_boundary_plan L188 execute_git_boundary_plan L350 confirmed"}
+  - {command: "grep persist_run_record/load_run_record in run_persistence.py", result: passed, exit_code: 0, evidence: "persist_run_record L195 load_run_record confirmed"}
+  - {command: "grep dogfood-proof/pr-0131-dogfood in PLAN", result: passed, exit_code: 0, evidence: "dogfood-proof.yml artifact defined; Ariadne CLI path; Git Boundary execution; no manual gh pr create"}
+  - {command: "grep dashboard|control.plane|retry|model.health in PLAN", result: passed, exit_code: 1, evidence: "exit 1 — none found"}
+  - {command: "if [ -d .ariadne ]; then find .ariadne -maxdepth 5 -type f | sort; else echo '.ariadne absent'; fi", result: passed, exit_code: 0, evidence: ".ariadne absent"}
+blockers: []
+warnings: []
+decisions_made:
+  - {decision: "Approve PR 0131 DOGFOOD plan", reason: "All 19 mandatory checks pass. Operational dogfood proof PR, not feature expansion. No new runtime modules, no existing module modifications. Full Ariadne closed loop path verified. Human approval gates enforced. Run Persistence proof contract complete. Dogfood-proof.yml artifact is small project-memory only. load_run_record readback validated. Validation strategy complete. Artifact write/readback requirements included."}
+context_used:
+  labels: [dogfood, production-line, stage-2-closed-loop, pr-0131, operational-proof, ariadne-task-cli, git-boundary, run-persistence, human-approval, pr-0130, pr-0129, pr-0128, pr-0127]
+  memory_files_read: [".project-memory/pr/0131-dogfood-pr-created-by-ariadne/PLAN.md", ".project-memory/review-artifact.schema.yml", "ROADMAP.md", ".project-memory/pr/0130-run-persistence/reviews/precommit-review.yml", "services/runner/src/runner/pipeline_runner.py", "services/runner/src/runner/git_boundary.py", "services/runner/src/runner/ariadne_task_cli.py", "services/runner/src/runner/run_persistence.py", "agents/plan-review.yml", "agents/precommit-review.yml"]
+  anchors_used: []
+  files_inspected: ["ROADMAP.md (L302-380)", "pipeline_runner.py (L1-530)", "git_boundary.py (L1-430)", "ariadne_task_cli.py (L1-560)", "run_persistence.py (L1-300)"]
+  files_modified: []
+  files_intentionally_ignored: [services/runner/src/**/*.py, services/task_intake/**, schemas/**, docs/**, agents/**, packages/**, apps/**, docker/**, .github/**, pyproject.toml, package.json, Makefile, .project-memory/post-0100/**]
+checks:
+  branch: pass
+  dirty_tree: pass
+  roadmap_alignment_present: pass
+  pr_0127_pipeline_evidence: pass
+  pr_0128_git_boundary_evidence: pass
+  pr_0129_cli_evidence: pass
+  pr_0130_run_persistence_evidence: pass
+  dogfood_only_scope: pass
+  dogfood_target_artifact: pass
+  ariadne_command_contract: pass
+  human_approval_contract: pass
+  git_boundary_execution_contract: pass
+  run_persistence_proof_contract: pass
+  expected_staged_local_files: pass
+  safety_boundary_complete: pass
+  frozen_streams_not_started: pass
+  validation_strategy_complete: pass
+  artifact_write_readback_requirements: pass
+boundary_confirmations:
+  - "evidence-first plan-review completed; PLAN.md not modified"
+  - "only plan-review artifact written; correct PR 0131 branch confirmed"
+  - "ROADMAP.md not modified by review; services/runner/** not modified by review; agents/** not modified by review"
+  - "Production Line Stream ACTIVE (ROADMAP L302); Stage 2 Closed Loop (L319); PR 0131 DOGFOOD MILESTONE defined (L326)"
+  - "PR 0130 precommit-review verdict:pass (run_persistence.py implemented)"
+  - "pipeline_runner.py present (PR 0127); git_boundary.py present (PR 0128); ariadne_task_cli.py present with --execute --approve --approved-by --runs-root --run-id (PR 0129); run_persistence.py present (PR 0130)"
+  - "DOGFOOD PR: operational proof, NOT feature expansion; no new runtime modules; no existing module modifications"
+  - "dogfood-proof.yml: small project-memory artifact only; SHA256 hashes; no raw agent stdout/stderr/secrets"
+  - "Ariadne CLI command: python -m runner.ariadne_task_cli task [description] --branch 0131-dogfood-pr-created-by-ariadne --base-branch main --runs-root .ariadne/runs --run-id pr-0131-dogfood --allowed-file dogfood-proof.yml --stage-file dogfood-proof.yml --commit-message --pr-title --pr-body --execute --approve --approved-by [operator] --approval-reason [reason] --json"
+  - "human approval: --execute --approve --approved-by --approval-reason all required; does NOT override failed pipeline/Git Boundary block/dirty-tree/ forbidden files"
+  - "Git Boundary execution: git status→git add→git commit→git push→gh_pr_create via argv command specs (shell=False); not manual gh pr create"
+  - "Run Persistence proof: .ariadne/runs/pr-0131-dogfood/run.json + manifest.json; load_run_record readback; hash_match; pipeline_status/git_boundary_status/execution_attempted recorded"
+  - "staged PR payload: only dogfood-proof.yml; no source-code changes; no ROADMAP/docs/agents/schemas/services modifications"
+  - "local proof: .ariadne/runs/pr-0131-dogfood/ (untracked); review artifact .project-memory/pr/0131/reviews/precommit-review.yml"
+  - "safety: no unattended git rights/no manual gh or git/no bypass pipeline or git boundary or run persistence/no docker/no dep install/no agent edits/no new architecture"
+  - "anti-stall: no dashboard/control-plane/retry/model health/run report/parallel queue/Decision Core/Context Warehouse/eval/faithfulness/frontend (all frozen until PR 0136)"
+  - "precommit validation: load_run_record readback + git diff --name-only + dogfood-proof.yml + run.json + manifest.json existence checks"
+  - "all 19 mandatory checks pass"
+evidence_ledger:
+  - {claim: "branch correct", evidence_source: "git branch --show-current", exact_observed_evidence: "0131-dogfood-pr-created-by-ariadne", result: pass}
+  - {claim: "dirty tree within planning scope", evidence_source: "git status --short + git diff --name-only", exact_observed_evidence: "?? .project-memory/pr/0131-dogfood-pr-created-by-ariadne/ only; git diff empty", result: pass}
+  - {claim: "PLAN.md was read", evidence_source: "PLAN.md content", exact_observed_evidence: "16221 bytes, 340+ lines, PR 0131 DOGFOOD Plan", result: pass}
+  - {claim: "required supporting files read", evidence_source: "files_checked list", exact_observed_evidence: "10 files: PLAN, schema, ROADMAP, PR0130 precommit-review, 4 runtime modules, 2 agent configs", result: pass}
+  - {claim: "roadmap alignment present", evidence_source: "PLAN.md ### Roadmap alignment", exact_observed_evidence: "track: Production Line — Stage 2 Closed Loop; slot: 0131; operational dogfood proof PR; proof principle: persisted run records and created PR evidence are runtime/file-captured proof", result: pass}
+  - {claim: "PR 0127 Pipeline Runner evidence present", evidence_source: "grep pipeline_runner.py + precommit-review", exact_observed_evidence: "pipeline_runner.py present; run_pr_pipeline()+PipelineRunnerResult confirmed; precommit-review verdict:pass", result: pass}
+  - {claim: "PR 0128 Git Boundary evidence present", evidence_source: "grep git_boundary.py + precommit-review", exact_observed_evidence: "git_boundary.py present; prepare_git_boundary_plan()+execute_git_boundary_plan()+GitCommandSpec confirmed; precommit-review verdict:pass", result: pass}
+  - {claim: "PR 0129 ariadne task CLI evidence present", evidence_source: "grep ariadne_task_cli.py + precommit-review", exact_observed_evidence: "ariadne_task_cli.py present; --execute/--approve/--approved-by/--approval-reason/--runs-root/--run-id confirmed at L177-183; precommit-review verdict:pass", result: pass}
+  - {claim: "PR 0130 Run Persistence evidence present", evidence_source: "grep run_persistence.py + precommit-review", exact_observed_evidence: "run_persistence.py present; persist_run_record()+load_run_record()+run.json+manifest.json confirmed; precommit-review verdict:pass", result: pass}
+  - {claim: "dogfood-only scope", evidence_source: "PLAN.md dogfood goal + non-goals sections", exact_observed_evidence: "PLAN L5-10: no new runtime modules, no architecture expansion, dogfood proof only; L206-220 non-goals confirmed", result: pass}
+  - {claim: "dogfood target artifact", evidence_source: "PLAN.md dogfood target artifact section L78-106", exact_observed_evidence: ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml; run_id SHA256/hashes/pipeline_status/git_boundary_status/command_plan/execution_attempted/pr_url; small YAML only", result: pass}
+  - {claim: "Ariadne command contract", evidence_source: "PLAN.md ariadne command section L114-128", exact_observed_evidence: "python -m runner.ariadne_task_cli task with full --branch/--base-branch/--runs-root/--run-id/--allowed-file/--stage-file/--commit-message/--pr-title/--pr-body/--execute/--approve/--approved-by/--approval-reason/--json; all flags present; no manual git/gh", result: pass}
+  - {claim: "human approval contract", evidence_source: "PLAN.md human approval contract section L130-140", exact_observed_evidence: "--execute required; --approve required; --approved-by non-empty required; --approval-reason non-empty required; approval does NOT override failed pipeline/Git Boundary block/dirty-tree/forbidden files", result: pass}
+  - {claim: "Git Boundary execution contract", evidence_source: "PLAN.md git boundary section L142-157", exact_observed_evidence: "git status→git add→git commit→git push→gh_pr_create via argv command specs (shell=False); executed by Git Boundary, NOT manually; gh_pr_create only when pr_title present", result: pass}
+  - {claim: "Run Persistence proof contract", evidence_source: "PLAN.md run persistence section L159-175", exact_observed_evidence: ".ariadne/runs/pr-0131-dogfood/run.json + manifest.json; load_run_record readback; hash_match; pipeline_status/git_boundary_status/execution_attempted/pr_url/approval_summary recorded; run_json_hash in manifest", result: pass}
+  - {claim: "expected staged/local files", evidence_source: "PLAN.md expected files section L177-201", exact_observed_evidence: "staged: dogfood-proof.yml only (no source-code changes); local: .ariadne/runs/pr-0131-dogfood/ (untracked); review artifact; blocked: no source-code/ROADMAP/docs/agents/schemas/services changes", result: pass}
+  - {claim: "safety boundary complete", evidence_source: "PLAN.md safety and mutation boundaries L237-249", exact_observed_evidence: "no unattended git rights/no manual gh or git/no bypass pipeline or git boundary or run persistence/no docker/no dep install/no agent edits/no new architecture", result: pass}
+  - {claim: "frozen streams not started", evidence_source: "PLAN.md non-goals L253-265 + ROADMAP L353-365", exact_observed_evidence: "PR 0131 non-goals include retry/model health/dashboard/control plane/run report/parallel queue/Decision Core/Context Warehouse/eval/faithfulness/frontend (all frozen until PR 0136)", result: pass}
+  - {claim: "validation strategy complete", evidence_source: "PLAN.md validation commands L267-295", exact_observed_evidence: "git branch/status/diff checks + test -f dogfood-proof.yml + test -f run.json + test -f manifest.json + load_run_record Python readback + grep proof checks + grep forbidden patterns + git status/diff; no Docker/dependency install/manual GitHub PR required", result: pass}
+  - {claim: "artifact physically written/read back", evidence_source: "write_file + test -f", exact_observed_evidence: "plan-review.yml written to .project-memory/pr/0131-dogfood-pr-created-by-ariadne/reviews/; test -f exits 0", result: pass}
