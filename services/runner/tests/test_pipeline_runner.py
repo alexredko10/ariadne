@@ -23,6 +23,10 @@ from runner.pipeline_runner import (
     REASON_BRIDGE_FAILED,
     REASON_PARSER_FAILED,
 )
+from runner.agent_runner_bridge import (
+    AgentRunnerBridgeStatus,
+    REASON_DOCKER_BLOCKED,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -443,6 +447,239 @@ class TestCoderStepFailure:
         assert REASON_CODER_STEP_FAILED in result.reason_codes
         step_names = [s.step_name for s in result.step_results]
         assert "precommit_review" not in step_names
+
+
+# ---------------------------------------------------------------------------
+# Local non-Docker pipeline (PR 0131D)
+# ---------------------------------------------------------------------------
+
+
+class TestLocalNonDockerPipeline:
+    """Full pipeline with real bridge, allow_docker=False on all agents."""
+
+    def test_all_bridge_steps_completed(self):
+        """All 4 bridge steps return completed (not blocked by docker_blocked)."""
+        from runner.agent_runner_bridge import run_agent_runner_bridge
+
+        packets = _default_packets()
+        # Override coder packet to use dogfood-like expected path
+        packets[2] = {
+            "agent_name": "coder",
+            "prompt_kind": "coder",
+            "prompt_text": (
+                "Create dogfood-proof.yml for PR dogfood.\n"
+                "Forbidden commands:\n"
+                "- git add\n"
+                "- git commit\n"
+                "- gh pr create\n"
+            ),
+            "expected_output_path": ".project-memory/pr/dogfood/dogfood-proof.yml",
+        }
+
+        request = PipelineRunnerRequest(
+            pr_id="0131d",
+            branch="0131d-local-non-docker-agent-execution",
+            task_title="Local Non-Docker Agent Execution",
+            task_description="Test local non-Docker pipeline",
+            prompt_composer=_fake_composer(packets),
+            bridge_runner=run_agent_runner_bridge,
+            artifact_reader=_fake_artifact_reader("test artifact content"),
+            verdict_parser=_fake_parser("pass", "continue"),
+            clock_provider=_clock,
+        )
+        result = run_pr_pipeline(request)
+        # Pipeline should complete — all bridge steps return completed
+        assert result.status == PipelineRunnerStatus.COMPLETED
+        assert result.stopped_at is None
+        # Check all bridge steps have completed status
+        bridge_steps = [s for s in result.step_results if s.bridge_status is not None]
+        for step in bridge_steps:
+            assert step.bridge_status == "completed", f"Step {step.step_name} has status {step.bridge_status}"
+        # No docker_blocked in any reason codes
+        for step in bridge_steps:
+            assert "docker_blocked" not in step.reason_codes, f"Step {step.step_name} has docker_blocked"
+        # Coder step should not have coder_step_failed
+        assert REASON_CODER_STEP_FAILED not in result.reason_codes
+
+    def test_pipeline_reaches_post_coder_precommit_gate(self):
+        """Pipeline reaches post-coder precommit gate."""
+        from runner.agent_runner_bridge import run_agent_runner_bridge
+
+        request = PipelineRunnerRequest(
+            pr_id="0131d",
+            branch="0131d-local-non-docker-agent-execution",
+            task_title="Local Non-Docker Agent Execution",
+            task_description="Test local non-Docker pipeline",
+            prompt_composer=_fake_composer(_default_packets()),
+            bridge_runner=run_agent_runner_bridge,
+            artifact_reader=_fake_artifact_reader("schema_version: 0.1\nverdict: pass\n"),
+            verdict_parser=_fake_parser("pass", "continue"),
+            clock_provider=_clock,
+        )
+        result = run_pr_pipeline(request)
+        # Pipeline should complete
+        assert result.status == PipelineRunnerStatus.COMPLETED
+        # Check that precommit gate was processed
+        step_names = [s.step_name for s in result.step_results]
+        assert "precommit_review" in step_names
+        assert "precommit-review_gate" in step_names
+        # Coder step should have bridge_status completed
+        coder_step = [s for s in result.step_results if s.step_name == "coder"]
+        assert len(coder_step) == 1
+        assert coder_step[0].bridge_status == "completed"
+
+    def test_dogfood_like_temp_proof_artifact(self):
+        """Dogfood-like pipeline creates temp dogfood-proof.yml path."""
+        from runner.agent_runner_bridge import run_agent_runner_bridge
+
+        packets = _default_packets()
+        # Override coder packet to use dogfood-like expected path
+        packets[2] = {
+            "agent_name": "coder",
+            "prompt_kind": "coder",
+            "prompt_text": (
+                "Create dogfood-proof.yml for PR dogfood.\n"
+                "Forbidden commands:\n"
+                "- git add\n"
+                "- git commit\n"
+                "- gh pr create\n"
+            ),
+            "expected_output_path": ".project-memory/pr/dogfood/dogfood-proof.yml",
+        }
+
+        request = PipelineRunnerRequest(
+            pr_id="0131d",
+            branch="0131d-local-non-docker-agent-execution",
+            task_title="Local Non-Docker Agent Execution",
+            task_description="Test local non-Docker pipeline",
+            prompt_composer=_fake_composer(packets),
+            bridge_runner=run_agent_runner_bridge,
+            artifact_reader=_fake_artifact_reader("dogfood-proof: passed"),
+            verdict_parser=_fake_parser("pass", "continue"),
+            clock_provider=_clock,
+        )
+        result = run_pr_pipeline(request)
+        assert result.status == PipelineRunnerStatus.COMPLETED
+        # Coder step should have the expected output path
+        coder_step = [s for s in result.step_results if s.step_name == "coder"]
+        assert len(coder_step) == 1
+        # Use endswith to avoid brittle ./ prefix assumptions
+        assert coder_step[0].expected_artifact_path is not None
+        assert coder_step[0].expected_artifact_path.endswith(
+            ".project-memory/pr/dogfood/dogfood-proof.yml"
+        )
+        assert coder_step[0].bridge_status == "completed"
+
+    def test_no_real_git_gh_docker_network_in_pipeline(self):
+        """Pipeline does not run real git/gh/Docker/network."""
+        import inspect
+        from runner.pipeline_runner import run_pr_pipeline
+        source = inspect.getsource(run_pr_pipeline)
+        assert "subprocess.run" not in source
+        assert "git add" not in source
+        assert "git commit" not in source
+        assert "gh pr create" not in source
+        # The parameter allow_docker is fine; check for actual docker commands
+        assert "docker compose" not in source
+        assert "docker run" not in source
+        assert "import docker" not in source
+
+
+# ---------------------------------------------------------------------------
+# Docker path remains blocked by default
+# ---------------------------------------------------------------------------
+
+
+class TestDockerPathRemains:
+    """Docker path remains blocked by default unless explicit Docker gates."""
+
+    def test_docker_adapter_blocked_without_allow_docker(self, tmp_path: Path):
+        """Docker adapter returns blocked when allow_docker=False."""
+        from runner.docker_agent_adapter import run_docker_agent_execution
+
+        execution_request = {
+            "execution_request_id": "test-request",
+            "run_id": "test-run",
+            "requested_adapter": "docker",
+            "execution_mode": "dry_run",
+            "allow_docker": False,
+            "inputs": {
+                "task_goal": "test",
+                "agent_name": "test-agent",
+                "model": "test-model",
+                "instruction": "test",
+            },
+            "workdir": "/tmp",
+        }
+        result = run_docker_agent_execution(
+            execution_request,
+            allow_docker=False,
+        )
+        assert result["status"] == "blocked"
+
+    def test_docker_adapter_requires_explicit_allow_docker(self, tmp_path: Path):
+        """Docker adapter requires allow_docker=True to execute."""
+        from runner.docker_agent_adapter import run_docker_agent_execution
+
+        execution_request = {
+            "execution_request_id": "test-request",
+            "run_id": "test-run",
+            "requested_adapter": "docker",
+            "execution_mode": "execute",
+            "allow_docker": True,
+            "inputs": {
+                "task_goal": "test",
+                "agent_name": "test-agent",
+                "model": "test-model",
+                "instruction": "test",
+            },
+            "workdir": "/tmp",
+        }
+        # Without ARIADNE_ALLOW_DOCKER_EXECUTION env, still blocked
+        result = run_docker_agent_execution(
+            execution_request,
+            allow_docker=False,
+        )
+        assert result["status"] == "blocked"
+
+    def test_docker_path_blocked_in_pipeline_by_default(self, tmp_path: Path):
+        """Pipeline default allow_docker=False keeps Docker blocked."""
+        from runner.agent_runner_bridge import run_agent_runner_bridge
+
+        # Use a real bridge call with allow_docker=True but no env
+        # The bridge's local mode only fires when allow_docker=False
+        # When allow_docker=True, it goes through the Docker path
+        # which requires both allow_docker=True and env var
+        # We test that the Docker path is still blocked
+        import os
+        old_env = os.environ.get("ARIADNE_ALLOW_DOCKER_EXECUTION", "")
+        os.environ["ARIADNE_ALLOW_DOCKER_EXECUTION"] = "0"
+        try:
+            # Create a temp agents dir with a test config
+            agents_dir = str(tmp_path / "agents")
+            os.makedirs(agents_dir, exist_ok=True)
+            config_file = os.path.join(agents_dir, "test-agent.yml")
+            with open(config_file, "w", encoding="utf-8") as f:
+                f.write("model: test-model\ninstruction: You are a test agent.\n")
+
+            # With allow_docker=True but env=0, Docker adapter returns blocked
+            # But the bridge's local mode only fires when allow_docker=False
+            # So allow_docker=True goes through Docker path
+            result = run_agent_runner_bridge(
+                agent_name="test-agent",
+                task_prompt="Run a test task.",
+                agents_dir=agents_dir,
+                allow_docker=True,
+                output_dir=str(tmp_path),
+            )
+            # Docker path should be blocked
+            assert result.status == AgentRunnerBridgeStatus.BLOCKED
+            assert REASON_DOCKER_BLOCKED in result.reason_codes
+        finally:
+            if old_env:
+                os.environ["ARIADNE_ALLOW_DOCKER_EXECUTION"] = old_env
+            else:
+                os.environ.pop("ARIADNE_ALLOW_DOCKER_EXECUTION", None)
 
 
 # ---------------------------------------------------------------------------
