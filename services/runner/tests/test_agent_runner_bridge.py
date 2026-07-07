@@ -15,6 +15,11 @@ from runner.agent_runner_bridge import (
     run_agent_runner_bridge,
     resolve_agent_config,
     build_agent_runner_execution_request,
+    _validate_artifact_path,
+    _materialize_local_artifact,
+    _build_default_precommit_artifact,
+    _build_default_plan_review_artifact,
+    _build_default_dogfood_proof,
     REASON_MISSING_AGENT_CONFIG,
     REASON_UNBOUNDED_AGENT_NAME,
     REASON_MISSING_TASK_PROMPT,
@@ -745,3 +750,336 @@ class TestNoForbiddenNames:
         ]
         for f in forbidden:
             assert f not in source, f"Forbidden string found: {f!r}"
+
+
+# ---------------------------------------------------------------------------
+# Local artifact materialization (PR 0131E)
+# ---------------------------------------------------------------------------
+
+
+class TestLocalArtifactMaterialization:
+    """Tests for local artifact materialization in agent_runner_bridge.
+
+    All tests use tmp_path only. No real PR 0131 dogfood artifacts are
+    created during testing.
+    """
+
+    # -----------------------------------------------------------------------
+    # Path validation
+    # -----------------------------------------------------------------------
+
+    def test_local_materializer_refuses_path_traversal(self, tmp_path):
+        """Path traversal (..) in path → ValueError."""
+        import pytest
+        with pytest.raises(ValueError, match="Path traversal"):
+            _validate_artifact_path(
+                ".project-memory/pr/../etc/passwd",
+                str(tmp_path),
+            )
+
+    def test_local_materializer_refuses_absolute_outside_repo(self, tmp_path):
+        """Absolute path outside repo root → ValueError."""
+        import pytest
+        with pytest.raises(ValueError, match="Absolute path outside repo root"):
+            _validate_artifact_path(
+                "/etc/passwd",
+                str(tmp_path),
+            )
+
+    def test_local_materializer_refuses_non_project_memory(self, tmp_path):
+        """Non-project-memory path → ValueError."""
+        import pytest
+        with pytest.raises(ValueError, match="Non-project-memory path"):
+            _validate_artifact_path(
+                "some/random/path.yml",
+                str(tmp_path),
+            )
+
+    def test_local_materializer_refuses_ariadne_path(self, tmp_path):
+        """Ariadne path → ValueError."""
+        import pytest
+        with pytest.raises(ValueError, match="Non-project-memory path"):
+            _validate_artifact_path(
+                ".ariadne/run.json",
+                str(tmp_path),
+            )
+
+    def test_local_materializer_refuses_captures_path(self, tmp_path):
+        """Captures path → ValueError."""
+        import pytest
+        with pytest.raises(ValueError, match="Non-project-memory path"):
+            _validate_artifact_path(
+                "captures/foo.json",
+                str(tmp_path),
+            )
+
+    # -----------------------------------------------------------------------
+    # Materialization
+    # -----------------------------------------------------------------------
+
+    def test_local_materializer_writes_expected_artifact(self, tmp_path):
+        """Valid path → file written, hash returned."""
+        artifact_path = ".project-memory/pr/test/foo.yml"
+        content = "key: value"
+        evidence = _materialize_local_artifact(
+            artifact_path=artifact_path,
+            content=content,
+            workdir=str(tmp_path),
+            task_prompt_hash="abc123",
+            agent_config_hash="def456",
+        )
+        assert evidence["path"] == str(tmp_path / artifact_path)
+        assert evidence["hash"] is not None
+        assert len(evidence["hash"]) == 16
+        assert evidence["line_count"] == 1
+        assert evidence["task_prompt_hash"] == "abc123"
+        assert evidence["agent_config_hash"] == "def456"
+        # File exists
+        assert (tmp_path / artifact_path).exists()
+        # Read back
+        written = (tmp_path / artifact_path).read_text(encoding="utf-8")
+        assert written == content
+
+    def test_local_materializer_writes_precommit_review(self, tmp_path):
+        """Temp precommit-review.yml written, parseable by VerdictParser."""
+        from runner.verdict_parser import VerdictParserRequest, parse_review_artifact
+
+        artifact_path = ".project-memory/pr/test/reviews/precommit-review.yml"
+        content = _build_default_precommit_artifact(
+            pr_id="test",
+            task_prompt_hash="abc123",
+            agent_config_hash="def456",
+            artifact_ref="ref789",
+        )
+        evidence = _materialize_local_artifact(
+            artifact_path=artifact_path,
+            content=content,
+            workdir=str(tmp_path),
+            task_prompt_hash="abc123",
+            agent_config_hash="def456",
+        )
+        assert (tmp_path / artifact_path).exists()
+        assert evidence["hash"] is not None
+        assert evidence["line_count"] > 0
+
+        # Parse through VerdictParser
+        request = VerdictParserRequest(
+            artifact_path=str(tmp_path / artifact_path),
+        )
+        parsed = parse_review_artifact(request)
+        assert parsed is not None
+        assert parsed.review_type == "precommit-review"
+        assert parsed.normalized_verdict == "pass"
+        assert parsed.has_blockers is False
+
+    def test_materialized_precommit_parses_as_pass(self, tmp_path):
+        """VerdictParser reads materialized artifact → pass verdict, no blockers."""
+        from runner.verdict_parser import VerdictParserRequest, parse_review_artifact, decide_next_action
+
+        artifact_path = ".project-memory/pr/test/reviews/precommit-review.yml"
+        content = _build_default_precommit_artifact(
+            pr_id="test",
+            task_prompt_hash="abc123",
+            agent_config_hash="def456",
+            artifact_ref="ref789",
+        )
+        _materialize_local_artifact(
+            artifact_path=artifact_path,
+            content=content,
+            workdir=str(tmp_path),
+            task_prompt_hash="abc123",
+            agent_config_hash="def456",
+        )
+
+        request = VerdictParserRequest(
+            artifact_path=str(tmp_path / artifact_path),
+        )
+        parsed = parse_review_artifact(request)
+        assert parsed is not None
+        decision = decide_next_action(parsed)
+        assert decision.next_action == "continue"
+        assert decision.has_blockers is False
+
+    def test_local_bridge_with_materialization_includes_evidence(self, tmp_path):
+        """Bridge result details include materialized path/hash/line_count."""
+        agents_dir = _agents_dir(tmp_path)
+        artifact_path = ".project-memory/pr/test/reviews/precommit-review.yml"
+        result = run_agent_runner_bridge(
+            agent_name="test-agent",
+            task_prompt="Run a test task.",
+            agents_dir=agents_dir,
+            allow_docker=False,
+            output_dir=str(tmp_path),
+            clock_provider=_clock_provider,
+            expected_artifact_path=artifact_path,
+        )
+        assert result.status == AgentRunnerBridgeStatus.COMPLETED
+        assert result.details is not None
+        assert "Materialized artifact" in result.details
+        assert "path=" in result.details
+        assert "hash=" in result.details
+        assert "line_count=" in result.details
+        # File exists
+        assert (tmp_path / artifact_path).exists()
+
+    def test_local_bridge_materializes_expected_path(self, tmp_path):
+        """Bridge with expected_artifact_path creates the file."""
+        agents_dir = _agents_dir(tmp_path)
+        artifact_path = ".project-memory/pr/test/reviews/precommit-review.yml"
+        result = run_agent_runner_bridge(
+            agent_name="test-agent",
+            task_prompt="Run a test task.",
+            agents_dir=agents_dir,
+            allow_docker=False,
+            output_dir=str(tmp_path),
+            clock_provider=_clock_provider,
+            expected_artifact_path=artifact_path,
+        )
+        assert result.status == AgentRunnerBridgeStatus.COMPLETED
+        assert (tmp_path / artifact_path).exists()
+        # Read back
+        content = (tmp_path / artifact_path).read_text(encoding="utf-8")
+        assert "precommit-review" in content
+        assert "verdict: \"pass\"" in content
+
+    def test_local_materializer_preserves_proof(self, tmp_path):
+        """Proof capture still written alongside materialized artifact."""
+        agents_dir = _agents_dir(tmp_path)
+        artifact_path = ".project-memory/pr/test/reviews/precommit-review.yml"
+        result = run_agent_runner_bridge(
+            agent_name="test-agent",
+            task_prompt="Run a test task.",
+            agents_dir=agents_dir,
+            allow_docker=False,
+            output_dir=str(tmp_path),
+            clock_provider=_clock_provider,
+            expected_artifact_path=artifact_path,
+        )
+        assert result.status == AgentRunnerBridgeStatus.COMPLETED
+        # Proof capture exists
+        assert result.captured_artifact is not None
+        assert result.captured_artifact.has_proof is True
+        assert result.captured_artifact.proof_capture_path is not None
+        proof_file = tmp_path / result.captured_artifact.proof_capture_path
+        assert proof_file.exists()
+        # Materialized artifact exists
+        assert (tmp_path / artifact_path).exists()
+
+    def test_local_materializer_preserves_hashes(self, tmp_path):
+        """task_prompt_hash and agent_config_hash in materialized content."""
+        agents_dir = _agents_dir(tmp_path)
+        artifact_path = ".project-memory/pr/test/reviews/precommit-review.yml"
+        result = run_agent_runner_bridge(
+            agent_name="test-agent",
+            task_prompt="Run a test task.",
+            agents_dir=agents_dir,
+            allow_docker=False,
+            output_dir=str(tmp_path),
+            clock_provider=_clock_provider,
+            expected_artifact_path=artifact_path,
+        )
+        assert result.status == AgentRunnerBridgeStatus.COMPLETED
+        content = (tmp_path / artifact_path).read_text(encoding="utf-8")
+        assert result.task_prompt_hash in content
+        assert result.agent_config_hash in content
+
+    def test_local_materializer_dogfood_proof(self, tmp_path):
+        """Dogfood-proof.yml materialization works in temp path."""
+        agents_dir = _agents_dir(tmp_path)
+        artifact_path = ".project-memory/pr/dogfood/dogfood-proof.yml"
+        result = run_agent_runner_bridge(
+            agent_name="test-agent",
+            task_prompt="Create dogfood proof.",
+            agents_dir=agents_dir,
+            allow_docker=False,
+            output_dir=str(tmp_path),
+            clock_provider=_clock_provider,
+            expected_artifact_path=artifact_path,
+        )
+        assert result.status == AgentRunnerBridgeStatus.COMPLETED
+        assert (tmp_path / artifact_path).exists()
+        content = (tmp_path / artifact_path).read_text(encoding="utf-8")
+        assert "dogfood_type: \"local-non-docker\"" in content
+        assert "status: \"completed\"" in content
+        assert result.task_prompt_hash in content
+        assert result.agent_config_hash in content
+
+    def test_no_real_pr_artifacts_created(self, tmp_path):
+        """No real PR 0131 dogfood artifacts created during test."""
+        agents_dir = _agents_dir(tmp_path)
+        artifact_path = ".project-memory/pr/test/reviews/precommit-review.yml"
+        result = run_agent_runner_bridge(
+            agent_name="test-agent",
+            task_prompt="Run a test task.",
+            agents_dir=agents_dir,
+            allow_docker=False,
+            output_dir=str(tmp_path),
+            clock_provider=_clock_provider,
+            expected_artifact_path=artifact_path,
+        )
+        assert result.status == AgentRunnerBridgeStatus.COMPLETED
+        # Verify no real PR 0131 artifacts exist
+        real_dogfood_proof = Path(".project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml")
+        real_precommit = Path(".project-memory/pr/0131-dogfood-pr-created-by-ariadne/reviews/precommit-review.yml")
+        assert not real_dogfood_proof.exists()
+        assert not real_precommit.exists()
+
+    def test_local_materializer_no_subprocess(self):
+        """Materialization code does not use subprocess/os.system."""
+        import inspect
+        from runner.agent_runner_bridge import _materialize_local_artifact
+        source = inspect.getsource(_materialize_local_artifact)
+        assert "subprocess.run" not in source
+        assert "subprocess.Popen" not in source
+        assert "os.system" not in source
+        assert "shell=True" not in source
+
+    def test_local_materializer_no_git(self):
+        """Materialization code does not call git commands."""
+        import inspect
+        from runner.agent_runner_bridge import _materialize_local_artifact
+        source = inspect.getsource(_materialize_local_artifact)
+        assert "git add" not in source
+        assert "git commit" not in source
+        assert "git push" not in source
+        assert "gh pr create" not in source
+
+    def test_local_materializer_no_docker(self):
+        """Materialization code does not call docker commands."""
+        import inspect
+        from runner.agent_runner_bridge import _materialize_local_artifact
+        source = inspect.getsource(_materialize_local_artifact)
+        assert "docker" not in source
+
+    def test_build_default_precommit_artifact_shape(self):
+        """Default precommit artifact has expected fields."""
+        content = _build_default_precommit_artifact(
+            pr_id="test-pr",
+            task_prompt_hash="abc123",
+            agent_config_hash="def456",
+            artifact_ref="ref789",
+        )
+        assert "schema_version: \"0.1\"" in content
+        assert "pr_id: \"test-pr\"" in content
+        assert "review_type: \"precommit-review\"" in content
+        assert "verdict: \"pass\"" in content
+        assert "blockers: []" in content
+        assert "abc123" in content
+        assert "def456" in content
+        assert "ref789" in content
+
+    def test_build_default_dogfood_proof_shape(self):
+        """Default dogfood-proof artifact has expected fields."""
+        content = _build_default_dogfood_proof(
+            pr_id="test-pr",
+            task_prompt_hash="abc123",
+            agent_config_hash="def456",
+            artifact_ref="ref789",
+        )
+        assert "schema_version: \"0.1\"" in content
+        assert "pr_id: \"test-pr\"" in content
+        assert "dogfood_type: \"local-non-docker\"" in content
+        assert "status: \"completed\"" in content
+        assert "abc123" in content
+        assert "def456" in content
+        assert "ref789" in content

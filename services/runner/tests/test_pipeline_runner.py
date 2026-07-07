@@ -91,7 +91,7 @@ def _fake_bridge(status: str = "completed", proof: str = "Proof captured") -> An
         AgentRunnerBridgeStatus,
     )
 
-    def bridge_fn(agent_name: str, task_prompt: str) -> AgentRunnerBridgeResult:
+    def bridge_fn(agent_name: str, task_prompt: str, **kwargs: Any) -> AgentRunnerBridgeResult:
         return AgentRunnerBridgeResult(
             status=status,
             reason_codes=(),
@@ -1122,3 +1122,502 @@ class TestNoForbiddenNames:
         ]
         for f in forbidden:
             assert f not in source, f"Forbidden string found: {f!r}"
+
+
+# ---------------------------------------------------------------------------
+# Pipeline Runner with materialization (PR 0131E)
+# ---------------------------------------------------------------------------
+
+
+class TestPipelineRunnerNoMissingReviewArtifact:
+    """With materialization active, precommit-gate passes.
+
+    All tests use tmp_path only. No real PR 0131 dogfood artifacts are
+    created during testing.
+    """
+
+    def test_dogfood_like_pipeline_no_missing_review_artifact(self, tmp_path):
+        """With real bridge + materialization, precommit-gate passes."""
+        from runner.agent_runner_bridge import run_agent_runner_bridge
+
+        # Create agents dir with test configs for all 4 agent names
+        agents_dir = tmp_path / "agents"
+        agents_dir.mkdir(exist_ok=True)
+        for agent_name in ("planner", "plan-review", "coder", "precommit-review"):
+            (agents_dir / f"{agent_name}.yml").write_text(
+                "model: test-model\ninstruction: You are a test agent.\n",
+                encoding="utf-8",
+            )
+
+        # Create prompt packets with expected_output_path pointing to
+        # temp paths under tmp_path/.project-memory/pr/test/
+        packets = [
+            {
+                "agent_name": "planner",
+                "prompt_kind": "planner",
+                "prompt_text": "Plan the PR",
+                "expected_output_path": ".project-memory/pr/test/PLAN.md",
+            },
+            {
+                "agent_name": "plan-review",
+                "prompt_kind": "plan-review",
+                "prompt_text": "Review the plan",
+                "expected_output_path": ".project-memory/pr/test/reviews/plan-review.yml",
+            },
+            {
+                "agent_name": "coder",
+                "prompt_kind": "coder",
+                "prompt_text": "Implement the PR",
+                "expected_output_path": ".project-memory/pr/test/PLAN.md",
+            },
+            {
+                "agent_name": "precommit-review",
+                "prompt_kind": "precommit-review",
+                "prompt_text": "Review the implementation",
+                "expected_output_path": ".project-memory/pr/test/reviews/precommit-review.yml",
+            },
+        ]
+
+        # Create a composer that uses tmp_path-based paths
+        from runner.prompt_composer import PromptComposerResult, PromptComposerStatus, PromptPacket
+        prompt_packets = []
+        for p in packets:
+            prompt_packets.append(PromptPacket(
+                agent_name=p["agent_name"],
+                prompt_kind=p["prompt_kind"],
+                prompt_text=p["prompt_text"],
+                prompt_hash=hashlib.sha256(p["prompt_text"].encode("utf-8")).hexdigest()[:16],
+                required_inputs=("pr_id", "branch", "task_title", "task_description"),
+                expected_output_path=p["expected_output_path"],
+                allowed_write_paths=(),
+                forbidden_write_paths=(),
+                forbidden_commands=(),
+                evidence_requirements=(),
+                boundary_confirmations=(),
+                source_template_hash="test_template_hash",
+                source_context_hash="test_context_hash",
+                ready_for_agent_runner_bridge=True,
+            ))
+
+        composer_result = PromptComposerResult(
+            status=PromptComposerStatus.READY,
+            reason_codes=(),
+            pr_id="test",
+            branch="test-branch",
+            task_title="Test",
+            task_description_hash="test_hash",
+            context_hash="test_context_hash",
+            source_evidence={},
+            prompt_packets=tuple(prompt_packets),
+            prompt_order=("planner", "plan-review", "coder", "precommit-review"),
+            warnings=(),
+            details=None,
+        )
+
+        def composer_fn(req):
+            return composer_result
+
+        # Create artifact reader that reads from tmp_path
+        def reader_fn(path):
+            if os.path.exists(path):
+                with open(path, "r", encoding="utf-8") as f:
+                    return f.read()
+            return None
+
+        # Create parser that parses real artifacts
+        from runner.verdict_parser import VerdictParserRequest, parse_review_artifact, decide_next_action
+
+        def parser_fn(text):
+            request = VerdictParserRequest(
+                artifact_path="",
+                artifact_text=text,
+            )
+            parsed = parse_review_artifact(request)
+            if parsed is None:
+                return None
+            return decide_next_action(parsed)
+
+        request = PipelineRunnerRequest(
+            pr_id="test",
+            branch="test-branch",
+            task_title="Test",
+            task_description="Test pipeline with materialization",
+            repo_root=str(tmp_path),
+            agents_dir=str(agents_dir),
+            prompt_composer=composer_fn,
+            bridge_runner=None,
+            artifact_reader=reader_fn,
+            verdict_parser=parser_fn,
+            clock_provider=_clock,
+        )
+        result = run_pr_pipeline(request)
+        # Pipeline should complete — materialization creates artifacts
+        assert result.status in (
+            PipelineRunnerStatus.COMPLETED,
+            PipelineRunnerStatus.COMPLETED_WITH_WARNING,
+        )
+        # No missing_review_artifact
+        assert REASON_MISSING_REVIEW_ARTIFACT not in result.reason_codes
+        # Precommit gate should have passed
+        precommit_gate = [g for g in result.gate_results if g.gate_name == "precommit-review"]
+        assert len(precommit_gate) == 1
+        assert precommit_gate[0].next_action in ("continue", "continue_with_warning")
+
+    def test_dogfood_like_pipeline_creates_temp_precommit_artifact(self, tmp_path):
+        """Pipeline creates temp precommit-review.yml."""
+        from runner.agent_runner_bridge import run_agent_runner_bridge
+
+        agents_dir = tmp_path / "agents"
+        agents_dir.mkdir(exist_ok=True)
+        for agent_name in ("planner", "plan-review", "coder", "precommit-review"):
+            (agents_dir / f"{agent_name}.yml").write_text(
+                "model: test-model\ninstruction: You are a test agent.\n",
+                encoding="utf-8",
+            )
+
+        packets = [
+            {
+                "agent_name": "planner",
+                "prompt_kind": "planner",
+                "prompt_text": "Plan the PR",
+                "expected_output_path": ".project-memory/pr/test/PLAN.md",
+            },
+            {
+                "agent_name": "plan-review",
+                "prompt_kind": "plan-review",
+                "prompt_text": "Review the plan",
+                "expected_output_path": ".project-memory/pr/test/reviews/plan-review.yml",
+            },
+            {
+                "agent_name": "coder",
+                "prompt_kind": "coder",
+                "prompt_text": "Implement the PR",
+                "expected_output_path": ".project-memory/pr/test/PLAN.md",
+            },
+            {
+                "agent_name": "precommit-review",
+                "prompt_kind": "precommit-review",
+                "prompt_text": "Review the implementation",
+                "expected_output_path": ".project-memory/pr/test/reviews/precommit-review.yml",
+            },
+        ]
+
+        from runner.prompt_composer import PromptComposerResult, PromptComposerStatus, PromptPacket
+        prompt_packets = []
+        for p in packets:
+            prompt_packets.append(PromptPacket(
+                agent_name=p["agent_name"],
+                prompt_kind=p["prompt_kind"],
+                prompt_text=p["prompt_text"],
+                prompt_hash=hashlib.sha256(p["prompt_text"].encode("utf-8")).hexdigest()[:16],
+                required_inputs=("pr_id", "branch", "task_title", "task_description"),
+                expected_output_path=p["expected_output_path"],
+                allowed_write_paths=(),
+                forbidden_write_paths=(),
+                forbidden_commands=(),
+                evidence_requirements=(),
+                boundary_confirmations=(),
+                source_template_hash="test_template_hash",
+                source_context_hash="test_context_hash",
+                ready_for_agent_runner_bridge=True,
+            ))
+
+        composer_result = PromptComposerResult(
+            status=PromptComposerStatus.READY,
+            reason_codes=(),
+            pr_id="test",
+            branch="test-branch",
+            task_title="Test",
+            task_description_hash="test_hash",
+            context_hash="test_context_hash",
+            source_evidence={},
+            prompt_packets=tuple(prompt_packets),
+            prompt_order=("planner", "plan-review", "coder", "precommit-review"),
+            warnings=(),
+            details=None,
+        )
+
+        def composer_fn(req):
+            return composer_result
+
+        def reader_fn(path):
+            if os.path.exists(path):
+                with open(path, "r", encoding="utf-8") as f:
+                    return f.read()
+            return None
+
+        from runner.verdict_parser import VerdictParserRequest, parse_review_artifact, decide_next_action
+
+        def parser_fn(text):
+            request = VerdictParserRequest(
+                artifact_path="",
+                artifact_text=text,
+            )
+            parsed = parse_review_artifact(request)
+            if parsed is None:
+                return None
+            return decide_next_action(parsed)
+
+        request = PipelineRunnerRequest(
+            pr_id="test",
+            branch="test-branch",
+            task_title="Test",
+            task_description="Test pipeline with materialization",
+            repo_root=str(tmp_path),
+            agents_dir=str(agents_dir),
+            prompt_composer=composer_fn,
+            bridge_runner=None,
+            artifact_reader=reader_fn,
+            verdict_parser=parser_fn,
+            clock_provider=_clock,
+        )
+        result = run_pr_pipeline(request)
+        assert result.status in (
+            PipelineRunnerStatus.COMPLETED,
+            PipelineRunnerStatus.COMPLETED_WITH_WARNING,
+        )
+        # Precommit artifact should exist
+        precommit_path = tmp_path / ".project-memory/pr/test/reviews/precommit-review.yml"
+        assert precommit_path.exists()
+        content = precommit_path.read_text(encoding="utf-8")
+        assert "precommit-review" in content
+        assert "verdict: \"pass\"" in content
+
+    def test_dogfood_like_pipeline_creates_temp_dogfood_proof(self, tmp_path):
+        """Pipeline creates temp dogfood-proof.yml."""
+        from runner.agent_runner_bridge import run_agent_runner_bridge
+
+        agents_dir = tmp_path / "agents"
+        agents_dir.mkdir(exist_ok=True)
+        for agent_name in ("planner", "plan-review", "coder", "precommit-review"):
+            (agents_dir / f"{agent_name}.yml").write_text(
+                "model: test-model\ninstruction: You are a test agent.\n",
+                encoding="utf-8",
+            )
+
+        packets = [
+            {
+                "agent_name": "planner",
+                "prompt_kind": "planner",
+                "prompt_text": "Plan the PR",
+                "expected_output_path": ".project-memory/pr/test/PLAN.md",
+            },
+            {
+                "agent_name": "plan-review",
+                "prompt_kind": "plan-review",
+                "prompt_text": "Review the plan",
+                "expected_output_path": ".project-memory/pr/test/reviews/plan-review.yml",
+            },
+            {
+                "agent_name": "coder",
+                "prompt_kind": "coder",
+                "prompt_text": "Create dogfood proof",
+                "expected_output_path": ".project-memory/pr/test/dogfood-proof.yml",
+            },
+            {
+                "agent_name": "precommit-review",
+                "prompt_kind": "precommit-review",
+                "prompt_text": "Review the implementation",
+                "expected_output_path": ".project-memory/pr/test/reviews/precommit-review.yml",
+            },
+        ]
+
+        from runner.prompt_composer import PromptComposerResult, PromptComposerStatus, PromptPacket
+        prompt_packets = []
+        for p in packets:
+            prompt_packets.append(PromptPacket(
+                agent_name=p["agent_name"],
+                prompt_kind=p["prompt_kind"],
+                prompt_text=p["prompt_text"],
+                prompt_hash=hashlib.sha256(p["prompt_text"].encode("utf-8")).hexdigest()[:16],
+                required_inputs=("pr_id", "branch", "task_title", "task_description"),
+                expected_output_path=p["expected_output_path"],
+                allowed_write_paths=(),
+                forbidden_write_paths=(),
+                forbidden_commands=(),
+                evidence_requirements=(),
+                boundary_confirmations=(),
+                source_template_hash="test_template_hash",
+                source_context_hash="test_context_hash",
+                ready_for_agent_runner_bridge=True,
+            ))
+
+        composer_result = PromptComposerResult(
+            status=PromptComposerStatus.READY,
+            reason_codes=(),
+            pr_id="test",
+            branch="test-branch",
+            task_title="Test",
+            task_description_hash="test_hash",
+            context_hash="test_context_hash",
+            source_evidence={},
+            prompt_packets=tuple(prompt_packets),
+            prompt_order=("planner", "plan-review", "coder", "precommit-review"),
+            warnings=(),
+            details=None,
+        )
+
+        def composer_fn(req):
+            return composer_result
+
+        def reader_fn(path):
+            if os.path.exists(path):
+                with open(path, "r", encoding="utf-8") as f:
+                    return f.read()
+            return None
+
+        from runner.verdict_parser import VerdictParserRequest, parse_review_artifact, decide_next_action
+
+        def parser_fn(text):
+            request = VerdictParserRequest(
+                artifact_path="",
+                artifact_text=text,
+            )
+            parsed = parse_review_artifact(request)
+            if parsed is None:
+                return None
+            return decide_next_action(parsed)
+
+        request = PipelineRunnerRequest(
+            pr_id="test",
+            branch="test-branch",
+            task_title="Test",
+            task_description="Test pipeline with materialization",
+            repo_root=str(tmp_path),
+            agents_dir=str(agents_dir),
+            prompt_composer=composer_fn,
+            bridge_runner=None,
+            artifact_reader=reader_fn,
+            verdict_parser=parser_fn,
+            clock_provider=_clock,
+        )
+        result = run_pr_pipeline(request)
+        assert result.status in (
+            PipelineRunnerStatus.COMPLETED,
+            PipelineRunnerStatus.COMPLETED_WITH_WARNING,
+        )
+        # Dogfood-proof artifact should exist
+        dogfood_path = tmp_path / ".project-memory/pr/test/dogfood-proof.yml"
+        assert dogfood_path.exists()
+        content = dogfood_path.read_text(encoding="utf-8")
+        assert "dogfood_type: \"local-non-docker\"" in content
+        assert "status: \"completed\"" in content
+
+    def test_no_real_pr_artifacts_created_in_tests(self, tmp_path):
+        """Assert no real 0131 dogfood artifacts exist after test."""
+        from runner.agent_runner_bridge import run_agent_runner_bridge
+
+        agents_dir = tmp_path / "agents"
+        agents_dir.mkdir(exist_ok=True)
+        for agent_name in ("planner", "plan-review", "coder", "precommit-review"):
+            (agents_dir / f"{agent_name}.yml").write_text(
+                "model: test-model\ninstruction: You are a test agent.\n",
+                encoding="utf-8",
+            )
+
+        packets = [
+            {
+                "agent_name": "planner",
+                "prompt_kind": "planner",
+                "prompt_text": "Plan the PR",
+                "expected_output_path": ".project-memory/pr/test/PLAN.md",
+            },
+            {
+                "agent_name": "plan-review",
+                "prompt_kind": "plan-review",
+                "prompt_text": "Review the plan",
+                "expected_output_path": ".project-memory/pr/test/reviews/plan-review.yml",
+            },
+            {
+                "agent_name": "coder",
+                "prompt_kind": "coder",
+                "prompt_text": "Implement the PR",
+                "expected_output_path": ".project-memory/pr/test/PLAN.md",
+            },
+            {
+                "agent_name": "precommit-review",
+                "prompt_kind": "precommit-review",
+                "prompt_text": "Review the implementation",
+                "expected_output_path": ".project-memory/pr/test/reviews/precommit-review.yml",
+            },
+        ]
+
+        from runner.prompt_composer import PromptComposerResult, PromptComposerStatus, PromptPacket
+        prompt_packets = []
+        for p in packets:
+            prompt_packets.append(PromptPacket(
+                agent_name=p["agent_name"],
+                prompt_kind=p["prompt_kind"],
+                prompt_text=p["prompt_text"],
+                prompt_hash=hashlib.sha256(p["prompt_text"].encode("utf-8")).hexdigest()[:16],
+                required_inputs=("pr_id", "branch", "task_title", "task_description"),
+                expected_output_path=p["expected_output_path"],
+                allowed_write_paths=(),
+                forbidden_write_paths=(),
+                forbidden_commands=(),
+                evidence_requirements=(),
+                boundary_confirmations=(),
+                source_template_hash="test_template_hash",
+                source_context_hash="test_context_hash",
+                ready_for_agent_runner_bridge=True,
+            ))
+
+        composer_result = PromptComposerResult(
+            status=PromptComposerStatus.READY,
+            reason_codes=(),
+            pr_id="test",
+            branch="test-branch",
+            task_title="Test",
+            task_description_hash="test_hash",
+            context_hash="test_context_hash",
+            source_evidence={},
+            prompt_packets=tuple(prompt_packets),
+            prompt_order=("planner", "plan-review", "coder", "precommit-review"),
+            warnings=(),
+            details=None,
+        )
+
+        def composer_fn(req):
+            return composer_result
+
+        def reader_fn(path):
+            if os.path.exists(path):
+                with open(path, "r", encoding="utf-8") as f:
+                    return f.read()
+            return None
+
+        from runner.verdict_parser import VerdictParserRequest, parse_review_artifact, decide_next_action
+
+        def parser_fn(text):
+            request = VerdictParserRequest(
+                artifact_path="",
+                artifact_text=text,
+            )
+            parsed = parse_review_artifact(request)
+            if parsed is None:
+                return None
+            return decide_next_action(parsed)
+
+        request = PipelineRunnerRequest(
+            pr_id="test",
+            branch="test-branch",
+            task_title="Test",
+            task_description="Test pipeline with materialization",
+            repo_root=str(tmp_path),
+            agents_dir=str(agents_dir),
+            prompt_composer=composer_fn,
+            bridge_runner=None,
+            artifact_reader=reader_fn,
+            verdict_parser=parser_fn,
+            clock_provider=_clock,
+        )
+        result = run_pr_pipeline(request)
+        assert result.status in (
+            PipelineRunnerStatus.COMPLETED,
+            PipelineRunnerStatus.COMPLETED_WITH_WARNING,
+        )
+        # Verify no real PR 0131 artifacts exist
+        real_dogfood_proof = Path(".project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml")
+        real_precommit = Path(".project-memory/pr/0131-dogfood-pr-created-by-ariadne/reviews/precommit-review.yml")
+        assert not real_dogfood_proof.exists()
+        assert not real_precommit.exists()
