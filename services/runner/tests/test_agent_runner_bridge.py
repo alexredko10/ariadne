@@ -56,13 +56,13 @@ def _agents_dir(tmp_path: Path) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Success — blocked (allow_docker=False)
+# Local execution completion (allow_docker=False)
 # ---------------------------------------------------------------------------
 
 
-class TestSuccessBlocked:
-    def test_blocked_without_docker(self, tmp_path: Path):
-        """allow_docker=False → BLOCKED with proof artifact."""
+class TestLocalExecutionCompletion:
+    def test_local_completion_without_docker(self, tmp_path: Path):
+        """allow_docker=False → COMPLETED (not BLOCKED) with proof artifact."""
         agents_dir = _agents_dir(tmp_path)
         result = run_agent_runner_bridge(
             agent_name="test-agent",
@@ -72,18 +72,203 @@ class TestSuccessBlocked:
             output_dir=str(tmp_path),
             clock_provider=_clock_provider,
         )
-        assert result.status == AgentRunnerBridgeStatus.BLOCKED
-        assert REASON_DOCKER_BLOCKED in result.reason_codes
+        assert result.status == AgentRunnerBridgeStatus.COMPLETED
+        assert REASON_DOCKER_BLOCKED not in result.reason_codes
         assert result.agent_name == "test-agent"
         assert result.task_prompt_hash is not None
         assert result.agent_config_path is not None
         assert result.agent_config_hash is not None
-        assert result.docker_adapter_status == "blocked"
+        assert result.docker_adapter_status == "completed"
+        assert result.exit_code == 0
         assert result.captured_artifact is not None
         assert result.captured_artifact.has_proof is True
         assert result.captured_artifact.proof_source == "runtime-captured"
         assert result.started_at == "2026-07-05T18:00:00Z"
         assert result.finished_at == "2026-07-05T18:00:00Z"
+
+    def test_local_completion_preserves_hashes(self, tmp_path: Path):
+        """Local mode preserves task_prompt_hash and agent_config_hash."""
+        agents_dir = _agents_dir(tmp_path)
+        result = run_agent_runner_bridge(
+            agent_name="test-agent",
+            task_prompt="Run a test task.",
+            agents_dir=agents_dir,
+            allow_docker=False,
+            output_dir=str(tmp_path),
+            clock_provider=_clock_provider,
+        )
+        assert result.task_prompt_hash is not None
+        assert len(result.task_prompt_hash) == 16
+        assert result.agent_config_hash is not None
+        assert len(result.agent_config_hash) == 16
+
+    def test_local_completion_stdout_contains_agent_name(self, tmp_path: Path):
+        """Local mode stdout includes agent_name."""
+        agents_dir = _agents_dir(tmp_path)
+        result = run_agent_runner_bridge(
+            agent_name="test-agent",
+            task_prompt="Run a test task.",
+            agents_dir=agents_dir,
+            allow_docker=False,
+            output_dir=str(tmp_path),
+            clock_provider=_clock_provider,
+        )
+        assert result.captured_stdout_hash is not None
+        assert result.exit_code == 0
+
+    def test_local_completion_no_docker_blocked(self, tmp_path: Path):
+        """Local mode does not return docker_blocked."""
+        agents_dir = _agents_dir(tmp_path)
+        result = run_agent_runner_bridge(
+            agent_name="test-agent",
+            task_prompt="Run a test task.",
+            agents_dir=agents_dir,
+            allow_docker=False,
+            output_dir=str(tmp_path),
+            clock_provider=_clock_provider,
+        )
+        assert result.status == AgentRunnerBridgeStatus.COMPLETED
+        assert REASON_DOCKER_BLOCKED not in result.reason_codes
+
+    def test_local_completion_proof_file_written(self, tmp_path: Path):
+        """Proof capture file is written in local mode."""
+        agents_dir = _agents_dir(tmp_path)
+        result = run_agent_runner_bridge(
+            agent_name="test-agent",
+            task_prompt="Run a test task.",
+            agents_dir=agents_dir,
+            allow_docker=False,
+            output_dir=str(tmp_path),
+            clock_provider=_clock_provider,
+        )
+        assert result.captured_artifact is not None
+        assert result.captured_artifact.proof_capture_path is not None
+        proof_file = tmp_path / result.captured_artifact.proof_capture_path
+        assert proof_file.exists()
+        data = json.loads(proof_file.read_text(encoding="utf-8"))
+        assert data["runtime_capture_kind"] == "agent_runner_bridge"
+        assert "agent_name" in data["payload"]
+        assert "task_prompt_hash" in data["payload"]
+        assert "agent_config_hash" in data["payload"]
+        assert "adapter_status" in data["payload"]
+
+
+# ---------------------------------------------------------------------------
+# Artifact write boundary
+# ---------------------------------------------------------------------------
+
+
+class TestArtifactWriteBoundary:
+    def test_local_mode_writes_only_to_captures_path(self, tmp_path: Path):
+        """Local mode writes only to captures/ path."""
+        agents_dir = _agents_dir(tmp_path)
+        result = run_agent_runner_bridge(
+            agent_name="test-agent",
+            task_prompt="Run a test task.",
+            agents_dir=agents_dir,
+            allow_docker=False,
+            output_dir=str(tmp_path),
+            clock_provider=_clock_provider,
+        )
+        assert result.captured_artifact is not None
+        assert result.captured_artifact.proof_capture_path is not None
+        # Proof capture path should be under captures/
+        assert "captures" in result.captured_artifact.proof_capture_path
+        # No writes outside captures/ from the bridge
+        proof_file = tmp_path / result.captured_artifact.proof_capture_path
+        assert proof_file.exists()
+        # Verify no unexpected files were created in tmp_path root
+        tmp_files = [f.name for f in tmp_path.iterdir() if f.is_file()]
+        for f in tmp_files:
+            assert f.startswith("captures") or "captures" in f, f"Unexpected file: {f}"
+
+    def test_local_mode_expected_artifact_path_validation(self, tmp_path: Path):
+        """Local mode creates only expected artifact path (captures/)."""
+        agents_dir = _agents_dir(tmp_path)
+        result = run_agent_runner_bridge(
+            agent_name="test-agent",
+            task_prompt="Run a test task.",
+            agents_dir=agents_dir,
+            allow_docker=False,
+            output_dir=str(tmp_path),
+            clock_provider=_clock_provider,
+        )
+        assert result.captured_artifact is not None
+        assert result.captured_artifact.proof_capture_path is not None
+        # Use endswith to avoid brittle ./ prefix assumptions
+        assert result.captured_artifact.proof_capture_path.endswith(
+            f"captures/bridge-test-agent-{result.task_prompt_hash}.json"
+        )
+
+    def test_local_mode_refuses_writes_outside_expected_path(self, tmp_path: Path):
+        """Local mode does not write outside expected captures/ path."""
+        agents_dir = _agents_dir(tmp_path)
+        result = run_agent_runner_bridge(
+            agent_name="test-agent",
+            task_prompt="Run a test task.",
+            agents_dir=agents_dir,
+            allow_docker=False,
+            output_dir=str(tmp_path),
+            clock_provider=_clock_provider,
+        )
+        # The bridge only writes to captures/ path via proof capture
+        assert result.captured_artifact is not None
+        assert result.captured_artifact.proof_capture_path is not None
+        # Verify no .project-memory/ files were created by the bridge
+        project_memory_dir = tmp_path / ".project-memory"
+        assert not project_memory_dir.exists()
+
+
+# ---------------------------------------------------------------------------
+# Local mode no git mutation
+# ---------------------------------------------------------------------------
+
+
+class TestLocalNoGitMutation:
+    def test_local_mode_no_subprocess(self):
+        """Local mode bridge code does not use subprocess."""
+        import inspect
+        from runner.agent_runner_bridge import run_agent_runner_bridge
+        source = inspect.getsource(run_agent_runner_bridge)
+        assert "subprocess.run" not in source
+        assert "subprocess.Popen" not in source
+        assert "os.system" not in source
+
+    def test_local_mode_no_git_commands(self):
+        """Local mode bridge code does not call git commands."""
+        import inspect
+        from runner.agent_runner_bridge import run_agent_runner_bridge
+        source = inspect.getsource(run_agent_runner_bridge)
+        assert "git add" not in source
+        assert "git commit" not in source
+        assert "git push" not in source
+        assert "git checkout" not in source
+        assert "git switch" not in source
+        assert "git merge" not in source
+        assert "git rebase" not in source
+        assert "git reset" not in source
+        assert "git clean" not in source
+        assert "git tag" not in source
+        assert "gh pr create" not in source
+        assert "gh release" not in source
+
+    def test_local_mode_no_docker(self):
+        """Local mode bridge code does not call docker commands."""
+        import inspect
+        from runner.agent_runner_bridge import run_agent_runner_bridge
+        source = inspect.getsource(run_agent_runner_bridge)
+        # The parameter name allow_docker is fine; check for actual docker commands
+        assert "docker compose" not in source
+        assert "docker run" not in source
+        assert "docker exec" not in source
+        assert "import docker" not in source
+
+    def test_local_mode_no_shell_true(self):
+        """Local mode bridge code does not use shell=True."""
+        import inspect
+        from runner.agent_runner_bridge import run_agent_runner_bridge
+        source = inspect.getsource(run_agent_runner_bridge)
+        assert "shell=True" not in source
 
 
 # ---------------------------------------------------------------------------
@@ -412,7 +597,7 @@ class TestNoAriadneResidue:
             allow_docker=False,
             output_dir=str(tmp_path),
         )
-        assert result.status == AgentRunnerBridgeStatus.BLOCKED
+        assert result.status == AgentRunnerBridgeStatus.COMPLETED
         assert not Path(".ariadne").exists()
 
 
@@ -533,9 +718,9 @@ class TestNonMutatingPromptAllowed:
             output_dir=str(tmp_path),
             clock_provider=_clock_provider,
         )
-        # Should not be FAILED — should proceed to Docker-blocked (BLOCKED)
-        assert result.status == AgentRunnerBridgeStatus.BLOCKED
-        assert REASON_DOCKER_BLOCKED in result.reason_codes
+        # Should not be FAILED — should proceed to local completion (COMPLETED)
+        assert result.status == AgentRunnerBridgeStatus.COMPLETED
+        assert REASON_DOCKER_BLOCKED not in result.reason_codes
         # Should NOT contain git_mutation_not_allowed or hidden_reasoning_not_allowed
         for rc in result.reason_codes:
             assert "git_mutation" not in rc

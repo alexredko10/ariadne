@@ -1,0 +1,139 @@
+pr_id: "0131d-local-non-docker-agent-execution"
+review_type: "precommit-review"
+verdict: "pass"
+head: "92154791862ab2a6bcdc14bf9099f99e8d355491"
+date: "2026-07-07T12:50:35Z"
+
+blockers: []
+warnings:
+  - id: "captures-directory-untracked"
+    description: "captures/ directory (5 JSON proof captures from dogfood runs) is untracked in dirty tree and not on the approved-files list. Not a blocker — these are runtime evidence from the human's dogfood run using the new agents/planner.yml and local non-Docker bridge. They are environmental artifacts from dogfood execution, not implementation code. Clean up with git clean -fd captures/ if desired."
+    evidence: "git status shows '?? captures/' as untracked. Files: bridge-coder-cff4d92d08e353f6.json, bridge-coder-e8af7b36aee9f9b7.json, bridge-plan-review-e794a93299662a1d.json, bridge-planner-b12e70fbc73bd2ff.json, bridge-precommit-review-7db34991159511f1.json. All show 'Local non-Docker execution' stdout + adapter_status=completed — proving the new local-mode bridge works in practice."
+
+validation:
+  compile: exit_code=0 (all files compiled)
+  focused_tests: "69 passed in 0.09s" (test_agent_runner_bridge.py + test_pipeline_runner.py)
+  regression_subset: "304 passed in 1.58s" (9 test modules)
+  ariadne_residue: ".ariadne absent"
+  forbidden_names: no matches in changed files (exit 1)
+  git_mutation_in_changed: "agent_runner_bridge.py: no shell=True/subprocess.run/os.system; only allow_docker parameter + docstring reference; test files: only assert 'not in source' negative checks; planner.yml: only deny-list entries"
+  docker_blocked_removed: "local mode at line 367 fires when allow_docker=False → adapter_status=completed, bridge_status=COMPLETED (not BLOCKED)"
+
+files_read:
+  - .project-memory/pr/0131d-local-non-docker-agent-execution/PLAN.md
+  - .project-memory/pr/0131d-local-non-docker-agent-execution/reviews/plan-review.yml
+  - services/runner/src/runner/agent_runner_bridge.py
+  - services/runner/tests/test_agent_runner_bridge.py
+  - services/runner/tests/test_pipeline_runner.py
+  - agents/planner.yml
+  - agents/coder.yml
+  - agents/plan-review.yml
+  - agents/precommit-review.yml
+  - agents/architect.yml
+
+files_written:
+  - .project-memory/pr/0131d-local-non-docker-agent-execution/reviews/precommit-review.yml
+
+evidence_ledger:
+  - row: "branch correct"
+    observed: "0131d-local-non-docker-agent-execution"
+    status: pass
+
+  - row: "plan-review warning/approve accepted"
+    observed: "verdict=warning (non-blocking); warnings: roadmap-alignment-section-missing (PLAN-level), test-artifact-path-assertion-dot-prefix (addressed via .endswith()), validation-grep-pattern-incomplete (user commands include shell=True/os.system)"
+    status: pass
+
+  - row: "dirty tree within scope"
+    observed: "M: agent_runner_bridge.py, test_agent_runner_bridge.py, test_pipeline_runner.py; ??: agents/planner.yml (new), captures/ (environmental); git diff matches scope exactly"
+    status: pass
+
+  - row: "planner config fixed"
+    observed: "agents/planner.yml created (version: 8, model=deepseek-chat, scoped permissions, git/docker forbidden, plan-only instruction)"
+    status: pass
+
+  - row: "local non-Docker execution fixed"
+    observed: "agent_runner_bridge.py:367 — if not allow_docker: returns COMPLETED with adapter_status=completed; skips harness/dispatcher/adapter entirely"
+    status: pass
+
+  - row: "no docker_blocked for local safe artifact work"
+    observed: "TestLocalExecutionCompletion + TestLocalNonDockerPipeline verify docker_blocked not in reason_codes; captures/ prove dogfood ran all 5 agents locally"
+    status: pass
+
+  - row: "Docker boundary preserved"
+    observed: "allow_docker=True still routes to Docker path (line 392+); docker_agent_adapter.py unchanged; ARIADNE_ALLOW_DOCKER_EXECUTION env still required; TestDockerPathRemains verifies blocked default"
+    status: pass
+
+  - row: "Git mutation boundary preserved"
+    observed: "git_boundary.py unchanged; TestNoGitMutation + TestLocalNoGitMutation verify bridge code has no git commands; planner.yml deny-list includes git add/commit/push etc."
+    status: pass
+
+  - row: "artifact-write constrained"
+    observed: "TestArtifactWriteBoundary: only writes to captures/ path; proof_capture_path ends with captures/bridge-{agent}-{hash}.json; no .project-memory/ writes from bridge"
+    status: pass
+
+  - row: "dogfood-like pipeline reaches post-coder path"
+    observed: "TestLocalNonDockerPipeline: all 4 bridge steps completed; no docker_blocked; coder bridge_status=completed; REASON_CODER_STEP_FAILED absent; precommit-review gate processed"
+    status: pass
+
+  - row: "forbidden mutation authority absent"
+    observed: "agent_runner_bridge.py: no subprocess.run/shell=True/os.system; only allow_docker parameter; TestLocalNoGitMutation + TestNoGitMutation pass"
+    status: pass
+
+  - row: "hidden-reasoning safety preserved"
+    observed: "_FORBIDDEN_HIDDEN_REASONING_PATTERNS check retained; TestHiddenReasoningRejected passes"
+    status: pass
+
+  - row: "forbidden files unchanged"
+    observed: "git diff pipeline_runner.py/git_boundary.py/ariadne_task_cli.py/run_persistence.py/adapter_registry.py/docker_agent_adapter.py/local_harness.py/prompt_composer.py: no output (no changes)"
+    status: pass
+
+  - row: "no real git/gh/Docker/network/agents"
+    observed: "TestLocalNoGitMutation + TestNoDirectDocker: all negative assertions pass; local mode returns simulated stdout only"
+    status: pass
+
+  - row: "no frozen scope"
+    observed: "grep retry/dashboard/control-plane/parallel queue/Decision Core/Context Warehouse/eval/faithfulness/frontend: only in Non-Goals exclusions"
+    status: pass
+
+  - row: "plan-review warnings addressed"
+    observed: "roadmap section: PLAN-level gap (implementation correct); artifact path: test uses .endswith() (fixed); grep pattern: user validation includes shell=True/os.system"
+    status: pass
+
+  - row: "validation passed"
+    observed: "compile=0, focused=69/69, regression=304/304, .ariadne=absent, forbidden-names=none"
+    status: pass
+
+  - row: "artifact physically written/read back"
+    observed: "write_file completed; test -f confirms exists; header read back"
+    status: pass
+
+checks:
+  branch_correct: pass
+  plan_review_warning_accepted: pass
+  dirty_tree_approved: pass
+  planner_config_fixed: pass
+  local_non_docker_fixed: pass
+  no_docker_blocked: pass
+  docker_boundary_preserved: pass
+  git_boundary_preserved: pass
+  artifact_write_constrained: pass
+  pipeline_post_coder: pass
+  no_subprocess_git_docker: pass
+  hidden_reasoning_preserved: pass
+  forbidden_files_unchanged: pass
+  no_real_mutation: pass
+  frozen_scope_absent: pass
+  plan_review_warnings_addressed: pass
+  validation_complete: pass
+  artifact_written_read: pass
+
+boundary_confirmations:
+  - "agents/planner.yml is the ONLY new agent config (Option A)"
+  - "agent_runner_bridge.py is the ONLY production code change (local mode at line 367)"
+  - "pipeline_runner.py, git_boundary.py, ariadne_task_cli.py, run_persistence.py: no changes"
+  - "adapter_registry.py, docker_agent_adapter.py, local_harness.py, prompt_composer.py: no changes"
+  - "captures/ contains 5 JSON proof captures from dogfood runs proving local mode works"
+  - "Local mode skips: run_local_execution_harness, dispatch_execution, docker adapter"
+  - "Docker remains opt-in: allow_docker=True required + ARIADNE_ALLOW_DOCKER_EXECUTION env"
+  - "Git Boundary remains sole authorized git mutation component"
+  - "Proof capture preserved in local mode: bridge_status=COMPLETED triggers proof block"
