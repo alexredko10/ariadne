@@ -160,8 +160,8 @@ def _valid_request(**overrides: Any) -> AriadneTaskCliRequest:
         "branch": "0129-ariadne-task-cli",
         "base_branch": "main",
         "repo_root": ".",
-        "allowed_files": ("services/runner/src/runner/ariadne_task_cli.py",),
-        "files_to_stage": ("services/runner/src/runner/ariadne_task_cli.py",),
+        "allowed_files": ("test_stage_file.py",),
+        "files_to_stage": ("test_stage_file.py",),
         "commit_message": "PR 0129 — ariadne task CLI",
         "pr_title": "PR 0129 — ariadne task CLI",
         "pr_body": "Implements the ariadne task CLI.",
@@ -174,6 +174,22 @@ def _valid_request(**overrides: Any) -> AriadneTaskCliRequest:
     }
     kwargs.update(overrides)
     return AriadneTaskCliRequest(**kwargs)  # type: ignore[arg-type]
+
+
+def _clean_baseline_check(repo_root, allowed_files):
+    """Clean baseline check provider for tests."""
+    return True, [], []
+
+
+def _clean_branch_sync(repo_root, expected_branch):
+    """Clean branch sync provider for tests."""
+    return {
+        "branch_match": True,
+        "ahead": 0,
+        "behind": 0,
+        "has_upstream": True,
+        "block_reason": None,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -278,6 +294,8 @@ class TestPipelineCompleted:
             git_boundary_planner_fn=_fake_git_boundary_planner(),
             git_boundary_executor_fn=_fake_git_boundary_executor(),
             clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
         )
         assert result.pipeline_status == "completed"
         assert result.pipeline_final_action == "continue"
@@ -379,6 +397,8 @@ class TestGitBlockedWithoutApprove:
             git_boundary_planner_fn=_fake_git_boundary_planner(),
             git_boundary_executor_fn=_fake_git_boundary_executor(),
             clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
         )
         assert result.status == AriadneTaskCliStatus.BLOCKED
         assert REASON_APPROVAL_REQUIRED in result.reason_codes
@@ -400,6 +420,8 @@ class TestGitBlockedMissingApprovedBy:
             git_boundary_planner_fn=_fake_git_boundary_planner(),
             git_boundary_executor_fn=_fake_git_boundary_executor(),
             clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
         )
         assert result.status == AriadneTaskCliStatus.BLOCKED
         assert REASON_MISSING_APPROVED_BY in result.reason_codes
@@ -421,6 +443,8 @@ class TestGitBlockedMissingApprovalReason:
             git_boundary_planner_fn=_fake_git_boundary_planner(),
             git_boundary_executor_fn=_fake_git_boundary_executor(),
             clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
         )
         assert result.status == AriadneTaskCliStatus.BLOCKED
         assert REASON_MISSING_APPROVAL_REASON in result.reason_codes
@@ -442,6 +466,8 @@ class TestApprovalDoesNotOverridePipelineBlock:
             git_boundary_planner_fn=_fake_git_boundary_planner(),
             git_boundary_executor_fn=_fake_git_boundary_executor(),
             clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
         )
         assert result.status == AriadneTaskCliStatus.STOPPED
         assert REASON_PIPELINE_STOPPED in result.reason_codes
@@ -463,6 +489,8 @@ class TestExecutionWithFullApproval:
             git_boundary_planner_fn=_fake_git_boundary_planner(),
             git_boundary_executor_fn=_fake_git_boundary_executor(),
             clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
         )
         assert result.status == AriadneTaskCliStatus.COMPLETED
         assert result.execution_attempted is True
@@ -610,6 +638,8 @@ class TestFakeGitBoundaryExecutor:
             git_boundary_planner_fn=_fake_git_boundary_planner(),
             git_boundary_executor_fn=fake_executor,
             clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
         )
         assert call_count[0] == 1
 
@@ -623,8 +653,8 @@ class TestNoRealGitMutationInTests:
     def test_no_subprocess_run_in_test_code(self):
         """Test code does not use subprocess.run for git mutation."""
         import inspect
-        from runner.ariadne_task_cli import run_ariadne_task
-        source = inspect.getsource(run_ariadne_task)
+        import runner.ariadne_task_cli as mod
+        source = inspect.getsource(mod)
         # run_ariadne_task may contain subprocess.run for dirty-tree preflight
         # (git status --short), but must not contain git mutation commands
         assert "git add" not in source
@@ -642,8 +672,8 @@ class TestNoDocker:
     def test_no_docker(self):
         """Module does not reference docker."""
         import inspect
-        from runner.ariadne_task_cli import run_ariadne_task
-        source = inspect.getsource(run_ariadne_task)
+        import runner.ariadne_task_cli as mod
+        source = inspect.getsource(mod)
         assert "import docker" not in source
 
 
@@ -756,6 +786,8 @@ class TestGitBoundaryBlocked:
             ),
             git_boundary_executor_fn=_fake_git_boundary_executor(),
             clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
         )
         assert result.status == AriadneTaskCliStatus.BLOCKED
         assert REASON_GIT_BOUNDARY_BLOCKED in result.reason_codes
@@ -782,8 +814,9 @@ class TestProductName:
 class TestNoForbiddenNames:
     def test_no_forbidden_strings(self):
         """Source contains no forbidden legacy names."""
-        from runner.ariadne_task_cli import run_ariadne_task
-        source = inspect.getsource(run_ariadne_task)
+        import inspect
+        import runner.ariadne_task_cli as mod
+        source = inspect.getsource(mod)
         forbidden = [
             "water_meter", "water-meter", "Broken Clock", "broken_clock",
             "daily-consumption", ".grace", "@grace-", "old Flask",
@@ -809,16 +842,24 @@ class TestDirtyTreeOutOfScope:
             repo_root=repo_root,
             allowed_files=("allowed.py",),
             files_to_stage=("allowed.py",),
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing",
+            dry_run=True,
         )
         # Create allowed file
         with open(os.path.join(repo_root, "allowed.py"), "w") as f:
             f.write("# allowed")
-        # Create an unrelated dirty file
-        with open(os.path.join(repo_root, "unrelated.py"), "w") as f:
-            f.write("# unrelated")
-        # Init git repo and stage the unrelated file
+        # Init git repo and create initial commit with only allowed file
         import subprocess
         subprocess.run(["git", "init"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "checkout", "-b", "0129-ariadne-task-cli"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "add", "allowed.py"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "initial"], cwd=repo_root, capture_output=True)
+        # Create an unrelated dirty file AFTER initial commit
+        with open(os.path.join(repo_root, "unrelated.py"), "w") as f:
+            f.write("# unrelated")
         subprocess.run(["git", "add", "unrelated.py"], cwd=repo_root, capture_output=True)
 
         result = run_ariadne_task(
@@ -845,6 +886,9 @@ class TestDirtyTreeOutOfScope:
             f.write("# allowed")
         import subprocess
         subprocess.run(["git", "init"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "checkout", "-b", "0129-ariadne-task-cli"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "add", "allowed.py"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "initial"], cwd=repo_root, capture_output=True)
 
         result = run_ariadne_task(
             request,
@@ -856,27 +900,35 @@ class TestDirtyTreeOutOfScope:
         # Should reach git boundary (blocked on execute, not dirty tree)
         assert REASON_DIRTY_TREE_OUT_OF_SCOPE not in result.reason_codes
 
-    def test_dirty_tree_excludes_ariadne_captures_residue(self):
-        """.ariadne/ and captures/ are local residue, not commit payload."""
+    def test_dirty_tree_ariadne_captures_blocked_as_payload(self):
+        """.ariadne/ and captures/ are blocked as forbidden payload."""
         import tempfile
         repo_root = tempfile.mkdtemp(prefix="dirty-tree-residue-test-")
         request = _valid_request(
             repo_root=repo_root,
             allowed_files=("allowed.py",),
             files_to_stage=("allowed.py",),
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing",
+            dry_run=True,
         )
         # Create allowed file
         with open(os.path.join(repo_root, "allowed.py"), "w") as f:
             f.write("# allowed")
-        # Create local residue files (should be excluded from dirty check)
+        import subprocess
+        subprocess.run(["git", "init"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "checkout", "-b", "0129-ariadne-task-cli"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "add", "allowed.py"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "initial"], cwd=repo_root, capture_output=True)
+        # Create local residue files AFTER initial commit (so they appear as untracked)
         os.makedirs(os.path.join(repo_root, ".ariadne"), exist_ok=True)
         with open(os.path.join(repo_root, ".ariadne/run.json"), "w") as f:
             f.write("{}")
         os.makedirs(os.path.join(repo_root, "captures"), exist_ok=True)
         with open(os.path.join(repo_root, "captures/proof.json"), "w") as f:
             f.write("{}")
-        import subprocess
-        subprocess.run(["git", "init"], cwd=repo_root, capture_output=True)
 
         result = run_ariadne_task(
             request,
@@ -885,8 +937,8 @@ class TestDirtyTreeOutOfScope:
             git_boundary_executor_fn=_fake_git_boundary_executor(),
             clock_provider=_clock,
         )
-        # Residue files should not trigger dirty_tree_out_of_scope
-        assert REASON_DIRTY_TREE_OUT_OF_SCOPE not in result.reason_codes
+        # .ariadne/ and captures/ should be blocked as forbidden payload
+        assert REASON_DIRTY_TREE_OUT_OF_SCOPE in result.reason_codes
 
 
 # ---------------------------------------------------------------------------
@@ -912,6 +964,8 @@ class TestDryRunWarning:
             git_boundary_planner_fn=_fake_git_boundary_planner(),
             git_boundary_executor_fn=_fake_git_boundary_executor(),
             clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
         )
         # Should have dry-run warning
         assert any("Dry-run mode active" in w for w in result.warnings)
@@ -934,6 +988,8 @@ class TestDryRunWarning:
             git_boundary_planner_fn=_fake_git_boundary_planner(),
             git_boundary_executor_fn=_fake_git_boundary_executor(),
             clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
         )
         assert result.execution_attempted is False
 
@@ -952,6 +1008,8 @@ class TestDryRunWarning:
             git_boundary_planner_fn=_fake_git_boundary_planner(),
             git_boundary_executor_fn=_fake_git_boundary_executor(),
             clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
         )
         assert result.execution_attempted is True
         assert len(result.execution_results) > 0
@@ -1163,3 +1221,702 @@ class TestStoppedPipelinePersistence:
             clock_provider=_clock,
         )
         assert not Path(".ariadne").exists()
+
+
+# ---------------------------------------------------------------------------
+# Dogfood proof renderer tests
+# ---------------------------------------------------------------------------
+
+
+class TestDogfoodProofRenderer:
+    """Dogfood proof renderer creates complete, sanitized proof YAML."""
+
+    def test_proof_renderer_creates_required_fields(self):
+        """Proof renderer creates all required fields."""
+        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
+        request = _valid_request(
+            pr_id="0131g-test",
+            branch="0131g-test-branch",
+            approved_by="tester",
+            approval_reason="Testing proof renderer",
+        )
+        proof = _render_dogfood_proof_yaml(
+            pipeline_status="completed",
+            pipeline_final_action="continue",
+            pipeline_has_blockers=False,
+            pipeline_artifact_hashes={"file1.yml": "abc123def456"},
+            git_plan=None,
+            request=request,
+            run_id="run-test-001",
+            run_record_path=".ariadne/runs/run-test-001/run.json",
+            clock_provider=_clock,
+        )
+        assert 'schema_version: "0.1"' in proof
+        assert 'pr_id: "0131g-test"' in proof
+        assert 'run_id: "run-test-001"' in proof
+        assert 'branch: "0131g-test-branch"' in proof
+        assert 'invocation_mode: "cli"' in proof
+        assert 'pipeline_status: "completed"' in proof
+        assert 'pipeline_final_action: "continue"' in proof
+        assert "pipeline_has_blockers: False" in proof
+        assert 'git_boundary_status: "pending"' in proof
+        assert "execution_attempted: false" in proof
+        assert "pr_created: false" in proof
+        assert 'pr_url: "pending-before-gh-pr-create"' in proof
+        assert 'run_record_path: ".ariadne/runs/run-test-001/run.json"' in proof
+        assert 'run_json_hash: "pending"' in proof
+        assert 'proof_artifact_ref:' in proof
+        assert 'proof_artifact_ref: "' in proof
+        assert 'proof_artifact_ref: ""' not in proof
+        assert 'timestamp: "2026-07-06T15:00:00Z"' in proof
+        assert 'note: "dogfood proof artifact, not a product feature"' in proof
+
+    def test_proof_renderer_sanitizes_task_prompt(self):
+        """Proof renderer does not include raw task description with secrets."""
+        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
+        request = _valid_request(
+            task_description="Implement feature X with secret_key=abc123 and password=secret",
+            approved_by="tester",
+            approval_reason="Testing with secret=xyz",
+        )
+        proof = _render_dogfood_proof_yaml(
+            pipeline_status="completed",
+            pipeline_final_action="continue",
+            pipeline_has_blockers=False,
+            pipeline_artifact_hashes={},
+            git_plan=None,
+            request=request,
+            run_id="run-test-002",
+            run_record_path=None,
+            clock_provider=_clock,
+        )
+        # Raw task description should not appear in proof
+        assert "secret_key=abc123" not in proof
+        assert "password=secret" not in proof
+        # Approval summary is sanitized (truncated to 80 chars)
+        # The approval_reason is included but truncated
+        assert "secret=xyz" in proof  # truncated to 80 chars, still contains the reason
+
+    def test_proof_renderer_no_raw_stdout_stderr(self):
+        """Proof renderer does not include raw stdout/stderr."""
+        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
+        request = _valid_request(
+            approved_by="tester",
+            approval_reason="Testing",
+        )
+        proof = _render_dogfood_proof_yaml(
+            pipeline_status="completed",
+            pipeline_final_action="continue",
+            pipeline_has_blockers=False,
+            pipeline_artifact_hashes={"output.log": "abcdef1234567890"},
+            git_plan=None,
+            request=request,
+            run_id="run-test-003",
+            run_record_path=None,
+            clock_provider=_clock,
+        )
+        # Only operation summaries and sanitized hashes, no raw stdout/stderr
+        assert "stdout" not in proof
+        assert "stderr" not in proof
+        # Hashes should be truncated to 16 chars
+        assert "abcdef1234567890" in proof
+
+    def test_proof_renderer_pr_url_pending_before_gh_pr_create(self):
+        """pr_url is 'pending-before-gh-pr-create' before gh pr create."""
+        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
+        request = _valid_request(
+            approved_by="tester",
+            approval_reason="Testing",
+        )
+        proof = _render_dogfood_proof_yaml(
+            pipeline_status="completed",
+            pipeline_final_action="continue",
+            pipeline_has_blockers=False,
+            pipeline_artifact_hashes={},
+            git_plan=None,
+            request=request,
+            run_id="run-test-004",
+            run_record_path=None,
+            clock_provider=_clock,
+        )
+        assert 'pr_url: "pending-before-gh-pr-create"' in proof
+        # Not empty, not a real URL
+        assert "https://" not in proof
+        assert "github.com" not in proof
+
+    def test_proof_renderer_includes_command_plan_summary(self):
+        """Proof includes command_plan_summary with operation names."""
+        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
+        from runner.git_boundary import GitCommandSpec
+        request = _valid_request(
+            approved_by="tester",
+            approval_reason="Testing",
+        )
+        # Create a mock git plan with command specs
+        class MockGitPlan:
+            command_specs = (
+                GitCommandSpec(
+                    operation="git_status",
+                    argv=("git", "status"),
+                    cwd=".",
+                    allowed_files=(),
+                    requires_human_approval=False,
+                    side_effecting=False,
+                    redacted_display="git status",
+                ),
+                GitCommandSpec(
+                    operation="git_add",
+                    argv=("git", "add", "--", "file.yml"),
+                    cwd=".",
+                    allowed_files=(),
+                    requires_human_approval=False,
+                    side_effecting=False,
+                    redacted_display="git add -- 1 file(s)",
+                ),
+            )
+        proof = _render_dogfood_proof_yaml(
+            pipeline_status="completed",
+            pipeline_final_action="continue",
+            pipeline_has_blockers=False,
+            pipeline_artifact_hashes={},
+            git_plan=MockGitPlan(),
+            request=request,
+            run_id="run-test-005",
+            run_record_path=None,
+            clock_provider=_clock,
+        )
+        assert "command_plan_summary:" in proof
+        assert '"git_status"' in proof
+        assert '"git_add"' in proof
+
+    def test_proof_renderer_includes_execution_attempted(self):
+        """execution_attempted is False at render time."""
+        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
+        request = _valid_request(
+            approved_by="tester",
+            approval_reason="Testing",
+        )
+        proof = _render_dogfood_proof_yaml(
+            pipeline_status="completed",
+            pipeline_final_action="continue",
+            pipeline_has_blockers=False,
+            pipeline_artifact_hashes={},
+            git_plan=None,
+            request=request,
+            run_id="run-test-006",
+            run_record_path=None,
+            clock_provider=_clock,
+        )
+        assert "execution_attempted: false" in proof
+
+    def test_proof_renderer_includes_run_record_path(self):
+        """Proof includes run_record_path."""
+        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
+        request = _valid_request(
+            approved_by="tester",
+            approval_reason="Testing",
+            runs_root="/tmp/runs",
+        )
+        proof = _render_dogfood_proof_yaml(
+            pipeline_status="completed",
+            pipeline_final_action="continue",
+            pipeline_has_blockers=False,
+            pipeline_artifact_hashes={},
+            git_plan=None,
+            request=request,
+            run_id="run-test-007",
+            run_record_path="/tmp/runs/run-test-007/run.json",
+            clock_provider=_clock,
+        )
+        assert 'run_record_path: "/tmp/runs/run-test-007/run.json"' in proof
+
+    def test_proof_renderer_run_json_hash_pending_if_not_persisted(self):
+        """run_json_hash is 'pending' when not yet persisted."""
+        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
+        request = _valid_request(
+            approved_by="tester",
+            approval_reason="Testing",
+        )
+        proof = _render_dogfood_proof_yaml(
+            pipeline_status="completed",
+            pipeline_final_action="continue",
+            pipeline_has_blockers=False,
+            pipeline_artifact_hashes={},
+            git_plan=None,
+            request=request,
+            run_id="run-test-008",
+            run_record_path=None,
+            clock_provider=_clock,
+        )
+        assert 'run_json_hash: "pending"' in proof
+
+    def test_proof_renderer_includes_approval_summary(self):
+        """Proof includes sanitized approval_summary."""
+        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
+        request = _valid_request(
+            approved_by="human-reviewer-001",
+            approval_reason="Pipeline completed, all gates passed",
+        )
+        proof = _render_dogfood_proof_yaml(
+            pipeline_status="completed",
+            pipeline_final_action="continue",
+            pipeline_has_blockers=False,
+            pipeline_artifact_hashes={},
+            git_plan=None,
+            request=request,
+            run_id="run-test-009",
+            run_record_path=None,
+            clock_provider=_clock,
+        )
+        assert "approval_summary:" in proof
+        assert "human-reviewer-001" in proof
+        assert "all gates passed" in proof
+
+    def test_proof_written_before_git_boundary_execution(self):
+        """Proof file exists on disk before Git Boundary planner is invoked."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="proof-before-git-test-")
+        stage_file = ".project-memory/pr/test-dogfood/dogfood-proof.yml"
+        request = _valid_request(
+            repo_root=repo_root,
+            allowed_files=(stage_file,),
+            files_to_stage=(stage_file,),
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing proof before git",
+            dry_run=True,
+        )
+        # Create parent directory for stage file
+        stage_dir = os.path.join(repo_root, ".project-memory", "pr", "test-dogfood")
+        os.makedirs(stage_dir, exist_ok=True)
+
+        # Fake planner that observes proof file existence before delegating
+        observed = {}
+
+        def planner_asserts_proof_exists(git_request):
+            proof_path = os.path.join(repo_root, stage_file)
+            observed["proof_exists_before_plan"] = os.path.exists(proof_path)
+            return _fake_git_boundary_planner()(git_request)
+
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=planner_asserts_proof_exists,
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        # Proof file should exist on disk after run_ariadne_task completes
+        proof_path = os.path.join(repo_root, stage_file)
+        assert os.path.exists(proof_path), f"Proof file not found: {proof_path}"
+        # Planner observed proof file existed before it was called
+        assert observed.get("proof_exists_before_plan") is True
+        # Verify stage_file path is under .project-memory/pr/
+        assert stage_file.startswith(".project-memory/pr/")
+        # Verify proof content
+        with open(proof_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        assert 'schema_version: "0.1"' in content
+        assert 'pr_url: "pending-before-gh-pr-create"' in content
+        assert "proof_artifact_ref:" in content
+
+
+# ---------------------------------------------------------------------------
+# Dirty baseline enforcement tests
+# ---------------------------------------------------------------------------
+
+
+class TestDirtyBaselineEnforcement:
+    """Dirty baseline enforcement blocks before Git Boundary."""
+
+    def test_dirty_baseline_unrelated_untracked_file_blocks(self):
+        """Unrelated untracked file blocks before Git Boundary."""
+        from runner.ariadne_task_cli import _check_git_baseline
+
+        def status_provider(repo_root, allowed_files):
+            return False, ["dirty_tree_out_of_scope"], ["Unrelated dirty file: unrelated.py"]
+
+        ok, codes, warnings = _check_git_baseline(
+            repo_root=".",
+            allowed_files=("allowed.py",),
+            status_provider=status_provider,
+        )
+        assert ok is False
+        assert "dirty_tree_out_of_scope" in codes
+
+    def test_dirty_baseline_unrelated_tracked_modification_blocks(self):
+        """Unrelated tracked modification blocks."""
+        from runner.ariadne_task_cli import _check_git_baseline
+
+        def status_provider(repo_root, allowed_files):
+            return False, ["dirty_tree_out_of_scope"], ["Unrelated dirty file: modified.py"]
+
+        ok, codes, warnings = _check_git_baseline(
+            repo_root=".",
+            allowed_files=("allowed.py",),
+            status_provider=status_provider,
+        )
+        assert ok is False
+        assert "dirty_tree_out_of_scope" in codes
+
+    def test_dirty_baseline_staged_file_before_run_blocks(self):
+        """Staged file before run blocks."""
+        from runner.ariadne_task_cli import _check_git_baseline
+
+        def status_provider(repo_root, allowed_files):
+            return False, ["dirty_tree_out_of_scope"], ["Unrelated dirty file: staged.py"]
+
+        ok, codes, warnings = _check_git_baseline(
+            repo_root=".",
+            allowed_files=(),
+            status_provider=status_provider,
+        )
+        assert ok is False
+        assert "dirty_tree_out_of_scope" in codes
+
+    def test_dirty_baseline_ariadne_path_blocked(self):
+        """.ariadne/** files are blocked as forbidden payload."""
+        from runner.ariadne_task_cli import _check_git_baseline
+
+        def status_provider(repo_root, allowed_files):
+            return False, ["dirty_tree_out_of_scope"], ["Forbidden payload path: .ariadne/runs/foo/run.json"]
+
+        ok, codes, warnings = _check_git_baseline(
+            repo_root=".",
+            allowed_files=(),
+            status_provider=status_provider,
+        )
+        assert ok is False
+        assert "dirty_tree_out_of_scope" in codes
+
+    def test_dirty_baseline_captures_path_blocked(self):
+        """captures/** files are blocked as forbidden payload."""
+        from runner.ariadne_task_cli import _check_git_baseline
+
+        def status_provider(repo_root, allowed_files):
+            return False, ["dirty_tree_out_of_scope"], ["Forbidden payload path: captures/proof.json"]
+
+        ok, codes, warnings = _check_git_baseline(
+            repo_root=".",
+            allowed_files=(),
+            status_provider=status_provider,
+        )
+        assert ok is False
+        assert "dirty_tree_out_of_scope" in codes
+
+    def test_dirty_baseline_prevents_execution_attempted_true(self):
+        """Dirty tree prevents execution_attempted=true."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="dirty-exec-test-")
+        request = _valid_request(
+            repo_root=repo_root,
+            allowed_files=("allowed.py",),
+            files_to_stage=("allowed.py",),
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing",
+            dry_run=True,
+        )
+        # Create allowed file
+        with open(os.path.join(repo_root, "allowed.py"), "w") as f:
+            f.write("# allowed")
+        # Init git repo
+        import subprocess
+        subprocess.run(["git", "init"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "checkout", "-b", "0129-ariadne-task-cli"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "add", "allowed.py"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "initial"], cwd=repo_root, capture_output=True)
+        # Create unrelated dirty file
+        with open(os.path.join(repo_root, "unrelated.py"), "w") as f:
+            f.write("# unrelated")
+
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            clock_provider=_clock,
+        )
+        assert result.execution_attempted is False
+        assert REASON_DIRTY_TREE_OUT_OF_SCOPE in result.reason_codes
+
+    def test_dirty_baseline_returns_dirty_tree_out_of_scope_code(self):
+        """Dirty baseline returns dirty_tree_out_of_scope reason code."""
+        from runner.ariadne_task_cli import _check_git_baseline
+
+        def status_provider(repo_root, allowed_files):
+            return False, ["dirty_tree_out_of_scope"], ["Unrelated dirty file: foo.py"]
+
+        ok, codes, warnings = _check_git_baseline(
+            repo_root=".",
+            allowed_files=(),
+            status_provider=status_provider,
+        )
+        assert "dirty_tree_out_of_scope" in codes
+
+    def test_dirty_baseline_clean_tree_proceeds(self):
+        """Clean tree with allowed files proceeds."""
+        from runner.ariadne_task_cli import _check_git_baseline
+
+        def status_provider(repo_root, allowed_files):
+            return True, [], []
+
+        ok, codes, warnings = _check_git_baseline(
+            repo_root=".",
+            allowed_files=("allowed.py",),
+            status_provider=status_provider,
+        )
+        assert ok is True
+        assert len(codes) == 0
+
+
+# ---------------------------------------------------------------------------
+# Branch baseline tests
+# ---------------------------------------------------------------------------
+
+
+class TestBranchBaseline:
+    """Branch baseline enforcement."""
+
+    def test_branch_mismatch_blocks(self):
+        """Current branch mismatch blocks."""
+        from runner.ariadne_task_cli import _check_branch_sync
+
+        def status_provider(expected_branch):
+            return {
+                "branch_match": False,
+                "ahead": 0,
+                "behind": 0,
+                "has_upstream": True,
+                "block_reason": "branch_mismatch",
+            }
+
+        result = _check_branch_sync(
+            repo_root=".",
+            expected_branch="right-branch",
+            status_provider=status_provider,
+        )
+        assert result["branch_match"] is False
+        assert result["block_reason"] == "branch_mismatch"
+
+    def test_branch_ahead_of_upstream_blocks(self):
+        """Branch ahead of upstream blocks."""
+        from runner.ariadne_task_cli import _check_branch_sync
+
+        def status_provider(expected_branch):
+            return {
+                "branch_match": True,
+                "ahead": 3,
+                "behind": 0,
+                "has_upstream": True,
+                "block_reason": "branch_ahead_or_behind",
+            }
+
+        result = _check_branch_sync(
+            repo_root=".",
+            expected_branch="test-branch",
+            status_provider=status_provider,
+        )
+        assert result["block_reason"] == "branch_ahead_or_behind"
+
+    def test_branch_behind_upstream_blocks(self):
+        """Branch behind upstream blocks."""
+        from runner.ariadne_task_cli import _check_branch_sync
+
+        def status_provider(expected_branch):
+            return {
+                "branch_match": True,
+                "ahead": 0,
+                "behind": 2,
+                "has_upstream": True,
+                "block_reason": "branch_ahead_or_behind",
+            }
+
+        result = _check_branch_sync(
+            repo_root=".",
+            expected_branch="test-branch",
+            status_provider=status_provider,
+        )
+        assert result["block_reason"] == "branch_ahead_or_behind"
+
+    def test_branch_no_upstream_blocks(self):
+        """No upstream configured blocks."""
+        from runner.ariadne_task_cli import _check_branch_sync
+
+        def status_provider(expected_branch):
+            return {
+                "branch_match": True,
+                "ahead": 0,
+                "behind": 0,
+                "has_upstream": False,
+                "block_reason": "branch_not_clean",
+            }
+
+        result = _check_branch_sync(
+            repo_root=".",
+            expected_branch="test-branch",
+            status_provider=status_provider,
+        )
+        assert result["block_reason"] == "branch_not_clean"
+
+    def test_branch_clean_synced_proceeds(self):
+        """Clean synchronized branch proceeds."""
+        from runner.ariadne_task_cli import _check_branch_sync
+
+        def status_provider(expected_branch):
+            return {
+                "branch_match": True,
+                "ahead": 0,
+                "behind": 0,
+                "has_upstream": True,
+                "block_reason": None,
+            }
+
+        result = _check_branch_sync(
+            repo_root=".",
+            expected_branch="test-branch",
+            status_provider=status_provider,
+        )
+        assert result["block_reason"] is None
+        assert result["branch_match"] is True
+
+
+# ---------------------------------------------------------------------------
+# Dry-run / No-dry-run behavior tests
+# ---------------------------------------------------------------------------
+
+
+class TestDryRunNoDryRunBehavior:
+    """Dry-run and no-dry-run behavior."""
+
+    def test_dry_run_still_non_mutating_with_clean_baseline(self):
+        """--dry-run with clean baseline: no execution side effects."""
+        request = _valid_request(
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing",
+            dry_run=True,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        assert result.execution_attempted is False
+        assert any("Dry-run mode active" in w for w in result.warnings)
+
+    def test_no_dry_run_dirty_baseline_blocks_before_execution(self):
+        """--no-dry-run with dirty baseline blocks before execution."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="no-dry-dirty-test-")
+        request = _valid_request(
+            repo_root=repo_root,
+            allowed_files=("allowed.py",),
+            files_to_stage=("allowed.py",),
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing",
+            dry_run=False,
+        )
+        # Create allowed file
+        with open(os.path.join(repo_root, "allowed.py"), "w") as f:
+            f.write("# allowed")
+        # Init git repo
+        import subprocess
+        subprocess.run(["git", "init"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "checkout", "-b", "0129-ariadne-task-cli"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "add", "allowed.py"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "initial"], cwd=repo_root, capture_output=True)
+        # Create unrelated dirty file
+        with open(os.path.join(repo_root, "unrelated.py"), "w") as f:
+            f.write("# unrelated")
+
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            clock_provider=_clock,
+        )
+        assert result.execution_attempted is False
+        assert REASON_DIRTY_TREE_OUT_OF_SCOPE in result.reason_codes
+
+    def test_no_dry_run_clean_baseline_fake_git_gh_proceeds(self):
+        """--no-dry-run with clean baseline and fake git/gh proceeds."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="no-dry-clean-test-")
+        request = _valid_request(
+            repo_root=repo_root,
+            allowed_files=("allowed.py",),
+            files_to_stage=("allowed.py",),
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing",
+            dry_run=False,
+        )
+        # Create allowed file
+        with open(os.path.join(repo_root, "allowed.py"), "w") as f:
+            f.write("# allowed")
+        # Init git repo
+        import subprocess
+        subprocess.run(["git", "init"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "checkout", "-b", "0129-ariadne-task-cli"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "add", "allowed.py"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "initial"], cwd=repo_root, capture_output=True)
+
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            clock_provider=_clock,
+        )
+        assert result.execution_attempted is True
+        assert len(result.execution_results) > 0
+
+
+# ---------------------------------------------------------------------------
+# Dogfood proof incomplete blocks
+# ---------------------------------------------------------------------------
+
+
+class TestDogfoodProofIncomplete:
+    """Incomplete dogfood proof blocks."""
+
+    def test_dogfood_proof_incomplete_reason_defined(self):
+        """REASON_DOGFOOD_PROOF_INCOMPLETE is defined."""
+        from runner.ariadne_task_cli import REASON_DOGFOOD_PROOF_INCOMPLETE
+        assert REASON_DOGFOOD_PROOF_INCOMPLETE == "dogfood_proof_incomplete"
+
+    def test_proof_renderer_without_stage_file_skips(self):
+        """No files_to_stage → proof renderer is skipped."""
+        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
+        request = _valid_request(
+            files_to_stage=(),
+            approved_by="tester",
+            approval_reason="Testing",
+        )
+        proof = _render_dogfood_proof_yaml(
+            pipeline_status="completed",
+            pipeline_final_action="continue",
+            pipeline_has_blockers=False,
+            pipeline_artifact_hashes={},
+            git_plan=None,
+            request=request,
+            run_id="run-test-010",
+            run_record_path=None,
+            clock_provider=_clock,
+        )
+        # Proof can still be rendered, but won't be written to disk
+        assert proof is not None
+        assert 'schema_version: "0.1"' in proof

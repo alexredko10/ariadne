@@ -132,6 +132,7 @@ REASON_MISSING_APPROVED_BY = "missing_approved_by"
 REASON_MISSING_APPROVAL_REASON = "missing_approval_reason"
 REASON_EXECUTION_FAILED = "execution_failed"
 REASON_DIRTY_TREE_OUT_OF_SCOPE = "dirty_tree_out_of_scope"
+REASON_DOGFOOD_PROOF_INCOMPLETE = "dogfood_proof_incomplete"
 
 
 # ---------------------------------------------------------------------------
@@ -266,6 +267,246 @@ def _detect_payload_artifact_path(files_to_stage: tuple[str, ...]) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Dogfood proof renderer
+# ---------------------------------------------------------------------------
+
+
+def _render_dogfood_proof_yaml(
+    pipeline_status: Optional[str],
+    pipeline_final_action: Optional[str],
+    pipeline_has_blockers: Optional[bool],
+    pipeline_artifact_hashes: dict[str, str],
+    git_plan: Any,
+    request: AriadneTaskCliRequest,
+    run_id: str,
+    run_record_path: Optional[str],
+    clock_provider: Optional[Callable] = None,
+) -> str:
+    """Render a dogfood proof YAML artifact from runtime context."""
+    timestamp = clock_provider() if clock_provider else datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    # Build command_plan_summary from git plan
+    if git_plan is not None:
+        command_plan_summary = [s.operation for s in git_plan.command_specs]
+    else:
+        command_plan_summary = []
+
+    # Sanitize approval summary
+    approved_by = request.approved_by or ""
+    approval_reason = request.approval_reason or ""
+    if approved_by:
+        approval_summary = f"Approved by {approved_by[:40]}"
+        if approval_reason:
+            approval_summary += f": {approval_reason[:80]}"
+    else:
+        approval_summary = "Not approved"
+
+    # Build run_record_path
+    if run_record_path:
+        record_path = run_record_path
+    elif request.runs_root and run_id:
+        record_path = os.path.join(request.runs_root, run_id, "run.json")
+    else:
+        record_path = ""
+
+    # Build proof_artifact_ref from stage-file path
+    if request.files_to_stage:
+        proof_artifact_ref = request.files_to_stage[0]
+    else:
+        proof_artifact_ref = "pending-before-proof-hash"
+
+    # Build run_json_hash (pending if not yet persisted)
+    run_json_hash = "pending"
+
+    # Build artifact_hashes summary
+    artifact_hashes_summary = {}
+    for path, h in pipeline_artifact_hashes.items():
+        artifact_hashes_summary[path] = h[:16]
+
+    lines = [
+        'schema_version: "0.1"',
+        'pr_id: "' + request.pr_id + '"',
+        'run_id: "' + run_id + '"',
+        'branch: "' + request.branch + '"',
+        'invocation_mode: "cli"',
+        'pipeline_status: "' + (pipeline_status or "") + '"',
+        'pipeline_final_action: "' + (pipeline_final_action or "") + '"',
+        "pipeline_has_blockers: " + str(pipeline_has_blockers or False),
+        'git_boundary_status: "pending"',
+        "execution_attempted: false",
+        "pr_created: false",
+        'pr_url: "pending-before-gh-pr-create"',
+        'run_record_path: "' + record_path + '"',
+        'run_json_hash: "' + run_json_hash + '"',
+        'proof_artifact_ref: "' + proof_artifact_ref + '"',
+        'timestamp: "' + timestamp + '"',
+        'note: "dogfood proof artifact, not a product feature"',
+    ]
+
+    # Add command_plan_summary
+    if command_plan_summary:
+        lines.append("command_plan_summary:")
+        for op in command_plan_summary:
+            lines.append('  - "' + op + '"')
+    else:
+        lines.append("command_plan_summary: []")
+
+    # Add artifact_hashes
+    if artifact_hashes_summary:
+        lines.append("artifact_hashes:")
+        for path, h in artifact_hashes_summary.items():
+            lines.append('  "' + path + '": "' + h + '"')
+    else:
+        lines.append("artifact_hashes: {}")
+
+    # Add approval_summary
+    lines.append('approval_summary: "' + approval_summary + '"')
+
+    return "\n".join(lines) + "\n"
+
+
+# ---------------------------------------------------------------------------
+# Check branch sync
+# ---------------------------------------------------------------------------
+
+
+def _check_branch_sync(
+    repo_root: str,
+    expected_branch: str,
+    status_provider: Optional[Callable] = None,
+) -> dict:
+    """Check branch synchronization status."""
+    if status_provider is not None:
+        return status_provider(expected_branch)
+
+    result: dict = {
+        "branch_match": False,
+        "ahead": 0,
+        "behind": 0,
+        "has_upstream": False,
+        "block_reason": None,
+    }
+
+    try:
+        branch_result = subprocess.run(
+            ["git", "branch", "--show-current"],
+            capture_output=True, text=True, shell=False,
+            cwd=repo_root,
+        )
+        if branch_result.returncode != 0:
+            result["block_reason"] = "branch_not_clean"
+            return result
+
+        current_branch = branch_result.stdout.strip()
+        result["branch_match"] = (current_branch == expected_branch)
+
+        if not result["branch_match"]:
+            result["block_reason"] = "branch_mismatch"
+            return result
+
+        status_result = subprocess.run(
+            ["git", "status", "--porcelain=v1", "--branch"],
+            capture_output=True, text=True, shell=False,
+            cwd=repo_root,
+        )
+        if status_result.returncode != 0:
+            result["block_reason"] = "branch_not_clean"
+            return result
+
+        first_line = status_result.stdout.splitlines()[0] if status_result.stdout else ""
+        if not first_line.startswith("##"):
+            result["block_reason"] = "branch_not_clean"
+            return result
+
+        if "..." not in first_line:
+            result["has_upstream"] = False
+            return result
+
+        result["has_upstream"] = True
+
+        if "ahead " in first_line:
+            import re
+            match = re.search(r"ahead (\d+)", first_line)
+            if match:
+                result["ahead"] = int(match.group(1))
+
+        if "behind " in first_line:
+            import re
+            match = re.search(r"behind (\d+)", first_line)
+            if match:
+                result["behind"] = int(match.group(1))
+
+        if result["ahead"] > 0 or result["behind"] > 0:
+            result["block_reason"] = "branch_ahead_or_behind"
+            return result
+
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        result["block_reason"] = "branch_not_clean"
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Check git baseline
+# ---------------------------------------------------------------------------
+
+
+def _check_git_baseline(
+    repo_root: str,
+    allowed_files: tuple[str, ...],
+    status_provider: Optional[Callable] = None,
+) -> tuple[bool, list[str], list[str]]:
+    """Check git working tree baseline before execution."""
+    if status_provider is not None:
+        return status_provider(repo_root, allowed_files)
+
+    codes: list[str] = []
+    warnings: list[str] = []
+    allowed_set = set(allowed_files)
+
+    FORBIDDEN_PAYLOAD_PREFIXES = (".ariadne/", "captures/", "reviews/")
+
+    try:
+        status_result = subprocess.run(
+            ["git", "status", "--porcelain=v1"],
+            capture_output=True, text=True, shell=False,
+            cwd=repo_root,
+        )
+        if status_result.returncode != 0:
+            codes.append("branch_not_clean")
+            return False, codes, warnings
+
+        for line in status_result.stdout.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            if len(line) < 4:
+                continue
+            filename = line[3:].strip()
+            if not filename:
+                continue
+
+            is_forbidden_payload = any(
+                filename.startswith(p) for p in FORBIDDEN_PAYLOAD_PREFIXES
+            )
+            if is_forbidden_payload:
+                codes.append("dirty_tree_out_of_scope")
+                warnings.append("Forbidden payload path: " + filename)
+                continue
+
+            if filename not in allowed_set:
+                codes.append("dirty_tree_out_of_scope")
+                warnings.append("Unrelated dirty file: " + filename)
+
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        codes.append("branch_not_clean")
+        return False, codes, warnings
+
+    ok = len(codes) == 0
+    return ok, codes, warnings
+
+
+# ---------------------------------------------------------------------------
 # Local git command executor
 # ---------------------------------------------------------------------------
 
@@ -314,6 +555,8 @@ def run_ariadne_task(
     git_boundary_executor_fn: Optional[Callable] = None,
     persistence_fn: Optional[Callable] = None,
     clock_provider: Optional[Callable] = None,
+    baseline_check_fn: Optional[Callable] = None,
+    branch_sync_fn: Optional[Callable] = None,
 ) -> AriadneTaskCliResult:
     """Run the ariadne task orchestration.
 
@@ -331,6 +574,12 @@ def run_ariadne_task(
         Default: ``execute_git_boundary_plan``.
     clock_provider:
         Optional callable returning a timestamp string.
+    baseline_check_fn:
+        Injectable baseline check function.
+        Default: ``_check_git_baseline``.
+    branch_sync_fn:
+        Injectable branch sync check function.
+        Default: ``_check_branch_sync``.
 
     Returns
     -------
@@ -345,6 +594,8 @@ def run_ariadne_task(
     pipeline_fn = pipeline_runner_fn or run_pr_pipeline
     planner_fn = git_boundary_planner_fn or prepare_git_boundary_plan
     executor_fn = git_boundary_executor_fn or execute_git_boundary_plan
+    baseline_fn = baseline_check_fn or _check_git_baseline
+    branch_fn = branch_sync_fn or _check_branch_sync
 
     # 1. Validate task description
     if not request.task_description or request.task_description.strip() == "":
@@ -475,69 +726,87 @@ def run_ariadne_task(
             ),
         )
 
-    # 4b. Dirty-tree preflight — check actual git status
-    # Only run when repo_root is explicitly set (not the default ".")
-    LOCAL_RESIDUE_PREFIXES = (".ariadne/", "captures/")
-    if request.repo_root and request.repo_root != ".":
-        try:
-            status_result = subprocess.run(
-                ["git", "status", "--short"],
-                capture_output=True,
-                text=True,
-                shell=False,
-                cwd=request.repo_root,
-            )
-            if status_result.returncode == 0:
-                actual_dirty = set()
-                for line in status_result.stdout.splitlines():
-                    line = line.strip()
-                    if not line:
-                        continue
-                    # Format: "XY filename" where X,Y are status codes
-                    filename = line[3:].strip() if len(line) > 3 else ""
-                    if filename:
-                        # Exclude local residue
-                        is_residue = any(
-                            filename.startswith(p) for p in LOCAL_RESIDUE_PREFIXES
-                        )
-                        if not is_residue:
-                            actual_dirty.add(filename)
-
-                # Intersect with allowed_files
-                allowed_set = set(request.allowed_files)
-                for dirty_file in actual_dirty:
-                    if dirty_file not in allowed_set:
-                        codes.append(REASON_DIRTY_TREE_OUT_OF_SCOPE)
-                        warnings.append(
-                            f"Unrelated dirty file: {dirty_file}"
-                        )
-        except (FileNotFoundError, subprocess.CalledProcessError):
-            pass  # Not in a git repo — skip
-
-    # If dirty tree is out of scope, block before Git Boundary
-    if REASON_DIRTY_TREE_OUT_OF_SCOPE in codes:
-        finished_at = clock_provider() if clock_provider else None
-        return _persist_and_return(
-            request, persistence_fn, clock_provider,
-            AriadneTaskCliResult(
-                status=AriadneTaskCliStatus.BLOCKED,
-                reason_codes=tuple(codes),
-                task_description=request.task_description,
-                task_description_hash=task_description_hash,
-                pipeline_status=pipeline_status,
-                pipeline_final_action=pipeline_final_action,
-                pipeline_has_blockers=pipeline_has_blockers,
-                git_boundary_status=None,
-                command_plan=None,
-                execution_attempted=False,
-                execution_results=(),
-                warnings=tuple(warnings),
-                next_action="stop",
-                started_at=started_at,
-                finished_at=finished_at,
-                details="Dirty tree out of scope",
-            ),
+    # 4b. Git baseline check — runs when execute is requested
+    if request.execute:
+        # Check git baseline (untracked, modified, staged files)
+        baseline_ok, baseline_codes, baseline_warnings = baseline_fn(
+            repo_root=request.repo_root,
+            allowed_files=request.allowed_files,
         )
+        codes.extend(baseline_codes)
+        warnings.extend(baseline_warnings)
+
+        # Check branch sync
+        branch_info = branch_fn(
+            repo_root=request.repo_root,
+            expected_branch=request.branch,
+        )
+        if branch_info.get("block_reason"):
+            codes.append(branch_info["block_reason"])
+            if branch_info["block_reason"] == "branch_mismatch":
+                warnings.append(
+                    "Branch mismatch: expected '" + request.branch + "'"
+                )
+            elif branch_info["block_reason"] == "branch_ahead_or_behind":
+                warnings.append(
+                    "Branch ahead=" + str(branch_info.get("ahead", 0)) + ", "
+                    "behind=" + str(branch_info.get("behind", 0))
+                )
+            else:
+                warnings.append("Branch not clean or no upstream configured")
+
+        # If baseline or branch check failed, block before Git Boundary
+        if not baseline_ok or branch_info.get("block_reason"):
+            finished_at = clock_provider() if clock_provider else None
+            return _persist_and_return(
+                request, persistence_fn, clock_provider,
+                AriadneTaskCliResult(
+                    status=AriadneTaskCliStatus.BLOCKED,
+                    reason_codes=tuple(codes),
+                    task_description=request.task_description,
+                    task_description_hash=task_description_hash,
+                    pipeline_status=pipeline_status,
+                    pipeline_final_action=pipeline_final_action,
+                    pipeline_has_blockers=pipeline_has_blockers,
+                    git_boundary_status=None,
+                    command_plan=None,
+                    execution_attempted=False,
+                    execution_results=(),
+                    warnings=tuple(warnings),
+                    next_action="stop",
+                    started_at=started_at,
+                    finished_at=finished_at,
+                    details="Git baseline check failed",
+                ),
+            )
+
+    # 4c. Render dogfood proof if files_to_stage contains a payload path
+    if request.files_to_stage:
+        run_id = request.run_id or "run-" + (task_description_hash or "unknown")
+        run_record_path = None
+        if request.runs_root:
+            run_record_path = os.path.join(request.runs_root, run_id, "run.json")
+
+        proof_yaml = _render_dogfood_proof_yaml(
+            pipeline_status=pipeline_status,
+            pipeline_final_action=pipeline_final_action,
+            pipeline_has_blockers=pipeline_has_blockers,
+            pipeline_artifact_hashes=pipeline_artifact_hashes,
+            git_plan=None,
+            request=request,
+            run_id=run_id,
+            run_record_path=run_record_path,
+            clock_provider=clock_provider,
+        )
+
+        # Write proof to each stage-file path
+        for stage_file in request.files_to_stage:
+            full_path = os.path.join(request.repo_root, stage_file)
+            parent_dir = os.path.dirname(full_path)
+            if parent_dir:
+                os.makedirs(parent_dir, exist_ok=True)
+            with open(full_path, "w", encoding="utf-8") as f:
+                f.write(proof_yaml)
 
     # 5. Build GitBoundaryRequest
     git_request = GitBoundaryRequest(
