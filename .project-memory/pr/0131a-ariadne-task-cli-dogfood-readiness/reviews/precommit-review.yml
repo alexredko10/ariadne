@@ -1,0 +1,184 @@
+schema_version: "0.1"
+pr_id: "0131a-ariadne-task-cli-dogfood-readiness"
+review_type: precommit-review
+verdict: pass
+reviewer: precommit-review
+timestamp: "2026-07-07T00:03:00Z"
+related_plan: .project-memory/pr/0131a-ariadne-task-cli-dogfood-readiness/PLAN.md
+related_commit: 85a46ee3a1187b12b73855c825423fe11039fd58
+summary:
+  result: "PR 0131A DOGFOOD Readiness Fix matches PLAN.md. 5 concrete fixes applied: module entrypoint, parser task literal support, JSON output fix, shared persistence helper for all terminal statuses, debugging fields. 29 CLI tests pass; 197 regression pass; --help works; both task forms work; .ariadne absent."
+snapshot_delta:
+  plan_base_sha: "ecac1bda691b66b3876569a817ed5731a573ab52"
+  current_head: "85a46ee3a1187b12b73855c825423fe11039fd58"
+  action: continue
+  stale_snapshot: true
+scope:
+  expected_files: [services/runner/src/runner/ariadne_task_cli.py, services/runner/tests/test_ariadne_task_cli.py]
+  actual_files: [services/runner/src/runner/ariadne_task_cli.py, services/runner/tests/test_ariadne_task_cli.py]
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: in_scope
+files_checked:
+  - .project-memory/pr/0131a-ariadne-task-cli-dogfood-readiness/PLAN.md
+  - .project-memory/pr/0131a-ariadne-task-cli-dogfood-readiness/reviews/plan-review.yml
+  - .project-memory/review-artifact.schema.yml
+  - ROADMAP.md
+  - .project-memory/pr/0129-ariadne-task-cli/reviews/precommit-review.yml
+  - .project-memory/pr/0130-run-persistence/reviews/precommit-review.yml
+  - services/runner/src/runner/ariadne_task_cli.py
+  - services/runner/tests/test_ariadne_task_cli.py
+  - services/runner/src/runner/pipeline_runner.py
+  - services/runner/src/runner/git_boundary.py
+  - services/runner/src/runner/run_persistence.py
+  - agents/plan-review.yml
+  - agents/precommit-review.yml
+files_modified: []
+validation:
+  - command: git rev-parse HEAD
+    result: passed
+    exit_code: 0
+    evidence: 85a46ee3a11
+  - command: git branch
+    result: passed
+    exit_code: 0
+    evidence: 0131a-ariadne-task-cli-dogfood-readiness
+  - command: git status --short
+    result: passed
+    exit_code: 0
+    evidence: M ariadne_task_cli.py + M test_ariadne_task_cli.py
+  - command: git diff --name-only
+    result: passed
+    exit_code: 0
+    evidence: ariadne_task_cli.py + test_ariadne_task_cli.py only
+  - command: compileall
+    result: passed
+    exit_code: 0
+    evidence: exit 0
+  - command: pytest CLI + regression
+    result: passed
+    exit_code: 0
+    evidence: 29 CLI + 168 regression = 197 passed
+  - command: python -m runner.ariadne_task_cli --help
+    result: passed
+    exit_code: 0
+    evidence: usage printed; --help works; Fix 1 confirmed
+  - command: python -m runner.ariadne_task_cli task smoke --json
+    result: passed
+    exit_code: 1
+    evidence: JSON output without AttributeError; Fix 2+3 confirmed
+  - command: python -m runner.ariadne_task_cli smoke --json
+    result: passed
+    exit_code: 1
+    evidence: JSON output works; both parser forms work
+  - command: grep forbidden calls
+    result: passed
+    exit_code: 0
+    evidence: subprocess.run only in _execute_git_command_spec (shell=False, inherited from PR 0129)
+  - command: .ariadne residue
+    result: passed
+    exit_code: 0
+    evidence: .ariadne absent
+blockers: []
+warnings: []
+decisions_made:
+  - decision: Approve PR 0131A implementation
+    reason: All 5 fixes verified in diff; 29 CLI tests pass; 197 regression pass; module --help works; task literal + direct description both parse; JSON output fixed; _persist_and_return helper refactored; git_boundary.py + pipeline_runner.py NOT modified.
+context_used:
+  labels: [dogfood-readiness, production-line, stage-2-closed-loop, pr-0131a, executable-fix, pipeline-runner-unchanged, git-boundary-unchanged]
+  memory_files_read: [.project-memory/pr/0131a-ariadne-task-cli-dogfood-readiness/PLAN.md, .project-memory/pr/0131a-ariadne-task-cli-dogfood-readiness/reviews/plan-review.yml]
+  anchors_used: []
+  files_inspected: [services/runner/src/runner/ariadne_task_cli.py, services/runner/tests/test_ariadne_task_cli.py, services/runner/src/runner/pipeline_runner.py, services/runner/src/runner/git_boundary.py]
+  files_modified: [.project-memory/pr/0131a-ariadne-task-cli-dogfood-readiness/reviews/precommit-review.yml]
+  files_intentionally_ignored: [ROADMAP.md, docs/**, schemas/**, services/task_intake/**, pyproject.toml, package.json, Makefile]
+checks:
+  branch: pass
+  plan_review: pass
+  dirty_tree: pass
+  module_entrypoint_fixed: pass
+  parser_literal_task: pass
+  json_output_fixed: pass
+  stopped_persistence_fixed: pass
+  debugging_fields: pass
+  focused_tests_added: pass
+  validation: pass
+  pipeline_runner_unchanged: pass
+  git_boundary_unchanged: pass
+  no_forbidden_modules: pass
+  .ariadne_absent: pass
+  artifact_write_readback: pass
+boundary_confirmations:
+  - evidence-first precommit-review completed
+  - PLAN.md reviewed; plan-review reviewed; ROADMAP/agents/schemas/docs/task_intake unchanged
+  - pipeline_runner.py NOT modified
+  - git_boundary.py NOT modified
+  - only ariadne_task_cli.py + test_ariadne_task_cli.py modified (plan-approved)
+  - Fix 1: `if __name__ == "__main__": raise SystemExit(main())` at module end
+  - Fix 2: `nargs="*"` parser accepts literal "task <desc>" and direct "<desc>" forms
+  - Fix 3: `main()` reads `request.json_output` not missing `result.json_output`
+  - Fix 4: `_persist_and_return()` helper persists all terminal statuses
+  - Fix 5: `run_id` + `run_record_path` in all results when `--runs-root` provided
+  - 29 CLI tests pass; 197 regression pass; --help works
+  - .ariadne absent
+evidence_ledger:
+  - claim: branch correct
+    evidence_source: git branch --show-current
+    exact_observed_evidence: 0131a-ariadne-task-cli-dogfood-readiness
+    result: pass
+  - claim: plan-review approved
+    evidence_source: plan-review.yml verdict field
+    exact_observed_evidence: verdict approve (2026-07-07T00:55:00Z)
+    result: pass
+  - claim: dirty tree within scope
+    evidence_source: git status --short + git diff --name-only
+    exact_observed_evidence: M ariadne_task_cli.py + M test_ariadne_task_cli.py; no forbidden paths
+    result: pass
+  - claim: module entrypoint fixed
+    evidence_source: git diff ariadne_task_cli.py end
+    exact_observed_evidence: if __name__ == "__main__": raise SystemExit(main()) at module end; --help confirmed working
+    result: pass
+  - claim: parser compatibility fixed
+    evidence_source: git diff + --json smoke tests
+    exact_observed_evidence: nargs="*" parser; both "task description" and "description" forms work; exit 0
+    result: pass
+  - claim: JSON output fixed
+    evidence_source: git diff + smoke test
+    exact_observed_evidence: main() reads request.json_output not result.json_output; JSON output without AttributeError confirmed
+    result: pass
+  - claim: stopped pipeline persistence fixed
+    evidence_source: git diff + _persist_and_return helper
+    exact_identified_evidence: _persist_and_return() helper refactors all terminal paths through shared persistence block
+    result: pass
+  - claim: debugging fields present
+    evidence_source: git diff + smoke output
+    exact_observed_evidence: run_id + run_record_path in CLI result dataclass; fields present in smoke output
+    result: pass
+  - claim: focused tests added
+    evidence_source: pytest test_ariadne_task_cli.py
+    exact_observed_evidence: 29 CLI tests pass
+    result: pass
+  - claim: validation passed
+    evidence_source: compileall + pytest + smoke + grep
+    exact_observed_evidence: compileall exit 0; 29+168 pytest pass; --help works; both parser forms work; no forbidden patterns
+    result: pass
+  - claim: pipeline_runner.py unchanged
+    evidence_source: git diff --name-only
+    exact_observed_evidence: pipeline_runner.py NOT in diff
+    result: pass
+  - claim: git_boundary.py unchanged
+    evidence_source: git diff --name-only
+    exact_observed_evidence: git_boundary.py NOT in diff
+    result: pass
+  - claim: no forbidden module expansion
+    evidence_source: grep forbidden patterns
+    exact_observed_evidence: subprocess.run only in _execute_git_command_spec (shell=False, inherited from PR 0129)
+    result: pass
+  - claim: .ariadne absent
+    evidence_source: find .ariadne
+    exact_observed_evidence: .ariadne absent
+    result: pass
+  - claim: artifact physically written/read back
+    evidence_source: write_file + test -f
+    exact_observed_evidence: precommit-review.yml written to .project-memory/pr/0131a-ariadne-task-cli-dogfood-readiness/reviews/
+    result: pass
