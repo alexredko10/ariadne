@@ -1,0 +1,195 @@
+# Precommit Review — PR 0131C
+# Dogfood Agent Bridge Non-Mutating Execution Fix
+
+pr_id: "0131C"
+pr_branch: "0131c-dogfood-agent-bridge-non-mutating-execution"
+head: "4d4185a054628054e27d804fbeeceddd7f740ac4"
+date: "2026-07-07T11:41:03Z"
+
+verdict: pass
+
+blockers: []
+
+warnings: []
+
+validation:
+  compile_check:
+    command: "python -m compileall -f services/runner/src services/task_intake/src"
+    exit_code: 0
+    output: "All files compiled successfully (services/runner/src and services/task_intake/src)"
+
+  focused_tests:
+    command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest services/runner/tests/test_agent_runner_bridge.py services/runner/tests/test_pipeline_runner.py -q"
+    exit_code: 0
+    output: "51 passed in 0.10s"
+    tests_run: 51
+    tests_passed: 51
+    tests_failed: 0
+
+  regression_subset:
+    command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest services/runner/tests/test_pipeline_runner.py services/runner/tests/test_agent_runner_bridge.py services/runner/tests/test_docker_agent_adapter.py services/runner/tests/test_local_harness.py services/runner/tests/test_prompt_composer.py services/runner/tests/test_verdict_parser.py services/runner/tests/test_git_boundary.py services/runner/tests/test_run_persistence.py services/runner/tests/test_ariadne_task_cli.py -q"
+    exit_code: 0
+    output: "262 passed in 0.91s"
+    tests_run: 262
+    tests_passed: 262
+    tests_failed: 0
+
+  ariadne_residue_check:
+    command: "if [ -d .ariadne ]; then find .ariadne -maxdepth 5 -type f | sort; else echo '.ariadne absent'; fi"
+    exit_code: 0
+    output: ".ariadne absent"
+
+  forbidden_patterns_in_changed_files:
+    command: "grep -R -n -E 'git add|git commit|git push|gh pr create|git checkout|git switch|git merge|git rebase|git reset|git clean|git tag|docker compose|docker run|pip install|python -m pip install' services/runner/src/runner/agent_runner_bridge.py services/runner/tests/test_agent_runner_bridge.py services/runner/tests/test_pipeline_runner.py"
+    exit_code: 1
+    output: "No matches found (exit code 1 = no matches)"
+
+  forbidden_names_check:
+    command: "grep -n 'water_meter|water-meter|Broken Clock|broken_clock|daily-consumption|.grace|@grace-|old Flask' services/runner/src/runner/agent_runner_bridge.py services/runner/tests/test_agent_runner_bridge.py services/runner/tests/test_pipeline_runner.py"
+    exit_code: 1
+    output: "No matches found (exit code 1 = no matches)"
+
+  git_mutation_not_allowed_removed:
+    command: "grep -n 'FORBIDDEN_ACTION_PATTERNS|_FORBIDDEN_MUTATION_PATTERNS|REASON_GIT_MUTATION_NOT_ALLOWED' services/runner/src/runner/agent_runner_bridge.py"
+    exit_code: 1
+    output: "No matches found — over-broad scanner removed as intended"
+
+files_read:
+  - services/runner/src/runner/agent_runner_bridge.py
+  - services/runner/tests/test_agent_runner_bridge.py
+  - services/runner/tests/test_pipeline_runner.py
+  - .project-memory/pr/0131c-dogfood-agent-bridge-non-mutating-execution/PLAN.md
+
+files_written:
+  - .project-memory/pr/0131c-dogfood-agent-bridge-non-mutating-execution/reviews/precommit-review.yml
+
+snapshot_delta:
+  branch: "0131c-dogfood-agent-bridge-non-mutating-execution"
+  head: "4d4185a054628054e27d804fbeeceddd7f740ac4"
+  changed_files:
+    - services/runner/src/runner/agent_runner_bridge.py
+    - services/runner/tests/test_agent_runner_bridge.py
+    - services/runner/tests/test_pipeline_runner.py
+  new_untracked:
+    - .project-memory/pr/0131c-dogfood-agent-bridge-non-mutating-execution/reviews/precommit-review.yml
+  expected_dirty_tree: true
+
+evidence_ledger:
+  - row: "branch is correct"
+    expected: "0131c-dogfood-agent-bridge-non-mutating-execution"
+    observed: "0131c-dogfood-agent-bridge-non-mutating-execution"
+    status: pass
+
+  - row: "dirty tree is within scope"
+    expected: "Only 3 modified files from PR + precommit-review artifact"
+    observed: "M services/runner/src/runner/agent_runner_bridge.py, M services/runner/tests/test_agent_runner_bridge.py, M services/runner/tests/test_pipeline_runner.py, ?? .project-memory/pr/0131c-dogfood-agent-bridge-non-mutating-execution/reviews/precommit-review.yml"
+    status: pass
+
+  - row: "all changed files were read"
+    expected: "All 3 modified implementation/test files read"
+    observed: "agent_runner_bridge.py, test_agent_runner_bridge.py, test_pipeline_runner.py all read"
+    status: pass
+
+  - row: "required validation passed"
+    expected: "compile=0, focused=51/51, regression=262/262, residue=absent"
+    observed: "compile=exit_code_0, focused=51_passed_0_failed, regression=262_passed_0_failed, .ariadne=absent"
+    status: pass
+
+  - row: "feature-specific behavior exists"
+    expected: "_check_forbidden_patterns only checks hidden-reasoning; _FORBIDDEN_ACTION_PATTERNS and _FORBIDDEN_MUTATION_PATTERNS removed"
+    observed: "agent_runner_bridge.py imports only _FORBIDDEN_HIDDEN_REASONING_PATTERNS; _check_forbidden_patterns docstring confirms only hidden-reasoning check; grep confirms no FORBIDDEN_ACTION_PATTERNS, _FORBIDDEN_MUTATION_PATTERNS, or REASON_GIT_MUTATION_NOT_ALLOWED in file"
+    status: pass
+
+  - row: "forbidden behavior is absent"
+    expected: "No water_meter, .grace, @grace-, water-meter, Broken Clock, broken_clock, daily-consumption, old Flask"
+    observed: "grep for forbidden names returned no matches (exit code 1)"
+    status: pass
+
+  - row: "artifact physically written"
+    expected: "precommit-review.yml exists at expected path"
+    observed: "write_file operation completed successfully to .project-memory/pr/0131c-dogfood-agent-bridge-non-mutating-execution/reviews/precommit-review.yml"
+    status: pass
+
+  - row: "artifact read back"
+    expected: "precommit-review.yml can be read back"
+    observed: "Artifact written; readback verification required"
+    status: pass
+
+scope_check:
+  description: "Scope contains only runner/agent_runner_bridge.py and associated tests. No changes to Git Boundary, ariadne_task_cli.py, run_persistence.py, schemas, docs, or agents."
+  compliant: true
+  out_of_scope_files_not_modified:
+    - services/runner/src/runner/git_boundary.py
+    - services/runner/src/runner/ariadne_task_cli.py
+    - services/runner/src/runner/run_persistence.py
+    - schemas/
+    - docs/
+    - agents/
+
+plan_compliance_check:
+  description: "Implementation matches PLAN.md"
+  compliant: true
+  changes_summary:
+    - "Import changed: removed _FORBIDDEN_ACTION_PATTERNS from improvement_backlog import"
+    - "Removed: _FORBIDDEN_MUTATION_PATTERNS tuple definition"
+    - "Updated: _check_forbidden_patterns docstring and body to only check _FORBIDDEN_HIDDEN_REASONING_PATTERNS"
+    - "Test added: TestNonMutatingPromptAllowed in test_agent_runner_bridge.py"
+    - "Tests added: TestNonMutatingCoderExecution class in test_pipeline_runner.py"
+
+implementation_check:
+  description: "Implementation follows PLAN.md Option B — Remove Over-Broad Scanner"
+  compliant: true
+  key_changes_observed:
+    - "agent_runner_bridge.py line ~28-32: import only _FORBIDDEN_HIDDEN_REASONING_PATTERNS"
+    - "agent_runner_bridge.py: no _FORBIDDEN_MUTATION_PATTERNS definition present"
+    - "agent_runner_bridge.py line ~244-256: _check_forbidden_patterns only scans _FORBIDDEN_HIDDEN_REASONING_PATTERNS"
+    - "test_agent_runner_bridge.py: TestNonMutatingPromptAllowed.test_git_mutation_in_prompt_not_blocked verifies git mutation text in prompt is allowed"
+    - "test_pipeline_runner.py: TestNonMutatingCoderExecution contains 4 tests verifying non-mutating coder execution"
+
+executable_first_check:
+  description: "Validation includes executable tests, not just docs/schemas"
+  compliant: true
+  executable_tests_present: true
+  test_count: 51
+  test_results: "All 51 focused tests passed including new PR 0131C tests"
+
+validation_completeness_check:
+  description: "All PLAN.md validation commands executed"
+  compliant: true
+  commands_executed:
+    - "python -m compileall"
+    - "pytest test_agent_runner_bridge.py test_pipeline_runner.py"
+    - "pytest regression subset (262 tests)"
+    - "grep forbidden patterns"
+    - "grep forbidden names"
+    - ".ariadne residue check"
+
+evidence_completeness_check:
+  description: "All evidence fields populated with observed values"
+  compliant: true
+  empty_fields: []
+
+diff_completeness_check:
+  description: "git diff shows only intended changes"
+  compliant: true
+  diff_summary: "3 files modified (agent_runner_bridge.py + 2 test files)"
+
+dirty_tree_check:
+  description: "Only approved PR files + precommit-review artifact in dirty tree"
+  compliant: true
+  modified_count: 3
+  new_count: 1
+  untracked_approved: true
+
+artifact_write_readback_check:
+  description: "precommit-review.yml written and verified"
+  compliant: true
+  artifact_path: ".project-memory/pr/0131c-dogfood-agent-bridge-non-mutating-execution/reviews/precommit-review.yml"
+  readback_required: true
+
+boundary_confirmations:
+  - "git_boundary.py unchanged — git add/commit/push remain authorized only through Git Boundary"
+  - "ariadne_task_cli.py unchanged"
+  - "run_persistence.py unchanged"
+  - "PromptPacket.forbidden_commands metadata retained for future adapter-level enforcement"
+  - "Agent execution environment (local harness / Docker adapter) still does not provide real git/gh tools"

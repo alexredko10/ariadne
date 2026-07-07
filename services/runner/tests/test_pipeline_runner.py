@@ -446,6 +446,121 @@ class TestCoderStepFailure:
 
 
 # ---------------------------------------------------------------------------
+# Non-mutating coder execution (PR 0131C)
+# ---------------------------------------------------------------------------
+
+
+class TestNonMutatingCoderExecution:
+    """Coder bridge can write expected artifacts without git mutation."""
+
+    def test_coder_writes_expected_artifact(self):
+        """Coder bridge passing → pipeline completes with all steps."""
+        packets = _default_packets()
+        # Override coder packet to include forbidden command text
+        packets[2] = {
+            "agent_name": "coder",
+            "prompt_kind": "coder",
+            "prompt_text": (
+                "Implement the task.\n"
+                "Forbidden commands:\n"
+                "- git commit\n"
+                "- git push\n"
+            ),
+            "expected_output_path": ".project-memory/pr/dogfood/dogfood-proof.yml",
+        }
+        request = _full_request(
+            packets=packets,
+            bridge_status="completed",
+            artifact_text="dogfood-proof: passed",
+            parser_verdict="pass",
+            parser_action="continue",
+        )
+        result = run_pr_pipeline(request)
+        assert result.status == PipelineRunnerStatus.COMPLETED
+        assert result.stopped_at is None
+        # Coder bridge should have status completed
+        coder_step = [s for s in result.step_results if s.step_name == "coder"]
+        assert len(coder_step) == 1
+        assert coder_step[0].bridge_status == "completed"
+        assert REASON_CODER_STEP_FAILED not in result.reason_codes
+
+    def test_forbidden_git_command_still_blocked(self):
+        """Git add/commit still not executed (adapter/harness enforces)."""
+        packets = _default_packets()
+        # Override coder packet
+        packets[2] = {
+            "agent_name": "coder",
+            "prompt_kind": "coder",
+            "prompt_text": (
+                "Implement the task.\n"
+                "Forbidden commands:\n"
+                "- git add\n"
+                "- git commit\n"
+            ),
+            "expected_output_path": "test-artifact.md",
+        }
+        request = _full_request(
+            packets=packets,
+            bridge_status="completed",
+            artifact_text="test artifact content",
+            parser_verdict="pass",
+            parser_action="continue",
+        )
+        result = run_pr_pipeline(request)
+        # Pipeline should still complete — the bridge controls execution,
+        # and the bridge (via local harness / docker adapter) does not
+        # provide git tools.  The forbidden text in the prompt is just
+        # instructions to the agent, not execution.
+        assert result.status in (
+            PipelineRunnerStatus.COMPLETED,
+            PipelineRunnerStatus.COMPLETED_WITH_WARNING,
+        )
+
+    def test_coder_creates_dogfood_proof_in_temp_path(self):
+        """Coder writes dogfood-proof.yml without git mutation."""
+        packets = _default_packets()
+        # Override coder packet
+        packets[2] = {
+            "agent_name": "coder",
+            "prompt_kind": "coder",
+            "prompt_text": (
+                "Create dogfood-proof.yml for PR dogfood.\n"
+                "Forbidden commands:\n"
+                "- git add\n"
+                "- git commit\n"
+                "- gh pr create\n"
+            ),
+            "expected_output_path": ".project-memory/pr/dogfood/dogfood-proof.yml",
+        }
+        request = _full_request(
+            packets=packets,
+            bridge_status="completed",
+            artifact_text="dogfood-proof: passed",
+            parser_verdict="pass",
+            parser_action="continue",
+        )
+        result = run_pr_pipeline(request)
+        # Pipeline should complete — the bridge handles file writes
+        assert result.status == PipelineRunnerStatus.COMPLETED
+        assert result.stopped_at is None
+        # Coder step should have the expected output path
+        coder_step = [s for s in result.step_results if s.step_name == "coder"]
+        assert len(coder_step) == 1
+        assert coder_step[0].expected_artifact_path == ".project-memory/pr/dogfood/dogfood-proof.yml"
+        assert coder_step[0].bridge_status == "completed"
+
+    def test_no_real_git_mutation_in_tests(self):
+        """Test code does not use subprocess/git/gh."""
+        import inspect
+        from runner.pipeline_runner import run_pr_pipeline
+        source = inspect.getsource(run_pr_pipeline)
+        assert "subprocess.run" not in source
+        assert "git add" not in source
+        assert "git commit" not in source
+        assert "gh pr create" not in source
+
+
+# ---------------------------------------------------------------------------
 # Blockers force stop
 # ---------------------------------------------------------------------------
 

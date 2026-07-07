@@ -507,6 +507,43 @@ class TestProductName:
 
 
 # ---------------------------------------------------------------------------
+# Non-mutating prompt allowed (PR 0131C)
+# ---------------------------------------------------------------------------
+
+
+class TestNonMutatingPromptAllowed:
+    """Prompt text containing git mutation references is allowed."""
+
+    def test_git_mutation_in_prompt_not_blocked(self, tmp_path: Path):
+        """Git command text in prompt no longer triggers git_mutation_not_allowed."""
+        agents_dir = _agents_dir(tmp_path)
+        prompt = (
+            "Implement a feature.\n"
+            "Forbidden commands:\n"
+            "- git commit\n"
+            "- git push\n"
+            "- pip install\n"
+            "- subprocess.run\n"
+        )
+        result = run_agent_runner_bridge(
+            agent_name="test-agent",
+            task_prompt=prompt,
+            agents_dir=agents_dir,
+            allow_docker=False,
+            output_dir=str(tmp_path),
+            clock_provider=_clock_provider,
+        )
+        # Should not be FAILED — should proceed to Docker-blocked (BLOCKED)
+        assert result.status == AgentRunnerBridgeStatus.BLOCKED
+        assert REASON_DOCKER_BLOCKED in result.reason_codes
+        # Should NOT contain git_mutation_not_allowed or hidden_reasoning_not_allowed
+        for rc in result.reason_codes:
+            assert "git_mutation" not in rc
+            assert "hidden_reasoning" not in rc
+            assert "action" not in rc
+
+
+# ---------------------------------------------------------------------------
 # No forbidden legacy names
 # ---------------------------------------------------------------------------
 

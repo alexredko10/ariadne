@@ -30,7 +30,6 @@ from runner.proof_capture import (
 )
 from runner.improvement_backlog import (
     _FORBIDDEN_HIDDEN_REASONING_PATTERNS,
-    _FORBIDDEN_ACTION_PATTERNS,
 )
 
 
@@ -123,26 +122,6 @@ REASON_HIDDEN_REASONING_NOT_ALLOWED = "hidden_reasoning_not_allowed"
 # ---------------------------------------------------------------------------
 
 _AGENT_NAME_RE = re.compile(r"^[a-zA-Z0-9_\-]+$")
-
-# ---------------------------------------------------------------------------
-# Forbidden patterns
-# ---------------------------------------------------------------------------
-
-_FORBIDDEN_MUTATION_PATTERNS: tuple[tuple[str, str], ...] = (
-    ("git add", REASON_HIDDEN_REASONING_NOT_ALLOWED),
-    ("git commit", REASON_HIDDEN_REASONING_NOT_ALLOWED),
-    ("git push", REASON_HIDDEN_REASONING_NOT_ALLOWED),
-    ("git checkout", REASON_HIDDEN_REASONING_NOT_ALLOWED),
-    ("git switch", REASON_HIDDEN_REASONING_NOT_ALLOWED),
-    ("git merge", REASON_HIDDEN_REASONING_NOT_ALLOWED),
-    ("git rebase", REASON_HIDDEN_REASONING_NOT_ALLOWED),
-    ("git reset", REASON_HIDDEN_REASONING_NOT_ALLOWED),
-    ("git clean", REASON_HIDDEN_REASONING_NOT_ALLOWED),
-    ("git tag", REASON_HIDDEN_REASONING_NOT_ALLOWED),
-    ("gh pr create", REASON_HIDDEN_REASONING_NOT_ALLOWED),
-    ("gh release", REASON_HIDDEN_REASONING_NOT_ALLOWED),
-)
-
 
 # ---------------------------------------------------------------------------
 # Resolve agent config
@@ -257,23 +236,21 @@ def build_agent_runner_execution_request(
 
 
 def _check_forbidden_patterns(text: str, codes: list[str]) -> None:
-    """Check for forbidden patterns in text."""
-    # Hidden reasoning
+    """Check for forbidden patterns in text.
+
+    Only hidden-reasoning patterns are checked here.  Mutation and action
+    patterns are not scanned against the task prompt because the prompt
+    text is composed by the trusted Prompt Composer and includes safety
+    instructions that describe forbidden commands as *descriptive text*,
+    not as executable directives.  Structural git-mutation safety is
+    enforced by:
+    - The agent environment (no real git/gh tools)
+    - Git Boundary (sole component authorized for git add/commit/push)
+    - ``PromptPacket.forbidden_commands`` metadata
+    """
     for pattern in _FORBIDDEN_HIDDEN_REASONING_PATTERNS:
         if pattern in text:
             codes.append(REASON_HIDDEN_REASONING_NOT_ALLOWED)
-            return
-
-    # Forbidden actions (command execution, provider call, git mutation)
-    for pattern, reason in _FORBIDDEN_ACTION_PATTERNS:
-        if pattern in text:
-            codes.append(reason)
-            return
-
-    # Forbidden mutation patterns (git commands, gh commands)
-    for pattern, reason in _FORBIDDEN_MUTATION_PATTERNS:
-        if pattern in text:
-            codes.append(reason)
             return
 
 
