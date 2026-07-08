@@ -267,6 +267,152 @@ def _detect_payload_artifact_path(files_to_stage: tuple[str, ...]) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Compute plan summary from request parameters
+# ---------------------------------------------------------------------------
+
+
+def _compute_plan_summary(request: AriadneTaskCliRequest) -> list[str]:
+    """Compute a deterministic command plan summary from request parameters.
+
+    Returns a list of operation names that the Git Boundary would execute.
+    This is used before Git Boundary planning to populate the proof's
+    ``command_plan_summary`` field.
+
+    Parameters
+    ----------
+    request:
+        The CLI request.
+
+    Returns
+    -------
+    list[str]
+        Ordered list of operation names.
+    """
+    operations: list[str] = []
+    operations.append("git_status")
+    if request.files_to_stage:
+        operations.append("git_add")
+    operations.append("git_commit")
+    operations.append("git_push")
+    if request.pr_title:
+        operations.append("gh_pr_create")
+    return operations
+
+
+# ---------------------------------------------------------------------------
+# Validate dogfood proof content
+# ---------------------------------------------------------------------------
+
+
+_REQUIRED_PROOF_FIELDS: tuple[str, ...] = (
+    "schema_version",
+    "pr_id",
+    "run_id",
+    "branch",
+    "invocation_mode",
+    "pipeline_status",
+    "pipeline_final_action",
+    "pipeline_has_blockers",
+    "git_boundary_status",
+    "command_plan_summary",
+    "execution_attempted",
+    "pr_created",
+    "pr_url",
+    "run_record_path",
+    "run_json_hash",
+    "artifact_hashes",
+    "approval_summary",
+    "timestamp",
+    "note",
+    "proof_artifact_ref",
+)
+
+_CRITICAL_NON_EMPTY_FIELDS: tuple[str, ...] = (
+    "pr_id",
+    "run_id",
+    "branch",
+    "proof_artifact_ref",
+)
+
+
+_ALLOWED_SENTINEL_VALUES: dict[str, tuple[str, ...]] = {
+    "pr_url": ("pending-before-gh-pr-create",),
+    "run_json_hash": ("pending",),
+}
+
+
+_WEAK_BRIDGE_PATTERNS: tuple[str, ...] = (
+    "dogfood_type: \"local-non-docker\"",
+    "bridge_task_prompt_hash:",
+    "bridge_agent_config_hash:",
+    "materialized_at:",
+)
+
+
+def _validate_dogfood_proof_content(path: str) -> tuple[bool, list[str], list[str]]:
+    """Validate a written dogfood proof file on disk.
+
+    Checks:
+    1. All 20 required fields are present
+    2. Critical fields are non-empty
+    3. No weak bridge placeholder patterns
+
+    Parameters
+    ----------
+    path:
+        Path to the proof file on disk.
+
+    Returns
+    -------
+    tuple[bool, list[str], list[str]]
+        ``(ok, reason_codes, warnings)``.
+    """
+    codes: list[str] = []
+    warnings: list[str] = []
+
+    if not os.path.exists(path):
+        codes.append("dogfood_proof_incomplete")
+        warnings.append("Proof file does not exist: " + path)
+        return False, codes, warnings
+
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            content = f.read()
+    except OSError as e:
+        codes.append("dogfood_proof_incomplete")
+        warnings.append("Cannot read proof file: " + str(e))
+        return False, codes, warnings
+
+    # Check for weak bridge placeholder patterns
+    for pattern in _WEAK_BRIDGE_PATTERNS:
+        if pattern in content:
+            codes.append("dogfood_proof_incomplete")
+            warnings.append("Weak bridge placeholder pattern found: " + pattern)
+            return False, codes, warnings
+
+    # Check all required fields are present
+    for field in _REQUIRED_PROOF_FIELDS:
+        if field + ":" not in content:
+            codes.append("dogfood_proof_incomplete")
+            warnings.append("Missing required proof field: " + field)
+
+    # Check critical non-empty fields
+    for field in _CRITICAL_NON_EMPTY_FIELDS:
+        pattern = field + ': ""'
+        if pattern in content:
+            codes.append("dogfood_proof_incomplete")
+            warnings.append("Empty critical field: " + field)
+
+    # Check command_plan_summary is not empty
+    if "command_plan_summary: []" in content:
+        codes.append("dogfood_proof_incomplete")
+        warnings.append("command_plan_summary is empty")
+
+    ok = len(codes) == 0
+    return ok, codes, warnings
+
+
+# ---------------------------------------------------------------------------
 # Dogfood proof renderer
 # ---------------------------------------------------------------------------
 
@@ -276,7 +422,7 @@ def _render_dogfood_proof_yaml(
     pipeline_final_action: Optional[str],
     pipeline_has_blockers: Optional[bool],
     pipeline_artifact_hashes: dict[str, str],
-    git_plan: Any,
+    command_plan_summary: list[str],
     request: AriadneTaskCliRequest,
     run_id: str,
     run_record_path: Optional[str],
@@ -284,12 +430,6 @@ def _render_dogfood_proof_yaml(
 ) -> str:
     """Render a dogfood proof YAML artifact from runtime context."""
     timestamp = clock_provider() if clock_provider else datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-    # Build command_plan_summary from git plan
-    if git_plan is not None:
-        command_plan_summary = [s.operation for s in git_plan.command_specs]
-    else:
-        command_plan_summary = []
 
     # Sanitize approval summary
     approved_by = request.approved_by or ""
@@ -597,6 +737,30 @@ def run_ariadne_task(
     baseline_fn = baseline_check_fn or _check_git_baseline
     branch_fn = branch_sync_fn or _check_branch_sync
 
+    # Auto-default runs_root when run_id is explicitly provided
+    if request.run_id and not request.runs_root:
+        request = AriadneTaskCliRequest(
+            task_description=request.task_description,
+            pr_id=request.pr_id,
+            branch=request.branch,
+            base_branch=request.base_branch,
+            repo_root=request.repo_root,
+            allowed_files=request.allowed_files,
+            files_to_stage=request.files_to_stage,
+            commit_message=request.commit_message,
+            pr_title=request.pr_title,
+            pr_body=request.pr_body,
+            pr_body_path=request.pr_body_path,
+            dry_run=request.dry_run,
+            execute=request.execute,
+            approve=request.approve,
+            approved_by=request.approved_by,
+            approval_reason=request.approval_reason,
+            json_output=request.json_output,
+            runs_root=".ariadne/runs",
+            run_id=request.run_id,
+        )
+
     # 1. Validate task description
     if not request.task_description or request.task_description.strip() == "":
         codes.append(REASON_MISSING_TASK_DESCRIPTION)
@@ -787,19 +951,23 @@ def run_ariadne_task(
         if request.runs_root:
             run_record_path = os.path.join(request.runs_root, run_id, "run.json")
 
+        # Compute plan summary from request params (not from git_plan, which
+        # is unavailable before Git Boundary planning)
+        plan_summary = _compute_plan_summary(request)
+
         proof_yaml = _render_dogfood_proof_yaml(
             pipeline_status=pipeline_status,
             pipeline_final_action=pipeline_final_action,
             pipeline_has_blockers=pipeline_has_blockers,
             pipeline_artifact_hashes=pipeline_artifact_hashes,
-            git_plan=None,
+            command_plan_summary=plan_summary,
             request=request,
             run_id=run_id,
             run_record_path=run_record_path,
             clock_provider=clock_provider,
         )
 
-        # Write proof to each stage-file path
+        # Write proof to each stage-file path (overwrites bridge placeholder)
         for stage_file in request.files_to_stage:
             full_path = os.path.join(request.repo_root, stage_file)
             parent_dir = os.path.dirname(full_path)
@@ -807,6 +975,37 @@ def run_ariadne_task(
                 os.makedirs(parent_dir, exist_ok=True)
             with open(full_path, "w", encoding="utf-8") as f:
                 f.write(proof_yaml)
+
+        # Validate written proof content
+        for stage_file in request.files_to_stage:
+            full_path = os.path.join(request.repo_root, stage_file)
+            proof_ok, proof_codes, proof_warnings = _validate_dogfood_proof_content(full_path)
+            codes.extend(proof_codes)
+            warnings.extend(proof_warnings)
+            if not proof_ok:
+                codes.append(REASON_DOGFOOD_PROOF_INCOMPLETE)
+                finished_at = clock_provider() if clock_provider else None
+                return _persist_and_return(
+                    request, persistence_fn, clock_provider,
+                    AriadneTaskCliResult(
+                        status=AriadneTaskCliStatus.BLOCKED,
+                        reason_codes=tuple(codes),
+                        task_description=request.task_description,
+                        task_description_hash=task_description_hash,
+                        pipeline_status=pipeline_status,
+                        pipeline_final_action=pipeline_final_action,
+                        pipeline_has_blockers=pipeline_has_blockers,
+                        git_boundary_status=None,
+                        command_plan=None,
+                        execution_attempted=False,
+                        execution_results=(),
+                        warnings=tuple(warnings),
+                        next_action="stop",
+                        started_at=started_at,
+                        finished_at=clock_provider() if clock_provider else None,
+                        details="Dogfood proof incomplete",
+                    ),
+                )
 
     # 5. Build GitBoundaryRequest
     git_request = GitBoundaryRequest(
