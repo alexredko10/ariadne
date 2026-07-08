@@ -1,0 +1,138 @@
+schema_version: "0.1"
+pr_id: "0131j-finalize-existing-tracked-dogfood-proof-before-baseline"
+review_type: precommit-review
+verdict: pass
+reviewer: precommit-review
+timestamp: "2026-07-08T20:10:00Z"
+snapshot_delta:
+  plan_base_sha: "9c45d392e3dec0195f4e8004bd2e0c2678f0f0ea"
+  current_head: "a67192a8f9ba9845ffd629f6419efe914c591d69"
+  action: continue
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - ".project-memory/pr/0131j-finalize-existing-tracked-dogfood-proof-before-baseline/reviews/precommit-review.yml"
+  actual_files:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - ".project-memory/pr/0131j-finalize-existing-tracked-dogfood-proof-before-baseline/reviews/precommit-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: in_scope
+files_checked:
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+  - "services/runner/src/runner/git_boundary.py"
+  - "agents/precommit-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0131j-finalize-existing-tracked-dogfood-proof-before-baseline/PLAN.md"
+  - ".project-memory/pr/0131j-finalize-existing-tracked-dogfood-proof-before-baseline/reviews/plan-review.yml"
+validation:
+  - command: "python -m compileall -f services/runner/src services/task_intake/src"
+    result: passed; exit_code: 0; evidence: "exit 0, all .py files compiled without syntax errors"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest [4 modules] -q"
+    result: passed; exit_code: 0; evidence: "192 passed in 0.66s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest [10 modules] -q"
+    result: passed; exit_code: 0; evidence: "409 passed in 2.01s"
+  - command: "grep ordering + safety patterns services/runner/src/runner services/runner/tests"
+    result: passed; exit_code: 0; evidence: "cleanup L931→proof finalization L932-979→baseline L993; sentinel L340; subprocess.run only for read-only git status/branch"
+  - command: "git rev-parse HEAD && git branch --show-current && git status --short && git diff --name-only"
+    result: passed; exit_code: 0; evidence: "HEAD=a67192a8; branch=0131j-finalize-existing-tracked-dogfood-proof-before-baseline; dirty=ariadne_task_cli.py+test_ariadne_task_cli.py; no forbidden changes"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Proof finalization reordered before baseline — fix verified"
+    reason: "sed L927-1050: _cleanup_runtime_residue(L931) → proof render/write/validate(L932-979) → baseline check(L993-1036). PLAN root cause confirmed and fixed."
+  - decision: "Existing tracked weak proof overwritten before baseline — verified"
+    reason: "test_fake_dogfood_run_overwrites_weak_tracked_proof(L1419): writes weak placeholder, asserts after run pr_id='test-0131i', proof_artifact_ref non-empty, bridge_task_prompt_hash absent."
+  - decision: "Bridge materialized weak proof overwritten before baseline — verified"
+    reason: "test_runtime_finalizer_overwrites_bridge_placeholder_before_git_boundary(L1570): fake planner reads proof during run; asserts complete proof fields present before git boundary."
+  - decision: "dogfood_proof_incomplete takes priority over dirty_tree_out_of_scope"
+    reason: "Proof validation L966-979 returns BLOCKED with REASON_DOGFOOD_PROOF_INCOMPLETE; baseline L993 never reached; test_dogfood_proof_incomplete_reason_emitted_for_weak_placeholder(L1921) passes."
+  - decision: "Exact stage_file allowed; arbitrary paths blocked"
+    reason: "Baseline allows_set=set(allowed_files); _is_forbidden_path blocks agents/schemas/services/task_intake/.project-memory/post-0100/ROADMAP/docs; test_dirty_baseline_ariadne_path_ignored(L2300) passes."
+  - decision: "Unrelated dirty files still block after reordering"
+    reason: "test_unrelated_untracked_file_still_blocks(L1335), test_dirty_baseline_unrelated_untracked_file_blocks(L2255) pass."
+  - decision: "0131I hygiene preserved"
+    reason: "_cleanup_runtime_residue at L931 (before proof finalization); IGNORED_BASELINE_PREFIXES=('.ariadne/',) L640; FORBIDDEN_PAYLOAD_PREFIXES=('captures/',) L639."
+  - decision: "0131H proof finalization preserved"
+    reason: "_compute_plan_summary L274 L942; _validate_dogfood_proof_content L352 L968; proof_artifact_ref L327 L481; pending-before-gh-pr-create L339 L478; pending-before-run-persist L340 (new sentinel)."
+  - decision: "Command payload constrained"
+    reason: "_is_forbidden_path blocks agents/, schemas/, services/task_intake/, .project-memory/post-0100/, ROADMAP.md, docs/; cleanup removes captures/ and generated reviews; git add argv uses only files_to_stage tuple."
+  - decision: "No frozen scope added"
+    reason: "grep confirmed: no dashboard/control-plane/retry/model-health/parallel-queue/Decision-Core/Context-Warehouse/eval/frontend in implementation."
+  - decision: "No real git/gh/Docker in production"
+    reason: "subprocess.run only for read-only git status/branch; no git add/commit/push, gh pr create, docker, pip install; test_runtime_finalizer_preserves_no_real_git_gh_docker_network_boundary(L2231) passes."
+context_used:
+  labels: [dogfood-hardening, production-line-stage-2, proof-finalization, step-ordering, pr-0131j, baseline-ordering]
+  memory_files_read:
+    - ".project-memory/pr/0131j-finalize-existing-tracked-dogfood-proof-before-baseline/PLAN.md"
+    - ".project-memory/pr/0131j-finalize-existing-tracked-dogfood-proof-before-baseline/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - "services/runner/src/runner/git_boundary.py"
+    - "agents/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "ariadne_task_cli.py: cleanup L931, proof finalization L932-979, baseline L993-1036, sentinel L340, validation L968, _compute_plan_summary L274, _validate_dogfood_proof_content L352, IGNORED_BASELINE_PREFIXES L640, FORBIDDEN_PAYLOAD_PREFIXES L639"
+    - "test_ariadne_task_cli.py: 96 test functions, key ordering tests at L1419 L1570 L1641"
+    - "git_boundary.py: _is_forbidden_path, _FORBIDDEN_PATHS, _ADDITIONAL_BLOCKED_PATHS"
+  files_modified: []
+  files_intentionally_ignored:
+    - "agent_runner_bridge.py (read-only, not in diff)"
+    - "pipeline_runner.py (read-only, not in diff)"
+    - "prompt_composer.py (read-only, not in diff)"
+    - "run_persistence.py (read-only, not in diff)"
+    - "verdict_parser.py (read-only, not in diff)"
+    - "docker_agent_adapter.py (read-only, not in diff)"
+evidence_ledger:
+  - claim: "branch correct"; evidence_source: "git branch --show-current"; exact_observed_evidence: "0131j-finalize-existing-tracked-dogfood-proof-before-baseline"; result: pass
+  - claim: "dirty tree within scope"; evidence_source: "git status --short && git diff --name-only"; exact_observed_evidence: "M ariadne_task_cli.py + M test_ariadne_task_cli.py; only approved files"; result: pass
+  - claim: "all changed files were read"; evidence_source: "read_file ariadne_task_cli.py + test_ariadne_task_cli.py"; exact_observed_evidence: "both read fully; match git diff --name-only"; result: pass
+  - claim: "required validation passed"; evidence_source: "compileall + pytest"; exact_observed_evidence: "compileall EXIT:0; 192 passed 0.66s; 409 passed 2.01s"; result: pass
+  - claim: "proof finalization before baseline"; evidence_source: "sed L927-1050 ariadne_task_cli.py"; exact_observed_evidence: "L931 cleanup → L932-979 proof finalization → L993 baseline; proof finalization BEFORE baseline confirmed"; result: pass
+  - claim: "existing tracked weak proof overwritten"; evidence_source: "test_fake_dogfood_run_overwrites_weak_tracked_proof L1419"; exact_observed_evidence: "weak placeholder (pr_id='', bridge_task_prompt_hash) overwritten; after run: pr_id='test-0131i', proof_artifact_ref non-empty, bridge fields absent"; result: pass
+  - claim: "bridge weak proof overwritten"; evidence_source: "test_runtime_finalizer_overwrites_bridge_placeholder_before_git_boundary L1570"; exact_observed_evidence: "fake planner reads proof during run; asserts complete proof fields present before git boundary"; result: pass
+  - claim: "dogfood_proof_incomplete priority"; evidence_source: "sed L966-979 vs L993-1036; test L1921"; exact_observed_evidence: "validation failure returns BLOCKED L968-979; REASON_DOGFOOD_PROOF_INCOMPLETE emitted; baseline never reached"; result: pass
+  - claim: "exact stage_file allowed"; evidence_source: "baseline allows_set; test_dirty_baseline_clean_tree_proceeds L2381"; exact_observed_evidence: "allows_set=set(allowed_files); only exact matches pass"; result: pass
+  - claim: "arbitrary paths blocked"; evidence_source: "git_boundary.py _is_forbidden_path"; exact_observed_evidence: "_is_forbidden_path blocks agents/, schemas/, services/task_intake/, .project-memory/post-0100/, ROADMAP.md, docs/"; result: pass
+  - claim: "unrelated dirty files still block"; evidence_source: "test_unrelated_* L1335-1395; test_dirty_baseline_* L2255-2315"; exact_observed_evidence: "all 7 related tests pass"; result: pass
+  - claim: "0131I hygiene preserved"; evidence_source: "sed L639-640 L931; test L1473"; exact_observed_evidence: "cleanup L931 before proof finalization; IGNORED_BASELINE_PREFIXES=('.ariadne/',) L640; FORBIDDEN_PAYLOAD_PREFIXES=('captures/',) L639"; result: pass
+  - claim: "0131H proof finalization preserved"; evidence_source: "grep primitives"; exact_observed_evidence: "_compute_plan_summary L274 L942; _validate_dogfood_proof_content L352 L968; proof_artifact_ref L327 L481; pending-before-gh-pr-create L339 L478; pending-before-run-persist L340"; result: pass
+  - claim: "command payload constrained"; evidence_source: "git_boundary.py _is_forbidden_path; grep cleanup"; exact_observed_evidence: "_is_forbidden_path blocks forbidden dirs; cleanup removes captures/ and reviews; git add argv uses only files_to_stage"; result: pass
+  - claim: "forbidden files unchanged"; evidence_source: "git diff --name-only"; exact_observed_evidence: "only ariadne_task_cli.py + test_ariadne_task_cli.py modified; no ROADMAP/docs/agents/schemas/docker/.github changes"; result: pass
+  - claim: "no frozen scope added"; evidence_source: "grep frozen stream terms"; exact_observed_evidence: "no dashboard/control-plane/retry/model-health/parallel-queue/Decision-Core/frontend in implementation"; result: pass
+  - claim: "artifact written and read back"; evidence_source: "test -f + sed"; exact_observed_evidence: "write_file path exists; test -f exits 0; sed confirms content"; result: pass
+summary: |
+  PR 0131J fixes the ordering bug causing dirty_tree_out_of_scope after 0131I.
+  Corrected order: _cleanup_runtime_residue(L931) → proof finalization
+  (render/write/validate, L932-979) → baseline check (L993-1036). Before this PR,
+  baseline ran before proof finalization, so weak bridge placeholder was seen as
+  dirty file and blocked. After this PR, complete proof is written before baseline,
+  passes allowed_set check, and proceeds to Git Boundary. Sentinel
+  pending-before-run-persist added. 0131I hygiene and 0131H primitives preserved.
+  409/409 regression tests pass. Implementation scope: ariadne_task_cli.py +
+  test_ariadne_task_cli.py only.
+checks:
+  branch: pass; plan_review_verdict: pass; dirty_tree_scope: pass; all_changed_files_read: pass
+  proof_finalization_before_baseline: pass; existing_tracked_weak_proof_overwritten: pass
+  bridge_weak_proof_overwritten: pass; dogfood_proof_incomplete_priority: pass
+  exact_stage_file_allowed: pass; arbitrary_path_blocked: pass; unrelated_dirty_blocks: pass
+  0131I_hygiene_preserved: pass; 0131H_proof_finalization_preserved: pass
+  command_payload_constrained: pass; forbidden_files_unchanged: pass; no_frozen_scope: pass
+  compileall_passed: pass; focused_tests_passed: pass; regression_tests_passed: pass
+  grep_safety_passed: pass; artifact_written: pass; artifact_read_back: pass
+boundary_confirmations:
+  - "Only precommit-review.yml artifact written; no implementation, test, PLAN, or schema files modified"
+  - "Branch confirmed: 0131j-finalize-existing-tracked-dogfood-proof-before-baseline"
+  - "Corrected order confirmed by sed L927-1050: cleanup(L931) → proof finalization(L932-979) → baseline(L993-1036)"
+  - "Priority preserved: weak proof → dogfood_proof_incomplete (before baseline); valid proof + unrelated dirty → dirty_tree_out_of_scope (at baseline)"
+  - "0131I preserved: _cleanup_runtime_residue at L931, IGNORED_BASELINE_PREFIXES=('.ariadne/',), FORBIDDEN_PAYLOAD_PREFIXES=('captures/',)"
+  - "0131H preserved: _compute_plan_summary L274, _validate_dogfood_proof_content L352, pending-before-gh-pr-create, pending-before-run-persist (new)"
+  - "No real git/gh/Docker mutation in production; only read-only subprocess.run for git status/branch"
+  - "Implementation scope: ariadne_task_cli.py + test_ariadne_task_cli.py only; no frozen scope added"
+  - "Artifact written to correct path and read back successfully"

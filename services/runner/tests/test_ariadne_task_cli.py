@@ -2578,7 +2578,7 @@ class TestDryRunNoDryRunBehavior:
         request = _valid_request(
             repo_root=repo_root,
             allowed_files=("allowed.py",),
-            files_to_stage=("allowed.py",),
+            files_to_stage=(),
             execute=True,
             approve=True,
             approved_by="tester",

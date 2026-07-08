@@ -337,7 +337,7 @@ _CRITICAL_NON_EMPTY_FIELDS: tuple[str, ...] = (
 
 _ALLOWED_SENTINEL_VALUES: dict[str, tuple[str, ...]] = {
     "pr_url": ("pending-before-gh-pr-create",),
-    "run_json_hash": ("pending",),
+    "run_json_hash": ("pending", "pending-before-run-persist"),
 }
 
 
@@ -927,64 +927,10 @@ def run_ariadne_task(
             ),
         )
 
-    # 4b. Cleanup runtime residue before baseline check
+    # 4a. Cleanup runtime residue before proof finalization
     _cleanup_runtime_residue(request.repo_root, request.pr_id)
 
-    # 4c. Git baseline check — runs when execute is requested
-    if request.execute:
-        # Check git baseline (untracked, modified, staged files)
-        baseline_ok, baseline_codes, baseline_warnings = baseline_fn(
-            repo_root=request.repo_root,
-            allowed_files=request.allowed_files,
-        )
-        codes.extend(baseline_codes)
-        warnings.extend(baseline_warnings)
-
-        # Check branch sync
-        branch_info = branch_fn(
-            repo_root=request.repo_root,
-            expected_branch=request.branch,
-        )
-        if branch_info.get("block_reason"):
-            codes.append(branch_info["block_reason"])
-            if branch_info["block_reason"] == "branch_mismatch":
-                warnings.append(
-                    "Branch mismatch: expected '" + request.branch + "'"
-                )
-            elif branch_info["block_reason"] == "branch_ahead_or_behind":
-                warnings.append(
-                    "Branch ahead=" + str(branch_info.get("ahead", 0)) + ", "
-                    "behind=" + str(branch_info.get("behind", 0))
-                )
-            else:
-                warnings.append("Branch not clean or no upstream configured")
-
-        # If baseline or branch check failed, block before Git Boundary
-        if not baseline_ok or branch_info.get("block_reason"):
-            finished_at = clock_provider() if clock_provider else None
-            return _persist_and_return(
-                request, persistence_fn, clock_provider,
-                AriadneTaskCliResult(
-                    status=AriadneTaskCliStatus.BLOCKED,
-                    reason_codes=tuple(codes),
-                    task_description=request.task_description,
-                    task_description_hash=task_description_hash,
-                    pipeline_status=pipeline_status,
-                    pipeline_final_action=pipeline_final_action,
-                    pipeline_has_blockers=pipeline_has_blockers,
-                    git_boundary_status=None,
-                    command_plan=None,
-                    execution_attempted=False,
-                    execution_results=(),
-                    warnings=tuple(warnings),
-                    next_action="stop",
-                    started_at=started_at,
-                    finished_at=finished_at,
-                    details="Git baseline check failed",
-                ),
-            )
-
-    # 4c. Render dogfood proof if files_to_stage contains a payload path
+    # 4b. Render dogfood proof (before baseline)
     if request.files_to_stage:
         run_id = request.run_id or "run-" + (task_description_hash or "unknown")
         run_record_path = None
@@ -1046,6 +992,60 @@ def run_ariadne_task(
                         details="Dogfood proof incomplete",
                     ),
                 )
+
+    # 4c. Git baseline check (sees complete proof) — runs when execute is requested
+    if request.execute:
+        # Check git baseline (untracked, modified, staged files)
+        baseline_ok, baseline_codes, baseline_warnings = baseline_fn(
+            repo_root=request.repo_root,
+            allowed_files=request.allowed_files,
+        )
+        codes.extend(baseline_codes)
+        warnings.extend(baseline_warnings)
+
+        # Check branch sync
+        branch_info = branch_fn(
+            repo_root=request.repo_root,
+            expected_branch=request.branch,
+        )
+        if branch_info.get("block_reason"):
+            codes.append(branch_info["block_reason"])
+            if branch_info["block_reason"] == "branch_mismatch":
+                warnings.append(
+                    "Branch mismatch: expected '" + request.branch + "'"
+                )
+            elif branch_info["block_reason"] == "branch_ahead_or_behind":
+                warnings.append(
+                    "Branch ahead=" + str(branch_info.get("ahead", 0)) + ", "
+                    "behind=" + str(branch_info.get("behind", 0))
+                )
+            else:
+                warnings.append("Branch not clean or no upstream configured")
+
+        # If baseline or branch check failed, block before Git Boundary
+        if not baseline_ok or branch_info.get("block_reason"):
+            finished_at = clock_provider() if clock_provider else None
+            return _persist_and_return(
+                request, persistence_fn, clock_provider,
+                AriadneTaskCliResult(
+                    status=AriadneTaskCliStatus.BLOCKED,
+                    reason_codes=tuple(codes),
+                    task_description=request.task_description,
+                    task_description_hash=task_description_hash,
+                    pipeline_status=pipeline_status,
+                    pipeline_final_action=pipeline_final_action,
+                    pipeline_has_blockers=pipeline_has_blockers,
+                    git_boundary_status=None,
+                    command_plan=None,
+                    execution_attempted=False,
+                    execution_results=(),
+                    warnings=tuple(warnings),
+                    next_action="stop",
+                    started_at=started_at,
+                    finished_at=finished_at,
+                    details="Git baseline check failed",
+                ),
+            )
 
     # 5. Build GitBoundaryRequest
     git_request = GitBoundaryRequest(
