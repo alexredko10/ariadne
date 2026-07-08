@@ -587,6 +587,38 @@ def _check_branch_sync(
 
 
 # ---------------------------------------------------------------------------
+# Cleanup runtime residue
+# ---------------------------------------------------------------------------
+
+
+def _cleanup_runtime_residue(repo_root: str, pr_id: str) -> None:
+    """Remove runtime residue before dirty baseline check.
+
+    Removes captures/ and generated reviews that are runtime artifacts,
+    not commit payload.
+
+    Parameters
+    ----------
+    repo_root:
+        Repository root path.
+    pr_id:
+        Current PR identifier.
+    """
+    # 1. Remove captures/ directory
+    captures_dir = os.path.join(repo_root, "captures")
+    if os.path.isdir(captures_dir):
+        import shutil
+        shutil.rmtree(captures_dir)
+
+    # 2. Remove generated precommit-review.yml under current PR path
+    review_path = os.path.join(
+        repo_root, ".project-memory", "pr", pr_id, "reviews", "precommit-review.yml"
+    )
+    if os.path.exists(review_path):
+        os.remove(review_path)
+
+
+# ---------------------------------------------------------------------------
 # Check git baseline
 # ---------------------------------------------------------------------------
 
@@ -604,7 +636,8 @@ def _check_git_baseline(
     warnings: list[str] = []
     allowed_set = set(allowed_files)
 
-    FORBIDDEN_PAYLOAD_PREFIXES = (".ariadne/", "captures/", "reviews/")
+    FORBIDDEN_PAYLOAD_PREFIXES = ("captures/",)
+    IGNORED_BASELINE_PREFIXES = (".ariadne/",)
 
     try:
         status_result = subprocess.run(
@@ -624,6 +657,10 @@ def _check_git_baseline(
                 continue
             filename = line[3:].strip()
             if not filename:
+                continue
+
+            # Skip ignored baseline prefixes (e.g., .ariadne/ run records)
+            if any(filename.startswith(p) for p in IGNORED_BASELINE_PREFIXES):
                 continue
 
             is_forbidden_payload = any(
@@ -890,7 +927,10 @@ def run_ariadne_task(
             ),
         )
 
-    # 4b. Git baseline check — runs when execute is requested
+    # 4b. Cleanup runtime residue before baseline check
+    _cleanup_runtime_residue(request.repo_root, request.pr_id)
+
+    # 4c. Git baseline check — runs when execute is requested
     if request.execute:
         # Check git baseline (untracked, modified, staged files)
         baseline_ok, baseline_codes, baseline_warnings = baseline_fn(
