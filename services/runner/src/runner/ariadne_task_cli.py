@@ -650,12 +650,12 @@ def _check_git_baseline(
             return False, codes, warnings
 
         for line in status_result.stdout.splitlines():
-            line = line.strip()
-            if not line:
+            raw = line.rstrip('\n\r')
+            if not raw:
                 continue
-            if len(line) < 4:
+            if len(raw) < 4:
                 continue
-            filename = line[3:].strip()
+            filename = raw[3:].rstrip()
             if not filename:
                 continue
 
