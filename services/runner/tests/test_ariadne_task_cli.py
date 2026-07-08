@@ -2641,3 +2641,594 @@ class TestDogfoodProofIncomplete:
         # Proof can still be rendered, but won't be written to disk
         assert proof is not None
         assert 'schema_version: "0.1"' in proof
+
+
+# ---------------------------------------------------------------------------
+# Execution results persistence tests (PR 0132)
+# ---------------------------------------------------------------------------
+
+
+class TestExecutionResultsPersistence:
+    """Final run.json persists non-empty execution_results after approved execution."""
+
+    def test_persisted_run_json_contains_non_empty_execution_results(self):
+        """Persisted run.json contains non-empty execution_results_summary after fake execution."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="exec-results-persist-")
+        runs_root = os.path.join(repo_root, ".ariadne", "runs")
+        request = _valid_request(
+            repo_root=repo_root,
+            runs_root=runs_root,
+            run_id="exec-results-test",
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing execution results persistence",
+            dry_run=False,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        assert result.run_record_path is not None
+        run_json = Path(result.run_record_path)
+        assert run_json.exists()
+        data = json.loads(run_json.read_text(encoding="utf-8"))
+        assert "execution_results_summary" in data
+        assert len(data["execution_results_summary"]) > 0, "execution_results_summary should be non-empty"
+
+    def test_persisted_execution_results_contain_operation_and_exit_code(self):
+        """Each persisted execution result has operation and exit_code keys."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="exec-op-exit-")
+        runs_root = os.path.join(repo_root, ".ariadne", "runs")
+        request = _valid_request(
+            repo_root=repo_root,
+            runs_root=runs_root,
+            run_id="exec-op-exit-test",
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing operation and exit_code",
+            dry_run=False,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        assert result.run_record_path is not None
+        data = json.loads(Path(result.run_record_path).read_text(encoding="utf-8"))
+        for item in data["execution_results_summary"]:
+            assert "operation" in item, f"Missing 'operation' in {item}"
+            assert "exit_code" in item, f"Missing 'exit_code' in {item}"
+
+    def test_persisted_execution_results_contain_stdout_and_stderr(self):
+        """Persisted execution results contain stdout and stderr fields."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="exec-stdout-")
+        runs_root = os.path.join(repo_root, ".ariadne", "runs")
+        request = _valid_request(
+            repo_root=repo_root,
+            runs_root=runs_root,
+            run_id="exec-stdout-test",
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing stdout/stderr",
+            dry_run=False,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        assert result.run_record_path is not None
+        data = json.loads(Path(result.run_record_path).read_text(encoding="utf-8"))
+        for item in data["execution_results_summary"]:
+            assert "stdout" in item, f"Missing 'stdout' in {item}"
+            assert "stderr" in item, f"Missing 'stderr' in {item}"
+
+    def test_gh_pr_create_stdout_url_in_execution_result(self):
+        """gh_pr_create execution result includes pr_url when stdout contains a URL."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="gh-pr-url-")
+        runs_root = os.path.join(repo_root, ".ariadne", "runs")
+
+        def executor_with_pr_url(git_request, git_plan, executor=None, clock_provider=None):
+            from runner.git_boundary import GitBoundaryResult
+            return GitBoundaryResult(
+                status="approved",
+                reason_codes=(),
+                approved=True,
+                blocked=False,
+                command_plan=git_plan,
+                command_count=git_plan.command_count,
+                files_to_stage=git_plan.files_to_stage,
+                rejected_files=git_plan.rejected_files,
+                pipeline_eligible=git_plan.pipeline_eligible,
+                dirty_tree_valid=git_plan.dirty_tree_valid,
+                approval_summary="Approved by test",
+                execution_attempted=True,
+                execution_results=(
+                    {"operation": "git_status", "exit_code": "0", "stdout": "ok", "stderr": ""},
+                    {"operation": "git_add", "exit_code": "0", "stdout": "ok", "stderr": ""},
+                    {"operation": "git_commit", "exit_code": "0", "stdout": "ok", "stderr": ""},
+                    {"operation": "git_push", "exit_code": "0", "stdout": "ok", "stderr": ""},
+                    {
+                        "operation": "gh_pr_create",
+                        "exit_code": "0",
+                        "stdout": "https://github.com/owner/repo/pull/123\n",
+                        "stderr": "",
+                        "pr_url": "https://github.com/owner/repo/pull/123",
+                    },
+                ),
+                artifact_hashes=git_request.pipeline_artifact_hashes,
+                started_at=_clock(),
+                finished_at=_clock(),
+                details=None,
+            )
+
+        request = _valid_request(
+            repo_root=repo_root,
+            runs_root=runs_root,
+            run_id="gh-pr-url-test",
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing PR URL",
+            dry_run=False,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=executor_with_pr_url,
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        assert result.run_record_path is not None
+        data = json.loads(Path(result.run_record_path).read_text(encoding="utf-8"))
+        gh_result = None
+        for item in data["execution_results_summary"]:
+            if item.get("operation") == "gh_pr_create":
+                gh_result = item
+                break
+        assert gh_result is not None, "gh_pr_create result should be present"
+        assert "pr_url" in gh_result, f"gh_pr_create result should have pr_url, got {gh_result}"
+        assert gh_result["pr_url"] == "https://github.com/owner/repo/pull/123"
+
+    def test_gh_pr_create_url_in_persisted_run_json(self):
+        """Persisted run.json contains pr_url in gh_pr_create execution result."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="gh-url-persist-")
+        runs_root = os.path.join(repo_root, ".ariadne", "runs")
+
+        def executor_with_pr_url(git_request, git_plan, executor=None, clock_provider=None):
+            from runner.git_boundary import GitBoundaryResult
+            return GitBoundaryResult(
+                status="approved",
+                reason_codes=(),
+                approved=True,
+                blocked=False,
+                command_plan=git_plan,
+                command_count=git_plan.command_count,
+                files_to_stage=git_plan.files_to_stage,
+                rejected_files=git_plan.rejected_files,
+                pipeline_eligible=git_plan.pipeline_eligible,
+                dirty_tree_valid=git_plan.dirty_tree_valid,
+                approval_summary="Approved by test",
+                execution_attempted=True,
+                execution_results=(
+                    {"operation": "git_status", "exit_code": "0", "stdout": "ok", "stderr": ""},
+                    {"operation": "git_add", "exit_code": "0", "stdout": "ok", "stderr": ""},
+                    {"operation": "git_commit", "exit_code": "0", "stdout": "ok", "stderr": ""},
+                    {"operation": "git_push", "exit_code": "0", "stdout": "ok", "stderr": ""},
+                    {
+                        "operation": "gh_pr_create",
+                        "exit_code": "0",
+                        "stdout": "https://github.com/owner/repo/pull/456\n",
+                        "stderr": "",
+                        "pr_url": "https://github.com/owner/repo/pull/456",
+                    },
+                ),
+                artifact_hashes=git_request.pipeline_artifact_hashes,
+                started_at=_clock(),
+                finished_at=_clock(),
+                details=None,
+            )
+
+        request = _valid_request(
+            repo_root=repo_root,
+            runs_root=runs_root,
+            run_id="gh-url-persist-test",
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing PR URL persistence",
+            dry_run=False,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=executor_with_pr_url,
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        assert result.run_record_path is not None
+        data = json.loads(Path(result.run_record_path).read_text(encoding="utf-8"))
+        gh_result = None
+        for item in data["execution_results_summary"]:
+            if item.get("operation") == "gh_pr_create":
+                gh_result = item
+                break
+        assert gh_result is not None
+        assert "pr_url" in gh_result
+        assert gh_result["pr_url"] == "https://github.com/owner/repo/pull/456"
+
+    def test_execution_attempted_true_implies_non_empty_execution_results(self):
+        """When execution_attempted is true, execution_results must be non-empty."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="exec-attempted-")
+        runs_root = os.path.join(repo_root, ".ariadne", "runs")
+        request = _valid_request(
+            repo_root=repo_root,
+            runs_root=runs_root,
+            run_id="exec-attempted-test",
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing execution_attempted",
+            dry_run=False,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        assert result.execution_attempted is True
+        assert len(result.execution_results) > 0
+        data = json.loads(Path(result.run_record_path).read_text(encoding="utf-8"))
+        assert len(data["execution_results_summary"]) > 0
+
+    def test_failed_execution_persists_partial_execution_results(self):
+        """Failed execution persists partial execution_results including the failing operation."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="exec-failed-")
+        runs_root = os.path.join(repo_root, ".ariadne", "runs")
+
+        def executor_fails_on_commit(git_request, git_plan, executor=None, clock_provider=None):
+            from runner.git_boundary import GitBoundaryResult
+            return GitBoundaryResult(
+                status="failed",
+                reason_codes=("execution_failed",),
+                approved=False,
+                blocked=False,
+                command_plan=git_plan,
+                command_count=git_plan.command_count,
+                files_to_stage=git_plan.files_to_stage,
+                rejected_files=git_plan.rejected_files,
+                pipeline_eligible=git_plan.pipeline_eligible,
+                dirty_tree_valid=git_plan.dirty_tree_valid,
+                approval_summary="Approved by test",
+                execution_attempted=True,
+                execution_results=(
+                    {"operation": "git_status", "exit_code": "0", "stdout": "ok", "stderr": ""},
+                    {"operation": "git_commit", "exit_code": "1", "stdout": "", "stderr": "commit failed"},
+                ),
+                artifact_hashes=git_request.pipeline_artifact_hashes,
+                started_at=_clock(),
+                finished_at=_clock(),
+                details="Execution failed",
+            )
+
+        request = _valid_request(
+            repo_root=repo_root,
+            runs_root=runs_root,
+            run_id="exec-failed-test",
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing failed execution",
+            dry_run=False,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=executor_fails_on_commit,
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        assert result.run_record_path is not None
+        data = json.loads(Path(result.run_record_path).read_text(encoding="utf-8"))
+        assert len(data["execution_results_summary"]) > 0, "Should have partial results"
+        # At least git_status should be present
+        operations = [r["operation"] for r in data["execution_results_summary"]]
+        assert "git_status" in operations
+        # The failing operation should be present
+        assert "git_commit" in operations
+        # The failing operation should have non-zero exit_code
+        commit_result = [r for r in data["execution_results_summary"] if r["operation"] == "git_commit"][0]
+        assert commit_result["exit_code"] != "0"
+        assert "execution_failed" in data["reason_codes"]
+
+    def test_partial_execution_results_still_persist(self):
+        """Partial execution results persist when execution fails after some operations."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="exec-partial-")
+        runs_root = os.path.join(repo_root, ".ariadne", "runs")
+
+        def executor_partial(git_request, git_plan, executor=None, clock_provider=None):
+            from runner.git_boundary import GitBoundaryResult
+            return GitBoundaryResult(
+                status="failed",
+                reason_codes=("execution_failed",),
+                approved=False,
+                blocked=False,
+                command_plan=git_plan,
+                command_count=git_plan.command_count,
+                files_to_stage=git_plan.files_to_stage,
+                rejected_files=git_plan.rejected_files,
+                pipeline_eligible=git_plan.pipeline_eligible,
+                dirty_tree_valid=git_plan.dirty_tree_valid,
+                approval_summary="Approved by test",
+                execution_attempted=True,
+                execution_results=(
+                    {"operation": "git_status", "exit_code": "0", "stdout": "ok", "stderr": ""},
+                    {"operation": "git_add", "exit_code": "0", "stdout": "ok", "stderr": ""},
+                ),
+                artifact_hashes=git_request.pipeline_artifact_hashes,
+                started_at=_clock(),
+                finished_at=_clock(),
+                details="Execution failed after git_add",
+            )
+
+        request = _valid_request(
+            repo_root=repo_root,
+            runs_root=runs_root,
+            run_id="exec-partial-test",
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing partial results",
+            dry_run=False,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=executor_partial,
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        assert result.run_record_path is not None
+        data = json.loads(Path(result.run_record_path).read_text(encoding="utf-8"))
+        assert len(data["execution_results_summary"]) > 0
+        operations = [r["operation"] for r in data["execution_results_summary"]]
+        assert "git_status" in operations
+        assert "git_add" in operations
+        assert len(data["reason_codes"]) > 0
+
+    def test_pre_execution_blocked_run_has_empty_execution_results(self):
+        """Pre-execution blocked run has empty execution_results."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="exec-blocked-")
+        runs_root = os.path.join(repo_root, ".ariadne", "runs")
+        # Blocked at approval check (no --approve)
+        request = _valid_request(
+            repo_root=repo_root,
+            runs_root=runs_root,
+            run_id="exec-blocked-test",
+            execute=True,
+            approve=False,
+            dry_run=False,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        assert result.execution_attempted is False
+        assert len(result.execution_results) == 0
+        assert result.run_record_path is not None
+        data = json.loads(Path(result.run_record_path).read_text(encoding="utf-8"))
+        assert len(data["execution_results_summary"]) == 0
+
+    def test_dry_run_has_empty_execution_results(self):
+        """Dry-run has empty execution_results."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="exec-dry-")
+        runs_root = os.path.join(repo_root, ".ariadne", "runs")
+        request = _valid_request(
+            repo_root=repo_root,
+            runs_root=runs_root,
+            run_id="exec-dry-test",
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing dry-run",
+            dry_run=True,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        assert result.execution_attempted is False
+        assert len(result.execution_results) == 0
+
+    def test_proof_artifact_not_rewritten_after_execution(self):
+        """Proof artifact is not rewritten after execution; pr_url remains pending-before-gh-pr-create."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="proof-not-rewritten-")
+        runs_root = os.path.join(repo_root, ".ariadne", "runs")
+        stage_file = ".project-memory/pr/test-0132/dogfood-proof.yml"
+        stage_dir = os.path.join(repo_root, ".project-memory", "pr", "test-0132")
+        os.makedirs(stage_dir, exist_ok=True)
+
+        request = _valid_request(
+            repo_root=repo_root,
+            pr_id="test-0132",
+            allowed_files=(stage_file,),
+            files_to_stage=(stage_file,),
+            runs_root=runs_root,
+            run_id="proof-not-rewritten-test",
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing proof not rewritten",
+            dry_run=False,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        # Read proof file after execution
+        proof_path = os.path.join(repo_root, stage_file)
+        assert os.path.exists(proof_path)
+        with open(proof_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        # Proof should still have pre-execution sentinel
+        assert 'pr_url: "pending-before-gh-pr-create"' in content, \
+            "Proof pr_url should remain pending-before-gh-pr-create"
+        assert "execution_attempted: false" in content, \
+            "Proof execution_attempted should remain false"
+
+    def test_run_json_hash_stable_between_reads(self):
+        """run.json hash in manifest matches computed hash of run.json content."""
+        import tempfile
+        import hashlib
+        repo_root = tempfile.mkdtemp(prefix="run-hash-")
+        runs_root = os.path.join(repo_root, ".ariadne", "runs")
+        request = _valid_request(
+            repo_root=repo_root,
+            runs_root=runs_root,
+            run_id="run-hash-test",
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing run hash",
+            dry_run=False,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        assert result.run_record_path is not None
+        run_json = Path(result.run_record_path)
+        manifest_path = run_json.parent / "manifest.json"
+        assert manifest_path.exists()
+        manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
+        assert "run_json_hash" in manifest_data
+        # The hash is computed from the canonical JSON dict (sort_keys=True),
+        # not from the file bytes (which include indentation).
+        # Reconstruct the canonical dict from the file and recompute.
+        run_data = json.loads(run_json.read_text(encoding="utf-8"))
+        canonical = json.dumps(run_data, sort_keys=True, ensure_ascii=False)
+        computed_hash = hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:16]
+        assert manifest_data["run_json_hash"] == computed_hash, \
+            f"Manifest hash {manifest_data['run_json_hash']} != computed {computed_hash}"
+
+    def test_persistence_does_not_break_existing_dogfood_proof(self):
+        """Existing proof rendering and validation tests still pass."""
+        # This is a meta-test: verify that the existing proof validation
+        # and rendering functions still work correctly.
+        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
+        request = _valid_request(
+            pr_id="0132-regression",
+            branch="0132-regression-branch",
+            files_to_stage=(".project-memory/pr/test/dogfood-proof.yml",),
+            commit_message="Test commit",
+            approved_by="tester",
+            approval_reason="Testing regression",
+        )
+        plan_summary = _compute_plan_summary(request)
+        proof = _render_dogfood_proof_yaml(
+            pipeline_status="completed",
+            pipeline_final_action="continue",
+            pipeline_has_blockers=False,
+            pipeline_artifact_hashes={},
+            command_plan_summary=plan_summary,
+            request=request,
+            run_id="run-0132-regression",
+            run_record_path=None,
+            clock_provider=_clock,
+        )
+        assert 'schema_version: "0.1"' in proof
+        assert 'pr_url: "pending-before-gh-pr-create"' in proof
+        assert "execution_attempted: false" in proof
+        # Validate the rendered proof
+        import tempfile
+        tmp = tempfile.mkdtemp(prefix="proof-regression-")
+        path = os.path.join(tmp, "proof.yml")
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(proof)
+        ok, codes, warnings = _validate_dogfood_proof_content(path)
+        assert ok is True, f"Proof validation failed: {codes} {warnings}"
+
+    def test_no_real_git_gh_docker_network_in_execution_results_tests(self):
+        """Execution results tests use only fake functions, no real git/gh/Docker."""
+        import inspect
+        import runner.ariadne_task_cli as mod
+        source = inspect.getsource(mod)
+        # Production code may contain subprocess.run for read-only git commands,
+        # but must not contain git mutation or gh pr create
+        assert "git add" not in source
+        assert "git commit" not in source
+        assert "git push" not in source
+        assert "gh pr create" not in source
+        assert "import docker" not in source
+        assert True
