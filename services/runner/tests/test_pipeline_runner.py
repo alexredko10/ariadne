@@ -1504,7 +1504,7 @@ class TestPipelineRunnerNoMissingReviewArtifact:
         assert "status: \"completed\"" in content
 
     def test_no_real_pr_artifacts_created_in_tests(self, tmp_path):
-        """Assert no real 0131 dogfood artifacts exist after test."""
+        """No real PR 0131 dogfood artifacts created or mutated during test."""
         from runner.agent_runner_bridge import run_agent_runner_bridge
 
         agents_dir = tmp_path / "agents"
@@ -1616,11 +1616,39 @@ class TestPipelineRunnerNoMissingReviewArtifact:
             PipelineRunnerStatus.COMPLETED,
             PipelineRunnerStatus.COMPLETED_WITH_WARNING,
         )
-        # Verify no real PR 0131 artifacts exist
+
+        # Snapshot existing real dogfood proof (committed by #150)
         real_dogfood_proof = Path(".project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml")
         real_precommit = Path(".project-memory/pr/0131-dogfood-pr-created-by-ariadne/reviews/precommit-review.yml")
-        assert not real_dogfood_proof.exists()
-        assert not real_precommit.exists()
+
+        dogfood_snapshot = real_dogfood_proof.read_text(encoding="utf-8") if real_dogfood_proof.exists() else None
+        precommit_snapshot = real_precommit.read_text(encoding="utf-8") if real_precommit.exists() else None
+
+        # Assert unchanged: if artifact existed before test, it must still exist
+        # with identical content.  If it did not exist, it must still not exist.
+        if dogfood_snapshot is not None:
+            assert real_dogfood_proof.exists()
+            assert real_dogfood_proof.read_text(encoding="utf-8") == dogfood_snapshot
+        else:
+            assert not real_dogfood_proof.exists()
+
+        if precommit_snapshot is not None:
+            assert real_precommit.exists()
+            assert real_precommit.read_text(encoding="utf-8") == precommit_snapshot
+        else:
+            assert not real_precommit.exists()
+
+        # Verify no new files were created under real PR path during test
+        real_pr_dir = Path(".project-memory/pr/0131-dogfood-pr-created-by-ariadne")
+        expected_files = {"PLAN.md", "dogfood-proof.yml", "reviews/plan-review.yml"}
+        actual_files = set()
+        if real_pr_dir.exists():
+            for f in real_pr_dir.rglob("*"):
+                if f.is_file():
+                    rel = f.relative_to(real_pr_dir)
+                    actual_files.add(str(rel))
+        # Only expected committed files; no new generated artifacts
+        assert actual_files.issubset(expected_files), f"Unexpected files: {actual_files - expected_files}"
 
 
 # ---------------------------------------------------------------------------
