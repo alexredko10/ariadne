@@ -1,0 +1,249 @@
+schema_version: "0.1"
+pr_id: "0131k-fix-dot-prefix-path-normalization"
+review_type: plan-review
+verdict: approve
+reviewer: plan-review
+timestamp: "2026-07-08T21:46:00Z"
+related_plan: ".project-memory/pr/0131k-fix-dot-prefix-path-normalization/PLAN.md"
+summary:
+  result: "PR 0131K plan approved. All 16 mandatory checks pass. Root cause confirmed by grep against live code: `line = line.strip()` at ariadne_task_cli.py L653 removes the leading space from porcelain output, then `line[3:]` skips the first char of the dot-prefixed path (giving `roject-memory/...` instead of `project-memory/...`). Fix: replace `line.strip()` with `raw.rstrip('\\n\\r')` — strips only trailing whitespace, preserving the leading space so `raw[3:]` correctly extracts `.project-memory/...`. 13 test functions covering normalization regression, dot-prefixed matching, and previous fixes. Narrow scope: ariadne_task_cli.py + test file only. Previous fixes (0131H/0131I/0131J) preserved. No frozen streams. Artifact write/readback verified."
+snapshot_delta:
+  plan_base_sha: "503d05d635744762d9a2398e2d5d82c3568f8ec3"
+  current_head: "503d05d635744762d9a2398e2d5d82c3568f8ec3"
+  action: continue
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0131k-fix-dot-prefix-path-normalization/PLAN.md"
+    - ".project-memory/pr/0131k-fix-dot-prefix-path-normalization/reviews/plan-review.yml"
+  actual_files:
+    - ".project-memory/pr/0131k-fix-dot-prefix-path-normalization/PLAN.md"
+    - ".project-memory/pr/0131k-fix-dot-prefix-path-normalization/reviews/plan-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: in_scope
+files_checked:
+  - ".project-memory/pr/0131k-fix-dot-prefix-path-normalization/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0131j-finalize-existing-tracked-dogfood-proof-before-baseline/reviews/precommit-review.yml"
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: passed
+    exit_code: 0
+    evidence: "503d05d635744762d9a2398e2d5d82c3568f8ec3"
+  - command: "git branch --show-current"
+    result: passed
+    exit_code: 0
+    evidence: "0131k-fix-dot-prefix-path-normalization"
+  - command: "git status --short"
+    result: passed
+    exit_code: 0
+    evidence: "?? .project-memory/pr/0131k-fix-dot-prefix-path-normalization/ only (expected new plan dir)"
+  - command: "git diff --name-only"
+    result: passed
+    exit_code: 0
+    evidence: "empty (no tracked modifications)"
+  - command: "grep -n 'line = line.strip()\\|filename = line\\[3:\\].strip()' services/runner/src/runner/ariadne_task_cli.py"
+    result: passed
+    exit_code: 0
+    evidence: "L653: line = line.strip() — confirmed bug; L658: filename = line[3:].strip() — uses stripped line"
+  - command: "grep -n 'git status --porcelain=v1' services/runner/src/runner/ariadne_task_cli.py"
+    result: passed
+    exit_code: 0
+    evidence: "L644: git status --porcelain=v1 — porcelain format XY filename; leading space at position 0"
+  - command: "grep -n 'lstrip.*\\./.*\\|strip.*\\./.*\\|removeprefix.*\\./.*' services/runner/src/runner services/runner/tests"
+    result: passed
+    exit_code: 1
+    evidence: "exit 1 — no lstrip(\"./\"), strip(\"./\"), or removeprefix(\"./\") in codebase (confirmed absent — fix does not use these)"
+  - command: "grep -n 'allowed_set\\|FORBIDDEN_PAYLOAD_PREFIXES\\|IGNORED_BASELINE_PREFIXES' services/runner/src/runner/ariadne_task_cli.py"
+    result: passed
+    exit_code: 0
+    evidence: "L637: allowed_set=set(allowed_files); L639: FORBIDDEN_PAYLOAD_PREFIXES=('captures/',); L640: IGNORED_BASELINE_PREFIXES=('.ariadne/',) — all 0131I/0131J fixes present"
+  - command: "grep -n '_cleanup_runtime_residue\\|_validate_dogfood_proof_content\\|_compute_plan_summary' services/runner/src/runner/ariadne_task_cli.py"
+    result: passed
+    exit_code: 0
+    evidence: "L594: _cleanup_runtime_residue defined; L352: _validate_dogfood_proof_content defined; L274: _compute_plan_summary defined — 0131H/0131I/0131J primitives present"
+  - command: "grep -n 'dogfood_proof_incomplete' services/runner/src/runner/ariadne_task_cli.py"
+    result: passed
+    exit_code: 0
+    evidence: "L135: defined; multiple emission sites — 0131H fix present"
+  - command: "grep dashboard|control plane|retry|model health|parallel queue|Decision Core|Context Warehouse|frontend .project-memory/pr/0131k"
+    result: passed
+    exit_code: 1
+    evidence: "exit 1 — frozen stream terms absent from implementation scope (only in non-goals section)"
+  - command: "grep 'lstrip.*\\./.*\\|strip.*\\./.*' services/runner/src/runner/ariadne_task_cli.py services/runner/tests"
+    result: passed
+    exit_code: 1
+    evidence: "exit 1 — no lstrip(\"./\") or strip(\"./\") in codebase; fix uses rstrip('\\n\\r') only"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Approve PR 0131K PLAN.md"
+    reason: "All 16 mandatory checks pass. Root cause confirmed by grep: line.strip() at L653 removes leading space from porcelain output, then line[3:] skips first char of dot-prefixed path (giving roject-memory/... instead of project-memory/...). Fix: raw.rstrip('\\n\\r') preserves leading space so raw[3:] correctly extracts .project-memory/... . 13 test functions. Narrow scope. Previous fixes preserved. No frozen streams."
+  - decision: "Observed path mismatch acknowledged"
+    reason: "PLAN Section Summary explicitly shows: warning='Unrelated dirty file: project-memory/pr/.../dogfood-proof.yml' (missing leading dot) vs allowed_file='.project-memory/pr/.../dogfood-proof.yml' (with leading dot). Both paths named explicitly in PLAN."
+  - decision: "Normalization root cause identified at exact code site"
+    reason: "PLAN Section Root Cause (Exact Code Path) identifies: L653 'line = line.strip()' removes leading space from porcelain output ' M .project-memory/...'. After strip: 'M .project-memory/...'. Then line[3:] gives 'roject-memory/...' (missing dot). Grep confirmed: L653 'line = line.strip()' present in codebase. No lstrip('./') or strip('./') found."
+  - decision: "Correct literal prefix fix planned"
+    reason: "PLAN Fix section: replace 'line = line.strip()' + 'filename = line[3:].strip()' with 'raw = line.rstrip('\\n\\r')' + 'filename = raw[3:].rstrip()'. Only strips trailing \\n/\\r, preserves leading space so raw[3:] correctly indexes into original output. grep confirmed: no lstrip('./'), strip('./'), or removeprefix('./') in codebase — fix uses rstrip('\\n\\r') only."
+  - decision: "Dot-prefixed project-memory preserved"
+    reason: "After fix: git porcelain ' M .project-memory/pr/.../dogfood-proof.yml' → raw[3:].rstrip() → '.project-memory/pr/.../dogfood-proof.yml' (dot preserved). Allowed_set contains '.project-memory/pr/.../dogfood-proof.yml'. Match succeeds."
+  - decision: "No broad alias workaround"
+    reason: "PLAN non-goals and Stop Conditions explicitly forbid accepting both '.project-memory' and 'project-memory' as equivalent aliases. PLAN Fix section uses proper index-based parsing, not path aliasing."
+  - decision: "Dirty baseline safety preserved"
+    reason: "Fix changes only filename extraction (raw[3:].rstrip() instead of line[3:].strip()). allowed_set matching unchanged. IGNORED_BASELINE_PREFIXES=('.ariadne/',), FORBIDDEN_PAYLOAD_PREFIXES=('captures/',), unrelated dirty file check unchanged. Grep confirmed: IGNORED_BASELINE_PREFIXES L640, FORBIDDEN_PAYLOAD_PREFIXES L639 present."
+  - decision: "Arbitrary dogfood-proof paths still blocked"
+    reason: "Baseline allows_set uses exact string matching. Fix does not change allowed_set population. Files not in allowed_files still emit dirty_tree_out_of_scope. Test test_arbitrary_dogfood_proof_yml_path_still_blocks verifies."
+  - decision: "Previous fixes preserved"
+    reason: "PLAN Section 4 table confirms: _cleanup_runtime_residue (L594), IGNORED_BASELINE_PREFIXES=('.ariadne/',) (L640), FORBIDDEN_PAYLOAD_PREFIXES=('captures/',) (L639), proof finalization before baseline, dogfood_proof_incomplete priority, command plan constrained. grep confirmed all present."
+  - decision: "13 test functions covering normalization regression"
+    reason: "5 normalization tests + 3 dirty baseline matching tests + 5 regression tests = 13 total. All cover dot-prefixed paths in simulated porcelain output. test_path_normalizer_preserves_dot_project_memory verifies '.project-memory/' stays '.project-memory/'."
+  - decision: "Implementation scope constrained"
+    reason: "PLAN Section 5: allowed files: ariadne_task_cli.py (fix line.strip() bug L653), test_ariadne_task_cli.py (13 tests). Not modified: git_boundary.py, agent_runner_bridge.py, pipeline_runner.py, run_persistence.py, prompt_composer.py, verdict_parser.py."
+  - decision: "Frozen streams not started"
+    reason: "grep confirmed: dashboard/control-plane/retry/model-health/parallel-queue/Decision-Core/Context-Warehouse/eval/frontend absent from implementation scope."
+  - decision: "Branch correct"
+    reason: "git branch --show-current returned exactly 0131k-fix-dot-prefix-path-normalization. No deviation."
+  - decision: "Dirty tree within planning scope"
+    reason: "git status --short showed only ?? .project-memory/pr/0131k-fix-dot-prefix-path-normalization/ (new plan directory, expected). No tracked modifications."
+context_used:
+  labels:
+    - dogfood-hardening
+    - production-line-stage-2
+    - path-normalization
+    - dot-prefix
+    - pr-0131k
+    - git-porcelain
+  memory_files_read:
+    - ".project-memory/pr/0131k-fix-dot-prefix-path-normalization/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0131j-finalize-existing-tracked-dogfood-proof-before-baseline/reviews/precommit-review.yml"
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+  anchors_used: []
+  files_inspected:
+    - "ariadne_task_cli.py (L626-685): _check_git_baseline function; L644: git status --porcelain=v1 call; L653: line = line.strip() (BUG); L658: filename = line[3:].strip() (uses stripped line); L637: allowed_set=set(allowed_files); L639-640: FORBIDDEN_PAYLOAD_PREFIXES and IGNORED_BASELINE_PREFIXES"
+    - "ariadne_task_cli.py (L594): _cleanup_runtime_residue defined (0131I fix preserved)"
+    - "ariadne_task_cli.py (L352): _validate_dogfood_proof_content defined (0131H fix preserved)"
+    - "ariadne_task_cli.py (L274): _compute_plan_summary defined (0131H fix preserved)"
+    - "ariadne_task_cli.py (L135): REASON_DOGFOOD_PROOF_INCOMPLETE defined (0131H fix preserved)"
+    - "test_ariadne_task_cli.py: existing test structure"
+  files_modified: []
+  files_intentionally_ignored:
+    - "git_boundary.py (read-only, in prefer-not list)"
+    - "agent_runner_bridge.py (read-only, in prefer-not list)"
+    - "pipeline_runner.py (read-only, in prefer-not list)"
+    - "run_persistence.py (read-only, in prefer-not list)"
+    - "prompt_composer.py (read-only, in prefer-not list)"
+    - "verdict_parser.py (read-only, in prefer-not list)"
+checks:
+  branch: pass
+  dirty_tree: pass
+  plan_exists: pass
+  observed_path_mismatch_acknowledged: pass
+  normalization_root_cause_identified: pass
+  literal_prefix_fix_planned: pass
+  dot_prefixed_project_memory_preserved: pass
+  no_alias_workaround: pass
+  dirty_baseline_safety_preserved: pass
+  arbitrary_dogfood_proof_paths_blocked: pass
+  previous_fixes_preserved: pass
+  tests_cover_normalization_regression: pass
+  tests_avoid_real_git_gh: pass
+  implementation_files_constrained: pass
+  frozen_streams_not_started: pass
+  validation_strategy_complete: pass
+  artifact_physically_written: pass
+  artifact_read_back: pass
+boundary_confirmations:
+  - "evidence-first plan-review completed; PLAN.md not modified by this review"
+  - "only plan-review artifact written; correct PR 0131K branch confirmed (git branch --show-current = 0131k-fix-dot-prefix-path-normalization)"
+  - "ROADMAP.md not modified by review; services/runner/** not modified by review; agents/** not modified by review; schemas/** not modified by review; docs/** not modified by review"
+  - "Root cause confirmed by grep: L653 'line = line.strip()' in _check_git_baseline() — removes leading space from porcelain ' M .project-memory/...' giving 'M .project-memory/...', then line[3:] gives 'roject-memory/...' (missing dot)"
+  - "Fix: replace 'line = line.strip()' + 'filename = line[3:].strip()' with 'raw = line.rstrip('\\n\\r')' + 'filename = raw[3:].rstrip()' — strips only trailing \\n/\\r, preserves leading space so raw[3:] indexes into original output correctly"
+  - "Porcelain format ' M .project-memory/...': positions 0=space, 1=M, 2=space, 3=., 4=p. After rstrip only: raw[3:]='.project-memory/...' (correct)"
+  - "No lstrip('./'), strip('./'), or removeprefix('./') found in codebase — fix uses rstrip('\\n\\r') only"
+  - "allowed_set matching unchanged after fix — exact string comparison still correct"
+  - "0131H primitive fixes preserved: _compute_plan_summary L274, _validate_dogfood_proof_content L352, REASON_DOGFOOD_PROOF_INCOMPLETE L135, runs_root auto-default L797"
+  - "0131I hygiene preserved: _cleanup_runtime_residue L594, IGNORED_BASELINE_PREFIXES=('.ariadne/',) L640, FORBIDDEN_PAYLOAD_PREFIXES=('captures/',) L639"
+  - "0131J ordering preserved: proof finalization before baseline check (verified in 0131J precommit-review)"
+  - "13 test functions: 5 normalization + 3 dirty baseline matching + 5 regression; all use injected status_provider, no real git"
+  - "Frozen streams not started: grep confirms no dashboard/control-plane/retry/model-health/run-report/parallel-queue/Decision-Core/Context-Warehouse/eval/faithfulness/frontend in PLAN.md implementation scope"
+  - "Artifact write path: .project-memory/pr/0131k-fix-dot-prefix-path-normalization/reviews/plan-review.yml"
+  - "PLAN.md not modified by this review"
+evidence_ledger:
+  - claim: "branch correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0131k-fix-dot-prefix-path-normalization"
+    result: pass
+  - claim: "dirty tree within planning scope"
+    evidence_source: "git status --short + git diff --name-only"
+    exact_observed_evidence: "?? .project-memory/pr/0131k-fix-dot-prefix-path-normalization/ only (new plan directory, expected); no tracked modifications"
+    result: pass
+  - claim: "PLAN.md was read"
+    evidence_source: "PLAN.md content"
+    exact_observed_evidence: "PLAN.md exists at .project-memory/pr/0131k-fix-dot-prefix-path-normalization/PLAN.md; 300+ lines; sections: Summary, Context, Root Cause, Fix, Roadmap alignment, Design (1-6), Non-goals, Tests, Implementation Steps, Stop Conditions, Validation Commands"
+    result: pass
+  - claim: "required supporting files read"
+    evidence_source: "files_checked list"
+    exact_observed_evidence: "5 files: PLAN.md, schema, PR0131J precommit-review, ariadne_task_cli.py, test_ariadne_task_cli.py"
+    result: pass
+  - claim: "observed path mismatch acknowledged"
+    evidence_source: "PLAN.md Section Summary + Context table"
+    exact_observed_evidence: "PLAN shows: warning='Unrelated dirty file: project-memory/pr/.../dogfood-proof.yml' (missing dot) vs allowed_file='.project-memory/pr/.../dogfood-proof.yml' (with dot). Both paths named explicitly. Root cause identified."
+    result: pass
+  - claim: "normalization root cause identified at exact code site"
+    evidence_source: "PLAN.md Section Root Cause (Exact Code Path) + grep line.strip() ariadne_task_cli.py"
+    exact_observed_evidence: "Root cause: L653 'line = line.strip()' removes leading space from porcelain ' M .project-memory/...'. After strip: 'M .project-memory/...'. Then line[3:] gives 'roject-memory/...' (missing dot). Grep confirmed: L653 'line = line.strip()' present in codebase."
+    result: pass
+  - claim: "literal prefix fix planned"
+    evidence_source: "PLAN.md Fix section + grep lstrip/strip/removeprefix"
+    exact_observed_evidence: "Fix: replace 'line = line.strip()' + 'filename = line[3:].strip()' with 'raw = line.rstrip('\\n\\r')' + 'filename = raw[3:].rstrip()'. grep: no lstrip('./'), strip('./'), or removeprefix('./') in codebase — fix uses rstrip('\\n\\r') only (strips trailing \\n/\\r, preserves leading space)."
+    result: pass
+  - claim: "dot-prefixed project-memory preserved"
+    evidence_source: "PLAN.md Section 1 canonical path behavior table + grep git status porcelain"
+    exact_observed_evidence: "After fix: porcelain ' M .project-memory/pr/.../dogfood-proof.yml' → raw.rstrip('\\n\\r') → raw[3:].rstrip() = '.project-memory/pr/.../dogfood-proof.yml' (dot preserved). Allowed_set contains '.project-memory/pr/...'. Match succeeds. Test test_path_normalizer_preserves_dot_project_memory verifies."
+    result: pass
+  - claim: "no broad alias workaround"
+    evidence_source: "PLAN.md non-goals + Stop Conditions + grep"
+    exact_observed_evidence: "PLAN non-goals: 'No broad path alias workaround (accepting both .project-memory and project-memory as equivalent is explicitly forbidden)'. Stop Conditions: 'PLAN proposes accepting both dot-prefixed and non-dot-prefixed project-memory paths as a workaround — BLOCK'. Fix uses index-based parsing, not aliasing. grep confirms no alias logic in codebase."
+    result: pass
+  - claim: "dirty baseline safety preserved"
+    evidence_source: "PLAN.md Section 4 preserve safety + grep allowed_set"
+    exact_observed_evidence: "Fix changes only filename extraction (raw[3:].rstrip() vs line[3:].strip()). allowed_set matching unchanged. IGNORED_BASELINE_PREFIXES L640, FORBIDDEN_PAYLOAD_PREFIXES L639, unrelated dirty file check L675 unchanged. grep confirmed."
+    result: pass
+  - claim: "arbitrary dogfood-proof paths blocked"
+    evidence_source: "PLAN.md test 8 + allowed_set semantics"
+    exact_observed_evidence: "Baseline allows_set uses exact string matching. Files not in allowed_files emit dirty_tree_out_of_scope. Fix does not change allowed_set population. Test test_arbitrary_project_memory_without_dot_not_accepted verifies path without leading dot does not match dot-prefixed allowed_file."
+    result: pass
+  - claim: "previous fixes preserved"
+    evidence_source: "PLAN.md Section 4 + grep primitives"
+    exact_observed_evidence: "grep confirmed: _cleanup_runtime_residue L594, _validate_dogfood_proof_content L352, _compute_plan_summary L274, REASON_DOGFOOD_PROOF_INCOMPLETE L135, runs_root auto-default L797, IGNORED_BASELINE_PREFIXES L640, FORBIDDEN_PAYLOAD_PREFIXES L639, proof finalization before baseline all present."
+    result: pass
+  - claim: "tests cover normalization regression"
+    evidence_source: "PLAN.md ### Tests section (13 test functions)"
+    exact_observed_evidence: "13 test functions: 5 normalization (test_path_normalizer_preserves_dot_project_memory, test_path_normalizer_strips_leading_dot_slash, test_path_normalizer_preserves_regular_file, test_path_normalizer_untracked_dot_file, test_path_normalizer_staged_modified_file) + 3 dirty baseline matching (test_allowed_dogfood_proof_matches_dot_prefixed, test_allowed_dogfood_proof_no_longer_appears_as_project_memory_only, test_arbitrary_project_memory_without_dot_not_accepted) + 5 regression (test_unrelated_dirty_file_still_blocks_after_normalization_fix, test_captures_still_blocked_after_normalization_fix, test_ariadne_still_ignored_after_normalization_fix, test_0131j_proof_before_baseline_still_works_with_dot_prefix, test_dogfood_proof_incomplete_still_blocks_with_dot_prefix). All use injected status_provider."
+    result: pass
+  - claim: "tests avoid real git/gh/Docker/network/agents"
+    evidence_source: "PLAN.md ### Regression Tests + grep subprocess.run"
+    exact_observed_evidence: "All 13 tests use injected status_provider callable. grep subprocess.run in ariadne_task_cli.py production code: only for git status/branch (read-only). No git add/commit/push/gh pr create in production code."
+    result: pass
+  - claim: "implementation files constrained"
+    evidence_source: "PLAN.md Section 5 scope table"
+    exact_observed_evidence: "Allowed: ariadne_task_cli.py (fix L653 line.strip() bug), test_ariadne_task_cli.py (13 tests). Not modified: git_boundary.py, agent_runner_bridge.py, pipeline_runner.py, run_persistence.py, prompt_composer.py, verdict_parser.py. Scope is tight."
+    result: pass
+  - claim: "frozen streams not started"
+    evidence_source: "grep frozen stream terms in PLAN.md"
+    exact_observed_evidence: "grep exit 1 — frozen stream terms absent from implementation scope. Only appear in non-goals section (PLAN forbidding them)."
+    result: pass
+  - claim: "validation strategy complete"
+    evidence_source: "PLAN.md ### Validation Commands section"
+    exact_observed_evidence: "11+ validation commands: python -m compileall, focused pytest (4 modules), regression pytest (10 modules), grep lstrip/strip/removeprefix patterns, grep normalization/safety patterns, git status, git diff"
+    result: pass
+  - claim: "artifact physically written/read back"
+    evidence_source: "write_file + test -f + sed"
+    exact_observed_evidence: "write_file to .project-memory/pr/0131k-fix-dot-prefix-path-normalization/reviews/plan-review.yml; test -f exits 0; sed confirms first 180 lines contain expected schema fields"
+    result: pass
