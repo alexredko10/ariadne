@@ -1,0 +1,144 @@
+schema_version: "0.1"
+pr_id: "0132-persist-final-execution-results"
+review_type: precommit-review
+verdict: pass
+reviewer: precommit-review
+timestamp: "2026-07-09T00:30:00Z"
+head_verified: "b18ff75d339a54201675f1095828db6909431bbe"
+branch_confirmed: "0132-persist-final-execution-results"
+snapshot_delta:
+  plan_base_sha: "7e25f05523788197207fe37cd174be208954f5bc"
+  current_head: "b18ff75d339a54201675f1095828db6909431bbe"
+  action: continue
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - ".project-memory/pr/0132-persist-final-execution-results/reviews/precommit-review.yml"
+  actual_files:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - ".project-memory/pr/0132-persist-final-execution-results/reviews/precommit-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: in_scope
+files_checked:
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/src/runner/git_boundary.py"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0132-persist-final-execution-results/PLAN.md"
+  - ".project-memory/pr/0132-persist-final-execution-results/reviews/plan-review.yml"
+  - ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml"
+validation:
+  - command: "python -m compileall -f services/runner/src services/task_intake/src"
+    result: passed; exit_code: 0; evidence: "EXIT:0, all .py compiled"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest [4 modules] -q"
+    result: passed; exit_code: 0; evidence: "173 passed in 0.65s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest [10 modules] -q"
+    result: passed; exit_code: 0; evidence: "423 passed in 1.93s"
+  - command: "grep pr_url _execute_git_command_spec ariadne_task_cli.py"
+    result: passed; exit_code: 0; evidence: "L720-723: output['pr_url'] = url for gh_pr_create stdout"
+  - command: "grep frozen terms in implementation || true"
+    result: passed; exit_code: 0; evidence: "Only in PLAN.md non-goals list; absent from implementation"
+  - command: "git rev-parse HEAD && git branch --show-current && git status --short && git diff --name-only"
+    result: passed; exit_code: 0; evidence: "HEAD=b18ff75d; branch=0132-persist-final-execution-results; dirty: ariadne_task_cli.py + test_ariadne_task_cli.py"
+blockers: []
+warnings:
+  - id: "OPTIONAL_PRODUCTION_ENHANCEMENT"
+    description: "PR URL extraction is implemented as an optional enhancement (PLAN Step 1). Tests verify the enhancement works correctly with fake executors. No production code defect was fixed — the data path was already correct; tests prove readback works."
+    recommendation: "None needed — enhancement is present and tested."
+commit_readiness: ready
+decisions_made:
+  - decision: "Production PR URL extraction implemented and tested"
+    reason: "_execute_git_command_spec L720-723: when spec.operation=='gh_pr_create' and exit_code==0 and stdout has URL starting with 'http', output['pr_url'] = url. test_gh_pr_create_stdout_url_in_execution_result (L2748) and test_gh_pr_create_url_in_persisted_run_json (L2819) verify."
+  - decision: "Persisted run.json readback tests prove non-empty execution_results_summary"
+    reason: "test_persisted_run_json_contains_non_empty_execution_results (L2654): reads back run.json, asserts execution_results_summary non-empty. test_persisted_execution_results_contain_operation_and_exit_code (L2686): verifies operation and exit_code fields."
+  - decision: "operation and exit_code persisted correctly"
+    reason: "test_persisted_execution_results_contain_operation_and_exit_code (L2686): iterates execution_results_summary, asserts each has 'operation' and 'exit_code'."
+  - decision: "stdout and stderr persisted correctly"
+    reason: "test_persisted_execution_results_contain_stdout_and_stderr (L2717): asserts each result has 'stdout' and 'stderr'."
+  - decision: "Partial execution results preserved on failure"
+    reason: "test_failed_execution_persists_partial_execution_results (L2920): executor returns partial results; persisted run.json contains git_status, failing git_commit with exit_code != 0."
+  - decision: "Pre-execution blocked runs have empty execution_results"
+    reason: "test_pre_execution_blocked_run_has_empty_execution_results (L3043): no --approve → blocked; execution_results=(), persisted run.json execution_results_summary=[]."
+  - decision: "Proof artifact not rewritten after execution"
+    reason: "test_proof_artifact_not_rewritten_after_execution (L3101): reads proof before/after execution; pr_url remains 'pending-before-gh-pr-create' sentinel."
+  - decision: "Git Boundary authority preserved"
+    reason: "git_boundary.py not in scope; execution flow unchanged except PR URL extraction in _execute_git_command_spec."
+  - decision: "No frozen scope added"
+    reason: "grep frozen terms returns only PLAN.md non-goals list; not in implementation."
+  - decision: "Previous PRs 0131H/I/J/K preserved"
+    reason: "grep confirms: _cleanup_runtime_residue L594, proof finalization L931-979, IGNORED_BASELINE_PREFIXES L640, FORBIDDEN_PAYLOAD_PREFIXES L639, dogfood_proof_incomplete L135, _compute_plan_summary L274, pending-before-run-persist L340."
+context_used:
+  labels: [dogfood-hardening, production-line-stage-2, execution-results-persistence, pr-0132]
+  memory_files_read:
+    - ".project-memory/pr/0132-persist-final-execution-results/PLAN.md"
+    - ".project-memory/pr/0132-persist-final-execution-results/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml"
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - "services/runner/src/runner/run_persistence.py"
+    - "services/runner/src/runner/git_boundary.py"
+  anchors_used: []
+  files_inspected:
+    - "ariadne_task_cli.py: _execute_git_command_spec L691-726 with PR URL extraction L720-723; execution_results flow L1204-1270; _persist_and_return L1295-1400"
+    - "test_ariadne_task_cli.py: 110 tests (96+14 new); new tests at L2654-L3195"
+    - "run_persistence.py: execution_results_summary L256-257; load_run_record L489-490"
+    - "git_boundary.py: execution_results builder L514-533; unchanged"
+  files_modified: []
+  files_intentionally_ignored:
+    - "run_persistence.py (data path correct, not in scope)"
+    - "git_boundary.py (unchanged, not in scope)"
+    - "agent_runner_bridge.py (not in scope)"
+    - "pipeline_runner.py (not in scope)"
+    - "prompt_composer.py (not in scope)"
+    - "verdict_parser.py (not in scope)"
+checks:
+  branch_correct: pass; plan_exists_readable: pass; dirty_tree_scope: pass
+  changed_files_read: pass; persisted_readback_proven: pass
+  operation_fields_proven: pass; stdout_stderr_proven: pass
+  partial_results_proven: pass; pre_execution_blocked_proven: pass
+  proof_not_rewritten: pass; git_boundary_authority_preserved: pass
+  no_real_git_gh_docker: pass; 0131H_preserved: pass; 0131I_preserved: pass
+  0131J_preserved: pass; 0131K_preserved: pass
+  compileall_passed: pass; focused_tests_passed: pass; regression_passed: pass
+  frozen_scope_absent: pass; artifact_written: pass; artifact_read_back: pass
+evidence_ledger:
+  - claim: "branch correct"; evidence_source: "git branch --show-current"; exact_observed_evidence: "0132-persist-final-execution-results"; result: pass
+  - claim: "dirty tree within scope"; evidence_source: "git status --short && git diff --name-only"; exact_observed_evidence: "M ariadne_task_cli.py + M test_ariadne_task_cli.py; no forbidden changes"; result: pass
+  - claim: "all changed files were read"; evidence_source: "read_file ariadne_task_cli.py + test_ariadne_task_cli.py"; exact_observed_evidence: "both files read fully"; result: pass
+  - claim: "persisted run.json readback proven"; evidence_source: "test_persisted_run_json_contains_non_empty_execution_results L2654"; exact_observed_evidence: "L2683: assert 'execution_results_summary' in data; L2684: assert len > 0"; result: pass
+  - claim: "operation and exit_code proven"; evidence_source: "test_persisted_execution_results_contain_operation_and_exit_code L2686"; exact_observed_evidence: "L2713-2717: for item in data['execution_results_summary']: assert 'operation' in item, assert 'exit_code' in item"; result: pass
+  - claim: "stdout stderr proven"; evidence_source: "test_persisted_execution_results_contain_stdout_and_stderr L2717"; exact_observed_evidence: "L2744-2748: assert 'stdout' in item, assert 'stderr' in item"; result: pass
+  - claim: "pr_url extraction implemented"; evidence_source: "grep pr_url ariadne_task_cli.py"; exact_observed_evidence: "L720-723: if spec.operation=='gh_pr_create' and returncode==0 and stdout: url=stdout.strip().split('\\n')[0]; if url.startswith('http'): output['pr_url']=url"; result: pass
+  - claim: "gh_pr_create pr_url in execution result verified"; evidence_source: "test_gh_pr_create_stdout_url_in_execution_result L2748"; exact_observed_evidence: "L2816-2817: assert 'pr_url' in gh_result and equals expected URL"; result: pass
+  - claim: "gh_pr_create pr_url persisted verified"; evidence_source: "test_gh_pr_create_url_in_persisted_run_json L2819"; exact_observed_evidence: "L2882-2888: reads run.json, finds gh_pr_create result, asserts pr_url matches"; result: pass
+  - claim: "partial execution results preserved"; evidence_source: "test_failed_execution_persists_partial_execution_results L2920"; exact_observed_evidence: "L2971-2977: git_status present, git_commit present with exit_code != 0"; result: pass
+  - claim: "pre-execution blocked has empty execution_results"; evidence_source: "test_pre_execution_blocked_run_has_empty_execution_results L3043"; exact_observed_evidence: "L3066: execution_attempted is False; L3067: len(execution_results)==0; L3071: data['execution_results_summary']==[]"; result: pass
+  - claim: "proof artifact not rewritten"; evidence_source: "test_proof_artifact_not_rewritten_after_execution L3101"; exact_observed_evidence: "pr_url remains 'pending-before-gh-pr-create' sentinel after execution"; result: pass
+  - claim: "previous PRs 0131H/I/J/K preserved"; evidence_source: "grep primitives"; exact_observed_evidence: "_cleanup_runtime_residue L594, proof finalization L931-979, IGNORED_BASELINE_PREFIXES L640, FORBIDDEN_PAYLOAD_PREFIXES L639, dogfood_proof_incomplete L135, _compute_plan_summary L274, pending-before-run-persist L340"; result: pass
+  - claim: "validation passed"; evidence_source: "compileall + pytest"; exact_observed_evidence: "compileall EXIT:0; 173 focused passed; 423 regression passed"; result: pass
+  - claim: "forbidden files unchanged"; evidence_source: "git diff --name-only"; exact_observed_evidence: "only ariadne_task_cli.py + test_ariadne_task_cli.py modified; no ROADMAP/docs/agents/schemas/docker changes"; result: pass
+  - claim: "no frozen scope added"; evidence_source: "grep frozen terms in implementation"; exact_observed_evidence: "Only in PLAN.md non-goals; absent from implementation"; result: pass
+  - claim: "artifact written and read back"; evidence_source: "test -f + sed"; exact_observed_evidence: "test -f exits 0; sed confirms content"; result: pass
+boundary_confirmations:
+  - "Only precommit-review.yml artifact written; no implementation, test, PLAN, or schema files modified"
+  - "Branch confirmed: 0132-persist-final-execution-results"
+  - "Dirty tree within scope: only ariadne_task_cli.py + test_ariadne_task_cli.py modified"
+  - "PR URL extraction: _execute_git_command_spec L720-723 adds pr_url from gh_pr_create stdout when exit_code==0 and URL starts with 'http'"
+  - "Persisted readback: test_persisted_run_json_contains_non_empty_execution_results (L2654) reads run.json and asserts execution_results_summary non-empty"
+  - "operation/exit_code: test_persisted_execution_results_contain_operation_and_exit_code (L2686) iterates and verifies each result has 'operation' and 'exit_code'"
+  - "stdout/stderr: test_persisted_execution_results_contain_stdout_and_stderr (L2717) verifies each result has 'stdout' and 'stderr'"
+  - "gh_pr_create pr_url in execution result: test_gh_pr_create_stdout_url_in_execution_result (L2748) + test_gh_pr_create_url_in_persisted_run_json (L2819)"
+  - "Partial results on failure: test_failed_execution_persists_partial_execution_results (L2920) proves partial results persisted with failing exit_code"
+  - "Pre-execution blocked: test_pre_execution_blocked_run_has_empty_execution_results (L3043) proves execution_results=[] when no --approve"
+  - "Proof not rewritten: test_proof_artifact_not_rewritten_after_execution (L3101) proves pr_url sentinel preserved after execution"
+  - "Git Boundary authority preserved: git_boundary.py not in scope; execution flow unchanged except PR URL extraction"
+  - "0131H/I/J/K preserved: _cleanup_runtime_residue, proof finalization before baseline, IGNORED_BASELINE_PREFIXES, FORBIDDEN_PAYLOAD_PREFIXES, dogfood_proof_incomplete, pending-before-run-persist all confirmed present"
+  - "No real git/gh/Docker in production; subprocess.run only for read-only git status/branch"
+  - "Artifact written to correct path and read back successfully"

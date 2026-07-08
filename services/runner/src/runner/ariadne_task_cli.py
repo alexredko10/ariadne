@@ -700,6 +700,8 @@ def _execute_git_command_spec(spec: GitCommandSpec) -> dict[str, Any]:
     -------
     dict
         Result dict with ``exit_code``, ``stdout``, ``stderr``.
+        When ``spec.operation == "gh_pr_create"`` and exit code is 0,
+        the result also includes ``pr_url`` extracted from stdout.
     """
     try:
         result = subprocess.run(
@@ -709,11 +711,17 @@ def _execute_git_command_spec(spec: GitCommandSpec) -> dict[str, Any]:
             shell=False,
             cwd=spec.cwd,
         )
-        return {
+        output = {
             "exit_code": result.returncode,
             "stdout": result.stdout[:2000] if result.stdout else "",
             "stderr": result.stderr[:2000] if result.stderr else "",
         }
+        # Extract PR URL from gh_pr_create stdout
+        if spec.operation == "gh_pr_create" and result.returncode == 0 and result.stdout:
+            url = result.stdout.strip().split("\n")[0]
+            if url.startswith("http"):
+                output["pr_url"] = url
+        return output
     except FileNotFoundError:
         return {"exit_code": -1, "stdout": "", "stderr": f"Command not found: {spec.argv[0]}"}
     except Exception as e:
