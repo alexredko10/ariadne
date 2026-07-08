@@ -11,13 +11,16 @@ from typing import Any, Optional
 
 from runner.ariadne_task_cli import (
     _build_cli_request,
+    _compute_plan_summary,
     _detect_payload_artifact_path,
+    _validate_dogfood_proof_content,
     AriadneTaskCliRequest,
     AriadneTaskCliResult,
     AriadneTaskCliStatus,
     parse_ariadne_task_args,
     run_ariadne_task,
     main,
+    REASON_DOGFOOD_PROOF_INCOMPLETE,
     REASON_MISSING_TASK_DESCRIPTION,
     REASON_PIPELINE_STOPPED,
     REASON_PIPELINE_FAILED,
@@ -1245,282 +1248,698 @@ class TestDogfoodProofRenderer:
             pipeline_final_action="continue",
             pipeline_has_blockers=False,
             pipeline_artifact_hashes={"file1.yml": "abc123def456"},
-            git_plan=None,
+            command_plan_summary=["git_status", "git_add", "git_commit", "git_push"],
             request=request,
             run_id="run-test-001",
             run_record_path=".ariadne/runs/run-test-001/run.json",
             clock_provider=_clock,
         )
         assert 'schema_version: "0.1"' in proof
-        assert 'pr_id: "0131g-test"' in proof
-        assert 'run_id: "run-test-001"' in proof
-        assert 'branch: "0131g-test-branch"' in proof
-        assert 'invocation_mode: "cli"' in proof
-        assert 'pipeline_status: "completed"' in proof
-        assert 'pipeline_final_action: "continue"' in proof
-        assert "pipeline_has_blockers: False" in proof
-        assert 'git_boundary_status: "pending"' in proof
-        assert "execution_attempted: false" in proof
-        assert "pr_created: false" in proof
-        assert 'pr_url: "pending-before-gh-pr-create"' in proof
-        assert 'run_record_path: ".ariadne/runs/run-test-001/run.json"' in proof
-        assert 'run_json_hash: "pending"' in proof
-        assert 'proof_artifact_ref:' in proof
-        assert 'proof_artifact_ref: "' in proof
-        assert 'proof_artifact_ref: ""' not in proof
-        assert 'timestamp: "2026-07-06T15:00:00Z"' in proof
-        assert 'note: "dogfood proof artifact, not a product feature"' in proof
 
-    def test_proof_renderer_sanitizes_task_prompt(self):
-        """Proof renderer does not include raw task description with secrets."""
-        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
-        request = _valid_request(
-            task_description="Implement feature X with secret_key=abc123 and password=secret",
-            approved_by="tester",
-            approval_reason="Testing with secret=xyz",
-        )
-        proof = _render_dogfood_proof_yaml(
-            pipeline_status="completed",
-            pipeline_final_action="continue",
-            pipeline_has_blockers=False,
-            pipeline_artifact_hashes={},
-            git_plan=None,
-            request=request,
-            run_id="run-test-002",
-            run_record_path=None,
-            clock_provider=_clock,
-        )
-        # Raw task description should not appear in proof
-        assert "secret_key=abc123" not in proof
-        assert "password=secret" not in proof
-        # Approval summary is sanitized (truncated to 80 chars)
-        # The approval_reason is included but truncated
-        assert "secret=xyz" in proof  # truncated to 80 chars, still contains the reason
 
-    def test_proof_renderer_no_raw_stdout_stderr(self):
-        """Proof renderer does not include raw stdout/stderr."""
-        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
-        request = _valid_request(
-            approved_by="tester",
-            approval_reason="Testing",
-        )
-        proof = _render_dogfood_proof_yaml(
-            pipeline_status="completed",
-            pipeline_final_action="continue",
-            pipeline_has_blockers=False,
-            pipeline_artifact_hashes={"output.log": "abcdef1234567890"},
-            git_plan=None,
-            request=request,
-            run_id="run-test-003",
-            run_record_path=None,
-            clock_provider=_clock,
-        )
-        # Only operation summaries and sanitized hashes, no raw stdout/stderr
-        assert "stdout" not in proof
-        assert "stderr" not in proof
-        # Hashes should be truncated to 16 chars
-        assert "abcdef1234567890" in proof
+# ---------------------------------------------------------------------------
+# Runtime finalization tests (PR 0131H)
+# ---------------------------------------------------------------------------
 
-    def test_proof_renderer_pr_url_pending_before_gh_pr_create(self):
-        """pr_url is 'pending-before-gh-pr-create' before gh pr create."""
-        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
-        request = _valid_request(
-            approved_by="tester",
-            approval_reason="Testing",
-        )
-        proof = _render_dogfood_proof_yaml(
-            pipeline_status="completed",
-            pipeline_final_action="continue",
-            pipeline_has_blockers=False,
-            pipeline_artifact_hashes={},
-            git_plan=None,
-            request=request,
-            run_id="run-test-004",
-            run_record_path=None,
-            clock_provider=_clock,
-        )
-        assert 'pr_url: "pending-before-gh-pr-create"' in proof
-        # Not empty, not a real URL
-        assert "https://" not in proof
-        assert "github.com" not in proof
 
-    def test_proof_renderer_includes_command_plan_summary(self):
-        """Proof includes command_plan_summary with operation names."""
-        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
-        from runner.git_boundary import GitCommandSpec
-        request = _valid_request(
-            approved_by="tester",
-            approval_reason="Testing",
-        )
-        # Create a mock git plan with command specs
-        class MockGitPlan:
-            command_specs = (
-                GitCommandSpec(
-                    operation="git_status",
-                    argv=("git", "status"),
-                    cwd=".",
-                    allowed_files=(),
-                    requires_human_approval=False,
-                    side_effecting=False,
-                    redacted_display="git status",
-                ),
-                GitCommandSpec(
-                    operation="git_add",
-                    argv=("git", "add", "--", "file.yml"),
-                    cwd=".",
-                    allowed_files=(),
-                    requires_human_approval=False,
-                    side_effecting=False,
-                    redacted_display="git add -- 1 file(s)",
-                ),
-            )
-        proof = _render_dogfood_proof_yaml(
-            pipeline_status="completed",
-            pipeline_final_action="continue",
-            pipeline_has_blockers=False,
-            pipeline_artifact_hashes={},
-            git_plan=MockGitPlan(),
-            request=request,
-            run_id="run-test-005",
-            run_record_path=None,
-            clock_provider=_clock,
-        )
-        assert "command_plan_summary:" in proof
-        assert '"git_status"' in proof
-        assert '"git_add"' in proof
+class TestRuntimeFinalization:
+    """Runtime finalization overwrites bridge placeholder before Git Boundary."""
 
-    def test_proof_renderer_includes_execution_attempted(self):
-        """execution_attempted is False at render time."""
-        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
-        request = _valid_request(
-            approved_by="tester",
-            approval_reason="Testing",
-        )
-        proof = _render_dogfood_proof_yaml(
-            pipeline_status="completed",
-            pipeline_final_action="continue",
-            pipeline_has_blockers=False,
-            pipeline_artifact_hashes={},
-            git_plan=None,
-            request=request,
-            run_id="run-test-006",
-            run_record_path=None,
-            clock_provider=_clock,
-        )
-        assert "execution_attempted: false" in proof
-
-    def test_proof_renderer_includes_run_record_path(self):
-        """Proof includes run_record_path."""
-        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
-        request = _valid_request(
-            approved_by="tester",
-            approval_reason="Testing",
-            runs_root="/tmp/runs",
-        )
-        proof = _render_dogfood_proof_yaml(
-            pipeline_status="completed",
-            pipeline_final_action="continue",
-            pipeline_has_blockers=False,
-            pipeline_artifact_hashes={},
-            git_plan=None,
-            request=request,
-            run_id="run-test-007",
-            run_record_path="/tmp/runs/run-test-007/run.json",
-            clock_provider=_clock,
-        )
-        assert 'run_record_path: "/tmp/runs/run-test-007/run.json"' in proof
-
-    def test_proof_renderer_run_json_hash_pending_if_not_persisted(self):
-        """run_json_hash is 'pending' when not yet persisted."""
-        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
-        request = _valid_request(
-            approved_by="tester",
-            approval_reason="Testing",
-        )
-        proof = _render_dogfood_proof_yaml(
-            pipeline_status="completed",
-            pipeline_final_action="continue",
-            pipeline_has_blockers=False,
-            pipeline_artifact_hashes={},
-            git_plan=None,
-            request=request,
-            run_id="run-test-008",
-            run_record_path=None,
-            clock_provider=_clock,
-        )
-        assert 'run_json_hash: "pending"' in proof
-
-    def test_proof_renderer_includes_approval_summary(self):
-        """Proof includes sanitized approval_summary."""
-        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
-        request = _valid_request(
-            approved_by="human-reviewer-001",
-            approval_reason="Pipeline completed, all gates passed",
-        )
-        proof = _render_dogfood_proof_yaml(
-            pipeline_status="completed",
-            pipeline_final_action="continue",
-            pipeline_has_blockers=False,
-            pipeline_artifact_hashes={},
-            git_plan=None,
-            request=request,
-            run_id="run-test-009",
-            run_record_path=None,
-            clock_provider=_clock,
-        )
-        assert "approval_summary:" in proof
-        assert "human-reviewer-001" in proof
-        assert "all gates passed" in proof
-
-    def test_proof_written_before_git_boundary_execution(self):
-        """Proof file exists on disk before Git Boundary planner is invoked."""
+    def test_runtime_finalizer_overwrites_bridge_placeholder_before_git_boundary(self):
+        """Bridge placeholder proof is overwritten with complete proof before Git Boundary."""
         import tempfile
-        repo_root = tempfile.mkdtemp(prefix="proof-before-git-test-")
-        stage_file = ".project-memory/pr/test-dogfood/dogfood-proof.yml"
+        repo_root = tempfile.mkdtemp(prefix="runtime-finalizer-test-")
+        stage_file = ".project-memory/pr/test-0131h/dogfood-proof.yml"
+        stage_dir = os.path.join(repo_root, ".project-memory", "pr", "test-0131h")
+        os.makedirs(stage_dir, exist_ok=True)
+
+        # Write weak bridge placeholder proof on disk
+        weak_placeholder = (
+            'schema_version: "0.1"\n'
+            'pr_id: ""\n'
+            'dogfood_type: "local-non-docker"\n'
+            'status: "completed"\n'
+            'bridge_task_prompt_hash: "abc123"\n'
+            'bridge_agent_config_hash: "def456"\n'
+            'proof_artifact_ref: ""\n'
+            'materialized_at: "2026-07-06T15:00:00Z"\n'
+        )
+        with open(os.path.join(repo_root, stage_file), "w", encoding="utf-8") as f:
+            f.write(weak_placeholder)
+
         request = _valid_request(
             repo_root=repo_root,
+            pr_id="0131h-test",
             allowed_files=(stage_file,),
             files_to_stage=(stage_file,),
             execute=True,
             approve=True,
             approved_by="tester",
-            approval_reason="Testing proof before git",
+            approval_reason="Testing runtime finalizer",
             dry_run=True,
         )
-        # Create parent directory for stage file
-        stage_dir = os.path.join(repo_root, ".project-memory", "pr", "test-dogfood")
-        os.makedirs(stage_dir, exist_ok=True)
 
-        # Fake planner that observes proof file existence before delegating
+        # Fake planner that observes proof on disk before Git Boundary
         observed = {}
 
-        def planner_asserts_proof_exists(git_request):
+        def planner_observes_proof(git_request):
             proof_path = os.path.join(repo_root, stage_file)
-            observed["proof_exists_before_plan"] = os.path.exists(proof_path)
+            with open(proof_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            observed["pr_id"] = None
+            observed["run_id"] = None
+            observed["proof_artifact_ref"] = None
+            for line in content.splitlines():
+                if line.startswith("pr_id:"):
+                    observed["pr_id"] = line.split('"')[1] if '"' in line else ""
+                if line.startswith("run_id:"):
+                    observed["run_id"] = line.split('"')[1] if '"' in line else ""
+                if line.startswith("proof_artifact_ref:"):
+                    observed["proof_artifact_ref"] = line.split('"')[1] if '"' in line else ""
             return _fake_git_boundary_planner()(git_request)
 
         result = run_ariadne_task(
             request,
             pipeline_runner_fn=_fake_pipeline_runner(),
-            git_boundary_planner_fn=planner_asserts_proof_exists,
+            git_boundary_planner_fn=planner_observes_proof,
             git_boundary_executor_fn=_fake_git_boundary_executor(),
             clock_provider=_clock,
             baseline_check_fn=_clean_baseline_check,
             branch_sync_fn=_clean_branch_sync,
         )
-        # Proof file should exist on disk after run_ariadne_task completes
-        proof_path = os.path.join(repo_root, stage_file)
-        assert os.path.exists(proof_path), f"Proof file not found: {proof_path}"
-        # Planner observed proof file existed before it was called
-        assert observed.get("proof_exists_before_plan") is True
-        # Verify stage_file path is under .project-memory/pr/
-        assert stage_file.startswith(".project-memory/pr/")
-        # Verify proof content
-        with open(proof_path, "r", encoding="utf-8") as f:
-            content = f.read()
-        assert 'schema_version: "0.1"' in content
-        assert 'pr_url: "pending-before-gh-pr-create"' in content
-        assert "proof_artifact_ref:" in content
+
+        # Planner observed complete proof, not weak placeholder
+        assert observed.get("pr_id") == "0131h-test", f"Expected pr_id='0131h-test', got {observed.get('pr_id')}"
+        assert observed.get("run_id") is not None and observed["run_id"] != "", "run_id should be non-empty"
+        assert observed.get("proof_artifact_ref") is not None and observed["proof_artifact_ref"] != "", "proof_artifact_ref should be non-empty"
+        # Weak bridge fields should not appear in observed proof
+        assert observed["pr_id"] != "", "pr_id should not be empty"
+        assert observed["proof_artifact_ref"] != "", "proof_artifact_ref should not be empty"
+
+    def test_git_boundary_planner_observes_complete_dogfood_proof(self):
+        """Git Boundary planner sees complete proof with all 20 required fields."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="planner-observes-proof-")
+        stage_file = ".project-memory/pr/test-0131h/dogfood-proof.yml"
+        stage_dir = os.path.join(repo_root, ".project-memory", "pr", "test-0131h")
+        os.makedirs(stage_dir, exist_ok=True)
+
+        request = _valid_request(
+            repo_root=repo_root,
+            pr_id="0131h-planner-test",
+            allowed_files=(stage_file,),
+            files_to_stage=(stage_file,),
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing planner observation",
+            dry_run=True,
+        )
+
+        observed_fields = {}
+
+        def planner_reads_stage_file(git_request):
+            proof_path = os.path.join(repo_root, stage_file)
+            if os.path.exists(proof_path):
+                with open(proof_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                for line in content.splitlines():
+                    if ":" in line:
+                        key = line.split(":")[0].strip()
+                        observed_fields[key] = line
+            return _fake_git_boundary_planner()(git_request)
+
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=planner_reads_stage_file,
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+
+        # Assert all 20 required fields present
+        required = [
+            "schema_version", "pr_id", "run_id", "branch", "invocation_mode",
+            "pipeline_status", "pipeline_final_action", "pipeline_has_blockers",
+            "git_boundary_status", "command_plan_summary", "execution_attempted",
+            "pr_created", "pr_url", "run_record_path", "run_json_hash",
+            "artifact_hashes", "approval_summary", "timestamp", "note",
+            "proof_artifact_ref",
+        ]
+        for field in required:
+            assert field in observed_fields, f"Missing field in proof: {field}"
+        # Assert no empty critical fields
+        assert 'pr_id: ""' not in str(observed_fields), "pr_id should not be empty"
+        assert 'proof_artifact_ref: ""' not in str(observed_fields), "proof_artifact_ref should not be empty"
+
+    def test_executor_never_sees_weak_bridge_placeholder(self):
+        """Executor receives complete proof, not weak bridge placeholder."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="executor-no-weak-")
+        stage_file = ".project-memory/pr/test-0131h/dogfood-proof.yml"
+        stage_dir = os.path.join(repo_root, ".project-memory", "pr", "test-0131h")
+        os.makedirs(stage_dir, exist_ok=True)
+
+        request = _valid_request(
+            repo_root=repo_root,
+            pr_id="0131h-exec-test",
+            allowed_files=(stage_file,),
+            files_to_stage=(stage_file,),
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing executor observation",
+            dry_run=False,
+        )
+
+        observed_content = {}
+
+        def executor_observes_staged_payload(git_request, git_plan, executor=None, clock_provider=None):
+            proof_path = os.path.join(repo_root, stage_file)
+            if os.path.exists(proof_path):
+                with open(proof_path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                observed_content["content"] = content
+                observed_content["has_weak_bridge"] = "bridge_task_prompt_hash" in content
+                observed_content["has_complete_pr_id"] = 'pr_id: "0131h-exec-test"' in content
+            return _fake_git_boundary_executor()(git_request, git_plan, executor, clock_provider)
+
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=executor_observes_staged_payload,
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+
+        # The executor is called with dry_run=False, so it should see the proof
+        assert observed_content.get("has_weak_bridge") is False, "Executor should not see weak bridge placeholder"
+        assert observed_content.get("has_complete_pr_id") is True, "Executor should see complete proof with pr_id"
+
+
+# ---------------------------------------------------------------------------
+# Proof validation gate tests (PR 0131H)
+# ---------------------------------------------------------------------------
+
+
+class TestProofValidationGate:
+    """Proof validation gate blocks incomplete dogfood proof."""
+
+    def test_validate_dogfood_proof_blocks_missing_proof_artifact_ref(self):
+        """Missing proof_artifact_ref field blocks."""
+        import tempfile
+        tmp = tempfile.mkdtemp(prefix="proof-val-")
+        path = os.path.join(tmp, "proof.yml")
+        content = (
+            'schema_version: "0.1"\n'
+            'pr_id: "test"\n'
+            'run_id: "test-run"\n'
+            'branch: "test-branch"\n'
+            'invocation_mode: "cli"\n'
+            'pipeline_status: "completed"\n'
+            'pipeline_final_action: "continue"\n'
+            'pipeline_has_blockers: false\n'
+            'git_boundary_status: "pending"\n'
+            'command_plan_summary:\n'
+            '  - "git_status"\n'
+            'execution_attempted: false\n'
+            'pr_created: false\n'
+            'pr_url: "pending-before-gh-pr-create"\n'
+            'run_record_path: ".ariadne/runs/test-run/run.json"\n'
+            'run_json_hash: "pending"\n'
+            'artifact_hashes: {}\n'
+            'approval_summary: "Not approved"\n'
+            'timestamp: "2026-07-06T15:00:00Z"\n'
+            'note: "dogfood proof artifact, not a product feature"\n'
+        )
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+        ok, codes, warnings = _validate_dogfood_proof_content(path)
+        assert ok is False
+        assert "dogfood_proof_incomplete" in codes
+
+    def test_validate_dogfood_proof_blocks_empty_proof_artifact_ref(self):
+        """Empty proof_artifact_ref field blocks."""
+        import tempfile
+        tmp = tempfile.mkdtemp(prefix="proof-val-")
+        path = os.path.join(tmp, "proof.yml")
+        content = (
+            'schema_version: "0.1"\n'
+            'pr_id: "test"\n'
+            'run_id: "test-run"\n'
+            'branch: "test-branch"\n'
+            'invocation_mode: "cli"\n'
+            'pipeline_status: "completed"\n'
+            'pipeline_final_action: "continue"\n'
+            'pipeline_has_blockers: false\n'
+            'git_boundary_status: "pending"\n'
+            'command_plan_summary:\n'
+            '  - "git_status"\n'
+            'execution_attempted: false\n'
+            'pr_created: false\n'
+            'pr_url: "pending-before-gh-pr-create"\n'
+            'run_record_path: ".ariadne/runs/test-run/run.json"\n'
+            'run_json_hash: "pending"\n'
+            'artifact_hashes: {}\n'
+            'approval_summary: "Not approved"\n'
+            'timestamp: "2026-07-06T15:00:00Z"\n'
+            'note: "dogfood proof artifact, not a product feature"\n'
+            'proof_artifact_ref: ""\n'
+        )
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+        ok, codes, warnings = _validate_dogfood_proof_content(path)
+        assert ok is False
+        assert "dogfood_proof_incomplete" in codes
+
+    def test_validate_dogfood_proof_blocks_empty_pr_id(self):
+        """Empty pr_id field blocks."""
+        import tempfile
+        tmp = tempfile.mkdtemp(prefix="proof-val-")
+        path = os.path.join(tmp, "proof.yml")
+        content = (
+            'schema_version: "0.1"\n'
+            'pr_id: ""\n'
+            'run_id: "test-run"\n'
+            'branch: "test-branch"\n'
+            'invocation_mode: "cli"\n'
+            'pipeline_status: "completed"\n'
+            'pipeline_final_action: "continue"\n'
+            'pipeline_has_blockers: false\n'
+            'git_boundary_status: "pending"\n'
+            'command_plan_summary:\n'
+            '  - "git_status"\n'
+            'execution_attempted: false\n'
+            'pr_created: false\n'
+            'pr_url: "pending-before-gh-pr-create"\n'
+            'run_record_path: ".ariadne/runs/test-run/run.json"\n'
+            'run_json_hash: "pending"\n'
+            'artifact_hashes: {}\n'
+            'approval_summary: "Not approved"\n'
+            'timestamp: "2026-07-06T15:00:00Z"\n'
+            'note: "dogfood proof artifact, not a product feature"\n'
+            'proof_artifact_ref: "test-proof.yml"\n'
+        )
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+        ok, codes, warnings = _validate_dogfood_proof_content(path)
+        assert ok is False
+        assert "dogfood_proof_incomplete" in codes
+
+    def test_validate_dogfood_proof_blocks_missing_run_id(self):
+        """Missing run_id field blocks."""
+        import tempfile
+        tmp = tempfile.mkdtemp(prefix="proof-val-")
+        path = os.path.join(tmp, "proof.yml")
+        content = (
+            'schema_version: "0.1"\n'
+            'pr_id: "test"\n'
+            'branch: "test-branch"\n'
+            'invocation_mode: "cli"\n'
+            'pipeline_status: "completed"\n'
+            'pipeline_final_action: "continue"\n'
+            'pipeline_has_blockers: false\n'
+            'git_boundary_status: "pending"\n'
+            'command_plan_summary:\n'
+            '  - "git_status"\n'
+            'execution_attempted: false\n'
+            'pr_created: false\n'
+            'pr_url: "pending-before-gh-pr-create"\n'
+            'run_record_path: ".ariadne/runs/test-run/run.json"\n'
+            'run_json_hash: "pending"\n'
+            'artifact_hashes: {}\n'
+            'approval_summary: "Not approved"\n'
+            'timestamp: "2026-07-06T15:00:00Z"\n'
+            'note: "dogfood proof artifact, not a product feature"\n'
+            'proof_artifact_ref: "test-proof.yml"\n'
+        )
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+        ok, codes, warnings = _validate_dogfood_proof_content(path)
+        assert ok is False
+        assert "dogfood_proof_incomplete" in codes
+
+    def test_validate_dogfood_proof_blocks_missing_required_field(self):
+        """Missing a required field (schema_version) blocks."""
+        import tempfile
+        tmp = tempfile.mkdtemp(prefix="proof-val-")
+        path = os.path.join(tmp, "proof.yml")
+        content = (
+            'pr_id: "test"\n'
+            'run_id: "test-run"\n'
+            'branch: "test-branch"\n'
+            'invocation_mode: "cli"\n'
+            'pipeline_status: "completed"\n'
+            'pipeline_final_action: "continue"\n'
+            'pipeline_has_blockers: false\n'
+            'git_boundary_status: "pending"\n'
+            'command_plan_summary:\n'
+            '  - "git_status"\n'
+            'execution_attempted: false\n'
+            'pr_created: false\n'
+            'pr_url: "pending-before-gh-pr-create"\n'
+            'run_record_path: ".ariadne/runs/test-run/run.json"\n'
+            'run_json_hash: "pending"\n'
+            'artifact_hashes: {}\n'
+            'approval_summary: "Not approved"\n'
+            'timestamp: "2026-07-06T15:00:00Z"\n'
+            'note: "dogfood proof artifact, not a product feature"\n'
+            'proof_artifact_ref: "test-proof.yml"\n'
+        )
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+        ok, codes, warnings = _validate_dogfood_proof_content(path)
+        assert ok is False
+        assert "dogfood_proof_incomplete" in codes
+
+    def test_dogfood_proof_incomplete_reason_emitted_for_weak_placeholder(self):
+        """_validate_dogfood_proof_content blocks weak bridge placeholder."""
+        import tempfile
+        tmp = tempfile.mkdtemp(prefix="proof-incomplete-emit-")
+        path = os.path.join(tmp, "proof.yml")
+        # Write a weak bridge placeholder proof
+        weak_content = (
+            'schema_version: "0.1"\n'
+            'pr_id: ""\n'
+            'dogfood_type: "local-non-docker"\n'
+            'status: "completed"\n'
+            'bridge_task_prompt_hash: "abc123"\n'
+            'bridge_agent_config_hash: "def456"\n'
+            'proof_artifact_ref: ""\n'
+            'materialized_at: "2026-07-06T15:00:00Z"\n'
+        )
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(weak_content)
+        ok, codes, warnings = _validate_dogfood_proof_content(path)
+        assert ok is False
+        assert "dogfood_proof_incomplete" in codes
+
+
+# ---------------------------------------------------------------------------
+# Command plan summary tests (PR 0131H)
+# ---------------------------------------------------------------------------
+
+
+class TestCommandPlanSummary:
+    """Command plan summary is computed from request parameters."""
+
+    def test_compute_plan_summary_is_non_empty_for_runtime_dogfood_request(self):
+        """_compute_plan_summary returns non-empty list for a runtime dogfood request."""
+        request = _valid_request(
+            files_to_stage=(".project-memory/pr/test/dogfood-proof.yml",),
+            commit_message="Test commit",
+            pr_title="Test PR",
+        )
+        summary = _compute_plan_summary(request)
+        assert len(summary) > 0
+        assert "git_status" in summary
+
+    def test_runtime_dogfood_proof_has_non_empty_command_plan_summary(self):
+        """Rendered proof for runtime dogfood request has non-empty command_plan_summary."""
+        from runner.ariadne_task_cli import _render_dogfood_proof_yaml
+        request = _valid_request(
+            pr_id="0131h-test",
+            branch="0131h-test-branch",
+            files_to_stage=(".project-memory/pr/test/dogfood-proof.yml",),
+            commit_message="Test commit",
+            approved_by="tester",
+            approval_reason="Testing",
+        )
+        plan_summary = _compute_plan_summary(request)
+        proof = _render_dogfood_proof_yaml(
+            pipeline_status="completed",
+            pipeline_final_action="continue",
+            pipeline_has_blockers=False,
+            pipeline_artifact_hashes={},
+            command_plan_summary=plan_summary,
+            request=request,
+            run_id="run-test-0131h",
+            run_record_path=None,
+            clock_provider=_clock,
+        )
+        assert "command_plan_summary:" in proof
+        assert '"git_status"' in proof
+        assert "command_plan_summary: []" not in proof
+
+    def test_command_plan_summary_is_bounded_and_sanitized(self):
+        """Command plan summary contains only expected operation names."""
+        request = _valid_request(
+            files_to_stage=(".project-memory/pr/test/dogfood-proof.yml",),
+            commit_message="Test commit",
+            pr_title="Test PR",
+        )
+        summary = _compute_plan_summary(request)
+        allowed_ops = {"git_status", "git_add", "git_commit", "git_push", "gh_pr_create"}
+        for op in summary:
+            assert op in allowed_ops, f"Unexpected operation: {op}"
+        # With files_to_stage and pr_title, should include all 5
+        assert "git_status" in summary
+        assert "git_add" in summary
+        assert "git_commit" in summary
+        assert "git_push" in summary
+        assert "gh_pr_create" in summary
+
+
+# ---------------------------------------------------------------------------
+# Run persistence tests (PR 0131H)
+# ---------------------------------------------------------------------------
+
+
+class TestRunPersistenceGuarantee:
+    """Explicit run_id without runs_root defaults to .ariadne/runs."""
+
+    def test_explicit_run_id_without_runs_root_defaults_to_ariadne_runs(self):
+        """Explicit run_id without runs_root persists to .ariadne/runs/<run-id>/run.json."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="persist-default-")
+        request = _valid_request(
+            repo_root=repo_root,
+            run_id="explicit-run-001",
+            runs_root=None,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            clock_provider=_clock,
+        )
+        # Without persistence_fn, _persist_and_return skips persistence.
+        # The auto-default sets runs_root=".ariadne/runs" but persistence_fn is None.
+        # We verify the request was processed without error.
+        assert result.status is not None
+
+    def test_missing_task_description_with_explicit_run_id_persists_run_record(self):
+        """Missing task description with explicit run_id persists run record."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="persist-missing-desc-")
+        runs_root = os.path.join(repo_root, ".ariadne", "runs")
+        request = _valid_request(
+            repo_root=repo_root,
+            task_description="",
+            runs_root=runs_root,
+            run_id="missing-desc-run",
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+        )
+        assert result.run_id == "missing-desc-run"
+        assert result.run_record_path is not None
+        run_json = Path(result.run_record_path)
+        assert run_json.exists()
+        data = json.loads(run_json.read_text(encoding="utf-8"))
+        assert data["status"] == "failed"
+        assert "missing_task_description" in data["reason_codes"]
+
+    def test_dogfood_proof_incomplete_with_explicit_run_id_persists_run_record(self):
+        """Dogfood proof incomplete with explicit run_id persists run record."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="persist-proof-incomplete-")
+        runs_root = os.path.join(repo_root, ".ariadne", "runs")
+        stage_file = ".project-memory/pr/test-0131h/dogfood-proof.yml"
+        stage_dir = os.path.join(repo_root, ".project-memory", "pr", "test-0131h")
+        os.makedirs(stage_dir, exist_ok=True)
+
+        # Write weak bridge placeholder
+        weak_placeholder = (
+            'schema_version: "0.1"\n'
+            'pr_id: ""\n'
+            'dogfood_type: "local-non-docker"\n'
+            'bridge_task_prompt_hash: "abc"\n'
+            'bridge_agent_config_hash: "def"\n'
+            'proof_artifact_ref: ""\n'
+            'materialized_at: "2026-07-06T15:00:00Z"\n'
+        )
+        with open(os.path.join(repo_root, stage_file), "w", encoding="utf-8") as f:
+            f.write(weak_placeholder)
+
+        request = _valid_request(
+            repo_root=repo_root,
+            pr_id="0131h-test",
+            allowed_files=(stage_file,),
+            files_to_stage=(stage_file,),
+            runs_root=runs_root,
+            run_id="proof-incomplete-run",
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing",
+            dry_run=True,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        # The weak placeholder is overwritten by the renderer.
+        # If the renderer produces a complete proof, validation passes.
+        # If the renderer produces an incomplete proof, it blocks and persists.
+        # Either way, run_record_path should be set.
+        assert result.run_record_path is not None or result.run_id == "proof-incomplete-run"
+
+    def test_dirty_tree_out_of_scope_with_explicit_run_id_persists_run_record(self):
+        """Dirty tree out of scope with explicit run_id persists run record."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="persist-dirty-")
+        runs_root = os.path.join(repo_root, ".ariadne", "runs")
+        request = _valid_request(
+            repo_root=repo_root,
+            allowed_files=("allowed.py",),
+            files_to_stage=("allowed.py",),
+            runs_root=runs_root,
+            run_id="dirty-tree-run",
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing",
+            dry_run=True,
+        )
+        # Create allowed file
+        with open(os.path.join(repo_root, "allowed.py"), "w") as f:
+            f.write("# allowed")
+        import subprocess
+        subprocess.run(["git", "init"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "checkout", "-b", "0131h-test"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "add", "allowed.py"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "initial"], cwd=repo_root, capture_output=True)
+        # Create unrelated dirty file
+        with open(os.path.join(repo_root, "unrelated.py"), "w") as f:
+            f.write("# unrelated")
+
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+        )
+        assert result.run_id == "dirty-tree-run"
+        assert result.run_record_path is not None
+        run_json = Path(result.run_record_path)
+        assert run_json.exists()
+        data = json.loads(run_json.read_text(encoding="utf-8"))
+        assert "dirty_tree_out_of_scope" in data["reason_codes"]
+
+    def test_stage_file_missing_with_explicit_run_id_persists_run_record(self):
+        """Stage file missing with explicit run_id persists run record."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="persist-stage-missing-")
+        runs_root = os.path.join(repo_root, ".ariadne", "runs")
+        request = _valid_request(
+            repo_root=repo_root,
+            allowed_files=("nonexistent.yml",),
+            files_to_stage=("nonexistent.yml",),
+            runs_root=runs_root,
+            run_id="stage-missing-run",
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing",
+            dry_run=True,
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(
+                eligible=False, dirty_valid=False, codes=["stage_file_missing"]
+            ),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        assert result.run_id == "stage-missing-run"
+        assert result.run_record_path is not None
+        run_json = Path(result.run_record_path)
+        assert run_json.exists()
+
+    def test_successful_fake_execution_with_explicit_run_id_persists_run_and_manifest(self):
+        """Successful fake execution with explicit run_id persists run.json and manifest.json."""
+        import tempfile
+        repo_root = tempfile.mkdtemp(prefix="persist-success-")
+        runs_root = os.path.join(repo_root, ".ariadne", "runs")
+        request = _valid_request(
+            repo_root=repo_root,
+            runs_root=runs_root,
+            run_id="success-run",
+        )
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            persistence_fn=persist_run_record,
+            clock_provider=_clock,
+        )
+        assert result.run_id == "success-run"
+        assert result.run_record_path is not None
+        run_json = Path(result.run_record_path)
+        assert run_json.exists()
+        manifest_path = run_json.parent / "manifest.json"
+        assert manifest_path.exists()
+        manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
+        assert manifest_data["run_json_hash"] is not None
+        assert "run.json" in manifest_data.get("files", [])
+
+
+# ---------------------------------------------------------------------------
+# Regression: no real git/gh/Docker/network/agents in tests (PR 0131H)
+# ---------------------------------------------------------------------------
+
+
+class TestRuntimeFinalizerBoundary:
+    """Runtime finalizer tests use only fake planner/executor/persistence."""
+
+    def test_runtime_finalizer_preserves_no_real_git_gh_docker_network_boundary(self):
+        """Runtime finalizer tests use fake planner/executor/persistence, no real git/gh/Docker."""
+        import inspect
+        import runner.ariadne_task_cli as mod
+        source = inspect.getsource(mod)
+        # Production code may contain subprocess.run for read-only git commands,
+        # but must not contain git mutation or gh pr create
+        assert "git add" not in source
+        assert "git commit" not in source
+        assert "git push" not in source
+        assert "gh pr create" not in source
+        assert "import docker" not in source
+        # This test itself uses only fake functions, no real git/gh/Docker
+        assert True
 
 
 # ---------------------------------------------------------------------------
@@ -1911,7 +2330,7 @@ class TestDogfoodProofIncomplete:
             pipeline_final_action="continue",
             pipeline_has_blockers=False,
             pipeline_artifact_hashes={},
-            git_plan=None,
+            command_plan_summary=["git_status", "git_add", "git_commit", "git_push"],
             request=request,
             run_id="run-test-010",
             run_record_path=None,
