@@ -1,0 +1,133 @@
+schema_version: "0.1"
+pr_id: "0131h-runtime-dogfood-proof-finalizer"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-08T07:45:00Z"
+snapshot_delta:
+  plan_base_sha: "e466f06a350fb334fdd326ff7414e3c510fb42f8"
+  current_head: "920e0df7a00e5c8c7013801f46351422259791d5"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+  actual_files:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "920e0df7a00e5c8c7013801f46351422259791d5"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0131h-runtime-dogfood-proof-finalizer"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "M ariadne_task_cli.py + test_ariadne_task_cli.py"
+  - command: "python -m compileall -f services/runner/src services/task_intake/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "Compiles without errors"
+  - command: "PYTHONPATH=... pytest focused (4 modules) -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "180 passed in 0.65s (+10 vs prior)"
+  - command: "PYTHONPATH=... pytest regression (10 modules) -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "397 passed in 39.12s (+10 vs prior)"
+  - command: "grep test_ function names in git diff"
+    result: "passed"
+    exit_code: 0
+    evidence: "19 new test functions: 5 classes (TestRuntimeFinalization + TestProofValidationGate + TestCommandPlanSummary + TestRunPersistenceGuarantee + TestRuntimeFinalizerBoundary); 9 old tests replaced"
+  - command: "grep _compute_plan_summary ariadne_task_cli.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "L274: defined; L956: used in proof rendering"
+  - command: "grep _validate_dogfood_proof_content ariadne_task_cli.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "L352: defined; L982: called with proof file path"
+  - command: "grep REASON_DOGFOOD_PROOF_INCOMPLETE ariadne_task_cli.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "L135: defined; L986: codes.append emitted"
+  - command: "grep runs_root.*ariadne.*runs ariadne_task_cli.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "L741-760: auto-default runs_root='.ariadne/runs' when run_id provided"
+  - command: "grep forbidden patterns in production source"
+    result: "passed"
+    exit_code: 0
+    evidence: "subprocess.run only for git status/branch (read-only); no git add/commit/push/gh pr create; no shell=True"
+  - command: "test ! -f .project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml"
+    result: "passed"
+    exit_code: 0
+    evidence: "ABSENT_OK"
+  - command: "test ! -f .project-memory/pr/0131-dogfood-pr-created-by-ariadne/reviews/precommit-review.yml"
+    result: "passed"
+    exit_code: 0
+    evidence: "ABSENT_OK"
+  - command: ".ariadne check"
+    result: "passed"
+    exit_code: 0
+    evidence: ".ariadne absent"
+  - command: "captures check"
+    result: "passed"
+    exit_code: 0
+    evidence: "5 untracked captures (prior dogfood residue)"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Pass — prior blocker resolved by 19 new test functions"
+    reason: "All 13 mandatory checks pass. 19 new test functions added (5 new classes). 9 old test_proof_renderer_* tests (which tested git_plan=None renderer) replaced by 19 comprehensive new tests. Test count: 84 (was 74, +10 net). 180 focused tests pass. 397 regression tests pass."
+  - decision: "19 required test scenarios confirmed"
+    reason: "5 new test classes: (1) TestRuntimeFinalization — test_runtime_finalizer_overwrites_bridge_placeholder_before_git_boundary, test_git_boundary_planner_observes_complete_dogfood_proof, test_executor_never_sees_weak_bridge_placeholder; (2) TestProofValidationGate — test_validate_dogfood_proof_blocks_missing_proof_artifact_ref, test_validate_dogfood_proof_blocks_empty_proof_artifact_ref, test_validate_dogfood_proof_blocks_empty_pr_id, test_validate_dogfood_proof_blocks_missing_run_id, test_validate_dogfood_proof_blocks_missing_required_field; (3) TestCommandPlanSummary — test_dogfood_proof_incomplete_reason_emitted_for_weak_placeholder, test_compute_plan_summary_is_non_empty_for_runtime_dogfood_request, test_runtime_dogfood_proof_has_non_empty_command_plan_summary, test_command_plan_summary_is_bounded_and_sanitized; (4) TestRunPersistenceGuarantee — test_explicit_run_id_without_runs_root_defaults_to_ariadne_runs, test_missing_task_description_with_explicit_run_id_persists_run_record, test_dogfood_proof_incomplete_with_explicit_run_id_persists_run_record, test_dirty_tree_out_of_scope_with_explicit_run_id_persists_run_record, test_stage_file_missing_with_explicit_run_id_persists_run_record, test_successful_fake_execution_with_explicit_run_id_persists_run_and_manifest; (5) TestRuntimeFinalizerBoundary — test_runtime_finalizer_preserves_no_real_git_gh_docker_network_boundary"
+  - decision: "Implementation fixes still present"
+    reason: "_compute_plan_summary L274 ✓. _validate_dogfood_proof_content L352 ✓. REASON_DOGFOOD_PROOF_INCOMPLETE emitted at L986 ✓. runs_root auto-default at L741-760 ✓. proof_artifact_ref at L456 ✓."
+  - decision: "Real PR 0131 artifacts absent"
+    reason: "test ! -f both PASS. .ariadne absent. captures/ untracked."
+context_used:
+  labels:
+    - "dogfood-hardening"
+    - "production-line-stage-2"
+    - "pr-0131h"
+  memory_files_read:
+    - ".project-memory/pr/0131h-runtime-dogfood-proof-finalizer/PLAN.md"
+    - ".project-memory/pr/0131h-runtime-dogfood-proof-finalizer/reviews/plan-review.yml"
+  files_inspected:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+  files_modified: []
+  files_intentionally_ignored:
+    - "captures/ (untracked prior dogfood residue)"
+    - ".ariadne/ (absent)"
+checks:
+  branch_correct: "pass"
+  plan_review_verdict: "approve"
+  dirty_tree_within_scope: "pass"
+  previous_blocker_resolved: "pass"
+  runtime_finalization_tests_added: "pass"
+  proof_validation_tests_added: "pass"
+  command_plan_summary_tests_added: "pass"
+  run_persistence_tests_added: "pass"
+  boundary_tests_added: "pass"
+  implementation_still_correct: "pass"
+  compileall: "pass"
+  focused_pytest: "pass"
+  regression_pytest: "pass"
+  real_pr_artifacts_absent: "pass"
+  forbidden_patterns_absent: "pass"
+  artifact_written_read: "pass"

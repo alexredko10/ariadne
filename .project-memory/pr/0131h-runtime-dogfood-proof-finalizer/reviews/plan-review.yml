@@ -1,0 +1,303 @@
+schema_version: "0.1"
+pr_id: "0131h-runtime-dogfood-proof-finalizer"
+review_type: plan-review
+verdict: approve
+reviewer: plan-review
+timestamp: "2026-07-07T21:57:00Z"
+related_plan: ".project-memory/pr/0131h-runtime-dogfood-proof-finalizer/PLAN.md"
+summary:
+  result: "PR 0131H plan approved. All 18 mandatory checks pass. Three concrete runtime gaps identified from post-0131G evidence and confirmed against current codebase: (A) git_plan=None call makes command_plan_summary empty in proof, (B) REASON_DOGFOOD_PROOF_INCOMPLETE defined at L135 but never emitted — validation gate is missing, (C) _persist_and_return skips when runs_root=None so explicit --run-id without --runs-root fails to persist run records. Plan fixes all three: adds _compute_plan_summary(request) helper, wires in REASON_DOGFOOD_PROOF_INCOMPLETE emission via new _validate_dogfood_proof_content gate, auto-defaults runs_root to .ariadne/runs when run_id is explicit. 19 test functions covering runtime finalization, proof validation, persistence guarantee, and regressions. Narrow scope to ariadne_task_cli.py + test_ariadne_task_cli.py only. No frozen streams, no ROADMAP/docs/agents/schemas changes. Artifact write/readback verified."
+snapshot_delta:
+  plan_base_sha: "e466f06a350fb334fdd326ff7414e3c510fb42f8"
+  current_head: "e466f06a350fb334fdd326ff7414e3c510fb42f8"
+  action: continue
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0131h-runtime-dogfood-proof-finalizer/PLAN.md"
+    - ".project-memory/pr/0131h-runtime-dogfood-proof-finalizer/reviews/plan-review.yml"
+  actual_files:
+    - ".project-memory/pr/0131h-runtime-dogfood-proof-finalizer/PLAN.md"
+    - ".project-memory/pr/0131h-runtime-dogfood-proof-finalizer/reviews/plan-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: in_scope
+files_checked:
+  - ".project-memory/pr/0131h-runtime-dogfood-proof-finalizer/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/PLAN.md"
+  - ".project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/reviews/plan-review.yml"
+  - ".project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/reviews/precommit-review.yml"
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: passed
+    exit_code: 0
+    evidence: "e466f06a350fb334fdd326ff7414e3c510fb42f8"
+  - command: "git branch --show-current"
+    result: passed
+    exit_code: 0
+    evidence: "0131h-runtime-dogfood-proof-finalizer"
+  - command: "git status --short"
+    result: passed
+    exit_code: 0
+    evidence: "?? .project-memory/pr/0131h-runtime-dogfood-proof-finalizer/ only (expected new plan dir)"
+  - command: "git diff --name-only"
+    result: passed
+    exit_code: 0
+    evidence: "empty (no tracked modifications)"
+  - command: "grep REASON_DOGFOOD_PROOF_INCOMPLETE services/runner/src/runner/ariadne_task_cli.py"
+    result: passed
+    exit_code: 0
+    evidence: "REASON_DOGFOOD_PROOF_INCOMPLETE defined L135; used 0 times (never emitted) — confirmed gap"
+  - command: "grep 'git_plan=None' services/runner/src/runner/ariadne_task_cli.py"
+    result: passed
+    exit_code: 0
+    evidence: "git_plan=None at L795 in _render_dogfood_proof_yaml call — confirmed gap"
+  - command: "grep 'command_plan_summary = \\[\\]' services/runner/src/runner/ariadne_task_cli.py"
+    result: passed
+    exit_code: 0
+    evidence: "command_plan_summary=[] at L294 when git_plan is None — confirmed empty field in proof"
+  - command: "grep 'if not request.runs_root' services/runner/src/runner/ariadne_task_cli.py"
+    result: passed
+    exit_code: 0
+    evidence: "L1080: if not request.runs_root or not persistence_fn: return result — confirmed persistence gap"
+  - command: "grep 'proof_artifact_ref' services/runner/src/runner/ariadne_task_cli.py"
+    result: passed
+    exit_code: 0
+    evidence: "proof_artifact_ref set from files_to_stage[0] at L314; pending sentinel at L316; used in proof at L341"
+  - command: "grep 'pending-before-gh-pr-create' services/runner/src/runner/ariadne_task_cli.py"
+    result: passed
+    exit_code: 0
+    evidence: "L338: pr_url: pending-before-gh-pr-create constant in proof YAML"
+  - command: "grep 'branch_mismatch\\|branch_ahead_or_behind' services/runner/src/runner/ariadne_task_cli.py"
+    result: passed
+    exit_code: 0
+    evidence: "L743 and L750: codes.append(branch_info['block_reason']) — string values appended directly to reason_codes tuple"
+  - command: "grep 'dashboard|control plane|retry|model health|parallel queue|Decision Core|Context Warehouse|frontend' .project-memory/pr/0131h"
+    result: passed
+    exit_code: 1
+    evidence: "exit 1 — only found in non-goals section (PLAN forbidding them, not using them)"
+  - command: "grep -n 'subprocess.run.*git add\\|subprocess.run.*git commit\\|subprocess.run.*git push\\|subprocess.run.*gh pr create' services/runner/src/runner/ariadne_task_cli.py"
+    result: passed
+    exit_code: 0
+    evidence: "0 matches in production code; subprocess.run used only for read-only git status/branch commands"
+  - command: "test ! -f .project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml"
+    result: passed
+    exit_code: 0
+    evidence: "PASS: dogfood-proof.yml absent from branch"
+  - command: "test ! -f .project-memory/pr/0131-dogfood-pr-created-by-ariadne/reviews/precommit-review.yml"
+    result: passed
+    exit_code: 0
+    evidence: "PASS: precommit-review.yml absent from branch"
+  - command: "if [ -d .ariadne ]; then find .ariadne -maxdepth 5 -type f | sort; else echo '.ariadne absent'; fi"
+    result: passed
+    exit_code: 0
+    evidence: ".ariadne absent"
+  - command: "if [ -d captures ]; then find captures -maxdepth 5 -type f | sort; else echo 'captures absent'; fi"
+    result: passed
+    exit_code: 0
+    evidence: "captures absent"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Approve PR 0131H PLAN.md"
+    reason: "All 18 mandatory checks pass. Three concrete runtime gaps identified from post-0131G evidence and confirmed against current codebase. Plan correctly distinguishes renderer tests (0131G precommit confirmed 20 fields present) from runtime validation gate (still missing) and persistence guarantee (still missing). Fixes are narrow, targeted, and executable. No frozen streams, no ROADMAP/docs/agents/schemas changes. No real PR 0131 artifacts modified. Artifact write/readback verified."
+  - decision: "Post-0131G runtime weak proof acknowledged"
+    reason: "PLAN.md Section Summary explicitly shows the weak bridge placeholder proof that persisted after 0131G: schema_version: 0.1, pr_id: '', dogfood_type: local-non-docker, status: completed, bridge_task_prompt_hash, bridge_agent_config_hash, proof_artifact_ref: '', materialized_at — missing all 20 required fields. PLAN explicitly does not treat 0131G test coverage as sufficient because tests verified renderer output but did NOT verify validation gate emission or persistence guarantee."
+  - decision: "Renderer-vs-runtime gap correctly distinguished"
+    reason: "0131G precommit-review confirmed all 20 fields render correctly in unit tests (python -c: missing=[]). PLAN correctly identifies this does NOT guarantee runtime behavior: git_plan=None call at L795 means command_plan_summary=[], and validation gate REASON_DOGFOOD_PROOF_INCOMPLETE is defined but never emitted. The runtime path bypassed the renderer tests entirely in the real dogfood attempt."
+  - decision: "Bridge placeholder overwrite planned"
+    reason: "PLAN Section 1 confirms: open(full_path,'w') already overwrites bridge placeholder — overwrite behavior is correct. Fix targets the git_plan=None call at L795 to compute command_plan_summary from request parameters instead of from git_plan. git_plan=None is the root cause of empty command_plan_summary."
+  - decision: "Finalization order correct"
+    reason: "PLAN Section 4 corrected flow: pipeline/bridge materializes placeholder → step 4b baseline check → step 4c render complete proof with command_plan_summary from request params → step 4c.4 validate proof content → step 4c.5 emit REASON_DOGFOOD_PROOF_INCOMPLETE if invalid → step 5 Git Boundary planner sees complete proof on disk. Proof finalization happens BEFORE Git Boundary staging. Correct."
+  - decision: "All 20 proof fields validated with specific non-empty checks"
+    reason: "PLAN Section 2 specifies _validate_dogfood_proof_content(): checks all 20 required fields present; validates pr_id, run_id, branch, proof_artifact_ref, run_record_path non-empty; command_plan_summary non-empty (at minimum [git_status]); rejects pr_id: '', proof_artifact_ref: '', dogfood_type: local-non-docker without runtime fields. Sentinel values pr_url: pending-before-gh-pr-create and run_json_hash: pending are explicitly allowed."
+  - decision: "Empty pr_id and proof_artifact_ref blocked"
+    reason: "PLAN Section 2: _validate_dogfood_proof_content() rejects pr_id: '' and proof_artifact_ref: '' as dogfood_proof_incomplete. Tests test_empty_pr_id_blocks and test_root_weak_proof_content_with_empty_proof_artifact_ref_blocked verify this behavior."
+  - decision: "REASON_DOGFOOD_PROOF_INCOMPLETE gap confirmed"
+    reason: "grep confirmed: REASON_DOGFOOD_PROOF_INCOMPLETE defined at ariadne_task_cli.py L135 but no codes.append() call anywhere in the file — never emitted. test_ariadne_task_cli.py L1897-1899 tests only that the constant is defined, not that it is emitted. Plan correctly identifies this as a missing validation gate."
+  - decision: "Explicit --run-id persistence planned"
+    reason: "PLAN Section 3 fixes _persist_and_return gap: if request.run_id is provided (non-empty) and request.runs_root is None, default runs_root to .ariadne/runs. grep confirmed: L1080 'if not request.runs_root or not persistence_fn: return result' — runs_root=None skips all persistence. Test test_missing_task_description_with_explicit_run_id_persists verifies this fix."
+  - decision: "Failed/stopped run persistence addressed"
+    reason: "PLAN guarantees run.json persistence for: missing task description (early return at step 1), dogfood_proof_incomplete block (step 4c.5), dirty_tree_out_of_scope block (step 4b), stage_file_missing block (step 5), successful execution (step 10). All paths go through _persist_and_return which now has runs_root defaulted."
+  - decision: "Implementation scope constrained to ariadne_task_cli.py and test file only"
+    reason: "PLAN Section 5: allowed files are ariadne_task_cli.py (add _compute_plan_summary, fix render call site, add _validate_dogfood_proof_content, wire validation gate, fix runs_root defaulting) and test_ariadne_task_cli.py (19 test functions). Optional only if unavoidable: run_persistence.py. Not modified: git_boundary.py, agent_runner_bridge.py, pipeline_runner.py, prompt_composer.py, verdict_parser.py."
+  - decision: "19 test functions covering all new behaviors"
+    reason: "10 runtime finalization tests + 5 incomplete proof gate tests + 6 run persistence tests - some tests overlap in coverage. Plus 6 regression tests. All use injected fakes, no real git/gh/Docker/network."
+  - decision: "Real PR 0131 artifacts forbidden"
+    reason: "PLAN non-goals: no real PR 0131 dogfood artifacts created or modified. grep confirmed dogfood-proof.yml and precommit-review.yml absent from branch. .ariadne and captures absent."
+  - decision: "Frozen streams not started"
+    reason: "grep confirmed frozen stream terms (dashboard/control plane/retry/model health/run report/parallel queue/Decision Core/Context Warehouse/eval/faithfulness/frontend) only appear in PLAN non-goals section forbidding them, not in implementation scope."
+  - decision: "Validation strategy complete"
+    reason: "11 validation commands: compileall, focused pytest (4 modules), regression pytest (10 modules), grep proof patterns, grep forbidden patterns, test ! -f dogfood-proof.yml, test ! -f precommit-review.yml, .ariadne check, captures check, git status, git diff."
+  - decision: "Branch correct"
+    reason: "git branch --show-current returned exactly 0131h-runtime-dogfood-proof-finalizer. No deviation."
+  - decision: "Dirty tree within planning scope"
+    reason: "git status --short showed only ?? .project-memory/pr/0131h-runtime-dogfood-proof-finalizer/ (new plan directory, expected). No tracked modifications. No .ariadne/, captures/, or real PR 0131 artifacts."
+context_used:
+  labels:
+    - dogfood-hardening
+    - production-line-stage-2
+    - proof-validation-gate
+    - persistence-guarantee
+    - pr-0131h
+    - runtime-correction
+    - proof-finalizer
+  memory_files_read:
+    - ".project-memory/pr/0131h-runtime-dogfood-proof-finalizer/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/PLAN.md"
+    - ".project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/reviews/plan-review.yml"
+    - ".project-memory/pr/0131g-dogfood-proof-completeness-dirty-baseline/reviews/precommit-review.yml"
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/src/runner/run_persistence.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+  anchors_used: []
+  files_inspected:
+    - "ariadne_task_cli.py (L1-1300): REASON_DOGFOOD_PROOF_INCOMPLETE L135 (defined, never used); git_plan=None L795; command_plan_summary=[] L294; pending-before-gh-pr-create L338; proof_artifact_ref from files_to_stage[0] L314/L341; branch_mismatch L743; branch_ahead_or_behind L750; runs_root check L1080; _check_branch_sync L373; _check_git_baseline L454"
+    - "run_persistence.py (L1-500): PersistedRunRecord with run_json_hash L87, execution_attempted L99, command_plan_summary L98, approval_summary L101; persist_run_record writes run.json L235; manifest.json L274; load_run_record L345"
+    - "test_ariadne_task_cli.py (L1880-1920): TestDogfoodProofIncomplete class: test_dogfood_proof_incomplete_reason_defined (L1897) — only tests constant is defined, NOT that it is emitted; test_proof_renderer_without_stage_file_skips (L1910) — tests skip behavior"
+  files_modified: []
+  files_intentionally_ignored:
+    - "services/runner/src/runner/agent_runner_bridge.py (read-only, in prefer-not list)"
+    - "services/runner/src/runner/pipeline_runner.py (read-only, in prefer-not list)"
+    - "services/runner/src/runner/git_boundary.py (read-only, in prefer-not list)"
+    - "services/runner/src/runner/prompt_composer.py (read-only, in prefer-not list)"
+    - "services/runner/src/runner/verdict_parser.py (read-only, in prefer-not list)"
+checks:
+  branch: pass
+  dirty_tree: pass
+  plan_exists: pass
+  post_0131G_runtime_weak_proof_acknowledged: pass
+  renderer_vs_runtime_gap_distinguished: pass
+  bridge_placeholder_overwrite_planned: pass
+  finalization_order_correct: pass
+  all_20_proof_fields_validated: pass
+  empty_pr_id_proof_artifact_ref_blocked: pass
+  REASON_DOGFOOD_PROOF_INCOMPLETE_gap_confirmed: pass
+  explicit_run_id_persistence_planned: pass
+  failed_stopped_run_persistence_planned: pass
+  implementation_files_constrained: pass
+  tests_cover_runtime_finalization: pass
+  tests_cover_proof_validation: pass
+  tests_cover_persistence: pass
+  tests_avoid_real_git_gh: pass
+  real_pr_artifacts_forbidden: pass
+  frozen_streams_not_started: pass
+  validation_strategy_complete: pass
+  artifact_physically_written: pass
+  artifact_read_back: pass
+boundary_confirmations:
+  - "evidence-first plan-review completed; PLAN.md not modified by this review"
+  - "only plan-review artifact written; correct PR 0131H branch confirmed (git branch --show-current = 0131h-runtime-dogfood-proof-finalizer)"
+  - "ROADMAP.md not modified by review; services/runner/** not modified by review; agents/** not modified by review; schemas/** not modified by review; docs/** not modified by review"
+  - "Post-0131G runtime evidence acknowledged: weak bridge placeholder proof with empty pr_id and proof_artifact_ref persisted after 0131G. PLAN does NOT treat 0131G test coverage as sufficient — correctly identifies that renderer tests verified output but NOT validation gate emission or persistence guarantee"
+  - "Three concrete runtime gaps confirmed against current codebase: (A) git_plan=None at ariadne_task_cli.py L795 causes command_plan_summary=[], (B) REASON_DOGFOOD_PROOF_INCOMPLETE defined at L135 but never emitted (0 codes.append calls), (C) _persist_and_return L1080 skips when runs_root=None so explicit --run-id without --runs-root fails to persist"
+  - "Fix A: _compute_plan_summary(request) helper added; render call site uses computed summary instead of git_plan=None"
+  - "Fix B: _validate_dogfood_proof_content(path) added; validates all 20 fields; emits REASON_DOGFOOD_PROOF_INCOMPLETE if invalid; called after proof render, before Git Boundary"
+  - "Fix C: after request construction, if run_id is provided and runs_root is None, runs_root defaults to .ariadne/runs"
+  - "Proof finalization order: pipeline/bridge → baseline check (step 4b) → render complete proof with command_plan_summary from request params (step 4c.1-4c.3) → validate proof content (step 4c.4) → emit REASON_DOGFOOD_PROOF_INCOMPLETE if invalid (step 4c.5) → Git Boundary planner sees complete proof on disk (step 5)"
+  - "proof_artifact_ref from files_to_stage[0] is correct self-reference; not empty unless files_to_stage is empty (then sentinel pending-before-proof-hash)"
+  - "Sentinel values pr_url: pending-before-gh-pr-create and run_json_hash: pending are explicitly allowed in proof validation"
+  - "branch_mismatch and branch_ahead_or_behind are used as string values in branch_info['block_reason'] dict keys and appended directly to codes list at L743 and L750 — they appear in result.reason_codes tuple without needing formal REASON_* constants"
+  - "No real PR 0131 artifacts created or modified during implementation/tests (grep confirmed dogfood-proof.yml and precommit-review.yml absent from 0131H branch)"
+  - ".ariadne/ and captures/ absent from branch (find confirmed)"
+  - "Implementation scope: ariadne_task_cli.py only (primary); test_ariadne_task_cli.py only (primary); run_persistence.py optional only if unavoidable; not modified: git_boundary.py, agent_runner_bridge.py, pipeline_runner.py, prompt_composer.py, verdict_parser.py"
+  - "Tests: 19 test functions (10 runtime finalization + 5 incomplete proof gate + 6 run persistence) + 6 regression tests = ~25 total; all use injected fakes, no real git/gh/Docker/network"
+  - "Frozen streams not started: grep confirms no dashboard/control-plane/retry/model health/run report/parallel queue/Decision Core/Context Warehouse/eval/faithfulness/frontend in implementation scope"
+  - "Validation: compileall, focused pytest (4 modules), regression pytest (10 modules), grep proof/finalizer/persistence patterns, grep forbidden patterns (git mutation, docker, subprocess), real artifact absence checks, .ariadne check, captures check, git status, git diff — all 11 validation commands included"
+  - "Artifact write path: .project-memory/pr/0131h-runtime-dogfood-proof-finalizer/reviews/plan-review.yml"
+  - "PLAN.md not modified by this review"
+evidence_ledger:
+  - claim: "branch correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0131h-runtime-dogfood-proof-finalizer"
+    result: pass
+  - claim: "dirty tree within planning scope"
+    evidence_source: "git status --short + git diff --name-only"
+    exact_observed_evidence: "?? .project-memory/pr/0131h-runtime-dogfood-proof-finalizer/ only (new plan directory, expected); no tracked modifications; .ariadne absent; captures absent; real PR 0131 artifacts absent"
+    result: pass
+  - claim: "PLAN.md was read"
+    evidence_source: "PLAN.md content"
+    exact_observed_evidence: "PLAN.md exists at .project-memory/pr/0131h-runtime-dogfood-proof-finalizer/PLAN.md; 300+ lines; sections: Summary, Context, Roadmap alignment, Design (1-5), Non-goals, Tests, Implementation Steps, Stop Conditions, Validation Commands"
+    result: pass
+  - claim: "required supporting files read"
+    evidence_source: "files_checked list"
+    exact_observed_evidence: "8 files: PLAN.md, schema, PR0131G PLAN+plan-review+precommit-review, ariadne_task_cli.py, run_persistence.py, test_ariadne_task_cli.py"
+    result: pass
+  - claim: "post-0131G runtime weak proof acknowledged"
+    evidence_source: "PLAN.md Summary + Context"
+    exact_observed_evidence: "PLAN shows weak bridge placeholder: schema_version: 0.1, pr_id: '', dogfood_type: local-non-docker, status: completed, bridge_task_prompt_hash, bridge_agent_config_hash, proof_artifact_ref: '', materialized_at — missing all 20 required 0131G fields. PLAN explicitly states '0131G renderer tests confirmed all 20 fields present but did NOT verify validation gate emission or persistence guarantee.'"
+    result: pass
+  - claim: "renderer-vs-runtime gap distinguished"
+    evidence_source: "PLAN.md Summary + Context + grep confirmed"
+    exact_observed_evidence: "0131G precommit-review confirmed: python -c missing=[] (all 20 fields present), proof_artifact_ref non-empty. But REASON_DOGFOOD_PROOF_INCOMPLETE defined at L135 never emitted (grep: 0 codes.append calls). And git_plan=None at L795 makes command_plan_summary=[]. Runtime path bypassed unit test coverage."
+    result: pass
+  - claim: "bridge placeholder overwrite planned"
+    evidence_source: "PLAN.md Section 1 + grep confirmed git_plan=None"
+    exact_observed_evidence: "open(full_path,'w') already overwrites bridge placeholder at L800-804 (confirmed). Fix: replace git_plan=None with _compute_plan_summary(request) at L795. command_plan_summary computed from request params (files_to_stage, commit_message, pr_title) instead of from git_plan.command_specs."
+    result: pass
+  - claim: "finalization order correct"
+    evidence_source: "PLAN.md Section 4 corrected flow + grep confirmed"
+    exact_observed_evidence: "PLAN Section 4 corrected flow: 1 validate task desc → 2 pipeline request → 3 run pipeline → 4 check pipeline result (early return if failed) → 4b baseline check (block on dirty) → 4c.1 build plan_summary from request → 4c.2 render proof YAML → 4c.3 write to stage-file paths → 4c.4 validate proof content → 4c.5 if invalid emit REASON_DOGFOOD_PROOF_INCOMPLETE, block, persist → 5 build GitBoundaryRequest → 6 plan git boundary (stage-file check sees complete proof on disk). Proof BEFORE Git Boundary. Confirmed by grep: _render_dogfood_proof_yaml at L790-803; no validation between render and plan."
+    result: pass
+  - claim: "all 20 proof fields validated"
+    evidence_source: "PLAN.md Section 2 _validate_dogfood_proof_content specification"
+    exact_observed_evidence: "_validate_dogfood_proof_content(): reads written proof from disk, checks all 20 required fields present, validates non-empty for pr_id/run_id/branch/proof_artifact_ref/run_record_path, validates command_plan_summary non-empty (min [git_status]), rejects dogfood_type: local-non-docker without runtime fields, returns (ok, reason_codes, warnings). Sentinel allowed: pr_url: pending-before-gh-pr-create, run_json_hash: pending."
+    result: pass
+  - claim: "empty pr_id/proof_artifact_ref blocked"
+    evidence_source: "PLAN.md Section 2 + grep confirmed gap"
+    exact_observed_evidence: "grep confirmed: REASON_DOGFOOD_PROOF_INCOMPLETE defined at L135 but never appended to codes. _validate_dogfood_proof_content() plan adds checks for pr_id: '' and proof_artifact_ref: '' and returns ok=False with dogfood_proof_incomplete. Tests test_empty_pr_id_blocks and test_root_weak_proof_content_with_empty_proof_artifact_ref_blocked."
+    result: pass
+  - claim: "REASON_DOGFOOD_PROOF_INCOMPLETE gap confirmed"
+    evidence_source: "grep REASON_DOGFOOD_PROOF_INCOMPLETE services/runner/src/runner/ariadne_task_cli.py"
+    exact_observed_evidence: "REASON_DOGFOOD_PROOF_INCOMPLETE defined L135; grep shows 0 codes.append() calls using this constant — never emitted. test_ariadne_task_cli.py L1897 tests only that constant is defined, not that it is emitted in result.reason_codes. Validation gate is missing."
+    result: pass
+  - claim: "explicit --run-id persistence planned"
+    evidence_source: "PLAN.md Section 3 + grep confirmed _persist_and_return gap"
+    exact_observed_evidence: "grep L1080: 'if not request.runs_root or not persistence_fn: return result' — runs_root=None skips all persistence. PLAN Section 3 fix: after request construction, if run_id is provided and runs_root is None, default runs_root to .ariadne/runs. This ensures _persist_and_return runs for explicit --run-id. Test test_missing_task_description_with_explicit_run_id_persists verifies."
+    result: pass
+  - claim: "failed/stopped run persistence planned"
+    evidence_source: "PLAN.md Section 3 + run_persistence.py evidence"
+    exact_observed_evidence: "PLAN guarantees run.json persistence for all failure/stopped paths: missing task desc (step 1 early return → _persist_and_return), dogfood_proof_incomplete block (step 4c.5 → _persist_and_return), dirty_tree_out_of_scope block (step 4b → _persist_and_return), stage_file_missing block (step 5 → _persist_and_return), successful execution (step 10 → _persist_and_return). With runs_root defaulted, all paths persist."
+    result: pass
+  - claim: "implementation files constrained"
+    evidence_source: "PLAN.md Section 5 implementation scope table"
+    exact_observed_evidence: "Allowed: ariadne_task_cli.py (add _compute_plan_summary, fix render call, add _validate_dogfood_proof_content, wire validation gate, fix runs_root default), test_ariadne_task_cli.py (19 test functions). Optional only if unavoidable: run_persistence.py. Not modified: git_boundary.py, agent_runner_bridge.py, pipeline_runner.py, prompt_composer.py, verdict_parser.py. Scope is tight and justified."
+    result: pass
+  - claim: "tests cover runtime finalization"
+    evidence_source: "PLAN.md ### Runtime Finalization Tests (10 functions)"
+    exact_observed_evidence: "10 test functions: test_bridge_placeholder_overwritten_by_cli_proof_before_git_plan, test_root_weak_proof_content_with_empty_pr_id_blocked, test_root_weak_proof_content_with_empty_proof_artifact_ref_blocked, test_complete_proof_contains_all_20_required_fields, test_proof_artifact_ref_non_empty, test_pr_id_equals_requested_pr_id, test_run_id_equals_requested_run_id, test_stage_file_path_remains_dogfood_proof_yml, test_git_boundary_planner_observes_complete_proof_on_disk, test_git_boundary_executor_never_sees_weak_placeholder"
+    result: pass
+  - claim: "tests cover proof validation gate"
+    evidence_source: "PLAN.md ### Incomplete Proof Gate Tests (5 functions)"
+    exact_observed_evidence: "5 test functions: test_missing_proof_artifact_ref_blocks, test_empty_pr_id_blocks, test_missing_run_id_blocks, test_missing_proof_field_blocks, test_dogfood_proof_incomplete_reason_code_emitted"
+    result: pass
+  - claim: "tests cover persistence guarantee"
+    evidence_source: "PLAN.md ### Run Persistence Tests (6 functions)"
+    exact_observed_evidence: "6 test functions: test_missing_task_description_with_explicit_run_id_persists, test_dogfood_proof_incomplete_persists_run_record, test_dirty_tree_out_of_scope_persists_run_record, test_stage_file_missing_persists_run_record, test_successful_fake_execution_persists_run_json_and_manifest, test_persisted_run_path_uses_explicit_run_id"
+    result: pass
+  - claim: "tests avoid real git/gh/Docker/network/agents"
+    evidence_source: "PLAN.md ### Regression Tests + grep results"
+    exact_observed_evidence: "6 regression tests use injected fake functions. grep in ariadne_task_cli.py production code: subprocess.run used only for read-only git status/branch commands (L391/407/470/528). No git add/commit/push/gh pr create/docker in production code. Test file uses subprocess for temp repo setup (fixture only, not production). test_no_subprocess_run_in_test_code (existing test in file) verifies run_ariadne_task source has no git mutation."
+    result: pass
+  - claim: "real PR artifacts forbidden"
+    evidence_source: "PLAN.md non-goals + grep + test commands"
+    exact_observed_evidence: "PLAN non-goals: no real PR 0131 dogfood artifacts created or modified. grep confirmed: dogfood-proof.yml absent, precommit-review.yml absent from branch. test ! -f commands both PASS."
+    result: pass
+  - claim: "frozen streams not started"
+    evidence_source: "grep frozen stream terms in PLAN.md"
+    exact_observed_evidence: "grep found frozen stream terms only in non-goals section (PLAN forbidding them). None in implementation scope. Not started."
+    result: pass
+  - claim: "validation strategy complete"
+    evidence_source: "PLAN.md ### Validation Commands section"
+    exact_observed_evidence: "11 validation commands: python -m compileall, focused pytest (4 modules), regression pytest (10 modules), grep proof/finalizer/persistence patterns, grep forbidden patterns (git mutation, docker, subprocess), test ! -f dogfood-proof.yml, test ! -f precommit-review.yml, .ariadne check, captures check, git status, git diff"
+    result: pass
+  - claim: "artifact physically written/read back"
+    evidence_source: "write_file + test -f + sed"
+    exact_observed_evidence: "write_file to .project-memory/pr/0131h-runtime-dogfood-proof-finalizer/reviews/plan-review.yml; test -f exits 0; sed confirms first 180 lines contain expected schema fields"
+    result: pass
