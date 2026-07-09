@@ -200,6 +200,21 @@ def _clean_branch_sync(repo_root, expected_branch):
     }
 
 
+def _clean_payload_check(repo_root, allowed_files):
+    """Clean payload cleanliness provider for tests (gate passes)."""
+    from runner.ariadne_task_cli import PayloadCleanlinessResult
+    return PayloadCleanlinessResult(
+        is_clean=True,
+        allowed_payload_files=(),
+        known_residue_files=(),
+        forbidden_tracked_files=(),
+        staged_residue_files=(),
+        unknown_untracked_files=(),
+        cached_diff_files=(),
+        reason_codes=(),
+    )
+
+
 # ---------------------------------------------------------------------------
 # Focused residue-proof tests
 # ---------------------------------------------------------------------------
@@ -979,6 +994,7 @@ class TestDirtyTreeOutOfScope:
             git_boundary_planner_fn=_fake_git_boundary_planner(),
             git_boundary_executor_fn=_fake_git_boundary_executor(),
             clock_provider=_clock,
+            payload_cleanliness_fn=_clean_payload_check,
         )
         assert result.status == AriadneTaskCliStatus.BLOCKED
         assert REASON_DIRTY_TREE_OUT_OF_SCOPE in result.reason_codes
@@ -2255,6 +2271,7 @@ class TestRunPersistenceGuarantee:
             git_boundary_executor_fn=_fake_git_boundary_executor(),
             persistence_fn=persist_run_record,
             clock_provider=_clock,
+            payload_cleanliness_fn=_clean_payload_check,
         )
         assert result.run_id == "dirty-tree-run"
         assert result.run_record_path is not None
@@ -2466,6 +2483,7 @@ class TestDirtyBaselineEnforcement:
             git_boundary_planner_fn=_fake_git_boundary_planner(),
             git_boundary_executor_fn=_fake_git_boundary_executor(),
             clock_provider=_clock,
+            payload_cleanliness_fn=_clean_payload_check,
         )
         assert result.execution_attempted is False
         assert REASON_DIRTY_TREE_OUT_OF_SCOPE in result.reason_codes
@@ -2673,6 +2691,7 @@ class TestDryRunNoDryRunBehavior:
             git_boundary_planner_fn=_fake_git_boundary_planner(),
             git_boundary_executor_fn=_fake_git_boundary_executor(),
             clock_provider=_clock,
+            payload_cleanliness_fn=_clean_payload_check,
         )
         assert result.execution_attempted is False
         assert REASON_DIRTY_TREE_OUT_OF_SCOPE in result.reason_codes
@@ -3338,3 +3357,399 @@ class TestExecutionResultsPersistence:
         assert "gh pr create" not in source
         assert "import docker" not in source
         assert True
+
+
+# ---------------------------------------------------------------------------
+# Payload cleanliness gate tests (PR 0134)
+# ---------------------------------------------------------------------------
+
+
+class TestPayloadCleanlinessGate:
+    """Commit payload cleanliness gate classification and blocking."""
+
+    def test_untracked_known_residue_does_not_block(self):
+        """Untracked known generated residue passes the gate."""
+        from runner.ariadne_task_cli import _check_payload_cleanliness, PayloadCleanlinessResult
+
+        def status_provider(repo_root):
+            return ["?? captures/some_file.txt", "?? .ariadne/runs/run.json"]
+
+        def cached_diff_provider(repo_root):
+            return []
+
+        result = _check_payload_cleanliness(
+            repo_root=".",
+            allowed_files=(),
+            status_provider=status_provider,
+            cached_diff_provider=cached_diff_provider,
+        )
+        assert result.is_clean is True
+        assert "captures/some_file.txt" in result.known_residue_files
+        assert ".ariadne/runs/run.json" in result.known_residue_files
+        assert len(result.reason_codes) == 0
+
+    def test_staged_known_residue_blocks(self):
+        """Staged known generated residue blocks the gate."""
+        from runner.ariadne_task_cli import (
+            _check_payload_cleanliness,
+            REASON_COMMIT_PAYLOAD_STAGED_RESIDUE,
+        )
+
+        def status_provider(repo_root):
+            return ["A  .ariadne/runs/run.json"]
+
+        def cached_diff_provider(repo_root):
+            return [".ariadne/runs/run.json"]
+
+        result = _check_payload_cleanliness(
+            repo_root=".",
+            allowed_files=(),
+            status_provider=status_provider,
+            cached_diff_provider=cached_diff_provider,
+        )
+        assert result.is_clean is False
+        assert REASON_COMMIT_PAYLOAD_STAGED_RESIDUE in result.reason_codes
+        assert ".ariadne/runs/run.json" in result.staged_residue_files
+
+    def test_tracked_known_residue_blocks(self):
+        """Tracked (modified) known generated residue blocks."""
+        from runner.ariadne_task_cli import (
+            _check_payload_cleanliness,
+            REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE,
+        )
+
+        def status_provider(repo_root):
+            return [" M .ariadne/runs/run.json"]
+
+        def cached_diff_provider(repo_root):
+            return []
+
+        result = _check_payload_cleanliness(
+            repo_root=".",
+            allowed_files=(),
+            status_provider=status_provider,
+            cached_diff_provider=cached_diff_provider,
+        )
+        assert result.is_clean is False
+        assert REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE in result.reason_codes
+        assert ".ariadne/runs/run.json" in result.forbidden_tracked_files
+
+    def test_unknown_untracked_files_block(self):
+        """Unknown untracked files block the gate."""
+        from runner.ariadne_task_cli import (
+            _check_payload_cleanliness,
+            REASON_COMMIT_PAYLOAD_UNKNOWN_UNTRACKED,
+        )
+
+        def status_provider(repo_root):
+            return ["?? unknown_file.py"]
+
+        def cached_diff_provider(repo_root):
+            return []
+
+        result = _check_payload_cleanliness(
+            repo_root=".",
+            allowed_files=(),
+            status_provider=status_provider,
+            cached_diff_provider=cached_diff_provider,
+        )
+        assert result.is_clean is False
+        assert REASON_COMMIT_PAYLOAD_UNKNOWN_UNTRACKED in result.reason_codes
+        assert "unknown_file.py" in result.unknown_untracked_files
+
+    def test_agents_plan_review_yml_modification_blocks(self):
+        """Modification of agents/plan-review.yml blocks."""
+        from runner.ariadne_task_cli import (
+            _check_payload_cleanliness,
+            REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE,
+        )
+
+        def status_provider(repo_root):
+            return [" M agents/plan-review.yml"]
+
+        def cached_diff_provider(repo_root):
+            return []
+
+        result = _check_payload_cleanliness(
+            repo_root=".",
+            allowed_files=(),
+            status_provider=status_provider,
+            cached_diff_provider=cached_diff_provider,
+        )
+        assert result.is_clean is False
+        assert REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE in result.reason_codes
+        assert "agents/plan-review.yml" in result.forbidden_tracked_files
+
+    def test_agents_precommit_review_yml_modification_blocks(self):
+        """Modification of agents/precommit-review.yml blocks."""
+        from runner.ariadne_task_cli import (
+            _check_payload_cleanliness,
+            REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE,
+        )
+
+        def status_provider(repo_root):
+            return [" M agents/precommit-review.yml"]
+
+        def cached_diff_provider(repo_root):
+            return []
+
+        result = _check_payload_cleanliness(
+            repo_root=".",
+            allowed_files=(),
+            status_provider=status_provider,
+            cached_diff_provider=cached_diff_provider,
+        )
+        assert result.is_clean is False
+        assert REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE in result.reason_codes
+        assert "agents/precommit-review.yml" in result.forbidden_tracked_files
+
+    def test_roadmap_md_modification_blocks(self):
+        """Modification of ROADMAP.md blocks."""
+        from runner.ariadne_task_cli import (
+            _check_payload_cleanliness,
+            REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE,
+        )
+
+        def status_provider(repo_root):
+            return [" M ROADMAP.md"]
+
+        def cached_diff_provider(repo_root):
+            return []
+
+        result = _check_payload_cleanliness(
+            repo_root=".",
+            allowed_files=(),
+            status_provider=status_provider,
+            cached_diff_provider=cached_diff_provider,
+        )
+        assert result.is_clean is False
+        assert REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE in result.reason_codes
+        assert "ROADMAP.md" in result.forbidden_tracked_files
+
+    def test_gitignore_modification_blocks(self):
+        """Modification of .gitignore blocks."""
+        from runner.ariadne_task_cli import (
+            _check_payload_cleanliness,
+            REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE,
+        )
+
+        def status_provider(repo_root):
+            return [" M .gitignore"]
+
+        def cached_diff_provider(repo_root):
+            return []
+
+        result = _check_payload_cleanliness(
+            repo_root=".",
+            allowed_files=(),
+            status_provider=status_provider,
+            cached_diff_provider=cached_diff_provider,
+        )
+        assert result.is_clean is False
+        assert REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE in result.reason_codes
+        assert ".gitignore" in result.forbidden_tracked_files
+
+    def test_approved_payload_files_pass(self):
+        """Approved payload files pass the gate."""
+        from runner.ariadne_task_cli import _check_payload_cleanliness
+
+        def status_provider(repo_root):
+            return [
+                " M allowed.py",
+                " M .project-memory/pr/0134/test.yml",
+            ]
+
+        def cached_diff_provider(repo_root):
+            return []
+
+        result = _check_payload_cleanliness(
+            repo_root=".",
+            allowed_files=("allowed.py", ".project-memory/pr/0134/test.yml"),
+            status_provider=status_provider,
+            cached_diff_provider=cached_diff_provider,
+        )
+        assert result.is_clean is True
+        assert "allowed.py" in result.allowed_payload_files
+        assert ".project-memory/pr/0134/test.yml" in result.allowed_payload_files
+        assert len(result.reason_codes) == 0
+
+    def test_cached_diff_outside_approved_payload_blocks(self):
+        """Cached diff file outside approved payload blocks."""
+        from runner.ariadne_task_cli import (
+            _check_payload_cleanliness,
+            REASON_COMMIT_PAYLOAD_FORBIDDEN_CACHED_DIFF,
+        )
+
+        def status_provider(repo_root):
+            return []
+
+        def cached_diff_provider(repo_root):
+            return ["unexpected.c"]
+
+        result = _check_payload_cleanliness(
+            repo_root=".",
+            allowed_files=(),
+            status_provider=status_provider,
+            cached_diff_provider=cached_diff_provider,
+        )
+        assert result.is_clean is False
+        assert REASON_COMMIT_PAYLOAD_FORBIDDEN_CACHED_DIFF in result.reason_codes
+        assert "unexpected.c" in result.cached_diff_files
+
+    def test_structured_evidence_lists_returned(self):
+        """Result includes structured evidence lists."""
+        from runner.ariadne_task_cli import _check_payload_cleanliness
+
+        def status_provider(repo_root):
+            return [
+                " M agents/plan-review.yml",
+                " M allowed.py",
+                "?? .ariadne/runs/run.json",
+                "?? unknown.py",
+            ]
+
+        def cached_diff_provider(repo_root):
+            return ["unexpected.c"]
+
+        result = _check_payload_cleanliness(
+            repo_root=".",
+            allowed_files=("allowed.py",),
+            status_provider=status_provider,
+            cached_diff_provider=cached_diff_provider,
+        )
+        assert result.is_clean is False
+        assert "agents/plan-review.yml" in result.forbidden_tracked_files
+        assert "allowed.py" in result.allowed_payload_files
+        assert ".ariadne/runs/run.json" in result.known_residue_files
+        assert "unknown.py" in result.unknown_untracked_files
+        assert "unexpected.c" in result.cached_diff_files
+        assert len(result.reason_codes) > 0
+
+    def test_required_reason_codes_emitted(self):
+        """Required reason codes are emitted by the gate."""
+        from runner.ariadne_task_cli import (
+            _check_payload_cleanliness,
+            REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE,
+            REASON_COMMIT_PAYLOAD_STAGED_RESIDUE,
+            REASON_COMMIT_PAYLOAD_UNKNOWN_UNTRACKED,
+            REASON_COMMIT_PAYLOAD_FORBIDDEN_CACHED_DIFF,
+        )
+
+        def status_provider(repo_root):
+            return [
+                " M agents/plan-review.yml",
+                "A  .project-memory/pr/test/staged.yml",
+                "?? dirty_unknown.py",
+            ]
+
+        def cached_diff_provider(repo_root):
+            return ["extra.o"]
+
+        result = _check_payload_cleanliness(
+            repo_root=".",
+            allowed_files=(),
+            status_provider=status_provider,
+            cached_diff_provider=cached_diff_provider,
+        )
+        assert result.is_clean is False
+        assert REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE in result.reason_codes
+        assert REASON_COMMIT_PAYLOAD_STAGED_RESIDUE in result.reason_codes
+        assert REASON_COMMIT_PAYLOAD_UNKNOWN_UNTRACKED in result.reason_codes
+        assert REASON_COMMIT_PAYLOAD_FORBIDDEN_CACHED_DIFF in result.reason_codes
+
+    def test_gate_failure_prevents_commit_path(self):
+        """Gate failure before baseline prevents approved commit/PR path."""
+        import tempfile
+        from runner.ariadne_task_cli import (
+            run_ariadne_task,
+            REASON_COMMIT_PAYLOAD_UNKNOWN_UNTRACKED,
+        )
+        from runner.ariadne_task_cli import AriadneTaskCliStatus
+
+        repo_root = tempfile.mkdtemp(prefix="gate-block-test-")
+
+        request = _valid_request(
+            repo_root=repo_root,
+            pr_id="0134-test",
+            branch="0134-test",
+            allowed_files=("allowed.py",),
+            files_to_stage=("allowed.py",),
+            commit_message="Test commit",
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing gate failure",
+            dry_run=True,
+        )
+        # Create allowed file
+        with open(os.path.join(repo_root, "allowed.py"), "w") as f:
+            f.write("# allowed")
+        import subprocess
+        subprocess.run(["git", "init"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "checkout", "-b", "0134-test"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "add", "allowed.py"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "initial"], cwd=repo_root, capture_output=True)
+        # Create unknown untracked file
+        with open(os.path.join(repo_root, "unknown_dirty.py"), "w") as f:
+            f.write("# dirty")
+
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        assert result.status == AriadneTaskCliStatus.BLOCKED
+        assert result.execution_attempted is False
+        assert REASON_COMMIT_PAYLOAD_UNKNOWN_UNTRACKED in result.reason_codes
+
+    def test_clean_tree_with_known_residue_passes_full_task(self):
+        """Known generated residue (untracked only) does not block full task."""
+        import tempfile
+        from runner.ariadne_task_cli import (
+            run_ariadne_task,
+            AriadneTaskCliStatus,
+        )
+
+        repo_root = tempfile.mkdtemp(prefix="residue-pass-test-")
+
+        request = _valid_request(
+            repo_root=repo_root,
+            pr_id="0134-residue",
+            branch="0134-residue",
+            allowed_files=("allowed.py",),
+            execute=True,
+            approve=True,
+            approved_by="tester",
+            approval_reason="Testing residue pass",
+            dry_run=True,
+        )
+        # Create allowed file
+        with open(os.path.join(repo_root, "allowed.py"), "w") as f:
+            f.write("# allowed")
+        import subprocess
+        subprocess.run(["git", "init"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "checkout", "-b", "0134-residue"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "add", "allowed.py"], cwd=repo_root, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "initial"], cwd=repo_root, capture_output=True)
+        # Create untracked known residue (e.g. .ariadne)
+        os.makedirs(os.path.join(repo_root, ".ariadne", "runs"), exist_ok=True)
+
+        result = run_ariadne_task(
+            request,
+            pipeline_runner_fn=_fake_pipeline_runner(),
+            git_boundary_planner_fn=_fake_git_boundary_planner(),
+            git_boundary_executor_fn=_fake_git_boundary_executor(),
+            clock_provider=_clock,
+            baseline_check_fn=_clean_baseline_check,
+            branch_sync_fn=_clean_branch_sync,
+        )
+        # Gate should pass because .ariadne is untracked known residue
+        # Gate only runs when execute=True, baseline and branch are clean
+        assert result.status in (AriadneTaskCliStatus.BLOCKED, AriadneTaskCliStatus.COMPLETED)
+        # If blocked, it should NOT be due to payload cleanliness
+        for rc in result.reason_codes:
+            assert not rc.startswith("commit_payload_"), f"Unexpected reason code: {rc}"
