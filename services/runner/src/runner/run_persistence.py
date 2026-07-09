@@ -71,6 +71,7 @@ class RunPersistenceRequest:
     started_at: Optional[str]
     finished_at: Optional[str]
     clock_provider: Optional[Callable] = None
+    report_path: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------
@@ -268,11 +269,14 @@ def persist_run_record(
     run_json_hash = hashlib.sha256(run_json_canonical.encode("utf-8")).hexdigest()[:16]
 
     # 5. Build manifest.json data
+    manifest_files = ["run.json"]
+    if getattr(request, "report_path", None):
+        manifest_files.append("run-report.txt")
     manifest_data = {
         "schema_version": _SCHEMA_VERSION,
         "run_id": request.run_id,
         "run_json_hash": run_json_hash,
-        "files": ["run.json"],
+        "files": manifest_files,
     }
 
     # 6. Write files

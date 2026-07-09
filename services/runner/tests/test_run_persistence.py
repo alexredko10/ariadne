@@ -479,3 +479,37 @@ class TestNoForbiddenNames:
         ]
         for f in forbidden:
             assert f not in source, f"Forbidden string found: {f!r}"
+
+
+# ---------------------------------------------------------------------------
+# Manifest report path tests (PR 0135)
+# ---------------------------------------------------------------------------
+
+
+class TestManifestReportPath:
+    """Manifest includes run-report.txt when report_path is provided."""
+
+    def test_manifest_includes_report_path_when_provided(self, tmp_path: Path):
+        """Manifest files list includes run-report.txt when report_path is set."""
+        runs_root = str(tmp_path / "runs")
+        request = _valid_request(
+            runs_root=runs_root,
+            report_path=str(tmp_path / "runs" / "run-001" / "run-report.txt"),
+        )
+        result = persist_run_record(request)
+        assert result.status == RunPersistenceStatus.PERSISTED.value
+        manifest = Path(result.manifest_path)
+        manifest_data = json.loads(manifest.read_text(encoding="utf-8"))
+        assert "run.json" in manifest_data["files"]
+        assert "run-report.txt" in manifest_data["files"]
+
+    def test_manifest_excludes_report_path_when_not_provided(self, tmp_path: Path):
+        """Manifest files list excludes run-report.txt when report_path is not set."""
+        runs_root = str(tmp_path / "runs")
+        request = _valid_request(runs_root=runs_root)
+        result = persist_run_record(request)
+        assert result.status == RunPersistenceStatus.PERSISTED.value
+        manifest = Path(result.manifest_path)
+        manifest_data = json.loads(manifest.read_text(encoding="utf-8"))
+        assert "run.json" in manifest_data["files"]
+        assert "run-report.txt" not in manifest_data["files"]
