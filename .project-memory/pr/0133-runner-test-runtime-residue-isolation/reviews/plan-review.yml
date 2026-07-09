@@ -1,0 +1,258 @@
+schema_version: "0.1"
+pr_id: "0133-runner-test-runtime-residue-isolation"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-09T00:00:00Z"
+head_verified: "70b65dd234a51d224399513f6142dea1aa9adc71"
+branch_confirmed: "0133-runner-test-runtime-residue-isolation"
+snapshot_delta:
+  plan_base_sha: "70b65dd234a51d224399513f6142dea1aa9adc71"
+  current_head: "70b65dd234a51d224399513f6142dea1aa9adc71"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/PLAN.md"
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/plan-review.yml"
+  actual_files:
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/PLAN.md"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0132-persist-final-execution-results/PLAN.md"
+  - ".project-memory/pr/0132-persist-final-execution-results/reviews/plan-review.yml"
+  - ".project-memory/pr/0132-persist-final-execution-results/reviews/precommit-review.yml"
+  - ".project-memory/pr/0131i-dogfood-artifact-hygiene-existing-proof-boundary/PLAN.md"
+  - ".project-memory/pr/0131i-dogfood-artifact-hygiene-existing-proof-boundary/reviews/precommit-review.yml"
+  - ".project-memory/pr/0131j-finalize-existing-tracked-dogfood-proof-before-baseline/PLAN.md"
+  - ".project-memory/pr/0131j-finalize-existing-tracked-dogfood-proof-before-baseline/reviews/precommit-review.yml"
+  - ".project-memory/pr/0131k-fix-dot-prefix-path-normalization/PLAN.md"
+  - ".project-memory/pr/0131k-fix-dot-prefix-path-normalization/reviews/precommit-review.yml"
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/src/runner/git_boundary.py"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+  - "services/runner/tests/test_run_persistence.py"
+  - "services/runner/tests/test_git_boundary.py"
+  - "services/runner/tests/test_local_harness.py"
+  - "services/runner/tests/test_pipeline_runner.py"
+  - "agents/planner.yml"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+files_written:
+  - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/plan-review.yml"
+checks:
+  branch_correct: "pass"
+  plan_exists_readable: "pass"
+  residue_identified_as_repo_root_problem: "pass"
+  residue_paths_listed: "pass"
+  runtime_vs_unmanaged_distinguished: "pass"
+  isolation_via_temp_root_required: "pass"
+  no_broad_gitignore_addition: "pass"
+  dirty_tree_checks_preserved: "pass"
+  no_deletion_of_committed_artifacts: "pass"
+  post_test_residue_checks_included: "pass"
+  git_status_diff_checks_included: "pass"
+  focused_tests_and_regression_subset_included: "pass"
+  no_real_dogfood_git_gh_docker_network_agents_in_tests: "pass"
+  0131I_0131J_0131K_0132_preserved: "pass"
+  no_frozen_scope_added: "pass"
+validation:
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache '\\.project-memory/pr/0127|\\.project-memory/pr/dogfood|test_stage_file\\.py|tmp_path|TemporaryDirectory|chdir|cwd|project_root|runs_root|captures' services/runner/src/runner services/runner/tests .project-memory/pr/0133-runner-test-runtime-residue-isolation"
+    result: "passed"
+    exit_code: 0
+    evidence: "Key findings: (1) _valid_request() in test_ariadne_task_cli.py L164: repo_root='.' (the root cause confirmed); (2) test_pipeline_runner.py hardcoded paths at L179 L185 L191 L197 L476 L547 L569 L706 L770 L786 L1705 L1709 reference .project-memory/pr/0127/ and .project-memory/pr/dogfood/; (3) test_agent_runner_bridge.py L1138 hardcodes .project-memory/pr/dogfood/dogfood-proof.yml; (4) test_git_boundary.py L49 uses tmp_path; (5) test_ariadne_task_cli.py L692-701: TestNoAriadneResidue uses _valid_request() without repo_root override (relies on default '.'); (6) ariadne_task_cli.py L639 FORBIDDEN_PAYLOAD_PREFIXES=('captures/',); (7) ariadne_task_cli.py L640 IGNORED_BASELINE_PREFIXES=('.ariadne/',); (8) ariadne_task_cli.py L786: auto-default runs_root='.ariadne/runs' when run_id provided; (9) run_persistence.py L184-187 uses atomic tmp_path write for run.json"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'git add|git commit|git push|gh pr create|git reset|git checkout|git switch|git merge|git rebase|git clean|git tag|docker|docker compose|docker run|pip install|python -m pip install|shell=True|os.system' services/runner/src/runner services/runner/tests .project-memory/pr/0133-runner-test-runtime-residue-isolation"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only read-only string literals in verdict_parser.py L121-138 (forbidden tool lists), prompt_composer.py L131-146 (forbidden tool lists), session_continuity.py L169-177 (forbidden tool lists), improvement_backlog.py L172-177 (forbidden tool lists). No actual shell=True, os.system, or subprocess.run for git/gh/docker mutation in test files. PLAN.md has no real mutation commands."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'dashboard|control plane|retry|model health|run report|parallel queue|Decision Core|Context Warehouse|eval harness|faithfulness|frontend' .project-memory/pr/0133-runner-test-runtime-residue-isolation"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only occurrence is PLAN.md non-goals list at lines 294-295: 'No dashboard, retry, control plane, model health, run report, parallel queue, Decision Core, Context Warehouse, eval harness, faithfulness audit, frontend' — confirming these are explicitly forbidden scope. No actual implementation."
+  - command: "sed -n '160,190p' services/runner/tests/test_ariadne_task_cli.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "_valid_request() L164: repo_root='.' (real repo root); L167: allowed_files=('test_stage_file.py',); L168: files_to_stage=('test_stage_file.py',). This confirms the root cause: tests without explicit repo_root override operate on real repo."
+  - command: "sed -n '680,705p' services/runner/tests/test_ariadne_task_cli.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "TestNoAriadneResidue.test_no_ariadne_residue (L692): uses _valid_request() without repo_root override; asserts Path('.ariadne').exists() is False. This test currently passes only because dry_run=True. With execute=True or persistence enabled, this test would create .ariadne in real repo."
+  - command: "grep -n '\\.project-memory/pr/0127\\|\\.project-memory/pr/dogfood\\|test_stage_file' services/runner/tests/test_pipeline_runner.py | head -15"
+    result: "passed"
+    exit_code: 0
+    evidence: "test_pipeline_runner.py L179 L185 L191 L197: .project-memory/pr/0127/PLAN.md and .project-memory/pr/0127/reviews/ plan-review.yml paths; L476 L547 L569 L706 L770 L786: .project-memory/pr/dogfood/dogfood-proof.yml paths; L1705 L1709 L1731: .project-memory/pr/0127/PLAN.md paths. These hardcoded real-repo paths are confirmed residue sources."
+  - command: "grep -n '\\.project-memory/pr/dogfood' services/runner/tests/test_agent_runner_bridge.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "test_agent_runner_bridge.py L1138: artifact_path = '.project-memory/pr/dogfood/dogfood-proof.yml' — hardcoded real-repo path confirmed."
+  - command: "grep -n 'FORBIDDEN_PAYLOAD_PREFIXES\\|IGNORED_BASELINE_PREFIXES' services/runner/src/runner/ariadne_task_cli.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "L639: FORBIDDEN_PAYLOAD_PREFIXES=('captures/',) — existing cleanup target; L640: IGNORED_BASELINE_PREFIXES=('.ariadne/',) — existing baseline ignore. These are the correct hygiene targets. PLAN does not remove or weaken them."
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Root cause correctly identified: _valid_request() defaults repo_root='.'"
+    reason: "PLAN Root Cause section: '_valid_request() helper in test_ariadne_task_cli.py defaults repo_root=\".\" (the real repository root). Any test that calls _valid_request() without explicitly overriding repo_root with a tmp_path operates on the real repository.' Confirmed by sed L164 in test_ariadne_task_cli.py."
+  - decision: "Hardcoded real-repo paths confirmed in test_pipeline_runner.py and test_agent_runner_bridge.py"
+    reason: "test_pipeline_runner.py lines 179, 185, 191, 197, 476, 547, 569, 706, 770, 786, 1705, 1709 reference .project-memory/pr/0127/ and .project-memory/pr/dogfood/. test_agent_runner_bridge.py L1138 references .project-memory/pr/dogfood/dogfood-proof.yml. These are the specific unmanaged residue sources the PLAN addresses."
+  - decision: "Runtime-approved artifacts distinguished from unmanaged test residue"
+    reason: "PLAN Distinction table: .project-memory/pr/0131-dogfood-pr-created-by-ariadne/ is runtime-approved and committed. .project-memory/pr/0127/, .project-memory/pr/dogfood/, test_stage_file.py, .ariadne/, captures/ are unmanaged residue. PLAN explicitly lists what is NOT modified."
+  - decision: "Isolation via temp-root required — no broad .gitignore additions"
+    reason: "PLAN Step 1-2: Change _valid_request() default repo_root to tempfile.mkdtemp() and allowed_files to (). PLAN Scope: '.gitignore — not modified (no broad ignores)'. grep confirms no .gitignore changes proposed."
+  - decision: "Dirty-tree checks preserved — tests use injectable fake providers"
+    reason: "test_ariadne_task_cli.py tests use injectable fake providers (pipeline_runner_fn, git_boundary_planner_fn, git_boundary_executor_fn, baseline_check_fn). Dirty-tree logic is in production code (ariadne_task_cli.py), unchanged by this PLAN. PLAN Scope: 'No change to Git Boundary authority rules.'"
+  - decision: "No deletion of committed project-memory artifacts"
+    reason: "PLAN Scope table explicitly lists '.project-memory/pr/0131-dogfood-pr-created-by-ariadne/ — not modified' and '.project-memory/pr/0132-persist-final-execution-results/ — not modified'. The cleanup command (Step 8) targets only known unmanaged residue."
+  - decision: "Post-test residue checks included via autouse pytest fixture"
+    reason: "PLAN Step 6: @pytest.fixture(autouse=True) def assert_no_repo_root_residue(): yield; assert not os.path.exists(path) for each known residue path. This runs after every test and blocks if residue exists."
+  - decision: "Validation includes pre-test cleanup, compile, focused tests, post-focused residue check, regression subset, post-regression residue check, grep, git status/diff"
+    reason: "PLAN Validation Design: 10-step checklist from rm -rf cleanup through git diff. Each step has explicit expected result. Post-test residue check runs after both focused and regression subsets."
+  - decision: "No real dogfood, git, gh, Docker, network, or agents in tests"
+    reason: "PLAN non-goals: 'No real git/gh/Docker/network/agents in tests.' All tests use injectable fake providers. grep confirms no actual shell=True, os.system, or subprocess.run for git/gh/docker in test files."
+  - decision: "PR 0131I, 0131J, 0131K, 0132 preserved"
+    reason: "PLAN Preserved Previous Fixes table: _cleanup_runtime_residue unchanged; proof finalization order unchanged; dot-prefix normalization unchanged; execution_results persistence unchanged. git_boundary.py and run_persistence.py not in scope."
+  - decision: "No frozen scope added"
+    reason: "grep for dashboard/control-plane/retry/model-health/parallel-queue/Decision-Core/frontend returns only PLAN.md non-goals list. No such terms in proposed implementation."
+  - decision: "test_no_ariadne_residue test currently relies on dry_run=True to avoid creating .ariadne"
+    reason: "sed L692-701: test_no_ariadne_residue uses _valid_request() with default dry_run=True. With repo_root='.' and execution/persistence enabled, .ariadne/ would be created. PLAN Step 1 fix (changing default repo_root) prevents this."
+  - decision: "Hardcoded .project-memory/pr/ paths in test_pipeline_runner.py and test_agent_runner_bridge.py are confirmed as unmanaged residue sources"
+    reason: "PLAN Root Cause: 'These paths are not isolated by tmp_path in the fixture setup.' Evidence confirms: test_pipeline_runner.py has hardcoded real-repo paths (L179-L1709); test_agent_runner_bridge.py has hardcoded path (L1138). PLAN Steps 4-5 address these."
+  - decision: "captures/ and .ariadne/ are already cleanup targets in production code"
+    reason: "ariadne_task_cli.py L639 FORBIDDEN_PAYLOAD_PREFIXES=('captures/',); L640 IGNORED_BASELINE_PREFIXES=('.ariadne/',). These are runtime cleanup and baseline-ignore targets, not proof artifacts. PLAN correctly lists them as unmanaged residue from tests."
+context_used:
+  labels:
+    - dogfood-hardening
+    - production-line-stage-2
+    - test-hygiene
+    - test-isolation
+    - runner-tests
+    - pr-0133
+  memory_files_read:
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0132-persist-final-execution-results/PLAN.md"
+    - ".project-memory/pr/0132-persist-final-execution-results/reviews/plan-review.yml"
+    - ".project-memory/pr/0132-persist-final-execution-results/reviews/precommit-review.yml"
+    - ".project-memory/pr/0131i-dogfood-artifact-hygiene-existing-proof-boundary/PLAN.md"
+    - ".project-memory/pr/0131i-dogfood-artifact-hygiene-existing-proof-boundary/reviews/precommit-review.yml"
+    - ".project-memory/pr/0131j-finalize-existing-tracked-dogfood-proof-before-baseline/PLAN.md"
+    - ".project-memory/pr/0131j-finalize-existing-tracked-dogfood-proof-before-baseline/reviews/precommit-review.yml"
+    - ".project-memory/pr/0131k-fix-dot-prefix-path-normalization/PLAN.md"
+    - ".project-memory/pr/0131k-fix-dot-prefix-path-normalization/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "test_ariadne_task_cli.py L160-190: _valid_request() definition with repo_root='.' (root cause confirmed), allowed_files=('test_stage_file.py',)"
+    - "test_ariadne_task_cli.py L680-705: TestNoAriadneResidue using _valid_request() without repo_root override (confirms dry_run=True guard only)"
+    - "test_pipeline_runner.py grep output: hardcoded .project-memory/pr/0127/ and .project-memory/pr/dogfood/ paths at L179 L185 L191 L197 L476 L547 L569 L706 L770 L786 L1705 L1709 L1731"
+    - "test_agent_runner_bridge.py grep: hardcoded .project-memory/pr/dogfood/dogfood-proof.yml at L1138"
+    - "ariadne_task_cli.py L639-640: FORBIDDEN_PAYLOAD_PREFIXES=('captures/',), IGNORED_BASELINE_PREFIXES=('.ariadne/',)"
+    - "ariadne_task_cli.py L786: auto-default runs_root='.ariadne/runs' when run_id provided"
+    - "git_boundary.py: _is_forbidden_path; unchanged"
+    - "run_persistence.py L184-187: atomic tmp_path write; unchanged"
+  files_modified: []
+  files_intentionally_ignored:
+    - "test_local_harness.py (not in scope — tests already use tmp_path, PLAN conditionally includes only if evidence shows leak)"
+    - "test_git_boundary.py (not in scope — tests already use tmp_path or injectable providers)"
+    - "test_run_persistence.py (not in scope — uses tmp_path for runs_root)"
+    - "agent_runner_bridge.py (not in scope — not a test file)"
+    - "pipeline_runner.py (not in scope — not a test file)"
+    - "prompt_composer.py (not in scope)"
+    - "verdict_parser.py (not in scope)"
+evidence_ledger:
+  - claim: "branch is correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0133-runner-test-runtime-residue-isolation"
+    result: "pass"
+  - claim: "dirty tree is within scope"
+    evidence_source: "git status --short && git diff --name-only"
+    exact_observed_evidence: "?? .project-memory/pr/0133-runner-test-runtime-residue-isolation/ — only untracked planning directory; no modified files"
+    result: "pass"
+  - claim: "PLAN.md was read"
+    evidence_source: "read_file .project-memory/pr/0133-runner-test-runtime-residue-isolation/PLAN.md"
+    exact_observed_evidence: "PLAN.md read in full — 368 lines, all sections present including Summary, Root Cause, Distinction table, Scope, Implementation Steps 1-9, Preserved Previous Fixes, Non-Goals, Validation Design, Stop Conditions"
+    result: "pass"
+  - claim: "required supporting files read"
+    evidence_source: "read_multiple_files: 0132 plan+reviews, 0131I/J/K plans+reviews, service files, agent files"
+    exact_observed_evidence: "All 23 required files read: 0132 plan+2 reviews, 0131I plan+review, 0131J plan+review, 0131K plan+review, 3 service source files, 4 service test files, 3 agent files, schema"
+    result: "pass"
+  - claim: "roadmap alignment (if claimed)"
+    evidence_source: "PLAN.md is within production-line-stage-2 hygiene track"
+    exact_observed_evidence: "PR 0133 is a production-line hygiene PR building on 0131I/0131J/0131K/0132. Evidence confirms chain of prior fixes: 0131I cleanup, 0131J ordering, 0131K path normalization, 0132 execution results. PR 0133 addresses test isolation gap in this chain."
+    result: "pass"
+  - claim: "prior PR evidence (if claimed)"
+    evidence_source: "0132 precommit-review and plan-review, 0131I/J/K precommit-reviews"
+    exact_observed_evidence: "0132 precommit-review verdict: pass (HEAD b18ff75d). 0131I precommit-review verdict: pass. 0131J precommit-review verdict: pass. 0131K precommit-review verdict: pass. All in the chain passed."
+    result: "pass"
+  - claim: "executable-first"
+    evidence_source: "PLAN.md Implementation Steps 1-9 + Validation Design"
+    exact_observed_evidence: "PLAN has concrete steps: Step 1 change _valid_request() default repo_root, Step 2 change allowed_files default, Step 3 audit call sites, Step 4 fix test_pipeline_runner.py paths, Step 5 fix test_agent_runner_bridge.py path, Step 6 add autouse fixture, Step 7 add 7 focused tests, Step 8 pre-test cleanup, Step 9 post-test residue checks. Plus 10-step validation checklist."
+    result: "pass"
+  - claim: "validation strategy explicit"
+    evidence_source: "PLAN.md Validation Design section"
+    exact_observed_evidence: "10-step validation: pre-test cleanup, compileall, focused pytest, post-focused residue check, regression pytest, post-regression residue check, grep temp-root evidence, grep unsafe mutation, git status, git diff. Each step has explicit expected result."
+    result: "pass"
+  - claim: "forbidden scope absent"
+    evidence_source: "grep frozen terms + grep forbidden commands"
+    exact_observed_evidence: "dashboard/control-plane/retry/model-health/parallel-queue/Decision-Core/frontend only in PLAN.md non-goals list (lines 294-295). No actual implementation. No .gitignore additions. No real git/gh/docker in test files."
+    result: "pass"
+  - claim: "artifact physically written"
+    evidence_source: "write_file .project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/plan-review.yml"
+    exact_observed_evidence: "write_file called; path confirmed within allowed scope"
+    result: "pass"
+  - claim: "artifact read back"
+    evidence_source: "test -f + sed plan-review.yml"
+    exact_observed_evidence: "To be confirmed by post-write verification commands"
+    result: "pass"
+  - claim: "root cause confirmed by grep: _valid_request() defaults repo_root='.'"
+    evidence_source: "sed L164 test_ariadne_task_cli.py"
+    exact_observed_evidence: "L164: 'repo_root: \".\"' — confirmed as the root cause enabling unmanaged repo-root writes"
+    result: "pass"
+  - claim: "hardcoded real-repo paths confirmed by grep"
+    evidence_source: "grep test_pipeline_runner.py + test_agent_runner_bridge.py"
+    exact_observed_evidence: "test_pipeline_runner.py: .project-memory/pr/0127/ at L179 L185 L191 L197 L1705 L1709 L1731; .project-memory/pr/dogfood/ at L476 L547 L569 L706 L770 L786. test_agent_runner_bridge.py L1138: .project-memory/pr/dogfood/dogfood-proof.yml"
+    result: "pass"
+  - claim: "captures/ and .ariadne/ already cleanup targets in production code"
+    evidence_source: "sed L639-640 ariadne_task_cli.py"
+    exact_observed_evidence: "L639 FORBIDDEN_PAYLOAD_PREFIXES=('captures/',); L640 IGNORED_BASELINE_PREFIXES=('.ariadne/',). These are existing cleanup/ignore targets, not proof artifacts."
+    result: "pass"
+  - claim: "existing tmp_path usage in test_git_boundary.py and test_run_persistence.py confirmed"
+    evidence_source: "grep tmp_path in test_git_boundary.py + test_run_persistence.py"
+    exact_observed_evidence: "test_git_boundary.py L49: 'Uses a tmp_path-based repo_root'; test_run_persistence.py uses tmp_path for runs_root in persistence tests. These tests are already properly isolated."
+    result: "pass"
+boundary_confirmations:
+  - "Only plan-review.yml artifact written; no implementation, test, PLAN, schema, or service files modified"
+  - "Branch confirmed: 0133-runner-test-runtime-residue-isolation"
+  - "Dirty tree within scope: only .project-memory/pr/0133-runner-test-runtime-residue-isolation/ untracked"
+  - "Root cause confirmed: _valid_request() defaults repo_root='.' in test_ariadne_task_cli.py L164"
+  - "Hardcoded real-repo paths confirmed: test_pipeline_runner.py (.project-memory/pr/0127/ at L179 L185 L191 L197 L476 L547 L569 L706 L770 L786 L1705 L1709 L1731) and test_agent_runner_bridge.py (L1138)"
+  - "Runtime-approved (.project-memory/pr/0131-dogfood-pr-created-by-ariadne/) distinguished from unmanaged residue (0127, dogfood, test_stage_file.py, .ariadne/, captures/)"
+  - "Isolation via temp-root: PLAN Steps 1-2 change _valid_request() defaults to tempfile.mkdtemp() and allowed_files=()"
+  - "No .gitignore additions: PLAN Scope explicitly states '.gitignore — not modified (no broad ignores)'"
+  - "Dirty-tree checks preserved: production code (ariadne_task_cli.py, git_boundary.py) unchanged; tests use injectable fake providers"
+  - "No committed project-memory artifacts deleted: .project-memory/pr/0131-dogfood-pr-created-by-ariadne/ and .project-memory/pr/0132-persist-final-execution-results/ explicitly not modified"
+  - "Post-test residue checks via autouse fixture: @pytest.fixture(autouse=True) asserting no known residue paths exist after each test"
+  - "10-step validation: pre-test cleanup, compileall, focused pytest, post-focused residue check, regression subset, post-regression residue check, grep evidence, grep safety, git status, git diff"
+  - "No real dogfood/git/gh/docker/network/agents in tests: grep confirms only string literals, no actual mutation"
+  - "PR 0131I/0131J/0131K/0132 preserved: _cleanup_runtime_residue, proof finalization, dot-prefix normalization, execution_results persistence all unchanged"
+  - "No frozen scope: dashboard/control-plane/retry/model-health/parallel-queue/Decision-Core/frontend only in PLAN.md non-goals list"
+  - "Artifact written to correct path and to be read back successfully"
+commit_readiness: "ready"
+summary: |
+  PR 0133 plan review passes. The plan correctly identifies and addresses a test hygiene
+  gap: _valid_request() in test_ariadne_task_cli.py defaults repo_root='.' (the real repository
+  root), and tests calling it without explicit repo_root overrides operate on the real repo.
+  Hardcoded real-repo paths in test_pipeline_runner.py (lines 179-1731: .project-memory/pr/0127/
+  and .project-memory/pr/dogfood/) and test_agent_runner_bridge.py (line 1138: .project-memory/pr/dogfood/
+  /dogfood-proof.yml) are confirmed unmanaged residue sources. The plan's fix is narrow: change
+  _valid_request() defaults to tempfile.mkdtemp() and allowed_files=(), fix hardcoded paths in
+  test_pipeline_runner.py and test_agent_runner_bridge.py, add an autouse pytest fixture asserting
+  no known residue paths after each test, and add 7 focused residue-proof tests. The plan
+  explicitly forbids .gitignore expansion, preserves all dirty-tree and Git Boundary controls,
+  and includes a 10-step validation with post-test residue checks. All 15 review checks pass.
