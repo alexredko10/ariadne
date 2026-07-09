@@ -176,25 +176,25 @@ def _default_packets() -> list[dict]:
             "agent_name": "planner",
             "prompt_kind": "planner",
             "prompt_text": "Plan the PR",
-            "expected_output_path": ".project-memory/pr/0127/PLAN.md",
+            "expected_output_path": ".project-memory/pr/test/PLAN.md",
         },
         {
             "agent_name": "plan-review",
             "prompt_kind": "plan-review",
             "prompt_text": "Review the plan",
-            "expected_output_path": ".project-memory/pr/0127/reviews/plan-review.yml",
+            "expected_output_path": ".project-memory/pr/test/reviews/plan-review.yml",
         },
         {
             "agent_name": "coder",
             "prompt_kind": "coder",
             "prompt_text": "Implement the PR",
-            "expected_output_path": ".project-memory/pr/0127/PLAN.md",
+            "expected_output_path": ".project-memory/pr/test/PLAN.md",
         },
         {
             "agent_name": "precommit-review",
             "prompt_kind": "precommit-review",
             "prompt_text": "Review the implementation",
-            "expected_output_path": ".project-memory/pr/0127/reviews/precommit-review.yml",
+            "expected_output_path": ".project-memory/pr/test/reviews/precommit-review.yml",
         },
     ]
 
@@ -457,7 +457,7 @@ class TestCoderStepFailure:
 class TestLocalNonDockerPipeline:
     """Full pipeline with real bridge, allow_docker=False on all agents."""
 
-    def test_all_bridge_steps_completed(self):
+    def test_all_bridge_steps_completed(self, tmp_path):
         """All 4 bridge steps return completed (not blocked by docker_blocked)."""
         from runner.agent_runner_bridge import run_agent_runner_bridge
 
@@ -473,7 +473,7 @@ class TestLocalNonDockerPipeline:
                 "- git commit\n"
                 "- gh pr create\n"
             ),
-            "expected_output_path": ".project-memory/pr/dogfood/dogfood-proof.yml",
+            "expected_output_path": ".project-memory/pr/test/dogfood-proof.yml",
         }
 
         request = PipelineRunnerRequest(
@@ -481,6 +481,7 @@ class TestLocalNonDockerPipeline:
             branch="0131d-local-non-docker-agent-execution",
             task_title="Local Non-Docker Agent Execution",
             task_description="Test local non-Docker pipeline",
+            repo_root=str(tmp_path),
             prompt_composer=_fake_composer(packets),
             bridge_runner=run_agent_runner_bridge,
             artifact_reader=_fake_artifact_reader("test artifact content"),
@@ -501,7 +502,7 @@ class TestLocalNonDockerPipeline:
         # Coder step should not have coder_step_failed
         assert REASON_CODER_STEP_FAILED not in result.reason_codes
 
-    def test_pipeline_reaches_post_coder_precommit_gate(self):
+    def test_pipeline_reaches_post_coder_precommit_gate(self, tmp_path):
         """Pipeline reaches post-coder precommit gate."""
         from runner.agent_runner_bridge import run_agent_runner_bridge
 
@@ -510,6 +511,7 @@ class TestLocalNonDockerPipeline:
             branch="0131d-local-non-docker-agent-execution",
             task_title="Local Non-Docker Agent Execution",
             task_description="Test local non-Docker pipeline",
+            repo_root=str(tmp_path),
             prompt_composer=_fake_composer(_default_packets()),
             bridge_runner=run_agent_runner_bridge,
             artifact_reader=_fake_artifact_reader("schema_version: 0.1\nverdict: pass\n"),
@@ -528,7 +530,7 @@ class TestLocalNonDockerPipeline:
         assert len(coder_step) == 1
         assert coder_step[0].bridge_status == "completed"
 
-    def test_dogfood_like_temp_proof_artifact(self):
+    def test_dogfood_like_temp_proof_artifact(self, tmp_path):
         """Dogfood-like pipeline creates temp dogfood-proof.yml path."""
         from runner.agent_runner_bridge import run_agent_runner_bridge
 
@@ -544,7 +546,7 @@ class TestLocalNonDockerPipeline:
                 "- git commit\n"
                 "- gh pr create\n"
             ),
-            "expected_output_path": ".project-memory/pr/dogfood/dogfood-proof.yml",
+            "expected_output_path": ".project-memory/pr/test/dogfood-proof.yml",
         }
 
         request = PipelineRunnerRequest(
@@ -552,6 +554,7 @@ class TestLocalNonDockerPipeline:
             branch="0131d-local-non-docker-agent-execution",
             task_title="Local Non-Docker Agent Execution",
             task_description="Test local non-Docker pipeline",
+            repo_root=str(tmp_path),
             prompt_composer=_fake_composer(packets),
             bridge_runner=run_agent_runner_bridge,
             artifact_reader=_fake_artifact_reader("dogfood-proof: passed"),
@@ -566,7 +569,7 @@ class TestLocalNonDockerPipeline:
         # Use endswith to avoid brittle ./ prefix assumptions
         assert coder_step[0].expected_artifact_path is not None
         assert coder_step[0].expected_artifact_path.endswith(
-            ".project-memory/pr/dogfood/dogfood-proof.yml"
+            ".project-memory/pr/test/dogfood-proof.yml"
         )
         assert coder_step[0].bridge_status == "completed"
 
@@ -703,7 +706,7 @@ class TestNonMutatingCoderExecution:
                 "- git commit\n"
                 "- git push\n"
             ),
-            "expected_output_path": ".project-memory/pr/dogfood/dogfood-proof.yml",
+            "expected_output_path": ".project-memory/pr/test/dogfood-proof.yml",
         }
         request = _full_request(
             packets=packets,
@@ -767,7 +770,7 @@ class TestNonMutatingCoderExecution:
                 "- git commit\n"
                 "- gh pr create\n"
             ),
-            "expected_output_path": ".project-memory/pr/dogfood/dogfood-proof.yml",
+            "expected_output_path": ".project-memory/pr/test/dogfood-proof.yml",
         }
         request = _full_request(
             packets=packets,
@@ -783,7 +786,7 @@ class TestNonMutatingCoderExecution:
         # Coder step should have the expected output path
         coder_step = [s for s in result.step_results if s.step_name == "coder"]
         assert len(coder_step) == 1
-        assert coder_step[0].expected_artifact_path == ".project-memory/pr/dogfood/dogfood-proof.yml"
+        assert coder_step[0].expected_artifact_path == ".project-memory/pr/test/dogfood-proof.yml"
         assert coder_step[0].bridge_status == "completed"
 
     def test_no_real_git_mutation_in_tests(self):
@@ -1702,11 +1705,11 @@ class TestPayloadRouting:
         # Planner should still have PLAN.md
         planner_step = [s for s in result.step_results if s.step_name == "planner"]
         assert len(planner_step) == 1
-        assert planner_step[0].expected_artifact_path == ".project-memory/pr/0127/PLAN.md"
+        assert planner_step[0].expected_artifact_path == ".project-memory/pr/test/PLAN.md"
         # Plan-review should still have plan-review.yml
         plan_review_step = [s for s in result.step_results if s.step_name == "plan_review"]
         assert len(plan_review_step) == 1
-        assert plan_review_step[0].expected_artifact_path == ".project-memory/pr/0127/reviews/plan-review.yml"
+        assert plan_review_step[0].expected_artifact_path == ".project-memory/pr/test/reviews/plan-review.yml"
 
     def test_payload_artifact_path_empty_default(self):
         """Empty payload_artifact_path keeps coder PLAN.md path."""
@@ -1728,7 +1731,7 @@ class TestPayloadRouting:
         # Coder should still have PLAN.md (from prompt packet)
         coder_step = [s for s in result.step_results if s.step_name == "coder"]
         assert len(coder_step) == 1
-        assert coder_step[0].expected_artifact_path == ".project-memory/pr/0127/PLAN.md"
+        assert coder_step[0].expected_artifact_path == ".project-memory/pr/test/PLAN.md"
 
 
 # ---------------------------------------------------------------------------

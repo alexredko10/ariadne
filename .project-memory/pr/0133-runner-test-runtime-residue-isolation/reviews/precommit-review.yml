@@ -1,0 +1,183 @@
+schema_version: "0.1"
+pr_id: "0133-runner-test-runtime-residue-isolation"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-09T11:30:00Z"
+head_verified: "d07d901dbe492f47f191aa5b7bc5a544990f894a"
+branch_confirmed: "0133-runner-test-runtime-residue-isolation"
+snapshot_delta:
+  plan_base_sha: "70b65dd234a51d224399513f6142dea1aa9adc71"
+  current_head: "d07d901dbe492f47f191aa5b7bc5a544990f894a"
+  action: "continue"
+  stale_snapshot: true
+scope:
+  expected_files:
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - "services/runner/tests/test_pipeline_runner.py"
+    - "services/runner/tests/test_agent_runner_bridge.py"
+    - "services/runner/tests/conftest.py"
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/precommit-review.yml"
+  actual_files:
+    - "services/runner/tests/test_agent_runner_bridge.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - "services/runner/tests/test_pipeline_runner.py"
+    - "services/runner/tests/conftest.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/PLAN.md"
+  - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+  - "services/runner/tests/test_pipeline_runner.py"
+  - "services/runner/tests/test_agent_runner_bridge.py"
+  - "services/runner/tests/conftest.py"
+files_written:
+  - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/precommit-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "d07d901dbe492f47f191aa5b7bc5a544990f894a"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0133-runner-test-runtime-residue-isolation"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "M test_agent_runner_bridge.py, M test_ariadne_task_cli.py, M test_pipeline_runner.py, ?? conftest.py"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "services/runner/tests/test_agent_runner_bridge.py, services/runner/tests/test_ariadne_task_cli.py, services/runner/tests/test_pipeline_runner.py"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+  - command: "git ls-files captures .ariadne .project-memory/pr/test .project-memory/pr/0127 .project-memory/pr/dogfood test_stage_file.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "No tracked residue files"
+  - command: "git status --short -- captures .ariadne .project-memory/pr/test .project-memory/pr/0127 .project-memory/pr/dogfood test_stage_file.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "No known residue paths present"
+  - command: "git status --short -- agents/plan-review.yml agents/precommit-review.yml .Gitignore"
+    result: "passed"
+    exit_code: 0
+    evidence: "Forbidden tracked files are clean"
+  - command: "python -m compileall -f services/runner/src services/task_intake/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "All Python files compiled successfully"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest services/runner/tests/test_pipeline_runner.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "43 passed in 0.08s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest services/runner/tests/test_ariadne_task_cli.py services/runner/tests/test_pipeline_runner.py services/runner/tests/test_agent_runner_bridge.py services/runner/tests/test_run_persistence.py services/runner/tests/test_git_boundary.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "289 passed in 0.76s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest services/runner/tests/test_agent_runner_bridge.py services/runner/tests/test_pipeline_runner.py services/runner/tests/test_prompt_composer.py services/runner/tests/test_ariadne_task_cli.py services/runner/tests/test_git_boundary.py services/runner/tests/test_run_persistence.py services/runner/tests/test_verdict_parser.py services/runner/tests/test_docker_agent_adapter.py services/runner/tests/test_adapter_registry.py services/runner/tests/test_local_harness.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "430 passed in 2.09s"
+blockers: []
+warnings:
+  - id: "WARNING_001"
+    description: "Stale snapshot: current HEAD differs from plan base SHA"
+    evidence: "plan_base_sha=70b65dd234a51d224399513f6142dea1aa9adc71, current_head=d07d901dbe492f47f191aa5b7bc5a544990f894a"
+    recommendation: "Verify that implementation changes are correctly reflected at current HEAD"
+decisions_made:
+  - decision: "Implementation correctly fixes _valid_request() to use tempfile.mkdtemp()"
+    reason: "test_ariadne_task_cli.py line 170: repo_root now defaults to tempfile.mkdtemp(prefix='ariadne-test-') instead of '.'"
+  - decision: "Implementation correctly fixes allowed_files default"
+    reason: "test_ariadne_task_cli.py line 171: allowed_files now defaults to () instead of ('test_stage_file.py',)"
+  - decision: "Implementation correctly fixes hardcoded paths in test_pipeline_runner.py"
+    reason: "Changed .project-memory/pr/0127/PLAN.md -> .project-memory/pr/test/PLAN.md, .project-memory/pr/dogfood/dogfood-proof.yml -> .project-memory/pr/test/dogfood-proof.yml"
+  - decision: "Implementation correctly fixes hardcoded path in test_agent_runner_bridge.py"
+    reason: "Changed .project-memory/pr/dogfood/dogfood-proof.yml -> .project-memory/pr/test/dogfood-proof.yml"
+  - decision: "conftest.py adds residue guard fixture"
+    reason: "New conftest.py adds autouse fixture to clean known generated residue paths before/after tests"
+  - decision: "All validation tests pass"
+    reason: "Focused tests: 289 passed, Regression tests: 430 passed"
+  - decision: "Known generated residue is not staged or tracked"
+    reason: "git ls-files shows no tracked residue, git diff --cached shows no staged files"
+  - decision: "Forbidden tracked files are clean"
+    reason: "agents/plan-review.yml, agents/precommit-review.yml, and .gitignore are not modified"
+context_used:
+  labels:
+    - dogfood-hardening
+    - production-line-stage-2
+    - test-hygiene
+    - test-isolation
+    - runner-tests
+    - pr-0133
+  memory_files_read:
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/PLAN.md"
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+  files_inspected:
+    - "test_ariadne_task_cli.py: _valid_request() function changed to use tempfile.mkdtemp()"
+    - "test_pipeline_runner.py: hardcoded paths changed to .project-memory/pr/test/"
+    - "test_agent_runner_bridge.py: hardcoded path changed to .project-memory/pr/test/dogfood-proof.yml"
+    - "conftest.py: residue guard fixture added"
+  files_modified:
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - "services/runner/tests/test_pipeline_runner.py"
+    - "services/runner/tests/test_agent_runner_bridge.py"
+  files_intentionally_ignored: []
+boundary_confirmations:
+  - "Branch confirmed: 0133-runner-test-runtime-residue-isolation"
+  - "Implementation correctly isolates _valid_request() to temp root"
+  - "Implementation correctly removes hardcoded .project-memory/pr/0127 and .project-memory/pr/dogfood paths"
+  - "No .gitignore changes"
+  - "Dirty-tree checks preserved in production code"
+  - "No real git/gh/docker mutation added to tests"
+  - "PR 0132 tests preserved"
+  - "Forbidden tracked files (agents/plan-review.yml, agents/precommit-review.yml) are clean"
+known_generated_residue:
+  - path: "captures"
+    status: "absent"
+  - path: ".ariadne"
+    status: "absent"
+  - path: ".project-memory/pr/test"
+    status: "absent"
+  - path: ".project-memory/pr/0127"
+    status: "absent"
+  - path: ".project-memory/pr/dogfood"
+    status: "absent"
+  - path: "test_stage_file.py"
+    status: "absent"
+tracked_forbidden_files:
+  - path: "agents/plan-review.yml"
+    status: "clean"
+  - path: "agents/precommit-review.yml"
+    status: "clean"
+  - path: ".gitignore"
+    status: "clean"
+cached_diff_files: []
+commit_readiness: "ready"
+summary: |
+  PR 0133 implementation PASSES precommit review.
+
+  Implementation fixes:
+  - _valid_request() now uses tempfile.mkdtemp() instead of "." (the root cause fix)
+  - allowed_files defaults to () instead of ("test_stage_file.py",)
+  - Hardcoded .project-memory/pr/0127 and .project-memory/pr/dogfood paths replaced with .project-memory/pr/test/
+  - New conftest.py adds residue guard fixture for test hygiene
+  - All tests pass (289 focused + 430 regression)
+
+  All validation checks pass:
+  - Branch correct: 0133-runner-test-runtime-residue-isolation
+  - No staged files
+  - No tracked residue
+  - Forbidden tracked files clean (agents/plan-review.yml, agents/precommit-review.yml, .gitignore)
+  - Compile check passes
+  - All focused and regression tests pass
+  
+  Known generated residue is absent - the implementation successfully isolates test execution to temporary directories.
