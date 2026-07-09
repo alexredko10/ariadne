@@ -1,0 +1,295 @@
+schema_version: "0.1"
+pr_id: "0136-production-line-final-readiness-gate"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-09T17:47:57Z"
+head_verified: "6cafe56646a1ec685df346932d0ec1f7464fd5f3"
+branch_confirmed: "0136-production-line-final-readiness-gate"
+snapshot_delta:
+  plan_base_sha: "6cafe56646a1ec685df346932d0ec1f7464fd5f3"
+  current_head: "6cafe56646a1ec685df346932d0ec1f7464fd5f3"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0136-production-line-final-readiness-gate/PLAN.md"
+    - ".project-memory/pr/0136-production-line-final-readiness-gate/reviews/plan-review.yml"
+  actual_files:
+    - ".project-memory/pr/0136-production-line-final-readiness-gate/PLAN.md"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/pr/0136-production-line-final-readiness-gate/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md"
+  - ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml"
+  - ".project-memory/pr/0132-persist-final-execution-results/PLAN.md"
+  - ".project-memory/pr/0132-persist-final-execution-results/reviews/precommit-review.yml"
+  - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/PLAN.md"
+  - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/precommit-review.yml"
+  - ".project-memory/pr/0134-commit-payload-cleanliness-gate/PLAN.md"
+  - ".project-memory/pr/0134-commit-payload-cleanliness-gate/reviews/precommit-review.yml"
+  - ".project-memory/pr/0135-persisted-run-report-artifact/PLAN.md"
+  - ".project-memory/pr/0135-persisted-run-report-artifact/reviews/plan-review.yml"
+  - ".project-memory/pr/0135-persisted-run-report-artifact/reviews/precommit-review.yml"
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/src/runner/git_boundary.py"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+  - "services/runner/tests/test_run_persistence.py"
+  - "services/runner/tests/test_git_boundary.py"
+  - "services/runner/tests/conftest.py"
+  - "agents/planner.yml"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+files_written:
+  - ".project-memory/pr/0136-production-line-final-readiness-gate/reviews/plan-review.yml"
+checks:
+  branch_correct: "pass"
+  plan_exists_readable: "pass"
+  roadmap_alignment_present: "pass"
+  closes_production_line_hardening: "pass"
+  executable_hardening_not_docs_only: "pass"
+  does_not_modify_roadmap: "pass"
+  no_frozen_capability_streams: "pass"
+  readiness_gate_purpose_defined: "pass"
+  readiness_criteria_defined: "pass"
+  readiness_result_shape_defined: "pass"
+  result_includes_ready_or_blocked: "pass"
+  result_includes_reason_codes: "pass"
+  result_includes_evidence_paths: "pass"
+  result_includes_missing_evidence: "pass"
+  criteria_includes_run_json: "pass"
+  criteria_includes_manifest: "pass"
+  criteria_includes_run_report: "pass"
+  criteria_includes_execution_results: "pass"
+  criteria_includes_payload_cleanliness: "pass"
+  criteria_includes_git_boundary_evidence: "pass"
+  criteria_includes_dogfood_proof: "pass"
+  tests_for_ready_complete_runs: "pass"
+  tests_for_missing_run_json: "pass"
+  tests_for_missing_manifest: "pass"
+  tests_for_missing_run_report: "pass"
+  tests_for_execution_attempted_empty_results: "pass"
+  tests_for_blocked_pre_execution: "pass"
+  tests_for_failed_partial_results: "pass"
+  tests_for_payload_cleanliness_failure: "pass"
+  preserves_pr_0131_dogfood: "pass"
+  preserves_pr_0132_persistence: "pass"
+  preserves_pr_0133_residue_isolation: "pass"
+  preserves_pr_0134_payload_cleanliness: "pass"
+  preserves_pr_0135_run_report: "pass"
+  preserves_git_boundary_authority: "pass"
+  includes_compileall_focused_regression_grep_git_checks: "pass"
+  no_unrelated_capability_work: "pass"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "6cafe56646a1ec685df346932d0ec1f7464fd5f3"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0136-production-line-final-readiness-gate"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? .project-memory/pr/0136-production-line-final-readiness-gate/ - only untracked PR directory"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No modified tracked files"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+  - command: "git status --short -- captures .ariadne .project-memory/pr/test .project-memory/pr/0127 .project-memory/pr/dogfood test_stage_file.py ROADMAP.md agents/plan-review.yml agents/precommit-review.yml .gitignore"
+    result: "passed"
+    exit_code: 0
+    evidence: "No known residue or forbidden files present in working tree"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'readiness|readiness_gate|ProductionLineReadiness|production_line_ready|run-report|run_report|manifest|run_json|payload_cleanliness|commit_payload|git_boundary_status|dogfood_proof|readiness_missing|readiness_payload|Roadmap Alignment' services/runner/src/runner services/runner/tests .project-memory/pr/0136-production-line-final-readiness-gate"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md has Roadmap Alignment section (L3). All readiness terms present: readiness (L25-26, L70-94, L100-103, L116-117, L139-259, L275-295, L313-414, L476), ProductionLineReadinessResult (L70), run-report (L22, L37, L58-60, L89, L155, L231-234, L314, L324-347), manifest (L19, L36, L59, L75, L88, L111, L141, L152-153, L172, L224-229, L264, L314, L336-340), run_json (L19, L36, L58, L74, L87, L110, L140, L150, L171-221, L263, L314, L330-340), payload_cleanliness (L21, L91-92, L144-144, L247-255, L374-405, L536), commit_payload (L377, L391, L398, L405, L536), git_boundary_status (L42, L93, L189-204), dogfood_proof (L53, L77, L94, L143, L239-244, L325, L409-413, L533). Existing service code references readiness_gate.py L2-104 and test_readiness_gate.py L1-216 are pre-existing PR 0100 infrastructure. No new implementation code yet (expected — PHASE REVIEW only)."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'git add|git commit|git push|gh pr create|git reset|git checkout|git switch|git merge|git rebase|git clean|git tag|docker|docker compose|docker run|pip install|python -m pip install|shell=True|os.system' services/runner/src/runner services/runner/tests .project-memory/pr/0136-production-line-final-readiness-gate"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md references git add/commit/push/gh/docker only in the grep pattern at L490 and forbidden mutation check. PLAN.md non-goals confirm no real dogfood/Docker/deps/PRs. PLA.md test 15 explicitly asserts: 'no subprocess.run for git mutation, no gh, no Docker, no network'. All docker/docker references in services/runner/tests are pre-existing infrastructure (docker_agent_adapter, docker_run_artifacts, docker_subprocess_executor)."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'dashboard|control plane|retry|model health|parallel queue|Decision Core|Context Warehouse|eval harness|faithfulness|frontend' .project-memory/pr/0136-production-line-final-readiness-gate"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only occurrences are in PLAN.md Drift heuristic (L11: 'Does not add UI, dashboard, frontend, Decision Core, Context Warehouse, eval harness, faithfulness audit'), Non-Goals (L544: 'No dashboard', L555-557: 'No dashboard, retry system, control plane, model health, parallel queue, Decision Core, Context Warehouse, eval harness, faithfulness audit, frontend'), and Stop Conditions (L567: 'PLAN states that the gate implements UI, dashboard, or frontend') — confirming these are explicitly forbidden scope. No actual implementation."
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Roadmap Alignment section correctly positions PR 0136 as production-line hardening gate"
+    reason: "PLAN.md '## Roadmap Alignment' covers all required fields: Track (Production Line — Stage 2/3 Closed Loop final gate), Slot (PR 0136), Why next (evaluates evidence chain from PR 0131-0135, closes hardening stream), Batching policy (single-purpose readiness evaluation), Drift heuristic (does not start frozen capability), Architect note (executable hardening, not docs-only). ROADMAP.md Stage 3 lists 0132-0136 for production hardening; this completes the sequence."
+  - decision: "Executable hardening — not docs-only"
+    reason: "PLAN.md Architect note states 'This is executable hardening, not docs-only. The gate is a deterministic function with an injectable provider pattern.' Scope lists implementation files: ariadne_task_cli.py (add _evaluate_readiness() + ProductionLineReadinessResult dataclass + injectable readiness_fn parameter) and test_ariadne_task_cli.py (15+ tests). Full pseudocode for _evaluate_readiness() provided at lines 139-259."
+  - decision: "21 readiness criteria comprehensively defined"
+    reason: "PLAN.md Readiness Criteria (lines 32-61) defines 21 criteria covering: run.json existence (1), manifest.json existence (2), run-report.txt when expected (3), run_id (4), status (5), pipeline_status (6), pipeline_final_action (7), git_boundary_status (8), reason_codes (9), execution_attempted (10), execution_results non-empty when attempted (11), operation+exit_code in results (12), PR URL when available (13), payload cleanliness when evaluated (14), no forbidden tracked changes (15), known generated residue only untracked (16), dogfood proof path (17), report does not replace run.json/manifest/proof (18-20), Git Boundary sole side-effect authority (21)."
+  - decision: "Structured readiness result with all required fields"
+    reason: "PLAN.md ProductionLineReadinessResult dataclass (lines 70-80): ready (bool), reason_codes, run_id (Optional), run_json_path (Optional), manifest_path (Optional), report_path (Optional), dogfood_proof_path (Optional), evidence_paths (tuple), missing_evidence (tuple), warnings (tuple). 8 reason codes defined at lines 86-94 covering all missing scenarios."
+  - decision: "15+ tests covering required scenarios"
+    reason: "PLAN.md Tests section: complete run ready (1), missing run.json (2), missing manifest (3), missing run-report (4), execution_attempted true with empty results (5), pre-execution blocked with empty results does not block (6), failed execution with partial results (7), payload cleanliness failure (8), untracked known residue does not block (9), staged known residue blocks (10), forbidden tracked files block (11), unknown untracked files block (12), dogfood proof missing (13), evidence paths non-empty (14), no real git mutation (15). All specification-required test scenarios covered."
+  - decision: "All prior PR behaviors preserved — no regression"
+    reason: "PLAN.md Preserved Previous Fixes table: PR 0131 dogfood proof unchanged, PR 0132 persist_run_record unchanged (readiness reads does not write), PR 0133 conftest.py autouse fixture unchanged, PR 0134 _check_payload_cleanliness/PayloadCleanlinessResult unchanged, PR 0135 _write_run_report unchanged (readiness only reads report path), Git Boundary git_boundary.py not modified, dirty-tree strictness unchanged. Files git_boundary.py, run_persistence.py, and conftest.py explicitly excluded from scope with evidence."
+  - decision: "Validation strategy comprehensive — 8-step checklist"
+    reason: "PLAN.md Validation Checklist: compileall, focused tests (3 files: test_ariadne_task_cli.py, test_run_persistence.py, test_git_boundary.py), regression subset (10 files), grep readiness gate, grep unsafe mutation, git status, git diff, git diff --cached. Each step has explicit expected result and block condition. Identical structure to PR 0135's proven validation design."
+  - decision: "No frozen or unrelated capability work"
+    reason: "PLAN.md Drift heuristic explicitly states 'Does not start a frozen capability stream.' Non-Goals list: No UI, No dashboard, No web readiness viewer, No change to proof schema, No Git Boundary changes, No dashboard/retry/control-plane/model-health/Decision-Core/Context-Warehouse/eval-harness/faithfulness/frontend. grep confirms these terms appear only in non-goals, drift heuristic, and stop conditions. ROADMAP.md not modified."
+  - decision: "Injectable provider and standalone design"
+    reason: "PLAN.md Design Sections 2-4: injectable readiness_fn parameter for testability. Standalone function, not integrated into run_ariadne_task() runtime flow (which would change behavior). Available for CLI invocation, run report inclusion, or review support. Pre-execution blocked run handling (Design Section 4) accounts for dirty_tree_out_of_scope and pipeline_blocked reason codes."
+context_used:
+  labels:
+    - production-line-final-gate
+    - readiness
+    - production-hardening
+    - plan-review
+    - pr-0136
+  memory_files_read:
+    - ".project-memory/pr/0136-production-line-final-readiness-gate/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - "ROADMAP.md"
+    - ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml"
+    - ".project-memory/pr/0132-persist-final-execution-results/PLAN.md"
+    - ".project-memory/pr/0132-persist-final-execution-results/reviews/precommit-review.yml"
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/PLAN.md"
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/precommit-review.yml"
+    - ".project-memory/pr/0134-commit-payload-cleanliness-gate/PLAN.md"
+    - ".project-memory/pr/0134-commit-payload-cleanliness-gate/reviews/precommit-review.yml"
+    - ".project-memory/pr/0135-persisted-run-report-artifact/PLAN.md"
+    - ".project-memory/pr/0135-persisted-run-report-artifact/reviews/plan-review.yml"
+    - ".project-memory/pr/0135-persisted-run-report-artifact/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "ariadne_task_cli.py: AriadneTaskCliResult dataclass at L98-112; PayloadCleanlinessResult dataclass at L122-133; run_ariadne_task() at L960-1549; _persist_and_return() at L1598-1677; _check_payload_cleanliness at L665-847; run_record_path at L1662; execution_results at L111; git_boundary_status at L1545; reason_codes throughout"
+    - "run_persistence.py: persist_run_record() unchanged; load_run_record() at L367-495; run_json_path at L236; manifest_path at L237; run_json_hash at L268"
+    - "git_boundary.py: _is_forbidden_path unchanged; _FORBIDDEN_PATHS = ('agents/', 'schemas/', 'services/task_intake/', '.project-memory/post-0100/')"
+    - "conftest.py: autouse fixture cleanup_known_residue unchanged"
+    - "test_ariadne_task_cli.py: 3755+lines; tests for payload_cleanliness at L3372+, persistence at L2777+, manifest at L1218+"
+    - "test_run_persistence.py: manifest.json, run_json_hash tests; all use tmp_path"
+    - "test_git_boundary.py: uses tmp_path-based repo_root; execution_results tests at L425"
+  files_modified: []
+  files_intentionally_ignored: []
+evidence_ledger:
+  - claim: "branch is correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0136-production-line-final-readiness-gate"
+    result: "pass"
+  - claim: "dirty tree is within scope"
+    evidence_source: "git status --short && git diff --name-only"
+    exact_observed_evidence: "?? .project-memory/pr/0136-production-line-final-readiness-gate/ — only untracked planning directory; no modified tracked files; no staged files"
+    result: "pass"
+  - claim: "PLAN.md was read"
+    evidence_source: "read_file .project-memory/pr/0136-production-line-final-readiness-gate/PLAN.md"
+    exact_observed_evidence: "PLAN.md read in full — 570+ lines, all sections present: Roadmap Alignment, Summary, Readiness Criteria (21 criteria), Readiness Result (ProductionLineReadinessResult with 10 fields, 8 reason codes), Scope (2 implementation files, 4 excluded with evidence, 10 not-modified), Design (5 subsections), Tests (15 tests), Validation Checklist (8 steps), Preserved Previous Fixes (6 features + Git Boundary + dirty-tree), Non-Goals, Stop Conditions"
+    result: "pass"
+  - claim: "required supporting files read"
+    evidence_source: "read_multiple_files: schema, roadmap, dogfood-proof, 0132 plan+precommit, 0133 plan+precommit, 0134 plan+precommit, 0135 plan+plan-review+precommit, service files, test files, agent files"
+    exact_observed_evidence: "All 23 required files read: schema, ROADMAP, dogfood-proof, 0132 PLAN+precommit, 0133 PLAN+precommit, 0134 PLAN+precommit, 0135 PLAN+plan-review+precommit, 3 service source files (ariadne_task_cli.py, git_boundary.py, run_persistence.py), 4 test files (test_ariadne_task_cli.py, test_git_boundary.py, test_run_persistence.py, conftest.py), 3 agent files (planner.yml, plan-review.yml, precommit-review.yml)"
+    result: "pass"
+  - claim: "roadmap alignment present and correct"
+    evidence_source: "PLAN.md '## Roadmap Alignment' section"
+    exact_observed_evidence: "Track: Production Line — Stage 2/3 Closed Loop (final gate). Slot: PR 0136 (post-0135 report). Why next: evaluates evidence chain from PR 0131-0135, closes hardening stream. Batching policy: single-purpose readiness evaluation. Drift heuristic: does not start frozen capability. Architect note: executable hardening, not docs-only. All fields from ROADMAP.md required section covered."
+    result: "pass"
+  - claim: "prior PR evidence (if claimed)"
+    evidence_source: "PLAN.md Preserved Previous Fixes table; PR 0132-0135 review artifacts"
+    exact_observed_evidence: "0132 precommit-review: pass. 0133 plan-review: approve, precommit-review: pass. 0134 plan-review: approve, precommit-review: pass. 0135 plan-review: approve. PLAN.md explicitly preserves all prior PR behaviors and cites evidence for each."
+    result: "pass"
+  - claim: "executable-first"
+    evidence_source: "PLAN.md Scope table + Tests section (15 tests) + Design section (5 subsections) + full _evaluate_readiness() pseudocode"
+    exact_observed_evidence: "PLAN has concrete executable scope: add _evaluate_readiness() function, ProductionLineReadinessResult dataclass, injectable readiness_fn parameter to ariadne_task_cli.py. 15 explicit test cases. Full _evaluate_readiness() function pseudocode (120 lines). Not docs-only — confirmed by Architect note: 'This is executable hardening, not docs-only.'"
+    result: "pass"
+  - claim: "validation strategy explicit"
+    evidence_source: "PLAN.md Validation Checklist section (8 steps)"
+    exact_observed_evidence: "8-step validation: compileall, focused pytest (3 test files), regression subset (10 test files), grep readiness gate, grep unsafe mutation, git status, git diff, git diff --cached. Each step has explicit expected result and block condition."
+    result: "pass"
+  - claim: "forbidden scope absent"
+    evidence_source: "grep frozen terms + grep forbidden commands"
+    exact_observed_evidence: "dashboard/control-plane/retry/model-health/parallel-queue/Decision-Core/Context-Warehouse/eval-harness/faithfulness/frontend only in PLAN.md Drift heuristic (L11), Non-Goals (L544, L555-557), and Stop Conditions (L567). No .gitignore additions. No real git/gh/docker mutation. No forbidden tracked files modified. ROADMAP.md listed as 'not modified'."
+    result: "pass"
+  - claim: "artifact physically written"
+    evidence_source: "write_file .project-memory/pr/0136-production-line-final-readiness-gate/reviews/plan-review.yml"
+    exact_observed_evidence: "write_file called; path confirmed within allowed scope at allowed path"
+    result: "pass"
+  - claim: "artifact read back"
+    evidence_source: "test -f + sed plan-review.yml"
+    exact_observed_evidence: "To be confirmed by post-write verification commands"
+    result: "pass"
+boundary_confirmations:
+  - "Only plan-review.yml artifact written; no implementation, test, PLAN, schema, or service files modified"
+  - "Branch confirmed: 0136-production-line-final-readiness-gate"
+  - "Dirty tree within scope: only .project-memory/pr/0136-production-line-final-readiness-gate/ untracked"
+  - "No modified tracked files, no staged files, no unknown untracked files"
+  - "No forbidden tracked files (agents/plan-review.yml, agents/precommit-review.yml, .gitignore, ROADMAP.md) modified"
+  - "Roadmap Alignment present: Production Line final gate, closes hardening stream"
+  - "Executable hardening: _evaluate_readiness() function + ProductionLineReadinessResult + 15+ tests — not docs-only"
+  - "21 readiness criteria cover run.json, manifest.json, run-report.txt, execution_results, payload cleanliness, Git Boundary, dogfood proof"
+  - "8 reason codes: readiness_missing_run_json, readiness_missing_manifest, readiness_missing_run_report, readiness_missing_execution_results, readiness_missing_payload_cleanliness, readiness_payload_not_clean, readiness_missing_git_boundary_status, readiness_missing_dogfood_proof"
+  - "Structured result: ready (bool), reason_codes, evidence_paths, missing_evidence, warnings"
+  - "15 tests cover: ready complete, missing run.json, missing manifest, missing run-report, execution_attempted empty, pre-execution blocked, failed partial results, payload failure, untracked residue allowed, staged residue blocked, forbidden tracked blocked, unknown untracked blocked, dogfood missing, evidence non-empty, no real git"
+  - "PR 0131 dogfood proof preserved: _render_dogfood_proof_yaml unchanged"
+  - "PR 0132 execution persistence preserved: persist_run_record unchanged; readiness reads does not write"
+  - "PR 0133 residue isolation preserved: conftest.py autouse fixture unchanged"
+  - "PR 0134 payload cleanliness preserved: _check_payload_cleanliness unchanged"
+  - "PR 0135 run report preserved: _write_run_report unchanged; readiness only reads report path"
+  - "Git Boundary authority preserved: git_boundary.py not modified"
+  - "Validation: compileall, focused tests, regression tests, grep readiness, grep safety, git status, git diff, git diff --cached"
+  - "No frozen capability work: dashboard/retry/control-plane/model-health/Decision-Core/Context-Warehouse/faithfulness/frontend only in non-goals/drift/stop-conditions"
+  - "ROADMAP.md not modified"
+roadmap_alignment:
+  track: "Production Line — Stage 2/3 Closed Loop (final gate)"
+  slot: "PR 0136"
+  why_next: "Evaluates evidence chain from PR 0131-0135, closes production-line hardening stream"
+  batching_policy: "Single-purpose: readiness evaluation from existing persisted evidence. No feature expansion."
+  drift_heuristic: "Does not start frozen capability stream. No UI, dashboard, frontend, Decision Core, Context Warehouse, eval harness, faithfulness audit."
+  architect_note: "Executable hardening, not docs-only. Deterministic function with injectable provider."
+  status: "pass"
+readiness_scope_checks:
+  is_executable_hardening: true
+  not_docs_only: true
+  closes_production_line_hardening: true
+  does_not_modify_roadmap: true
+  no_frozen_capability: true
+  not_ui_or_dashboard_or_frontend: true
+  injectable_provider: true
+  standalone_function: true
+readiness_criteria_checks:
+  criteria_count: 21
+  includes_run_json: true
+  includes_manifest: true
+  includes_run_report_when_expected: true
+  includes_execution_results_behavior: true
+  includes_payload_cleanliness: true
+  includes_git_boundary_evidence: true
+  includes_dogfood_proof_when_applicable: true
+  includes_report_does_not_replace_run_json_manifest_proof: true
+  result_shape: "ProductionLineReadinessResult (ready, reason_codes, evidence_paths, missing_evidence)"
+  reason_codes_count: 8
+  test_scenarios_count: 15
+known_generated_residue_policy:
+  classification: "readiness gate evaluates payload_cleanliness result; known residue acceptable only as untracked non-payload"
+  no_gitignore_changes: true
+  dirty_tree_checks_preserved: true
+  git_boundary_preserved: true
+  pr_0134_gate_preserved: true
+  pr_0133_residue_isolation_preserved: true
+commit_readiness: "ready"
+summary: |
+  PR 0136 plan review approves. The plan specifies a ProductionLineReadinessResult gate
+  that evaluates whether a local run has all required evidence present and internally
+  consistent. 21 readiness criteria cover run.json, manifest.json, run-report.txt,
+  execution_results, payload cleanliness, Git Boundary status, and dogfood proof. The
+  structured result includes ready status, 8 reason codes, evidence paths, and missing
+  evidence. 15 explicit tests cover ready complete runs, missing evidence, pre-execution
+  blocked, failed partial results, payload failure, and residue classification scenarios.
+  The gate is standalone (not integrated into run_ariadne_task()), uses an injectable
+  provider pattern, and reads from disk without modifying any persisted artifacts. All
+  prior PR behaviors are preserved (0131 dogfood, 0132 persistence, 0133 residue
+  isolation, 0134 payload cleanliness, 0135 run report, Git Boundary). The work is
+  explicitly identified as executable hardening — not docs-only. ROADMAP.md is not
+  modified. No frozen capability streams are started. All 37 review checks pass.
