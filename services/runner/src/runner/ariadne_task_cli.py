@@ -659,6 +659,31 @@ _FORBIDDEN_TRACKED_PATHS: tuple[str, ...] = (
 
 
 # ---------------------------------------------------------------------------
+# Production Line Readiness Result
+# ---------------------------------------------------------------------------
+
+
+@dataclasses.dataclass(frozen=True)
+class ProductionLineReadinessResult:
+    """Result of a production-line readiness evaluation.
+
+    Evaluates whether a local run has all required evidence present
+    and internally consistent.
+    """
+
+    ready: bool
+    reason_codes: tuple[str, ...]
+    run_id: Optional[str]
+    run_json_path: Optional[str]
+    manifest_path: Optional[str]
+    report_path: Optional[str]
+    dogfood_proof_path: Optional[str]
+    evidence_paths: tuple[str, ...]
+    missing_evidence: tuple[str, ...]
+    warnings: tuple[str, ...]
+
+
+# ---------------------------------------------------------------------------
 # Payload cleanliness gate
 # ---------------------------------------------------------------------------
 
@@ -1828,6 +1853,163 @@ def _persist_and_return(
         started_at=result.started_at,
         finished_at=result.finished_at,
         details=f"Persistence failed: {persist_result.details}",
+    )
+
+
+# ---------------------------------------------------------------------------
+# Production Line Readiness Evaluation
+# ---------------------------------------------------------------------------
+
+
+READINESS_MISSING_RUN_JSON = "readiness_missing_run_json"
+READINESS_MISSING_MANIFEST = "readiness_missing_manifest"
+READINESS_MISSING_RUN_REPORT = "readiness_missing_run_report"
+READINESS_MISSING_EXECUTION_RESULTS = "readiness_missing_execution_results"
+READINESS_MISSING_PAYLOAD_CLEANLINESS = "readiness_missing_payload_cleanliness"
+READINESS_PAYLOAD_NOT_CLEAN = "readiness_payload_not_clean"
+READINESS_MISSING_GIT_BOUNDARY_STATUS = "readiness_missing_git_boundary_status"
+READINESS_MISSING_DOGFOOD_PROOF = "readiness_missing_dogfood_proof"
+
+
+_PRE_EXECUTION_BLOCK_CODES: tuple[str, ...] = (
+    "dirty_tree_out_of_scope",
+    "pipeline_stopped",
+    "pipeline_failed",
+    "pipeline_not_eligible",
+)
+
+
+def _evaluate_readiness(
+    run_json_path: str,
+    manifest_path: str,
+    report_path: Optional[str] = None,
+    dogfood_proof_path: Optional[str] = None,
+    payload_cleanliness: Optional[PayloadCleanlinessResult] = None,
+) -> ProductionLineReadinessResult:
+    """Evaluate production-line readiness from persisted evidence.
+
+    Inspects existing run artifacts and returns a structured readiness
+    result.  Does not write files, modify artifacts, or trigger side
+    effects.
+
+    Parameters
+    ----------
+    run_json_path:
+        Path to run.json.
+    manifest_path:
+        Path to manifest.json.
+    report_path:
+        Path to run-report.txt (optional).
+    dogfood_proof_path:
+        Path to dogfood-proof.yml (optional).
+    payload_cleanliness:
+        Payload cleanliness result from PR 0134 gate (optional).
+
+    Returns
+    -------
+    ProductionLineReadinessResult
+        Structured readiness result.
+    """
+    codes: list[str] = []
+    evidence_paths: list[str] = []
+    missing: list[str] = []
+    warnings: list[str] = []
+    run_id: Optional[str] = None
+    run_json: Optional[str] = run_json_path if os.path.exists(run_json_path) else None
+    manifest: Optional[str] = manifest_path if os.path.exists(manifest_path) else None
+    report: Optional[str] = report_path if report_path and os.path.exists(report_path) else None
+
+    # 1. Check run.json
+    if not run_json:
+        codes.append(READINESS_MISSING_RUN_JSON)
+        missing.append("run.json")
+    else:
+        evidence_paths.append(run_json_path)
+        # Read and parse run.json for evidence checks
+        try:
+            with open(run_json_path, "r", encoding="utf-8") as f:
+                run_data = json.load(f)
+            run_id = run_data.get("run_id")
+            status = run_data.get("status")
+            pipeline_status = run_data.get("pipeline_status")
+            pipeline_final_action = run_data.get("pipeline_final_action")
+            git_boundary_status = run_data.get("git_boundary_status")
+            reason_codes = run_data.get("reason_codes", [])
+            execution_attempted = run_data.get("execution_attempted", False)
+            execution_results = run_data.get("execution_results_summary", [])
+
+            if not status:
+                codes.append("readiness_missing_status")
+                missing.append("status")
+            if not pipeline_status:
+                codes.append("readiness_missing_pipeline_status")
+                missing.append("pipeline_status")
+            if not pipeline_final_action:
+                codes.append("readiness_missing_pipeline_final_action")
+                missing.append("pipeline_final_action")
+            if not git_boundary_status:
+                codes.append(READINESS_MISSING_GIT_BOUNDARY_STATUS)
+                missing.append("git_boundary_status")
+            if not reason_codes:
+                codes.append("readiness_missing_reason_codes")
+                missing.append("reason_codes")
+            if execution_attempted and not execution_results:
+                # Check if this is a pre-execution blocked run
+                is_pre_exec_blocked = any(
+                    rc in reason_codes for rc in _PRE_EXECUTION_BLOCK_CODES
+                )
+                if not is_pre_exec_blocked:
+                    codes.append(READINESS_MISSING_EXECUTION_RESULTS)
+                    missing.append("execution_results")
+        except (OSError, json.JSONDecodeError):
+            codes.append(READINESS_MISSING_RUN_JSON)
+            missing.append("run.json (unreadable)")
+
+    # 2. Check manifest.json
+    if not manifest:
+        codes.append(READINESS_MISSING_MANIFEST)
+        missing.append("manifest.json")
+    else:
+        evidence_paths.append(manifest_path)
+
+    # 3. Check run-report.txt
+    if report_path and not report:
+        codes.append(READINESS_MISSING_RUN_REPORT)
+        missing.append("run-report.txt")
+    elif report:
+        evidence_paths.append(report_path)
+
+    # 4. Check dogfood proof
+    if dogfood_proof_path:
+        if os.path.exists(dogfood_proof_path):
+            evidence_paths.append(dogfood_proof_path)
+        else:
+            codes.append(READINESS_MISSING_DOGFOOD_PROOF)
+            missing.append(dogfood_proof_path)
+
+    # 5. Check payload cleanliness
+    if payload_cleanliness is not None:
+        if not payload_cleanliness.is_clean:
+            codes.append(READINESS_PAYLOAD_NOT_CLEAN)
+            for rc in payload_cleanliness.reason_codes:
+                if rc not in codes:
+                    codes.append(rc)
+    else:
+        warnings.append("payload_cleanliness: not evaluated")
+
+    ready = len(codes) == 0
+
+    return ProductionLineReadinessResult(
+        ready=ready,
+        reason_codes=tuple(codes),
+        run_id=run_id,
+        run_json_path=run_json_path if run_json else None,
+        manifest_path=manifest_path if manifest else None,
+        report_path=report_path if report else None,
+        dogfood_proof_path=dogfood_proof_path if dogfood_proof_path and os.path.exists(dogfood_proof_path) else None,
+        evidence_paths=tuple(evidence_paths),
+        missing_evidence=tuple(missing),
+        warnings=tuple(warnings),
     )
 
 

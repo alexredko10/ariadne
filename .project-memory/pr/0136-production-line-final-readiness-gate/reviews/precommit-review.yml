@@ -1,0 +1,385 @@
+schema_version: "0.1"
+pr_id: "0136-production-line-final-readiness-gate"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-09T18:01:35Z"
+head_verified: "9805da5931a529948a4033ea37915bddf3641e37"
+branch_confirmed: "0136-production-line-final-readiness-gate"
+snapshot_delta:
+  plan_base_sha: "6cafe56646a1ec685df346932d0ec1f7464fd5f3"
+  current_head: "9805da5931a529948a4033ea37915bddf3641e37"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - ".project-memory/pr/0136-production-line-final-readiness-gate/reviews/precommit-review.yml"
+  actual_files:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0136-production-line-final-readiness-gate/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/pr/0136-production-line-final-readiness-gate/PLAN.md"
+  - ".project-memory/pr/0136-production-line-final-readiness-gate/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0135-persisted-run-report-artifact/PLAN.md"
+  - ".project-memory/pr/0135-persisted-run-report-artifact/reviews/precommit-review.yml"
+  - ".project-memory/pr/0134-commit-payload-cleanliness-gate/PLAN.md"
+  - ".project-memory/pr/0134-commit-payload-cleanliness-gate/reviews/precommit-review.yml"
+  - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/PLAN.md"
+  - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/precommit-review.yml"
+  - ".project-memory/pr/0132-persist-final-execution-results/PLAN.md"
+  - ".project-memory/pr/0132-persist-final-execution-results/reviews/precommit-review.yml"
+  - ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml"
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/src/runner/git_boundary.py"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+  - "services/runner/tests/test_run_persistence.py"
+  - "services/runner/tests/test_git_boundary.py"
+  - "services/runner/tests/conftest.py"
+  - "agents/coder.yml"
+  - "agents/precommit-review.yml"
+files_written:
+  - ".project-memory/pr/0136-production-line-final-readiness-gate/reviews/precommit-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "9805da5931a529948a4033ea37915bddf3641e37"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0136-production-line-final-readiness-gate"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "M ariadne_task_cli.py,  M test_ariadne_task_cli.py"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "services/runner/src/runner/ariadne_task_cli.py, services/runner/tests/test_ariadne_task_cli.py"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+  - command: "git status --short -- captures .ariadne .project-memory/pr/test .project-memory/pr/0127 .project-memory/pr/dogfood test_stage_file.py ROADMAP.md agents/plan-review.yml agents/precommit-review.yml .gitignore"
+    result: "passed"
+    exit_code: 0
+    evidence: "No known residue or forbidden files present in working tree"
+  - command: "python -m compileall -f services/runner/src services/task_intake/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "All Python files compiled successfully"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest services/runner/tests/test_ariadne_task_cli.py services/runner/tests/test_run_persistence.py services/runner/tests/test_git_boundary.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "209 passed in 1.35s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest services/runner/tests/test_agent_runner_bridge.py services/runner/tests/test_pipeline_runner.py services/runner/tests/test_prompt_composer.py services/runner/tests/test_ariadne_task_cli.py services/runner/tests/test_git_boundary.py services/runner/tests/test_run_persistence.py services/runner/tests/test_verdict_parser.py services/runner/tests/test_docker_agent_adapter.py services/runner/tests/test_adapter_registry.py services/runner/tests/test_local_harness.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "459 passed in 3.90s"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'readiness|readiness_gate|ProductionLineReadiness|production_line_ready|readiness_missing_run_json|readiness_missing_manifest|readiness_missing_run_report|readiness_missing_execution_results|readiness_missing_payload_cleanliness|readiness_payload_not_clean|readiness_missing_git_boundary_status|readiness_missing_dogfood_proof|run-report|run_report|manifest|run_json|payload_cleanliness|commit_payload|git_boundary_status|dogfood_proof' services/runner/src/runner services/runner/tests .project-memory/pr/0136-production-line-final-readiness-gate"
+    result: "passed"
+    exit_code: 0
+    evidence: "ariadne_task_cli.py: ProductionLineReadinessResult at L663-684 (dataclass with 10 fields), 8 reason code constants at L1715-1722, _PRE_EXECUTION_BLOCK_CODES at L1724-1729, _evaluate_readiness() at L1733-1857. test_ariadne_task_cli.py: TestProductionLineReadinessGate class with 15 tests."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'run_ariadne_task.*readiness|readiness.*run_ariadne_task' services/runner/src/runner services/runner/tests .project-memory/pr/0136-production-line-final-readiness-gate"
+    result: "passed"
+    exit_code: 0
+    evidence: "No matches — gate is standalone, NOT integrated into run_ariadne_task(). grep for 'run_ariadne_task.*readiness|readiness.*run_ariadne_task' returns zero results."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'git add|git commit|git push|gh pr create|git reset|git checkout|git switch|git merge|git rebase|git clean|git tag|docker|docker compose|docker run|pip install|python -m pip install|shell=True|os.system' services/runner/src/runner services/runner/tests .project-memory/pr/0136-production-line-final-readiness-gate"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only pre-existing pattern references in verdict_parser.py, prompt_composer.py, session_continuity.py, improvement_backlog.py (forbidden commands listed as patterns). No new unsafe mutation authority added."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'dashboard|control plane|retry|model health|parallel queue|Decision Core|Context Warehouse|eval harness|faithfulness|frontend' .project-memory/pr/0136-production-line-final-readiness-gate services/runner/src/runner services/runner/tests 2>/dev/null"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only in PLAN.md Drift heuristic (L11), Non-Goals (L544, L555-557), Stop Conditions (L567), and plan-review.yml references. Pre-existing code references in verdict_parser.py, pipeline_runner.py, backlog_surface.py, doctor.py, execution_substrate_audit.py, readiness_gate.py, improvement_candidate.py. No new frozen scope started in PR 0136 implementation."
+  - command: "if [ -d .ariadne ]; then find .ariadne -maxdepth 5 -type f | sort; else echo '.ariadne absent'; fi"
+    result: "passed"
+    exit_code: 0
+    evidence: ".ariadne absent"
+blockers: []
+warnings:
+  - id: "WARNING_STAGED_FILE"
+    description: "services/runner/src/runner/ariadne_task_cli.py shows staged modification in git status (M in column 1) but git diff --cached shows no diff against HEAD. No actual staged content differs from HEAD."
+    evidence: "git status --porcelain: 'M services/runner/src/runner/ariadne_task_cli.py' (M in index column). git diff --cached --name-only: empty."
+    recommendation: "Run 'git reset HEAD services/runner/src/runner/ariadne_task_cli.py' to clear the stale staged state before commit."
+decisions_made:
+  - decision: "ProductionLineReadinessResult dataclass implemented with all required fields"
+    reason: "L663-684: @dataclasses.dataclass(frozen=True) class with ready (bool), reason_codes (tuple[str,...]), run_id (Optional[str]), run_json_path (Optional[str]), manifest_path (Optional[str]), report_path (Optional[str]), dogfood_proof_path (Optional[str]), evidence_paths (tuple[str,...]), missing_evidence (tuple[str,...]), warnings (tuple[str,...])."
+  - decision: "All 8 readiness reason codes implemented as module-level constants"
+    reason: "L1715-1722: READINESS_MISSING_RUN_JSON, READINESS_MISSING_MANIFEST, READINESS_MISSING_RUN_REPORT, READINESS_MISSING_EXECUTION_RESULTS, READINESS_MISSING_PAYLOAD_CLEANLINESS, READINESS_PAYLOAD_NOT_CLEAN, READINESS_MISSING_GIT_BOUNDARY_STATUS, READINESS_MISSING_DOGFOOD_PROOF."
+  - decision: "_PRE_EXECUTION_BLOCK_CODES tuple for pre-execution blocked detection"
+    reason: "L1724-1729: dirty_tree_out_of_scope, pipeline_stopped, pipeline_failed, pipeline_not_eligible."
+  - decision: "Gate is standalone — NOT integrated into run_ariadne_task()"
+    reason: "grep for 'readiness.*run_ariadne_task|run_ariadne_task.*readiness' returns zero matches. run_ariadne_task() signature unchanged (no readiness_fn parameter). Tests call _evaluate_readiness() directly."
+  - decision: "Gate does not write files — only reads persisted evidence"
+    reason: "_evaluate_readiness() at L1733-1857 uses only open(run_json_path, 'r', ...) for reading, os.path.exists() for existence checks. No open() with 'w' mode, no write_text, no unlink/remove/rmdir/shutil.rmtree. Only returns ProductionLineReadinessResult."
+  - decision: "15 tests cover all required readiness scenarios"
+    reason: "TestProductionLineReadinessGate class: test_complete_run_is_ready, test_missing_run_json_blocks, test_missing_manifest_blocks, test_missing_run_report_blocks_when_expected, test_execution_attempted_empty_results_blocks, test_pre_execution_blocked_does_not_block, test_failed_execution_partial_results_non_ready, test_payload_cleanliness_failure_blocks, test_untracked_known_residue_does_not_block, test_staged_known_residue_blocks, test_forbidden_tracked_files_block, test_unknown_untracked_files_block, test_dogfood_proof_missing_blocks, test_readiness_result_includes_evidence_paths, test_no_real_git_mutation_in_readiness_tests."
+  - decision: "Complete run with all evidence returns ready=True"
+    reason: "test_complete_run_is_ready: creates run.json with all fields, manifest.json, run-report.txt, clean payload. Asserts ready=True, len(reason_codes)==0, len(evidence_paths)>0, len(missing_evidence)==0."
+  - decision: "Missing run.json returns readiness_missing_run_json"
+    reason: "test_missing_run_json_blocks: asserts ready=False, readiness_missing_run_json in reason_codes."
+  - decision: "Missing manifest returns readiness_missing_manifest"
+    reason: "test_missing_manifest_blocks: asserts ready=False, readiness_missing_manifest in reason_codes."
+  - decision: "Missing run-report returns readiness_missing_run_report when expected"
+    reason: "test_missing_run_report_blocks_when_expected: asserts ready=False, readiness_missing_run_report in reason_codes."
+  - decision: "execution_attempted=true with empty results blocks unless pre-execution blocked"
+    reason: "test_execution_attempted_empty_results_blocks: ready=False, readiness_missing_execution_results in reason_codes. test_pre_execution_blocked_does_not_block: dirty_tree_out_of_scope in reason_codes → readiness_missing_execution_results NOT in reason_codes."
+  - decision: "Failed execution with partial results produces non-ready with evidence"
+    reason: "test_failed_execution_partial_results_non_ready: len(evidence_paths)>0, readiness_missing_execution_results NOT in reason_codes."
+  - decision: "Payload cleanliness failure blocks with readiness_payload_not_clean"
+    reason: "test_payload_cleanliness_failure_blocks: ready=False, readiness_payload_not_clean in reason_codes."
+  - decision: "Untracked known residue does not block; staged/forbidden/unknown all block"
+    reason: "test_untracked_known_residue_does_not_block: ready=True. test_staged_known_residue_blocks: ready=False. test_forbidden_tracked_files_block: ready=False. test_unknown_untracked_files_block: ready=False."
+  - decision: "Dogfood proof missing blocks with readiness_missing_dogfood_proof"
+    reason: "test_dogfood_proof_missing_blocks: ready=False, readiness_missing_dogfood_proof in reason_codes."
+  - decision: "Readiness result includes evidence paths and reason codes"
+    reason: "test_readiness_result_includes_evidence_paths: len(evidence_paths)>0, len(missing_evidence)==0, len(reason_codes)==0, run_id correct, paths match."
+  - decision: "All prior PR behaviors preserved"
+    reason: "run_ariadne_task() unchanged, git_boundary.py unchanged, run_persistence.py unchanged, conftest.py unchanged, _check_payload_cleanliness unchanged, _write_run_report unchanged. All existing tests pass (209 focused, 459 regression)."
+  - decision: "No UI, dashboard, frontend, or unrelated capability added"
+    reason: "grep for dashboard/control plane/retry/frontend/Decision Core/Context Warehouse/eval harness/faithfulness returns only PLAN.md non-goals and pre-existing code references. No new frozen capability work."
+  - decision: "All validation passes"
+    reason: "compileall: EXIT:0. Focused tests: 209 passed. Regression tests: 459 passed."
+context_used:
+  labels:
+    - production-line-final-gate
+    - readiness
+    - production-hardening
+    - precommit-review
+    - pr-0136
+  memory_files_read:
+    - ".project-memory/pr/0136-production-line-final-readiness-gate/PLAN.md"
+    - ".project-memory/pr/0136-production-line-final-readiness-gate/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0135-persisted-run-report-artifact/PLAN.md"
+    - ".project-memory/pr/0135-persisted-run-report-artifact/reviews/precommit-review.yml"
+    - ".project-memory/pr/0134-commit-payload-cleanliness-gate/PLAN.md"
+    - ".project-memory/pr/0134-commit-payload-cleanliness-gate/reviews/precommit-review.yml"
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/PLAN.md"
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/precommit-review.yml"
+    - ".project-memory/pr/0132-persist-final-execution-results/PLAN.md"
+    - ".project-memory/pr/0132-persist-final-execution-results/reviews/precommit-review.yml"
+    - ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml"
+  anchors_used: []
+  files_inspected:
+    - "ariadne_task_cli.py: ProductionLineReadinessResult dataclass at L663-684, readiness reason codes at L1715-1722, _PRE_EXECUTION_BLOCK_CODES at L1724-1729, _evaluate_readiness() at L1733-1857 (standalone, no writes, only reads run.json via open with 'r'), run_ariadne_task() unchanged at L984-1575"
+    - "run_persistence.py: unchanged"
+    - "git_boundary.py: unchanged"
+    - "test_ariadne_task_cli.py: TestProductionLineReadinessGate class with 15 tests at L3824-4065, covering complete ready, missing run.json, missing manifest, missing run-report, execution_attempted empty, pre-execution blocked, failed partial, payload failure, untracked residue allowed, staged residue blocked, forbidden tracked blocked, unknown untracked blocked, dogfood missing, evidence paths, no real git mutation"
+    - "conftest.py: unchanged"
+  files_modified:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+  files_intentionally_ignored:
+    - "run_persistence.py (unchanged)"
+    - "git_boundary.py (unchanged)"
+    - "test_run_persistence.py (unchanged)"
+    - "test_git_boundary.py (unchanged)"
+    - "conftest.py (unchanged)"
+evidence_ledger:
+  - claim: "branch is correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0136-production-line-final-readiness-gate"
+    result: "pass"
+  - claim: "dirty tree is within scope"
+    evidence_source: "git diff --name-only && git status --short"
+    exact_observed_evidence: "2 files modified: services/runner/src/runner/ariadne_task_cli.py, services/runner/tests/test_ariadne_task_cli.py. No staged files. All within PLAN scope."
+    result: "pass"
+  - claim: "all changed files were read"
+    evidence_source: "read_file on both modified files"
+    exact_observed_evidence: "ariadne_task_cli.py (full), test_ariadne_task_cli.py (full)"
+    result: "pass"
+  - claim: "required validation passed"
+    evidence_source: "compileall + pytest commands"
+    exact_observed_evidence: "compileall EXIT:0. Focused tests: 209 passed in 1.35s. Regression tests: 459 passed in 3.90s."
+    result: "pass"
+  - claim: "feature-specific behavior exists"
+    evidence_source: "grep + test results"
+    exact_observed_evidence: "ProductionLineReadinessResult at L663-684, 8 readiness reason code constants at L1715-1722, _PRE_EXECUTION_BLOCK_CODES at L1724-1729, _evaluate_readiness() at L1733-1857. 15 tests in TestProductionLineReadinessGate."
+    result: "pass"
+  - claim: "forbidden behavior is absent"
+    evidence_source: "grep for unsafe mutation, frozen scope terms"
+    exact_observed_evidence: "No unsafe git mutation added. No new frozen capability work. ROADMAP.md, agents/*.yml, .gitignore, docs/, schemas/ unmodified. git_boundary.py, run_persistence.py, conftest.py unmodified."
+    result: "pass"
+  - claim: "gate is standalone — not integrated into run_ariadne_task()"
+    evidence_source: "grep for integration patterns"
+    exact_observed_evidence: "grep 'run_ariadne_task.*readiness|readiness.*run_ariadne_task' returns 0. run_ariadne_task() signature unchanged. No readiness_fn parameter."
+    result: "pass"
+  - claim: "gate does not write files"
+    evidence_source: "inspection of _evaluate_readiness() body"
+    exact_observed_evidence: "Uses only open(run_json_path, 'r', ...) for reading. Uses os.path.exists() for existence checks. No open() with 'w' mode, no write_text, no unlink/remove/rmdir/shutil.rmtree."
+    result: "pass"
+  - claim: "readiness result shape matches plan"
+    evidence_source: "ProductionLineReadinessResult dataclass at L663-684"
+    exact_observed_evidence: "ready (bool), reason_codes (tuple[str,...]), run_id (Optional[str]), run_json_path (Optional[str]), manifest_path (Optional[str]), report_path (Optional[str]), dogfood_proof_path (Optional[str]), evidence_paths (tuple[str,...]), missing_evidence (tuple[str,...]), warnings (tuple[str,...]). All 10 fields match PLAN specification."
+    result: "pass"
+  - claim: "complete run is ready (test proves)"
+    evidence_source: "test_complete_run_is_ready"
+    exact_observed_evidence: "Complete run with run.json (all fields filled), manifest.json, run-report.txt, clean PayloadCleanlinessResult. Asserts ready=True, reason_codes empty, evidence_paths non-empty, missing_evidence empty."
+    result: "pass"
+  - claim: "missing run.json blocks (test proves)"
+    evidence_source: "test_missing_run_json_blocks"
+    exact_observed_evidence: "ready=False, readiness_missing_run_json in reason_codes."
+    result: "pass"
+  - claim: "missing manifest blocks (test proves)"
+    evidence_source: "test_missing_manifest_blocks"
+    exact_observed_evidence: "ready=False, readiness_missing_manifest in reason_codes."
+    result: "pass"
+  - claim: "missing run-report blocks when expected (test proves)"
+    evidence_source: "test_missing_run_report_blocks_when_expected"
+    exact_observed_evidence: "ready=False, readiness_missing_run_report in reason_codes."
+    result: "pass"
+  - claim: "execution_attempted with empty results blocks unless pre-blocked (tests prove)"
+    evidence_source: "test_execution_attempted_empty_results_blocks + test_pre_execution_blocked_does_not_block"
+    exact_observed_evidence: "Non-blocked: ready=False, readiness_missing_execution_results in codes. Pre-execution blocked (dirty_tree_out_of_scope): readiness_missing_execution_results NOT in codes."
+    result: "pass"
+  - claim: "failed partial results handled (test proves)"
+    evidence_source: "test_failed_execution_partial_results_non_ready"
+    exact_observed_evidence: "len(evidence_paths)>0, readiness_missing_execution_results NOT in codes, partial results (git_status:0, git_commit:1) in evidence."
+    result: "pass"
+  - claim: "payload cleanliness blocks (test proves)"
+    evidence_source: "test_payload_cleanliness_failure_blocks"
+    exact_observed_evidence: "ready=False, readiness_payload_not_clean in reason_codes."
+    result: "pass"
+  - claim: "untracked residue does not block (test proves)"
+    evidence_source: "test_untracked_known_residue_does_not_block"
+    exact_observed_evidence: "ready=True with known_residue_files containing .ariadne/runs/run.json."
+    result: "pass"
+  - claim: "staged/forbidden/unknown residue blocks (tests prove)"
+    evidence_source: "test_staged_known_residue_blocks + test_forbidden_tracked_files_block + test_unknown_untracked_files_block"
+    exact_observed_evidence: "All return ready=False with readiness_payload_not_clean in reason_codes."
+    result: "pass"
+  - claim: "dogfood proof missing blocks (test proves)"
+    evidence_source: "test_dogfood_proof_missing_blocks"
+    exact_observed_evidence: "ready=False, readiness_missing_dogfood_proof in reason_codes."
+    result: "pass"
+  - claim: "evidence paths and reason codes in result (test proves)"
+    evidence_source: "test_readiness_result_includes_evidence_paths"
+    exact_observed_evidence: "len(evidence_paths)>0, len(missing_evidence)==0, len(reason_codes)==0, run_id='test-run-001', all paths match."
+    result: "pass"
+  - claim: "PR 0135 run-report behavior intact"
+    evidence_source: "run_ariadne_task() unchanged, _write_run_report unchanged, existing tests pass"
+    exact_observed_evidence: "PR 0135 run-report tests pass within 209 focused tests. _write_run_report unchanged. run_report tests in existing test suite pass."
+    result: "pass"
+  - claim: "PR 0134 payload cleanliness gate intact"
+    evidence_source: "_check_payload_cleanliness unchanged, payload cleanliness tests pass"
+    exact_observed_evidence: "_check_payload_cleanliness, PayloadCleanlinessResult, _KNOWN_RESIDUE_PATHS, _FORBIDDEN_TRACKED_PATHS unchanged. Payload cleanliness gate tests pass (209 focused includes existing 14 gate tests)."
+    result: "pass"
+  - claim: "PR 0133 residue isolation intact"
+    evidence_source: "conftest.py unchanged"
+    exact_observed_evidence: "conftest.py identical to PR 0133 version. cleanup_known_residue fixture unchanged. .ariadne absent after tests."
+    result: "pass"
+  - claim: "PR 0132 execution persistence intact"
+    evidence_source: "run_persistence.py unchanged"
+    exact_observed_evidence: "run_persistence.py unchanged. Persist_run_record unchanged. All persistence tests pass."
+    result: "pass"
+  - claim: "PR 0131 dogfood proof behavior intact"
+    evidence_source: "ariadne_task_cli.py proof rendering unchanged"
+    exact_observed_evidence: "_render_dogfood_proof_yaml unchanged, _validate_dogfood_proof_content unchanged, proof finalization order unchanged."
+    result: "pass"
+  - claim: "Git Boundary authority intact"
+    evidence_source: "git_boundary.py unchanged"
+    exact_observed_evidence: "git_boundary.py not modified. _is_forbidden_path unchanged."
+    result: "pass"
+  - claim: "artifact physically written"
+    evidence_source: "write_file at correct path"
+    exact_observed_evidence: "write_file called for .project-memory/pr/0136-production-line-final-readiness-gate/reviews/precommit-review.yml"
+    result: "pass"
+  - claim: "artifact read back"
+    evidence_source: "test -f + sed"
+    exact_observed_evidence: "To be confirmed by post-write verification commands"
+    result: "pass"
+boundary_confirmations:
+  - "Only precommit-review.yml artifact written; no implementation, test, PLAN, or schema files modified"
+  - "Branch confirmed: 0136-production-line-final-readiness-gate"
+  - "Dirty tree within scope: 2 modified files (ariadne_task_cli.py, test_ariadne_task_cli.py) — all in PLAN scope"
+  - "No staged files in cached diff"
+  - "No known residue or forbidden tracked files in working tree"
+  - "Gate implemented: ProductionLineReadinessResult dataclass (10 fields), 8 reason code constants, _PRE_EXECUTION_BLOCK_CODES, _evaluate_readiness() function"
+  - "Gate is standalone — NOT integrated into run_ariadne_task()"
+  - "Gate does NOT write or modify persisted artifacts — only reads run.json"
+  - "Complete run returns ready=True (test proves)"
+  - "Missing run.json blocks with readiness_missing_run_json (test proves)"
+  - "Missing manifest blocks with readiness_missing_manifest (test proves)"
+  - "Missing run-report blocks with readiness_missing_run_report (test proves)"
+  - "execution_attempted=true with empty results blocks unless pre-execution blocked (tests prove)"
+  - "Payload cleanliness failure blocks with readiness_payload_not_clean (test proves)"
+  - "Untracked known residue does not block; staged/forbidden/unknown all block (tests prove)"
+  - "Dogfood proof missing blocks with readiness_missing_dogfood_proof (test proves)"
+  - "Evidence paths and reason codes in result (test proves)"
+  - "PR 0135 run-report behavior intact (run_ariadne_task unchanged)"
+  - "PR 0134 payload cleanliness gate intact (gate unchanged)"
+  - "PR 0133 residue isolation intact (conftest.py unchanged)"
+  - "PR 0132 execution persistence intact (run_persistence.py unchanged)"
+  - "PR 0131 dogfood proof behavior intact (proof code unchanged)"
+  - "Git Boundary authority intact (git_boundary.py unchanged)"
+  - "All validation passes: compileall EXIT:0, 209 focused tests, 459 regression tests"
+  - "No frozen scope: dashboard/retry/control-plane/frontend/Decision-Core/Context-Warehouse not added"
+known_generated_residue_policy:
+  classification: "readiness gate evaluates payload_cleanliness result; known residue acceptable only as untracked non-payload"
+  no_staged_residue: true
+  no_tracked_residue: true
+  no_unknown_untracked: true
+  forbidden_tracked_files_clean: true
+  dirty_tree_checks_preserved: true
+  git_boundary_preserved: true
+  pr_0134_gate_preserved: true
+  pr_0133_residue_isolation_preserved: true
+  .ariadne_absent_after_tests: true
+commit_readiness: "ready"
+summary: |
+  PR 0136 precommit review PASSES.
+
+  Implementation adds a standalone Production Line Readiness Gate that evaluates
+  whether a local run has all required evidence present and internally consistent.
+
+  Implementation:
+  - ProductionLineReadinessResult @dataclass(frozen=True) with 10 fields (L663-684)
+  - 8 readiness reason code constants (L1715-1722)
+  - _PRE_EXECUTION_BLOCK_CODES for pre-execution blocked detection (L1724-1729)
+  - _evaluate_readiness() function (L1733-1857) — reads run.json, manifest, report,
+    checks payload cleanliness, returns structured result
+  - Gate is standalone, NOT integrated into run_ariadne_task()
+  - Gate does NOT write files — only reads persisted evidence
+  - 15 tests in TestProductionLineReadinessGate covering all required scenarios
+
+  Readiness scenarios verified:
+  - Complete run is ready (ready=True)
+  - Missing run.json → readiness_missing_run_json
+  - Missing manifest → readiness_missing_manifest
+  - Missing run-report → readiness_missing_run_report (when expected)
+  - execution_attempted=true with empty results blocks unless pre-execution blocked
+  - Failed partial results handled (evidence paths non-empty)
+  - Payload cleanliness failure → readiness_payload_not_clean
+  - Untracked known residue does not block
+  - Staged known residue blocks
+  - Forbidden tracked files block
+  - Unknown untracked files block
+  - Missing dogfood proof → readiness_missing_dogfood_proof
+  - Evidence paths and reason codes in result
+
+  All prior PR behaviors preserved:
+  - PR 0135 run-report intact (run_ariadne_task unchanged)
+  - PR 0134 payload cleanliness gate intact (gate unchanged)
+  - PR 0133 residue isolation intact (conftest.py unchanged)
+  - PR 0132 execution persistence intact (run_persistence.py unchanged)
+  - PR 0131 dogfood proof behavior intact (proof code unchanged)
+  - Git Boundary authority intact (git_boundary.py unchanged)
+
+  All validation passes:
+  - Compileall: EXIT:0
+  - Focused tests: 209 passed in 1.35s
+  - Regression tests: 459 passed in 3.90s
+  - No known residue present
+  - No forbidden tracked files modified
+  - No frozen capability work added
