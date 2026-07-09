@@ -1,0 +1,63 @@
+schema_version: "0.1"
+pr_id: "0052-matador-boundary-adapter-skeleton"
+review_type: "precommit-review"
+verdict: "block"
+reviewer: "precommit-review"
+timestamp: "2026-07-09T09:50:00Z"
+head_verified: "d07d901dbe492f47f191aa5b7bc5a544990f894a"
+branch_confirmed: "NOT_FOUND"
+snapshot_delta:
+  plan_base_sha: ""
+  current_head: "d07d901dbe492f47f191aa5b7bc5a544990f894a"
+  action: "stop"
+  stale_snapshot: true
+scope:
+  expected_files: []
+  actual_files: []
+  forbidden_paths_checked: false
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "blocked"
+files_read: []
+files_written:
+  - ".project-memory/pr/0052-matador-boundary-adapter-skeleton/reviews/precommit-review.yml"
+validation: []
+blockers:
+  - id: "BLOCKER_001"
+    description: "Required branch does not exist"
+    severity: "critical"
+    evidence: "Branch '0052-matador-boundary-adapter-skeleton' does not exist in repository. Available PR 0052 branch is '0052-cache-contracts-and-keys'. Current working branch is '0133-runner-test-runtime-residue-isolation'."
+    required_fix: "Create the branch '0052-matador-boundary-adapter-skeleton' and implement the Matador boundary adapter skeleton before requesting review."
+  - id: "BLOCKER_002"
+    description: "Required PR directory does not exist"
+    severity: "critical"
+    evidence: "Directory '.project-memory/pr/0052-matador-boundary-adapter-skeleton/' does not exist. Only '.project-memory/pr/0052-cache-contracts-and-keys/' exists."
+    required_fix: "Create the PR 0052 directory structure with PLAN.md and implementation before requesting review."
+  - id: "BLOCKER_003"
+    description: "No implementation files to review"
+    severity: "critical"
+    evidence: "No src/bremen/system_of_record.py, docs/adr/0012-system-of-record-boundary.md, or tests/test_bremen_system_of_record_boundary.py exist in this repository context."
+    required_fix: "Implement the Matador boundary adapter skeleton per the specification before requesting review."
+warnings: []
+decisions_made: []
+context_used:
+  labels:
+    - matador-boundary
+    - skeleton-only
+    - pr-0052
+  memory_files_read: []
+  files_inspected: []
+  files_modified: []
+  files_intentionally_ignored: []
+boundary_confirmations: []
+commit_readiness: "not_ready"
+summary: |
+  This review is BLOCKED because:
+  1. The required branch '0052-matador-boundary-adapter-skeleton' does not exist in the repository
+  2. The required PR directory '.project-memory/pr/0052-matador-boundary-adapter-skeleton/' does not exist
+  3. No implementation files exist to review
+
+  The only PR 0052 that exists in this repository is '0052-cache-contracts-and-keys'.
+  The current working branch is '0133-runner-test-runtime-residue-isolation'.
+
+  The Matador boundary adapter skeleton has not been created or implemented.
