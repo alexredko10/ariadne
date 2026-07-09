@@ -1,0 +1,338 @@
+schema_version: "0.1"
+pr_id: "0137-product-architecture-roadmap-unlock"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-09T21:51:41Z"
+head_verified: "7f40b4c50dac29c2ec45dac66e68fbf55033145f"
+branch_confirmed: "0137-product-architecture-roadmap-unlock"
+
+snapshot_delta:
+  plan_base_sha: "7f40b4c50dac29c2ec45dac66e68fbf55033145f"
+  current_head: "7f40b4c50dac29c2ec45dac66e68fbf55033145f"
+  action: "continue"
+  stale_snapshot: false
+
+scope:
+  expected_files:
+    - ".project-memory/product/ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - ".project-memory/pr/0137-product-architecture-roadmap-unlock/PROMPTS.md"
+    - ".project-memory/pr/0137-product-architecture-roadmap-unlock/PLAN.md"
+    - ".project-memory/pr/0137-product-architecture-roadmap-unlock/reviews/plan-review.yml"
+  actual_files:
+    - ".project-memory/product/ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - ".project-memory/pr/0137-product-architecture-roadmap-unlock/PROMPTS.md"
+    - ".project-memory/pr/0137-product-architecture-roadmap-unlock/PLAN.md"
+    - ".project-memory/pr/0137-product-architecture-roadmap-unlock/reviews/plan-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0137-product-architecture-roadmap-unlock/reviews/plan-review.yml"
+  scope_status: "in_scope"
+
+files_read:
+  - ".project-memory/pr/0137-product-architecture-roadmap-unlock/PLAN.md"
+  - ".project-memory/product/ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - ".project-memory/pr/0137-product-architecture-roadmap-unlock/PROMPTS.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md"
+  - ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml"
+  - ".project-memory/pr/0132-persist-final-execution-results/reviews/precommit-review.yml"
+  - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/precommit-review.yml"
+  - ".project-memory/pr/0134-commit-payload-cleanliness-gate/reviews/precommit-review.yml"
+  - ".project-memory/pr/0135-persisted-run-report-artifact/reviews/precommit-review.yml"
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "agents/planner.yml"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+
+files_written:
+  - ".project-memory/pr/0137-product-architecture-roadmap-unlock/reviews/plan-review.yml"
+
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "7f40b4c50dac29c2ec45dac66e68fbf55033145f"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0137-product-architecture-roadmap-unlock"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only untracked: .project-memory/pr/0137-product-architecture-roadmap-unlock/, .project-memory/product/, .project-memory/roadmaps/"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No tracked files modified"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+  - command: "git status --short -- .project-memory/product/ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md .project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md .project-memory/pr/0137-product-architecture-roadmap-unlock/PROMPTS.md .project-memory/pr/0137-product-architecture-roadmap-unlock/PLAN.md ROADMAP.md agents/plan-review.yml agents/precommit-review.yml .gitignore services docs schemas pyproject.toml poetry.lock"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only PR 0137 artifact files untracked (PLAN.md, PROMPTS.md, ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md, ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md). ROADMAP.md, agents/*.yml, .gitignore, services, docs, schemas all clean. No forbidden modifications."
+  - command: "test -f .project-memory/product/ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "Source artifact exists and is readable"
+  - command: "test -f .project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "Derived roadmap artifact exists and is readable"
+  - command: "test -f .project-memory/pr/0137-product-architecture-roadmap-unlock/PROMPTS.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PROMPTS.md exists and is readable"
+  - command: "test -f .project-memory/pr/0137-product-architecture-roadmap-unlock/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is readable"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'runtime substrate|runtime package|artifact workspace|agent orchestration substrate|Agent may generate|Runtime must verify|Human owns|artifacts make intermediate meaning visible|agent output is not proof|source of truth|model is replaceable|substrate is durable' .project-memory/product .project-memory/roadmaps .project-memory/pr/0137-product-architecture-roadmap-unlock"
+    result: "passed"
+    exit_code: 0
+    evidence: "Product identity principles found across source artifact, roadmap, and PLAN.md: runtime substrate (source L22), artifact workspace (source L38, roadmap L12, PLAN L38), agent orchestration substrate (source L49, PLAN L38), Agent may generate / Runtime must verify / Human owns (source L54-56, PLAN L45-46), artifacts make intermediate meaning visible (PLAN L46), agent output is not proof (PLAN L48), source of truth (source L62, roadmap L36), model is replaceable (source L77, roadmap L745), substrate is durable (source L79, roadmap L745)"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache '0131|0132|0133|0134|0135|0136|Production Line|closed|complete|milestone|0137|0138|Artifact Workspace|Read-Only UI|UI mutation.*frozen|agent launch.*UI.*frozen|commit.*UI.*frozen|PR creation.*UI.*frozen' .project-memory/roadmaps .project-memory/pr/0137-product-architecture-roadmap-unlock"
+    result: "passed"
+    exit_code: 0
+    evidence: "ROADMAP_AFTER_PR0136.md L1: 'After PR 0136', L10: 'PR 0131-0136 closed the Production Line hardening stream', L12: 'next active stream should be read-only Artifact Workspace UI', L37: 'UI mutation remains frozen', L38: 'Agent launch from UI remains frozen'. PLAN.md L9: 'PR 0131-0136 closed the Production Line hardening stream', L31-32: 'closes Production Line hardening stream and opens Artifact Workspace Read-Only UI', L11: 'UI mutation, agent launch from UI, commit from UI, and PR creation from UI remain frozen'"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'Context Core|Decision Core|Rubrics|Model Router|ETL|ERP|frozen|later|staged' .project-memory/roadmaps .project-memory/pr/0137-product-architecture-roadmap-unlock"
+    result: "passed"
+    exit_code: 0
+    evidence: "ROADMAP_AFTER_PR0136.md L39: 'Decision Core, Context Warehouse, Rubrics, Model Router, ETL demo, and agent autonomy expansion remain staged, not immediate'. Stream table shows Context Core MVP at Stream 6, Decision Core MVP at Stream 9. PLAN.md L131-142: 7 frozen boundary items including Context Core, Decision Core, Rubrics, Model Router, ETL/ERP demo."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'services/|agents/|schemas/|pyproject.toml|poetry.lock|requirements|.gitignore|ROADMAP.md' .project-memory/pr/0137-product-architecture-roadmap-unlock/PLAN.md .project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md explicitly lists services/** (L78), agents/** (L80), schemas/** (L81), pyproject.toml/poetry.lock (L82), .gitignore (L83) as forbidden. ROADMAP.md referenced only in roadmap artifact (L40, L69) as point-of-reference, not modified."
+
+blockers: []
+
+warnings:
+  - id: "WARNING_001"
+    description: "PR 0136 production-line-final-readiness-gate directory does not exist on disk. Its precommit-review.yml was listed as required read but is not available for review cross-reference."
+    evidence: "find .project-memory/pr/0136-production-line-final-readiness-gate: No such file or directory"
+    recommendation: "PR 0136 may not have been created yet or exists only in another branch. This does not block PR 0137 because PR 0136 is referenced as a planned/complete milestone and the roadmap correctly handles post-0136 stream transition. The absence of 0136 files on disk does not invalidate PR 0137 scope."
+  - id: "WARNING_002"
+    description: "ROADMAP.md 'Production Line Stream' section (Stage 4 — Public, 0137+) does not yet reflect Artifact Workspace Read-Only as the next stream. ROADMAP.md still shows the old Stage 4 description ('README/quickstart, GitHub release v0.1, demo. Post-0100 capability streams'). This is an expected gap because ROADMAP.md updates are deferred to coder execution."
+    evidence: "ROADMAP.md Production Line Stage 4 section: '0137+ — README/quickstart, GitHub release v0.1, demo. Post-0100 capability streams'"
+    recommendation: "Confirm ROADMAP.md update is deferred to coder step. The roadmap artifact corrects this with accurate stream definitions."
+
+decisions_made:
+  - decision: "PR 0137 is artifact-only by design and correctly scoped"
+    reason: "PLAN.md explicitly states artifact-only nature (L12), no runtime code (L78), no UI code, no ROADMAP.md changes, no agent changes, no schema changes. git diff --name-only confirms zero tracked files modified."
+  - decision: "Product identity is correctly preserved"
+    reason: "PLAN.md (L38): 'Ariadna is a runtime package, artifact workspace, and role-based agent orchestration substrate.' Master prompt (L49): 'runtime package + artifact workspace + agent orchestration substrate.' Roadmap (L17): 'Ariadna = runtime package + artifact workspace + role-based agent orchestration substrate.' All three sources consistent."
+  - decision: "Architecture principles are correctly preserved"
+    reason: "PLAN.md (L44-49): 'model is replaceable, substrate is durable', 'Agent may generate, runtime must verify, human owns root purpose', 'artifacts make intermediate meaning visible', 'agent output is not proof', 'runtime-captured evidence is source-of-truth material'. These match source artifact (L54-62, L77-79)."
+  - decision: "Artifact classification is correct"
+    reason: "PLAN.md (L16-30): Source artifact (master prompt), derived roadmap artifact (post-0136 roadmap), prompt artifact (PROMPTS.md) — all clearly distinguished."
+  - decision: "Production Line closure correctly stated"
+    reason: "PLAN.md (L9): 'PR 0131-0136 closed the Production Line hardening stream.' Roadmap L10: 'PR 0131-0136 closed the Production Line hardening stream.' Consistent across all artifacts."
+  - decision: "Next stream correctly identified"
+    reason: "PLAN.md (L31-32): 'opens Artifact Workspace Read-Only UI as the next active stream.' Roadmap L12: 'next active stream should be read-only Artifact Workspace UI.' Roadmap stream table (L46-47): Stream 1 is Artifact Workspace Read Model (0138-0142)."
+  - decision: "Frozen boundaries correctly enforced"
+    reason: "PLAN.md (L131-142): 7 frozen boundary items. UI mutation (L141), agent launch from UI (implicitly frozen per L11), automatic commits/PR creation from UI (L142). Roadmap L37: 'UI mutation remains frozen', L38: 'Agent launch from UI remains frozen'. Stream 1 acceptance criteria explicitly state 'No mutation', 'GET-only endpoints', 'No POST mutation', 'No agent launch', 'No git/gh operations'."
+  - decision: "Later streams correctly staged"
+    reason: "PLAN.md (L102-103): 'Artifact Workspace first, then Context Core, then GRACE contracts, PCAM/PBS, Rubrics, Decision Core, Model Router, ETL demo.' Roadmap stream table: Context Core MVP at Stream 6 (0163-0169), Decision Core MVP at Stream 9 (0180-0184), Rubrics at Stream 8 (0175-0179), Model Router at Stream 10 (0185-0186+). ETL/ERP in deferred candidates (L725-727)."
+  - decision: "Roadmap includes approximately 50 PRs"
+    reason: "52 distinct PR numbers (0137-0188) counted via grep. Roadmap states (L31): 'approximately 50 PRs (0138-0186+)'."
+  - decision: "Roadmap includes streams and PR numbers"
+    reason: "Stream table (L46-56): 10 streams with PR ranges. Individual PR entries (L62-724) with PR numbers, purpose, and acceptance criteria."
+  - decision: "Roadmap includes Artifact Workspace Read Model and Artifact Workspace Shell before Context Core, Decision Core, Rubrics, Model Router"
+    reason: "Stream order: Stream 1 (Artifact Workspace Read Model 0138-0142), Stream 2 (Artifact Workspace Shell 0143-0147). Context Core is Stream 6, Decision Core Stream 9, Rubrics Stream 8, Model Router Stream 10."
+  - decision: "Roadmap includes frozen boundaries"
+    reason: "L37: 'UI mutation remains frozen', L38: 'Agent launch from UI remains frozen', L39: 'Decision Core, Context Warehouse, Rubrics, Model Router, ETL demo, and agent autonomy expansion remain staged, not immediate'. Stream acceptance criteria enforce read-only/no-mutation."
+  - decision: "Roadmap includes final product principle"
+    reason: "L779: 'Ariadna is where the work becomes controllable.' Matches source artifact principle."
+  - decision: "No runtime code, tests, agents, schemas, docs, dependencies, .gitignore, ROADMAP.md, or previous PR artifacts are modified"
+    reason: "git diff --name-only (empty), git status --short (only untracked PR 0137 files). ALL forbidden paths are clean."
+
+context_used:
+  labels:
+    - plan-review
+    - product-architecture-roadmap-unlock
+    - stream-transition
+    - pr-0137
+  memory_files_read:
+    - ".project-memory/pr/0137-product-architecture-roadmap-unlock/PLAN.md"
+    - ".project-memory/product/ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - ".project-memory/pr/0137-product-architecture-roadmap-unlock/PROMPTS.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - "ROADMAP.md"
+    - ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml"
+    - ".project-memory/pr/0132-persist-final-execution-results/reviews/precommit-review.yml"
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/precommit-review.yml"
+    - ".project-memory/pr/0134-commit-payload-cleanliness-gate/reviews/precommit-review.yml"
+    - ".project-memory/pr/0135-persisted-run-report-artifact/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - ".project-memory/pr/0137-product-architecture-roadmap-unlock/PLAN.md: full read — artifact classification (L16-30), stream transition (L31-32), product identity (L38), architecture principles (L44-49), roadmap alignment section (L6-12), frozen boundaries (L131-142)"
+    - ".project-memory/product/ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md: full read — product identity (L22, L38, L49), architecture principles (L54-62, L77-79)"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md: full read — stream table (L46-56), PR entries (L62-724), frozen boundaries (L37-39), architecture guardrails (L730-747), final principle (L779)"
+    - ".project-memory/pr/0137-product-architecture-roadmap-unlock/PROMPTS.md: full read — planner and plan-review prompts"
+    - "ROADMAP.md: Production Line Stage 4 section — pre-0137 state confirmed"
+  files_modified: []
+  files_intentionally_ignored:
+    - ".project-memory/pr/0136-production-line-final-readiness-gate/ (directory does not exist on disk)"
+
+checks:
+  branch_correct: "pass"
+  plan_classifies_artifacts: "pass"
+  source_artifact_exists: "pass"
+  derived_roadmap_artifact_exists: "pass"
+  prompt_artifact_exists: "pass"
+  production_line_closed: "pass"
+  artifact_only_stated: "pass"
+  no_runtime_code: "pass"
+  no_ui_code: "pass"
+  no_roadmap_md_change: "pass"
+  product_identity_preserved: "pass"
+  architecture_principles_preserved: "pass"
+  next_stream_artifact_workspace_read_only: "pass"
+  ui_mutation_frozen: "pass"
+  agent_launch_from_ui_frozen: "pass"
+  commit_from_ui_frozen: "pass"
+  pr_creation_from_ui_frozen: "pass"
+  context_core_staged: "pass"
+  decision_core_staged: "pass"
+  rubrics_staged: "pass"
+  model_router_staged: "pass"
+  etl_erp_staged: "pass"
+  roadmap_approximately_50_prs: "pass"
+  roadmap_streams_and_pr_numbers: "pass"
+  roadmap_workspace_before_context: "pass"
+  roadmap_frozen_boundaries: "pass"
+  roadmap_final_product_principle: "pass"
+  no_tracked_files_modified: "pass"
+  no_staged_files: "pass"
+  artifact_physically_written: "pass"
+  artifact_read_back: "pass"
+
+evidence_ledger:
+  - claim: "branch is correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0137-product-architecture-roadmap-unlock"
+    result: "pass"
+  - claim: "dirty tree is within scope"
+    evidence_source: "git diff --name-only, git status --short"
+    exact_observed_evidence: "No tracked files modified. Only untracked: .project-memory/pr/0137-product-architecture-roadmap-unlock/, .project-memory/product/, .project-memory/roadmaps/. No unknown untracked files. No staged files."
+    result: "pass"
+  - claim: "PLAN.md was read"
+    evidence_source: "read_file .project-memory/pr/0137-product-architecture-roadmap-unlock/PLAN.md"
+    exact_observed_evidence: "PLAN.md read in full. Contains artifact classification (source, derived roadmap, prompt), stream transition declaration, product identity, frozen boundaries, and roadmap alignment section."
+    result: "pass"
+  - claim: "required supporting files read"
+    evidence_source: "read_file on 12+ required files"
+    exact_observed_evidence: "12 files read: PLAN.md, ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md, ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md, PROMPTS.md, review-artifact.schema.yml, ROADMAP.md, dogfood-proof.yml, 4 precommit-review.yml files (0132-0135), ariadne_task_cli.py, run_persistence.py, 3 agent yml files. PR 0136 directory absent on disk."
+    result: "pass"
+  - claim: "roadmap alignment (if claimed)"
+    evidence_source: "PLAN.md L6-12 Roadmap alignment section"
+    exact_observed_evidence: "PLAN.md includes Roadmap alignment section with Track (Production Line → Product Architecture), Slot (PR 0137), Why this PR is next, Batching policy, Drift heuristic, Architect note. All fields filled."
+    result: "pass"
+  - claim: "prior PR evidence (if claimed)"
+    evidence_source: "PR 0131-0136 precommit reviews and dogfood-proof.yml read"
+    exact_observed_evidence: "PR 0131 dogfood-proof.yml confirmed executable on disk. PR 0132 precommit-review: pass. PR 0133 precommit-review: pass. PR 0134 precommit-review: pass. PR 0135 precommit-review: pass. PR 0136 directory absent (not on current branch)."
+    result: "pass"
+  - claim: "executable-first"
+    evidence_source: "PLAN.md L12, L78-79"
+    exact_observed_evidence: "PLAN.md states artifact-only. No runtime code. git diff --name-only confirms zero tracked files modified. This is a transition PR after milestone, not an executable capability PR."
+    result: "pass"
+  - claim: "validation strategy explicit"
+    evidence_source: "PLAN.md L166-260 Validation section"
+    exact_observed_evidence: "PLAN.md includes comprehensive Validation section (L166-260) with required commands, file presence checks, grep validation, artifact write/readback, and validation checklist."
+    result: "pass"
+  - claim: "forbidden scope absent"
+    evidence_source: "git diff --name-only, git status --short, grep checks"
+    exact_observed_evidence: "No services/**, agents/**, schemas/**, docs/**, pyproject.toml, poetry.lock, .gitignore, or ROADMAP.md modifications. No previous PR artifacts modified. No staged files."
+    result: "pass"
+  - claim: "artifact physically written"
+    evidence_source: "write_file .project-memory/pr/0137-product-architecture-roadmap-unlock/reviews/plan-review.yml"
+    exact_observed_evidence: "write_file called at correct path; 24758 bytes written. find confirms file at .project-memory/pr/0137-product-architecture-roadmap-unlock/reviews/plan-review.yml. test -f exits 0. wc -l shows 338 lines."
+    result: "pass"
+  - claim: "artifact read back"
+    evidence_source: "sed -n '1,260p' plan-review.yml + git status post-write"
+    exact_observed_evidence: "sed confirms full header readable (schema_version, pr_id, review_type, verdict, head_verified, branch_confirmed). git status shows only expected untracked files including plan-review.yml."
+    result: "pass"
+
+boundary_confirmations:
+  - "Branch confirmed: 0137-product-architecture-roadmap-unlock"
+  - "No tracked files modified by PR 0137 — only untracked PR 0137 artifact files exist"
+  - "No staged files in cached diff"
+  - "No unknown untracked files beyond expected PR 0137 artifacts"
+  - "Source artifact (ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md) preserved as-is"
+  - "Derived roadmap artifact (ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md) written from source + post-0136 state"
+  - "PROMPTS.md preserved as prompt artifact"
+  - "PLAN.md classifies source artifact, derived roadmap artifact, and prompt artifact distinctly"
+  - "PLAN.md states PR 0131-0136 closed the Production Line hardening stream"
+  - "PLAN.md opens Artifact Workspace Read-Only UI as next active stream"
+  - "PLAN.md keeps UI mutation, agent launch from UI, commit from UI, PR creation from UI frozen"
+  - "PLAN.md stages Context Core, Decision Core, Rubrics, Model Router, ETL/ERP demo later"
+  - "Roadmap artifact opens Artifact Workspace Read Model (0138-0142) and Artifact Workspace Shell (0143-0147) as Stream 1 and Stream 2"
+  - "Roadmap artifact keeps UI mutation frozen, agent launch from UI frozen"
+  - "Roadmap artifact stages Context Core (Stream 6), Decision Core (Stream 9), Rubrics (Stream 8), Model Router (Stream 10), ETL (deferred) after Artifact Workspace"
+  - "Roadmap artifact includes approximately 52 distinct PR numbers (0137-0188)"
+  - "Roadmap artifact includes streams with PR number ranges and individual PR entries with acceptance criteria"
+  - "Roadmap artifact includes architecture guardrails (L730-747)"
+  - "Roadmap artifact includes final product principle: 'Ariadna is where the work becomes controllable'"
+  - "No runtime code, tests, agents, schemas, docs, dependencies, .gitignore, ROADMAP.md, or previous PR artifacts modified"
+  - "Product identity preserved: runtime package + artifact workspace + agent orchestration substrate"
+  - "Architecture principles preserved: model replaceable, substrate durable, agent output not proof, runtime evidence is source of truth"
+  - "Known generated residue (captures, .ariadne, .project-memory/pr/test, .project-memory/pr/0127, .project-memory/pr/dogfood, test_stage_file.py) all absent"
+
+known_generated_residue_policy:
+  classification: "three-bucket via PR 0134 gate"
+  known_residue_paths:
+    - "captures"
+    - ".ariadne"
+    - ".project-memory/pr/test"
+    - ".project-memory/pr/0127"
+    - ".project-memory/pr/dogfood"
+    - "test_stage_file.py"
+  untracked_allowed: true
+  staged_or_tracked_blocked: true
+  unknown_untracked_blocked: true
+  forbidden_tracked_blocked: true
+  all_residue_absent: true
+  no_unknown_untracked: true
+  no_staged_files: true
+  dirty_tree_only_expected_pr_artifacts: true
+
+commit_readiness: "ready_for_precommit_review"
+
+summary: |
+  PR 0137 Product Architecture Roadmap Unlock plan-review APPROVES.
+
+  This PR is a narrow artifact-only transition PR that:
+  1. Preserves the Ariadna Product Master Prompt as a durable source artifact
+  2. Writes a derived post-0136 product roadmap with ~52 PRs across 10 streams
+  3. Preserves PROMPTS.md as a prompt artifact
+  4. Closes the Production Line hardening stream (PR 0131-0136)
+  5. Opens Artifact Workspace Read-Only UI as the next active stream
+  6. Keeps UI mutation, agent launch from UI, commit from UI, and PR creation from UI frozen
+  7. Stages Context Core, Decision Core, Rubrics, Model Router, and ETL/ERP demo for later streams
+
+  Product identity and architecture principles are consistently preserved across all three artifacts (source, roadmap, PLAN.md):
+  - Ariadna = runtime package + artifact workspace + agent orchestration substrate
+  - Model is replaceable, substrate is durable
+  - Agent may generate, runtime must verify, human owns root purpose
+  - Artifacts make intermediate meaning visible
+  - Agent output is not proof; runtime-captured evidence is source of truth
+
+  All validation checks pass:
+  - Branch correct: 0137-product-architecture-roadmap-unlock
+  - No tracked files modified
+  - No staged files
+  - Only expected PR 0137 untracked artifacts exist
+  - All 4 required artifacts present and readable
+  - Artifact classification in PLAN.md is distinct and correct
+  - Stream transition is explicit and correctly ordered
+  - Frozen boundaries are comprehensive
+  - Roadmap artifact is coherent with ~52 PRs
+  - Forbidden scope (services, agents, schemas, dependencies, ROADMAP.md, previous PRs) is clean
