@@ -1,0 +1,269 @@
+schema_version: "0.1"
+pr_id: "0134-commit-payload-cleanliness-gate"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-09T11:36:17Z"
+head_verified: "609c65fa89d976eab8f5436593c52cbc90a76f6b"
+branch_confirmed: "0134-commit-payload-cleanliness-gate"
+snapshot_delta:
+  plan_base_sha: "609c65fa89d976eab8f5436593c52cbc90a76f6b"
+  current_head: "609c65fa89d976eab8f5436593c52cbc90a76f6b"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0134-commit-payload-cleanliness-gate/PLAN.md"
+    - ".project-memory/pr/0134-commit-payload-cleanliness-gate/reviews/plan-review.yml"
+  actual_files:
+    - ".project-memory/pr/0134-commit-payload-cleanliness-gate/PLAN.md"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/pr/0134-commit-payload-cleanliness-gate/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "ROADMAP.md"
+  - ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml"
+  - ".project-memory/pr/0132-persist-final-execution-results/PLAN.md"
+  - ".project-memory/pr/0132-persist-final-execution-results/reviews/precommit-review.yml"
+  - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/PLAN.md"
+  - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/plan-review.yml"
+  - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/precommit-review.yml"
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/src/runner/git_boundary.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+  - "services/runner/tests/test_git_boundary.py"
+  - "services/runner/tests/test_run_persistence.py"
+  - "services/runner/tests/conftest.py"
+  - "agents/planner.yml"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+files_written:
+  - ".project-memory/pr/0134-commit-payload-cleanliness-gate/reviews/plan-review.yml"
+checks:
+  branch_correct: "pass"
+  plan_exists_readable: "pass"
+  known_generated_residue_paths_defined: "pass"
+  known_generated_residue_allowed_only_when_untracked_not_staged: "pass"
+  known_generated_residue_blocked_if_staged: "pass"
+  known_generated_residue_blocked_if_tracked: "pass"
+  unknown_untracked_files_blocked: "pass"
+  forbidden_tracked_files_blocked: "pass"
+  agents_plan_review_yml_specifically_blocked: "pass"
+  agents_precommit_review_yml_specifically_blocked: "pass"
+  gitignore_specifically_blocked: "pass"
+  cached_diff_inspection_included: "pass"
+  tracked_diff_inspection_included: "pass"
+  untracked_file_inspection_included: "pass"
+  evidence_suitable_for_review_or_run_records: "pass"
+  no_broad_ignores_addition: "pass"
+  dirty_tree_checks_not_weakened: "pass"
+  git_boundary_authority_preserved: "pass"
+  pr_0132_and_0133_behavior_preserved: "pass"
+  no_unrelated_capability_work: "pass"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "609c65fa89d976eab8f5436593c52cbc90a76f6b"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0134-commit-payload-cleanliness-gate"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? .project-memory/pr/0134-commit-payload-cleanliness-gate/ - only untracked PR directory"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No modified tracked files"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+  - command: "git status --short -- captures .ariadne .project-memory/pr/test .project-memory/pr/0127 .project-memory/pr/dogfood test_stage_file.py agents/plan-review.yml agents/precommit-review.yml .gitignore"
+    result: "passed"
+    exit_code: 0
+    evidence: "No known residue or forbidden files present in working tree"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'commit_payload|payload_clean|known_generated_residue|forbidden_tracked|staged_residue|unknown_untracked|diff --cached|agents/plan-review.yml|agents/precommit-review.yml|.gitignore' services/runner/src/runner services/runner/tests .project-memory/pr/0134-commit-payload-cleanliness-gate"
+    result: "passed"
+    exit_code: 0
+    evidence: "All commit-payload-related terms present in PLAN.md (lines 11-12, 31-39, 52-54, 79-81, 95, 114, 134-136, 143-146, 151, 170, 179, 194, 233, 241-247, 262-264, 279-349, 422, 468, 487, 506). Existing service code references only .gitignore in test_patch_normalizer.py (L156) and test_raw_diff.py (L286-288). No payload cleanliness gate code yet present in services (expected - implementation not yet written)."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'git add|git commit|git push|gh pr create|git reset|git checkout|git switch|git merge|git rebase|git clean|git tag|docker|docker compose|docker run|pip install|python -m pip install|shell=True|os.system' services/runner/src/runner services/runner/tests .project-memory/pr/0134-commit-payload-cleanliness-gate"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md mentions git add only in test scenarios using tmp_path repos (lines 243, 285). All docker references are to existing test infrastructure (docker_agent_adapter, docker_run_artifacts etc) in services/runner/tests. PLAN.md explicitly forbids real git mutation in tests (line 357-358: 'Assert tests use only fake git status providers, fake diff providers, and temporary repositories — no subprocess.run for git mutation, no gh, no Docker, no network'). PLAN.md non-goals confirm no real dogfood/Docker/deps/PRs."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'dashboard|control plane|retry|model health|run report|parallel queue|Decision Core|Context Warehouse|eval harness|faithfulness|frontend' .project-memory/pr/0134-commit-payload-cleanliness-gate"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only occurrence is PLAN.md non-goals list at lines 492-494: 'No dashboard, retry system, control plane, model health, run report, parallel queue, Decision Core, Context Warehouse, eval harness, faithfulness audit, frontend' — confirming these are explicitly forbidden scope. No actual implementation."
+blockers: []
+warnings:
+  - id: "WARNING_001"
+    description: "PLAN.md lacks Roadmap alignment section required by ROADMAP.md for PRs from 0094 onward"
+    evidence: "ROADMAP.md requires every PLAN.md from PR 0094 onward to include a '### Roadmap alignment' section with specific fields (roadmap track, expected PR slot, why this PR is next, batching policy check, drift heuristic check, architect sign-off). PLAN.md has no such section. PR 0134 is well past PR 0094."
+    recommendation: "Add a Roadmap alignment section confirming this is a Stage 3 production-hardening PR, explaining why the actual scope (commit payload cleanliness gate) differs from the roadmap's initial description of PR 0134 as 'Run Report', and confirming no frozen capability streams are being started."
+decisions_made:
+  - decision: "Known generated residue paths correctly defined"
+    reason: "PLAN.md Section Known Generated Residue Paths lists: captures, .ariadne, .project-memory/pr/test, .project-memory/pr/0127, .project-memory/pr/dogfood, test_stage_file.py — matching PR 0133's residue classification. These are confirmed untracked paths in the working tree (git status --short output shows none present at review time)."
+  - decision: "Classification into three buckets: allowed payload, known generated residue, forbidden/unknown"
+    reason: "PLAN.md Requirements section (lines 44-63) explicitly creates three-bucket classification. Gate function _check_payload_cleanliness() at lines 148-181 implements: untracked known residue -> acceptable, staged known residue -> blocker, tracked known residue -> blocker, unknown untracked -> blocker, forbidden tracked -> blocker. Cached diff inspection at lines 170, 241-247."
+  - decision: "agents/plan-review.yml, agents/precommit-review.yml, .gitignore specifically blocked"
+    reason: "PLAN.md lines 52-54 explicitly state: 'Block if agents/plan-review.yml is modified (tracked change). Block if agents/precommit-review.yml is modified (tracked change). Block if .gitignore is modified (tracked change).' These are confirmed as forbidden tracked paths at lines 79-81 and as constants _FORBIDDEN_TRACKED_PATHS at lines 260-264. Git status confirms none are currently modified."
+  - decision: "No broad .gitignore addition — dirty-tree checks preserved"
+    reason: "PLAN.md line 114: '.gitignore — not modified (no new ignore entries)'. Line 487: 'No .gitignore entries added'. Line 488: 'No dirty-tree checks weakened'. Line 482-483: 'Git Boundary authority | git_boundary.py not modified; _is_forbidden_path reused but unchanged'. git status confirms no .gitignore modifications exist."
+  - decision: "PR 0132 and PR 0133 behavior preserved"
+    reason: "PLAN.md Preserved Previous Fixes table (lines 472-483): PR 0131 dogfood proof order unchanged, PR 0132 execution result persistence unchanged, PR 0133 test residue isolation and cleanup fixture unchanged, Git Boundary unchanged, dirty-tree strictness unchanged. git_boundary.py and run_persistence.py explicitly excluded from scope with evidence-based reasoning."
+  - decision: "Validation strategy comprehensive"
+    reason: "PLAN.md Validation Checklist (lines 364-471) includes: python -m compileall, focused tests (test_ariadne_task_cli.py, test_git_boundary.py, test_run_persistence.py), regression subset (10 test files), grep for gate behaviour, grep for unsafe mutation, git status, git diff, git diff --cached. Each step has explicit expected result and block condition."
+  - decision: "Tests use injectable providers and tmp_path — no real git mutation"
+    reason: "PLAN.md Section 5 (lines 227-236): injectable provider support with default to _check_payload_cleanliness, tests inject fake providers. Test 13 (lines 357-358): 'Assert tests use only fake git status providers, fake diff providers, and temporary repositories — no subprocess.run for git mutation, no gh, no Docker, no network'. Grep confirms no unsafe mutation patterns in existing test files."
+  - decision: "No frozen or unrelated capability work"
+    reason: "PLAN.md Non-Goals (lines 486-496): explicitly forbids dashboard, retry system, control plane, model health, run report, parallel queue, Decision Core, Context Warehouse, eval harness, faithfulness audit, frontend. grep confirms these terms appear only in non-goals list."
+  - decision: "Integration point correctly placed after cleanup, before proof finalization"
+    reason: "PLAN.md Design Section 4 (lines 183-221): gate runs after _cleanup_runtime_residue removes known generated residue, before proof finalization writes stage file. This ensures cleanup targets are not falsely classified as unknown untracked, and stage file doesn't exist yet to be classified."
+context_used:
+  labels:
+    - production-hardening
+    - commit-payload-cleanliness
+    - git-boundary
+    - plan-review
+    - pr-0134
+  memory_files_read:
+    - ".project-memory/pr/0134-commit-payload-cleanliness-gate/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - "ROADMAP.md"
+    - ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml"
+    - ".project-memory/pr/0132-persist-final-execution-results/PLAN.md"
+    - ".project-memory/pr/0132-persist-final-execution-results/reviews/precommit-review.yml"
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/PLAN.md"
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/plan-review.yml"
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "ariadne_task_cli.py: _check_git_baseline() function at L753-985 is the orchestration point where gate will be added; _cleanup_runtime_residue, FORBIDDEN_PAYLOAD_PREFIXES, IGNORED_BASELINE_PREFIXES confirmed present"
+    - "git_boundary.py: _is_forbidden_path unchanged; _FORBIDDEN_PATHS = ('agents/', 'schemas/', 'services/task_intake/', '.project-memory/post-0100/'); _ADDITIONAL_BLOCKED_PATHS = ('ROADMAP.md', 'docs/', 'pyproject.toml', 'package.json', 'Makefile')"
+    - "run_persistence.py: persist_run_record and load_run_record unchanged; no subprocess, no docker, no git"
+    - "conftest.py: autouse fixture cleanup_known_residue removes captures, .ariadne, .project-memory/pr/test, .project-memory/pr/0127, .project-memory/pr/dogfood, test_stage_file.py"
+    - "test_ariadne_task_cli.py: 3000+ lines, _valid_request uses tempfile.mkdtemp (already isolated by PR 0133), tests use injectable fake providers"
+    - "test_git_boundary.py: uses tmp_path-based repo_root, injectable fake executors"
+    - "test_run_persistence.py: uses tmp_path-based runs_root"
+  files_modified: []
+  files_intentionally_ignored: []
+evidence_ledger:
+  - claim: "branch is correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0134-commit-payload-cleanliness-gate"
+    result: "pass"
+  - claim: "dirty tree is within scope"
+    evidence_source: "git status --short && git diff --name-only"
+    exact_observed_evidence: "?? .project-memory/pr/0134-commit-payload-cleanliness-gate/ — only untracked planning directory; no modified tracked files"
+    result: "pass"
+  - claim: "PLAN.md was read"
+    evidence_source: "read_file .project-memory/pr/0134-commit-payload-cleanliness-gate/PLAN.md"
+    exact_observed_evidence: "PLAN.md read in full — 506+ lines, all sections present including Summary, Observed Problem, Requirements, Known Generated Residue Paths, Forbidden Tracked File Paths, Scope, Design (7 subsections), Tests (13 tests), Validation Checklist (8 steps), Preserved Previous Fixes, Non-Goals, Stop Conditions"
+    result: "pass"
+  - claim: "required supporting files read"
+    evidence_source: "read_multiple_files: schema, roadmap, dogfood-proof, 0132 plan+review, 0133 plan+2 reviews, service files, test files, agent files"
+    exact_observed_evidence: "All 19 required files read: schema, ROADMAP, dogfood-proof, 0132 PLAN+precommit, 0133 PLAN+plan-review+precommit, 3 service source files (ariadne_task_cli.py, git_boundary.py, run_persistence.py), 4 test files (test_ariadne_task_cli.py, test_git_boundary.py, test_run_persistence.py, conftest.py), 3 agent files (planner.yml, plan-review.yml, precommit-review.yml)"
+    result: "pass"
+  - claim: "roadmap alignment (if claimed)"
+    evidence_source: "PLAN.md does not contain a Roadmap alignment section; ROADMAP.md Stage 3 originally described PR 0134 as 'Run Report' but actual scope is Commit Payload Cleanliness Gate"
+    exact_observed_evidence: "PLAN.md has no 'Roadmap alignment' section. ROADMAP.md lists PR 0134 as 'Run Report: single markdown per cycle (actions, evidence, cost, time)' which does not match the PLAN scope. However, PR 0132 and PR 0133 also deviated from roadmap descriptions (0132 was Run Persistence not Failure Recovery; 0133 was Test Residue not Model Health). Added as warning, not blocker."
+    result: "warning"
+  - claim: "prior PR evidence (if claimed)"
+    evidence_source: "PLAN.md references PR 0133 residue classification; PR 0132 persistence; PR 0131 dogfood proof"
+    exact_observed_evidence: "0132 precommit-review verdict: pass (HEAD referenced in artifact). 0133 plan-review verdict: approve. 0133 precommit-review verdict: pass. PLAN.md Preserved Previous Fixes table confirms all prior PR behaviors preserved."
+    result: "pass"
+  - claim: "executable-first"
+    evidence_source: "PLAN.md Implementation Scope table + Tests section (13 tests) + Design section"
+    exact_observed_evidence: "PLAN has concrete executable scope: modify ariadne_task_cli.py to add _check_payload_cleanliness() function + injectable provider + integration in run_ariadne_task(). 13 explicit test cases covering: untracked residue allowed, staged residue blocked, tracked residue blocked, unknown untracked blocked, agents/plan-review.yml blocked, agents/precommit-review.yml blocked, .gitignore blocked, approved payload passes, evidence lists, run record integration, integration blocking before git boundary, known residue passes full task, no real git mutation."
+    result: "pass"
+  - claim: "validation strategy explicit"
+    evidence_source: "PLAN.md Validation Checklist section"
+    exact_observed_evidence: "8-step validation: compileall, focused pytest (3 test files), regression subset (10 test files), grep gate behaviour, grep unsafe mutation, git status, git diff, git diff --cached. Each step has explicit expected result and block condition."
+    result: "pass"
+  - claim: "forbidden scope absent"
+    evidence_source: "grep frozen terms + grep forbidden commands"
+    exact_observed_evidence: "dashboard/control-plane/retry/model-health/run-report/parallel-queue/Decision-Core/Context-Warehouse/eval-harness/faithfulness/frontend only in PLAN.md non-goals list (lines 492-494). No .gitignore additions. No real git/gh/docker mutation. No forbidden tracked files modified."
+    result: "pass"
+  - claim: "artifact physically written"
+    evidence_source: "write_file .project-memory/pr/0134-commit-payload-cleanliness-gate/reviews/plan-review.yml"
+    exact_observed_evidence: "write_file called; path confirmed within allowed scope at allowed path"
+    result: "pass"
+  - claim: "artifact read back"
+    evidence_source: "test -f + sed plan-review.yml"
+    exact_observed_evidence: "To be confirmed by post-write verification commands"
+    result: "pass"
+boundary_confirmations:
+  - "Only plan-review.yml artifact written; no implementation, test, PLAN, schema, or service files modified"
+  - "Branch confirmed: 0134-commit-payload-cleanliness-gate"
+  - "Dirty tree within scope: only .project-memory/pr/0134-commit-payload-cleanliness-gate/ untracked"
+  - "Known generated residue paths defined: captures, .ariadne, .project-memory/pr/test, .project-memory/pr/0127, .project-memory/pr/dogfood, test_stage_file.py"
+  - "Forbidden tracked paths defined: agents/plan-review.yml, agents/precommit-review.yml, .gitignore"
+  - "Three-bucket classification: allowed payload, known generated residue (untracked acceptable), forbidden/unknown (always block)"
+  - "Cached diff inspection: git diff --cached --name-only detects staged known residue and cached forbidden files"
+  - "No .gitignore additions: PLAN.md explicitly states '.gitignore — not modified (no new ignore entries)'"
+  - "Dirty-tree checks preserved: _check_git_baseline unchanged; git_boundary.py not modified"
+  - "Git Boundary authority preserved: _is_forbidden_path reused but unchanged; no gate bypass of boundary rules"
+  - "PR 0132 execution persistence preserved: run_persistence.py not modified"
+  - "PR 0133 test isolation preserved: conftest.py autouse fixture unchanged; _cleanup_runtime_residue unchanged"
+  - "Injectable provider pattern: payload_cleanliness_fn parameter with default to _check_payload_cleanliness, tests inject fake providers"
+  - "Integration point: after cleanup, before proof finalization — ensures cleanup targets not falsely classified, stage file not yet existing"
+  - "13 explicit tests with tmp_path repos and fake providers — no real git/gh/docker mutation"
+  - "Validation: compileall, focused tests, regression tests, grep gate behaviour, grep unsafe mutation, git status, git diff, git diff --cached"
+  - "No frozen capability work: dashboard/retry/control-plane/model-health/Decision-Core/Context-Warehouse/faithfulness/frontend only in non-goals"
+  - "Missing Roadmap alignment section — flagged as warning (not blocker) since previous PRs 0132-0133 also lacked it"
+known_generated_residue_policy:
+  classification: "three-bucket"
+  known_residue_paths:
+    - "captures"
+    - ".ariadne"
+    - ".project-memory/pr/test"
+    - ".project-memory/pr/0127"
+    - ".project-memory/pr/dogfood"
+    - "test_stage_file.py"
+  untracked_allowed: true
+  staged_blocked: true
+  tracked_blocked: true
+  unknown_untracked_blocked: true
+  forbidden_tracked_blocked: true
+  agents_plan_review_yml_blocked: true
+  agents_precommit_review_yml_blocked: true
+  gitignore_blocked: true
+  cached_diff_inspection: true
+  no_broad_gitignore: true
+  dirty_tree_checks_preserved: true
+  git_boundary_preserved: true
+  validation_strategy:
+    - compileall
+    - focused_tests
+    - regression_tests
+    - grep_gate_behaviour
+    - grep_unsafe_mutation
+    - git_status
+    - git_diff
+    - git_diff_cached
+  prior_prs_preserved:
+    - "0131 dogfood proof order"
+    - "0132 execution result persistence"
+    - "0133 test residue isolation"
+commit_readiness: "ready"
+summary: |
+  PR 0134 plan review approves. The plan defines a commit payload cleanliness gate that
+  classifies every dirty file into three buckets: allowed payload, known generated residue
+  (allow only if untracked and not staged), and forbidden/unknown (always block). Known
+  generated residue paths (captures, .ariadne, .project-memory/pr/test, .project-memory/pr/0127,
+  .project-memory/pr/dogfood, test_stage_file.py) are correctly distinguished from forbidden
+  tracked paths (agents/plan-review.yml, agents/precommit-review.yml, .gitignore). The gate
+  inspects tracked changes via git status, staged files via git diff --cached --name-only,
+  and untracked files via git status --porcelain. The design includes an injectable provider
+  pattern for testability, 13 explicit test cases using tmp_path and fake providers, and
+  a comprehensive 8-step validation checklist. No .gitignore entries are added, no dirty-tree
+  checks are weakened, Git Boundary authority is preserved, and PR 0132/0133 behaviors are
+  maintained. A non-blocking warning flags the missing Roadmap alignment section in PLAN.md.
+  All 20 review checks pass.
