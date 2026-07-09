@@ -299,12 +299,12 @@ Architect sign-off reference: "экран тайм, product, итерации."
 
 ---
 
-## Production Line Stream (ACTIVE)
+## Production Line Stream (COMPLETED)
 
 ### Stage 1 — Orchestrator (0123-0127)
 
 ```
-0123 — production line roadmap realignment (this PR, bridge)
+0123 — production line roadmap realignment (bridge)
 0124 — Agent Runner Bridge: run a docker agent from Ariadne code via
        docker_agent_adapter with a real agents/*.yml config;
        input agent_name + task_prompt, output captured artifact
@@ -341,35 +341,40 @@ Architect sign-off reference: "экран тайм, product, итерации."
        recorded metrics (success rate, cost, human interventions)
 ```
 
-### Stage 4 — Public (0137+)
+**Status: COMPLETED.** PR 0131-0136 closed the Production Line hardening
+stream. The runner now has dogfood proof (0131), execution result persistence
+(0132), test residue isolation (0133), commit payload cleanliness gate (0134),
+local run report (0135), and production-line readiness gate (0136).
 
-```
-0137+ — README/quickstart, GitHub release v0.1, demo. Post-0100
-        capability streams (Decision Core, Context Warehouse, eval
-        harness, faithfulness audit, frontend) queue AFTER the
-        dogfood milestone.
-```
+## Product Architecture Stream (ACTIVE)
 
-### Frozen until PR 0136 acceptance
+### PR 0137 — Product Architecture Roadmap Unlock
 
-The following capability streams are frozen until the Production Line reaches
-PR 0136 acceptance:
+PR 0137 is the architecture transition PR that commits the product master
+prompt as a durable source artifact, records the post-0136 roadmap, and opens
+**Artifact Workspace Read-Only UI** as the next active stream. No runtime or
+UI implementation happens in this PR.
 
-- Decision Core / GRM
-- Context Warehouse Bronze/Silver/Gold
-- Eval harness / benchmarks
-- Faithfulness audit
-- Frontend
-- New product-iteration surface features
+### Next active stream: Artifact Workspace Read-Only UI (0138+)
 
-All remain in the post-0100 manifest; their queue position is after the
-dogfood milestone.
+The next active stream is read-only Artifact Workspace UI. Detailed roadmap
+lives in `.project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md`.
 
-### Production Line stop conditions
+### Frozen boundaries
 
-- any PR 0124+ that is docs-only/schemas-only → block
-- any PR that gives agents unattended git mutation rights → block
-- any PR that adds a capability stream before 0136 acceptance → block
+The following remain frozen until explicitly unlocked by a future roadmap PR:
+
+- **UI mutation** — frozen until read-only Artifact Workspace is complete
+- **Agent launch from UI** — frozen until UI can display state, gates, proofs,
+  and run reports
+- **Commit from UI** — frozen until explicitly unlocked
+- **PR creation from UI** — frozen until explicitly unlocked
+- **Context Core** — staged after Artifact Workspace foundations
+- **Decision Core** — staged after Artifact Workspace and core evidence views
+- **Rubrics runtime** — staged after artifact and evidence views exist
+- **Model Router** — staged until observable role/evidence data exists
+- **ETL/ERP demo** — staged until Artifact Workspace, Artifact Registry, and
+  Visual Gate foundations exist
 
 ### Core principle
 
