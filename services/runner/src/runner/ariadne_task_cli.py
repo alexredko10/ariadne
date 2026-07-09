@@ -116,6 +116,7 @@ class AriadneTaskCliResult:
     details: Optional[str]
     run_id: Optional[str] = None
     run_record_path: Optional[str] = None
+    report_path: Optional[str] = None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -1578,6 +1579,127 @@ def _spec_to_dict(spec: GitCommandSpec) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
+def _write_run_report(
+    report_path: str,
+    request: AriadneTaskCliRequest,
+    result: AriadneTaskCliResult,
+    persist_result: Any,
+) -> None:
+    """Write a human-readable run report artifact.
+
+    Consolidates already-captured runtime evidence into a single
+    plain-text file alongside ``run.json`` and ``manifest.json``.
+
+    Parameters
+    ----------
+    report_path:
+        Absolute path for the report file.
+    request:
+        The CLI request (contains pr_id, branch, runs_root, etc.).
+    result:
+        The CLI result (contains status, reason_codes, execution_results, etc.).
+    persist_result:
+        The persistence result (contains run_json_hash, manifest_path, etc.).
+    """
+    lines: list[str] = []
+
+    # Header
+    lines.append("=" * 60)
+    lines.append("Ariadne Run Report")
+    lines.append("=" * 60)
+    lines.append("")
+    lines.append("Report schema version: 1")
+    lines.append("Generated at: " + (result.finished_at or "not available"))
+
+    # Run identity
+    lines.append("")
+    lines.append("--- Run Identity ---")
+    lines.append("Run ID: " + (result.run_id or "not available"))
+    lines.append("PR ID: " + (request.pr_id or "not available"))
+    lines.append("Branch: " + (request.branch or "not available"))
+    lines.append("Invocation mode: cli")
+
+    # Status
+    lines.append("")
+    lines.append("--- Status ---")
+    lines.append("Status: " + (result.status or "not available"))
+    if result.reason_codes:
+        lines.append("Reason codes: " + ", ".join(result.reason_codes))
+    else:
+        lines.append("Reason codes: none")
+
+    # Pipeline
+    lines.append("")
+    lines.append("--- Pipeline ---")
+    lines.append("Pipeline status: " + (str(result.pipeline_status) if result.pipeline_status is not None else "not available"))
+    lines.append("Final action: " + (result.pipeline_final_action or "not available"))
+    lines.append("Has blockers: " + (str(result.pipeline_has_blockers) if result.pipeline_has_blockers is not None else "not available"))
+
+    # Git Boundary
+    lines.append("")
+    lines.append("--- Git Boundary ---")
+    lines.append("Status: " + (result.git_boundary_status or "not available"))
+
+    # Execution
+    lines.append("")
+    lines.append("--- Execution ---")
+    lines.append("Execution attempted: " + str(result.execution_attempted))
+    if result.execution_results:
+        lines.append("Execution results:")
+        for res in result.execution_results:
+            op = res.get("operation", "?")
+            code = res.get("exit_code", "?")
+            lines.append("  " + op + ": exit_code=" + str(code))
+            stdout = res.get("stdout", "")
+            stderr = res.get("stderr", "")
+            if stdout and len(stdout) < 500:
+                lines.append("    stdout: " + stdout[:200])
+            if stderr and len(stderr) < 500:
+                lines.append("    stderr: " + stderr[:200])
+            # PR URL from gh_pr_create
+            if op == "gh_pr_create":
+                pr_url = res.get("pr_url", "")
+                if pr_url:
+                    lines.append("    PR URL: " + pr_url)
+    else:
+        lines.append("Execution results: none (pre-execution blocked or dry-run)")
+
+    # Warnings
+    if result.warnings:
+        lines.append("")
+        lines.append("--- Warnings ---")
+        for w in result.warnings:
+            lines.append("  - " + w)
+
+    # Artifacts
+    lines.append("")
+    lines.append("--- Artifacts ---")
+    lines.append("run.json path: " + (result.run_record_path or "not available"))
+    lines.append("run.json hash: " + (getattr(persist_result, "run_json_hash", None) or "not available"))
+    lines.append("manifest.json path: " + (getattr(persist_result, "manifest_path", None) or "not available"))
+    if request.files_to_stage:
+        dogfood_path = os.path.join(request.repo_root, request.files_to_stage[0])
+        lines.append("Dogfood proof path: " + dogfood_path)
+    lines.append("Report path: " + report_path)
+
+    # Payload cleanliness outcome (from reason codes)
+    payload_codes = [rc for rc in result.reason_codes if rc.startswith("commit_payload_")]
+    if payload_codes:
+        lines.append("")
+        lines.append("--- Payload Cleanliness ---")
+        lines.append("Payload cleanliness issues: " + ", ".join(payload_codes))
+
+    # Write
+    os.makedirs(os.path.dirname(report_path), exist_ok=True)
+    with open(report_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+
+
+# ---------------------------------------------------------------------------
+# Persist helper
+# ---------------------------------------------------------------------------
+
+
 def _persist_and_return(
     request: AriadneTaskCliRequest,
     persistence_fn: Optional[Callable],
@@ -1641,6 +1763,32 @@ def _persist_and_return(
     persist_result = persistence_fn(persist_request)
 
     if persist_result.status == RunPersistenceStatus.PERSISTED.value:
+        # Write run report alongside run.json
+        run_dir = os.path.dirname(persist_result.run_json_path)
+        report_path = os.path.join(run_dir, "run-report.txt")
+        # Create a result copy with run_id set for the report writer
+        result_with_id = AriadneTaskCliResult(
+            status=result.status,
+            reason_codes=result.reason_codes,
+            task_description=result.task_description,
+            task_description_hash=result.task_description_hash,
+            pipeline_status=result.pipeline_status,
+            pipeline_final_action=result.pipeline_final_action,
+            pipeline_has_blockers=result.pipeline_has_blockers,
+            git_boundary_status=result.git_boundary_status,
+            command_plan=result.command_plan,
+            execution_attempted=result.execution_attempted,
+            execution_results=result.execution_results,
+            warnings=result.warnings,
+            next_action=result.next_action,
+            started_at=result.started_at,
+            finished_at=result.finished_at,
+            details=result.details,
+            run_id=run_id,
+            run_record_path=persist_result.run_json_path,
+        )
+        _write_run_report(report_path, request, result_with_id, persist_result)
+
         return AriadneTaskCliResult(
             status=result.status,
             reason_codes=result.reason_codes,
@@ -1660,6 +1808,7 @@ def _persist_and_return(
             details=result.details,
             run_id=run_id,
             run_record_path=persist_result.run_json_path,
+            report_path=report_path,
         )
 
     return AriadneTaskCliResult(

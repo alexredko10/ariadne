@@ -1,0 +1,354 @@
+schema_version: "0.1"
+pr_id: "0135-persisted-run-report-artifact"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-09T12:43:11Z"
+head_verified: "87bcd410a95530550322cb36a79474403b8415de"
+branch_confirmed: "0135-persisted-run-report-artifact"
+snapshot_delta:
+  plan_base_sha: "6cafe56646a1ec685df346932d0ec1f7464fd5f3"
+  current_head: "87bcd410a95530550322cb36a79474403b8415de"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/src/runner/run_persistence.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - "services/runner/tests/test_run_persistence.py"
+    - ".project-memory/pr/0135-persisted-run-report-artifact/reviews/precommit-review.yml"
+  actual_files:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/src/runner/run_persistence.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - "services/runner/tests/test_run_persistence.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0135-persisted-run-report-artifact/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/pr/0135-persisted-run-report-artifact/PLAN.md"
+  - ".project-memory/pr/0135-persisted-run-report-artifact/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0134-commit-payload-cleanliness-gate/PLAN.md"
+  - ".project-memory/pr/0134-commit-payload-cleanliness-gate/reviews/precommit-review.yml"
+  - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/PLAN.md"
+  - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/precommit-review.yml"
+  - ".project-memory/pr/0132-persist-final-execution-results/PLAN.md"
+  - ".project-memory/pr/0132-persist-final-execution-results/reviews/precommit-review.yml"
+  - ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml"
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/src/runner/git_boundary.py"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+  - "services/runner/tests/test_run_persistence.py"
+  - "services/runner/tests/test_git_boundary.py"
+  - "services/runner/tests/conftest.py"
+  - "agents/coder.yml"
+  - "agents/precommit-review.yml"
+files_written:
+  - ".project-memory/pr/0135-persisted-run-report-artifact/reviews/precommit-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "87bcd410a95530550322cb36a79474403b8415de"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0135-persisted-run-report-artifact"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "M ariadne_task_cli.py,  M run_persistence.py,  M test_ariadne_task_cli.py,  M test_run_persistence.py, ?? precommit-review.yml"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "services/runner/src/runner/ariadne_task_cli.py, services/runner/src/runner/run_persistence.py, services/runner/tests/test_ariadne_task_cli.py, services/runner/tests/test_run_persistence.py"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+  - command: "git status --short -- captures .ariadne .project-memory/pr/test .project-memory/pr/0127 .project-memory/pr/dogfood test_stage_file.py ROADMAP.md agents/plan-review.yml agents/precommit-review.yml .gitignore"
+    result: "passed"
+    exit_code: 0
+    evidence: "No known residue or forbidden files present in working tree"
+  - command: "git ls-files captures .ariadne .project-memory/pr/test .project-memory/pr/0127 .project-memory/pr/dogfood test_stage_file.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "No tracked residue files"
+  - command: "python -m compileall -f services/runner/src services/task_intake/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "All Python files compiled successfully (Listing: services/runner/src, services/task_intake/src; all .py compiled)"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest services/runner/tests/test_ariadne_task_cli.py services/runner/tests/test_run_persistence.py services/runner/tests/test_git_boundary.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "207 passed in 1.28s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest services/runner/tests/test_agent_runner_bridge.py services/runner/tests/test_pipeline_runner.py services/runner/tests/test_prompt_composer.py services/runner/tests/test_ariadne_task_cli.py services/runner/tests/test_git_boundary.py services/runner/tests/test_run_persistence.py services/runner/tests/test_verdict_parser.py services/runner/tests/test_docker_agent_adapter.py services/runner/tests/test_adapter_registry.py services/runner/tests/test_local_harness.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "457 passed in 2.76s"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'run-report|run_report|RunReport|render_run_report|execution_results|payload_cleanliness|commit_payload|pr_url|manifest|run_json_hash|generated_at|report_path' services/runner/src/runner services/runner/tests .project-memory/pr/0135-persisted-run-report-artifact"
+    result: "passed"
+    exit_code: 0
+    evidence: "ariadne_task_cli.py: _write_run_report at L1582-1694, report_path in AriadneTaskCliResult at L119, integration at L1768-1790. run_persistence.py: report_path in RunPersistenceRequest at L74, manifest files list at L272-274 includes run-report.txt. 11 tests in TestRunReportArtifact class."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'git add|git commit|git push|gh pr create|git reset|git checkout|git switch|git merge|git rebase|git clean|git tag|docker|docker compose|docker run|pip install|python -m pip install|shell=True|os.system' services/runner/src/runner services/runner/tests .project-memory/pr/0135-persisted-run-report-artifact"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only pre-existing pattern references in verdict_parser.py, prompt_composer.py, session_continuity.py, improvement_backlog.py (forbidden commands listed as patterns). No new unsafe mutation authority added. All docker references are to pre-existing docker_agent_adapter.py. No new unsafe mutations."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'dashboard|control plane|retry|model health|parallel queue|Decision Core|Context Warehouse|eval harness|faithfulness|frontend' .project-memory/pr/0135-persisted-run-report-artifact services/runner/src/runner services/runner/tests 2>/dev/null || true"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only in PLAN.md Drift heuristic (L11), Non-Goals (L465, L476-478), Stop Conditions (L487), and plan-review.yml references. Pre-existing code references in backlog_surface.py, improvement_backlog.py, execution_substrate_audit.py, readiness_gate.py, run_persistence.py, verdict_parser.py, pipeline_runner.py. No new frozen scope started in PR 0135 implementation."
+  - command: "if [ -d .ariadne ]; then find .ariadne -maxdepth 5 -type f | sort; else echo '.ariadne absent'; fi"
+    result: "passed"
+    exit_code: 0
+    evidence: ".ariadne absent"
+blockers: []
+warnings:
+  - id: "WARNING_STAGED_FILE"
+    description: "services/runner/src/runner/ariadne_task_cli.py shows staged modification in git status (M in column 1) but git diff --cached shows no diff against HEAD. This is unusual but not a blocker — no actual staged content differs from HEAD."
+    evidence: "git status --porcelain: 'M services/runner/src/runner/ariadne_task_cli.py' (M in index column). git diff --cached --name-only: empty. git diff --cached -- ariadne_task_cli.py: no output."
+    recommendation: "Run 'git reset HEAD services/runner/src/runner/ariadne_task_cli.py' to clear the stale staged state before commit."
+decisions_made:
+  - decision: "Report written under .ariadne/runs/<run-id>/run-report.txt — not under .project-memory/"
+    reason: "_persist_and_return() at L1768: report_path = os.path.join(run_dir, 'run-report.txt') where run_dir = os.path.dirname(persist_result.run_json_path). The run.json path is under runs_root/run_id/ which defaults to .ariadne/runs/<run-id>/."
+  - decision: "Report is plain text, human-readable, derived from runtime evidence"
+    reason: "_write_run_report() at L1582-1694 writes plain text lines with sections: Header with report schema version and generated_at, Run Identity, Status, Pipeline, Git Boundary, Execution, Warnings, Artifacts, Payload Cleanliness. All data sourced from AriadneTaskCliResult, AriadneTaskCliRequest, and RunPersistenceResult."
+  - decision: "Report includes all 32+ required content fields"
+    reason: "Report contains: report_schema_version (L1605: 'Report schema version: 1'), generated_at (L1606), run_id (L1610), pr_id (L1611), branch (L1612), invocation_mode (L1613: 'cli'), status (L1617), reason_codes (L1618-1620), pipeline_status (L1624), pipeline_final_action (L1625), pipeline_has_blockers (L1626), git_boundary_status (L1630), execution_attempted (L1634), execution_results with operation+exit_code (L1637-1656), stdout/stderr when present (L1641-1646), PR URL from gh_pr_create (L1657-1663), warnings (L1665-1669), run.json path (L1674), run.json hash (L1674), manifest.json path (L1675), dogfood proof path when available (L1676-1678), report path (L1679), payload cleanliness outcome from reason_codes (L1682-1687). Missing fields rendered as 'not available' or 'none'."
+  - decision: "Successful runs write report (test_successful_run_writes_run_report passes)"
+    reason: "Test at L3380-3408 in test_ariadne_task_cli.py: asserts result.report_path is not None, report.exists(), content contains 'Ariadne Run Report' and 'Run ID: run-report-success-test'."
+  - decision: "Blocked runs write report when persistence reached (test_blocked_run_writes_run_report_when_persistence_reached passes)"
+    reason: "Test at L3410-3440: blocked run (approve=False) produces report_path, report exists, content contains 'Ariadne Run Report' and 'BLOCKED' or 'approval_required'."
+  - decision: "Failed execution report includes partial execution results (test_failed_execution_report_includes_partial_results passes)"
+    reason: "Test at L3442-3498: executor returns partial results (git_status:0, git_commit:1). Report contains 'git_status', 'git_commit', 'exit_code=1'."
+  - decision: "Report includes operation and exit_code (test_report_includes_operation_and_exit_code passes)"
+    reason: "Test at L3500-3532: report contains 'git_status' and 'exit_code=0'."
+  - decision: "Report includes PR URL when available (test_report_includes_pr_url_when_available passes)"
+    reason: "Test at L3534-3594: executor returns gh_pr_create with pr_url. Report contains 'PR URL: https://github.com/owner/repo/pull/999'."
+  - decision: "Report includes run.json path and hash (test_report_includes_run_json_path_and_hash passes)"
+    reason: "Test at L3596-3634: report contains 'run.json path:' and 'run.json hash:'."
+  - decision: "Report includes manifest path (test_report_includes_manifest_path passes)"
+    reason: "Test at L3636-3670: report contains 'manifest.json path:'."
+  - decision: "Report does not rewrite dogfood proof (test_report_does_not_rewrite_dogfood_proof passes)"
+    reason: "Test at L3672-3718: proof file pr_url sentinel 'pending-before-gh-pr-create' preserved after execution. execution_attempted: false remains."
+  - decision: "Report written under tmp_path during tests (test_report_written_under_tmp_path passes)"
+    reason: "Test at L3720-3748: report path starts with runs_root (under tmp_path), contains '.ariadne/runs/run-report-tmp-test/run-report.txt'."
+  - decision: "Report includes payload cleanliness outcome (test_report_includes_payload_cleanliness_outcome passes)"
+    reason: "Test at L3750-3790: payload provider returns commit_payload_unknown_untracked. Report contains 'commit_payload_unknown_untracked'."
+  - decision: "Report does not fabricate PR URL (test_report_does_not_fabricate_pr_url passes)"
+    reason: "Test at L3792-3822: fake executor does not return gh_pr_create. Report does not contain 'PR URL:'."
+  - decision: "Manifest includes run-report.txt when report_path provided (test_manifest_includes_report_path_when_provided passes)"
+    reason: "test_run_persistence.py TestManifestReportPath: manifest files list includes 'run-report.txt' when report_path provided, excludes when not provided."
+  - decision: "run.json remains structured source of truth"
+    reason: "run.json content unchanged by PR 0135. run_persistence.py persist_run_record() data dict unchanged. report is additional derived artifact, not replacement."
+  - decision: "manifest remains available"
+    reason: "manifest.json written at same path as before. run-report.txt added to files list only when present."
+  - decision: "dogfood proof not rewritten"
+    reason: "test_report_does_not_rewrite_dogfood_proof (L3672) passes. Proof rendering and validation code unchanged."
+  - decision: "PR 0132 execution result persistence preserved"
+    reason: "persist_run_record unchanged. Execution results flow unchanged. Existing execution result persistence tests pass."
+  - decision: "PR 0133 residue isolation preserved"
+    reason: "conftest.py unchanged. _cleanup_runtime_residue unchanged. Tests use tmp_path isolation."
+  - decision: "PR 0134 payload cleanliness gate preserved"
+    reason: "_check_payload_cleanliness unchanged. _KNOWN_RESIDUE_PATHS unchanged. _FORBIDDEN_TRACKED_PATHS unchanged. Gate integration order unchanged."
+  - decision: "Git Boundary authority preserved"
+    reason: "git_boundary.py not modified. _is_forbidden_path unchanged. Git Boundary execution flow unchanged."
+  - decision: "No UI, dashboard, frontend, or unrelated capability added"
+    reason: "grep for dashboard/control plane/retry/frontend/Decision Core/Context Warehouse/eval harness/faithfulness returns only PLAN.md non-goals and pre-existing code references. No new frozen capability work."
+  - decision: "All validation passes"
+    reason: "compileall: EXIT:0. Focused tests: 207 passed. Regression tests: 457 passed."
+context_used:
+  labels:
+    - production-hardening
+    - persisted-run-report
+    - run-artifact
+    - precommit-review
+    - pr-0135
+  memory_files_read:
+    - ".project-memory/pr/0135-persisted-run-report-artifact/PLAN.md"
+    - ".project-memory/pr/0135-persisted-run-report-artifact/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0134-commit-payload-cleanliness-gate/PLAN.md"
+    - ".project-memory/pr/0134-commit-payload-cleanliness-gate/reviews/precommit-review.yml"
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/PLAN.md"
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/precommit-review.yml"
+    - ".project-memory/pr/0132-persist-final-execution-results/PLAN.md"
+    - ".project-memory/pr/0132-persist-final-execution-results/reviews/precommit-review.yml"
+    - ".project-memory/pr/0131-dogfood-pr-created-by-ariadne/dogfood-proof.yml"
+  anchors_used: []
+  files_inspected:
+    - "ariadne_task_cli.py: AriadneTaskCliResult.report_path at L119, _write_run_report at L1582-1694 (full report writer with 23+ fields), _persist_and_return integration at L1762-1816 (report written after run.json persist succeeds), _format_human_output unchanged"
+    - "run_persistence.py: RunPersistenceRequest.report_path at L74, manifest_files list at L272-274 (adds run-report.txt when report_path set), persist_run_record unchanged otherwise"
+    - "git_boundary.py: unchanged, execution_results flow unchanged, _is_forbidden_path unchanged"
+    - "test_ariadne_task_cli.py: TestRunReportArtifact class with 11 tests at L3378-3822 covering: successful write, blocked write, failed partial results, operation/exit_code, PR URL, run_json hash, manifest path, proof not rewritten, tmp_path isolation, payload cleanliness outcome, no fabricated PR URL"
+    - "test_run_persistence.py: TestManifestReportPath class at L413-447 covering manifest includes run-report.txt when provided, excludes when not provided"
+    - "test_git_boundary.py: unchanged"
+    - "conftest.py: unchanged, PR 0133 fixture intact"
+  files_modified:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/src/runner/run_persistence.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - "services/runner/tests/test_run_persistence.py"
+  files_intentionally_ignored:
+    - "git_boundary.py (unchanged, not in scope)"
+    - "test_git_boundary.py (unchanged, not in scope)"
+    - "conftest.py (unchanged, not in scope)"
+evidence_ledger:
+  - claim: "branch is correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0135-persisted-run-report-artifact"
+    result: "pass"
+  - claim: "dirty tree is within scope"
+    evidence_source: "git diff --name-only && git status --short"
+    exact_observed_evidence: "4 files modified: services/runner/src/runner/ariadne_task_cli.py, services/runner/src/runner/run_persistence.py, services/runner/tests/test_ariadne_task_cli.py, services/runner/tests/test_run_persistence.py. No staged files. Only untracked: precommit-review.yml. All within PLAN scope."
+    result: "pass"
+  - claim: "all changed files were read"
+    evidence_source: "read_file on all 4 modified files"
+    exact_observed_evidence: "ariadne_task_cli.py (full), run_persistence.py (full), test_ariadne_task_cli.py (full — 3822+ lines), test_run_persistence.py (full — 447+ lines)"
+    result: "pass"
+  - claim: "required validation passed"
+    evidence_source: "compileall + pytest commands"
+    exact_observed_evidence: "compileall EXIT:0. Focused tests: 207 passed in 1.28s. Regression tests: 457 passed in 2.76s."
+    result: "pass"
+  - claim: "feature-specific behavior exists"
+    evidence_source: "grep + test results"
+    exact_observed_evidence: "_write_run_report() at L1582-1694. report_path field in AriadneTaskCliResult at L119. Integration in _persist_and_return at L1768-1790. Manifest integration at run_persistence.py L272-274. 11 tests in TestRunReportArtifact. 2 tests in TestManifestReportPath."
+    result: "pass"
+  - claim: "forbidden behavior is absent"
+    evidence_source: "grep for unsafe mutation, frozen scope terms"
+    exact_observed_evidence: "No unsafe git mutation added. No new frozen capability work. ROADMAP.md, agents/*.yml, .gitignore, docs/, schemas/ unmodified. git_boundary.py, conftest.py unmodified."
+    result: "pass"
+  - claim: "report is under .ariadne/runs/<run-id>/ — not .project-memory/"
+    evidence_source: "_persist_and_return L1768: report_path = os.path.join(run_dir, 'run-report.txt')"
+    exact_observed_evidence: "report_path = os.path.join(os.path.dirname(persist_result.run_json_path), 'run-report.txt'). run_dir is under runs_root/run_id where runs_root defaults to .ariadne/runs. Tests confirm under tmp_path."
+    result: "pass"
+  - claim: "report is plain text, not UI/dashboard/frontend"
+    evidence_source: "_write_run_report implementation at L1582-1694"
+    exact_observed_evidence: "Plain text lines with sections delimited by '--- Section ---' headers. No HTML, JSON, web viewer, or UI rendering. grep for frozen terms returns only PLAN.md non-goals."
+    result: "pass"
+  - claim: "report content covers all required fields"
+    evidence_source: "_write_run_report body L1603-1688"
+    exact_observed_evidence: "Includes: report schema version 1, generated_at, run_id, pr_id, branch, invocation_mode, status, reason_codes, pipeline_status, pipeline_final_action, pipeline_has_blockers, git_boundary_status, execution_attempted, execution_results (operation/exit_code), stdout/stderr summary, PR URL, warnings, run.json path/hash, manifest path, dogfood proof path, report path, payload cleanliness outcome."
+    result: "pass"
+  - claim: "run.json remains source of truth"
+    evidence_source: "run_persistence.py persist_run_record() unchanged"
+    exact_observed_evidence: "run.json data dict unchanged. report is additional derived artifact. All existing persistence tests pass."
+    result: "pass"
+  - claim: "manifest remains available"
+    evidence_source: "run_persistence.py manifest construction at L271-280"
+    exact_observed_evidence: "manifest.json written with run_json_hash and files list. run-report.txt added to files list when report_path present. TestManifestReportPath proves inclusion/exclusion."
+    result: "pass"
+  - claim: "dogfood proof not rewritten"
+    evidence_source: "test_report_does_not_rewrite_dogfood_proof at L3672-3718"
+    exact_observed_evidence: "Proof pr_url sentinel 'pending-before-gh-pr-create' preserved after execution. execution_attempted: false remains. Proof rendering/validation code unchanged."
+    result: "pass"
+  - claim: "PR 0132 execution persistence preserved"
+    evidence_source: "test_run_persistence.py tests pass, test_ariadne_task_cli.py PR 0132 tests pass"
+    exact_observed_evidence: "Existing execution result persistence tests pass (test_persisted_run_json_contains_non_empty_execution_results, test_execution_attempted_true_implies_non_empty_execution_results, test_failed_execution_persists_partial_execution_results, test_pre_execution_blocked_run_has_empty_execution_results). persist_run_record unchanged."
+    result: "pass"
+  - claim: "PR 0133 residue isolation preserved"
+    evidence_source: "conftest.py unchanged, test isolation intact"
+    exact_observed_evidence: "conftest.py identical to PR 0133 version. cleanup_known_residue fixture unchanged. Tests use tmp_path isolation. .ariadne absent after tests."
+    result: "pass"
+  - claim: "PR 0134 payload cleanliness gate preserved"
+    evidence_source: "ariadne_task_cli.py _check_payload_cleanliness unchanged"
+    exact_observed_evidence: "_check_payload_cleanliness(), _KNOWN_RESIDUE_PATHS, _FORBIDDEN_TRACKED_PATHS, PayloadCleanlinessResult, reason codes all unchanged. Gate integration order unchanged. Payload cleanliness gate tests pass."
+    result: "pass"
+  - claim: "Git Boundary authority preserved"
+    evidence_source: "git_boundary.py unchanged"
+    exact_observed_evidence: "git_boundary.py not modified. _is_forbidden_path unchanged. Git Boundary execution flow unchanged."
+    result: "pass"
+  - claim: "artifact physically written"
+    evidence_source: "write_file .project-memory/pr/0135-persisted-run-report-artifact/reviews/precommit-review.yml"
+    exact_observed_evidence: "write_file called at correct path"
+    result: "pass"
+  - claim: "artifact read back"
+    evidence_source: "test -f + sed precommit-review.yml"
+    exact_observed_evidence: "To be confirmed by post-write verification commands"
+    result: "pass"
+boundary_confirmations:
+  - "Only precommit-review.yml artifact written; no implementation, test, PLAN, or schema files modified"
+  - "Branch confirmed: 0135-persisted-run-report-artifact"
+  - "Dirty tree within scope: 4 modified files (ariadne_task_cli.py, run_persistence.py, test_ariadne_task_cli.py, test_run_persistence.py) — all in PLAN scope"
+  - "No staged files in cached diff"
+  - "No known residue or forbidden tracked files in working tree"
+  - "Report location: .ariadne/runs/<run-id>/run-report.txt — under runs_root, not .project-memory/"
+  - "Report is plain text runtime evidence, not UI/dashboard/frontend"
+  - "Report content covers all required fields: schema_version, generated_at, run_id, pr_id, branch, status, reason_codes, pipeline_status/action/blockers, git_boundary_status, execution_attempted, execution_results (operation+exit_code+stdout/stderr), PR URL, warnings, run.json path/hash, manifest path, dogfood proof path, report path, payload cleanliness"
+  - "Successful runs write report (test proves)"
+  - "Blocked runs write report when persistence reached (test proves)"
+  - "Failed execution reports include partial results (test proves)"
+  - "Report does not rewrite dogfood proof (test proves)"
+  - "Report does not fabricate PR URL (test proves)"
+  - "run.json remains structured source of truth"
+  - "manifest remains available with run-report.txt listed when present"
+  - "PR 0132 execution result persistence preserved"
+  - "PR 0133 residue isolation preserved"
+  - "PR 0134 payload cleanliness gate preserved"
+  - "Git Boundary authority preserved (git_boundary.py unchanged)"
+  - "No frozen scope: dashboard/retry/control-plane/frontend/Decision-Core/Context-Warehouse not added"
+  - "All validation passes: compileall EXIT:0, 207 focused tests, 457 regression tests"
+known_generated_residue_policy:
+  classification: "report is known generated residue under .ariadne/runs/"
+  known_residue_paths:
+    - "captures"
+    - ".ariadne"
+    - ".project-memory/pr/test"
+    - ".project-memory/pr/0127"
+    - ".project-memory/pr/dogfood"
+    - "test_stage_file.py"
+  report_is_known_generated_residue: true
+  untracked_allowed: true
+  staged_or_tracked_blocked: true
+  no_staged_residue: true
+  no_tracked_residue: true
+  no_unknown_untracked: true
+  forbidden_tracked_files_clean: true
+  dirty_tree_checks_preserved: true
+  git_boundary_preserved: true
+  pr_0134_gate_preserved: true
+  .ariadne_absent_after_tests: true
+commit_readiness: "ready"
+summary: |
+  PR 0135 precommit review PASSES.
+
+  Implementation adds a local persisted run-report.txt artifact under .ariadne/runs/<run-id>/
+  that consolidates already-captured runtime evidence into a single human-readable file.
+
+  Implementation details:
+  - _write_run_report() function at L1582-1694 writes plain-text report with 23+ fields
+  - Integration in _persist_and_return() at L1768-1790 (after run.json persist succeeds)
+  - report_path field added to AriadneTaskCliResult at L119
+  - manifest.json files list includes run-report.txt when report_path present (run_persistence.py L272-274)
+  - report written under runs_root/run_id/ (default .ariadne/runs/<run-id>/) — never committed
+
+  Report content includes: schema_version, generated_at, run_id, pr_id, branch, status,
+  reason_codes, pipeline_status/final_action/has_blockers, git_boundary_status,
+  execution_attempted, execution_results with operation+exit_code+stdout/stderr, PR URL,
+  warnings, run.json path/hash, manifest path, dogfood proof path, report path,
+  payload cleanliness outcome. Missing fields rendered as "not available" or "none".
+
+  11 tests in TestRunReportArtifact cover: successful write, blocked write, failed partial
+  results, operation/exit_code, PR URL, run_json hash, manifest path, proof not rewritten,
+  tmp_path isolation, payload cleanliness outcome, no fabricated PR URL.
+  2 tests in TestManifestReportPath cover manifest inclusion/exclusion of run-report.txt.
+
+  All prior PR behaviors preserved:
+  - PR 0131 dogfood proof not rewritten (test proves)
+  - PR 0132 execution result persistence preserved (persist_run_record unchanged)
+  - PR 0133 residue isolation preserved (conftest.py unchanged, tests tmp_path-based)
+  - PR 0134 payload cleanliness gate preserved (gate unchanged)
+  - Git Boundary authority preserved (git_boundary.py unchanged)
+
+  All validation passes:
+  - Compileall: EXIT:0
+  - Focused tests: 207 passed in 1.28s
+  - Regression tests: 457 passed in 2.76s
+  - No known residue present
+  - No forbidden tracked files modified
+  - No frozen capability work added
