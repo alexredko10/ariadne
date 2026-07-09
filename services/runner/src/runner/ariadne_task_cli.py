@@ -118,6 +118,20 @@ class AriadneTaskCliResult:
     run_record_path: Optional[str] = None
 
 
+@dataclasses.dataclass(frozen=True)
+class PayloadCleanlinessResult:
+    """Structured result of a payload cleanliness check."""
+
+    is_clean: bool
+    allowed_payload_files: tuple[str, ...]
+    known_residue_files: tuple[str, ...]
+    forbidden_tracked_files: tuple[str, ...]
+    staged_residue_files: tuple[str, ...]
+    unknown_untracked_files: tuple[str, ...]
+    cached_diff_files: tuple[str, ...]
+    reason_codes: tuple[str, ...]
+
+
 # ---------------------------------------------------------------------------
 # Stable reason codes
 # ---------------------------------------------------------------------------
@@ -133,6 +147,10 @@ REASON_MISSING_APPROVAL_REASON = "missing_approval_reason"
 REASON_EXECUTION_FAILED = "execution_failed"
 REASON_DIRTY_TREE_OUT_OF_SCOPE = "dirty_tree_out_of_scope"
 REASON_DOGFOOD_PROOF_INCOMPLETE = "dogfood_proof_incomplete"
+REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE = "commit_payload_forbidden_tracked_change"
+REASON_COMMIT_PAYLOAD_STAGED_RESIDUE = "commit_payload_staged_residue"
+REASON_COMMIT_PAYLOAD_UNKNOWN_UNTRACKED = "commit_payload_unknown_untracked"
+REASON_COMMIT_PAYLOAD_FORBIDDEN_CACHED_DIFF = "commit_payload_forbidden_cached_diff"
 
 
 # ---------------------------------------------------------------------------
@@ -619,6 +637,214 @@ def _cleanup_runtime_residue(repo_root: str, pr_id: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Known residue and forbidden paths (commit payload cleanliness)
+# ---------------------------------------------------------------------------
+
+_KNOWN_RESIDUE_PATHS: tuple[str, ...] = (
+    "captures",
+    ".ariadne",
+    ".project-memory/pr/test",
+    ".project-memory/pr/0127",
+    ".project-memory/pr/dogfood",
+    "test_stage_file.py",
+)
+
+_FORBIDDEN_TRACKED_PATHS: tuple[str, ...] = (
+    "agents/plan-review.yml",
+    "agents/precommit-review.yml",
+    "ROADMAP.md",
+    ".gitignore",
+)
+
+
+# ---------------------------------------------------------------------------
+# Payload cleanliness gate
+# ---------------------------------------------------------------------------
+
+
+def _check_payload_cleanliness(
+    repo_root: str,
+    allowed_files: tuple[str, ...],
+    status_provider: Optional[Callable] = None,
+    cached_diff_provider: Optional[Callable] = None,
+) -> PayloadCleanlinessResult:
+    """Check commit payload cleanliness before commit/PR creation.
+
+    Classifies working tree state into:
+    - allowed payload files (pass)
+    - known generated residue (allowed only if untracked and not staged)
+    - forbidden tracked changes (always block)
+    - staged residue (always block)
+    - unknown untracked files (always block)
+    - cached diff files outside approved payload (always block)
+
+    Known generated residue is acceptable when present as untracked
+    files.  If staged, tracked, or appearing in cached diff, it blocks.
+
+    Parameters
+    ----------
+    repo_root:
+        Repository root path.
+    allowed_files:
+        Tuple of allowed payload file paths.
+    status_provider:
+        Optional callable ``(repo_root) -> list[str]`` returning
+        ``git status --porcelain=v1`` lines for testing.
+    cached_diff_provider:
+        Optional callable ``(repo_root) -> list[str]`` returning
+        ``git diff --cached --name-only`` lines for testing.
+
+    Returns
+    -------
+    PayloadCleanlinessResult
+        Structured result with bucket classification and reason codes.
+    """
+    allowed_payload: list[str] = []
+    known_residue: list[str] = []
+    forbidden_tracked: list[str] = []
+    staged_residue: list[str] = []
+    unknown_untracked: list[str] = []
+    cached_diff: list[str] = []
+    reason_codes: list[str] = []
+
+    allowed_set = set(allowed_files)
+    residue_set = set(_KNOWN_RESIDUE_PATHS)
+    forbidden_set = set(_FORBIDDEN_TRACKED_PATHS)
+
+    # --- collect git status ---
+    if status_provider is not None:
+        status_lines = status_provider(repo_root)
+    else:
+        try:
+            status_result = subprocess.run(
+                ["git", "status", "--porcelain=v1"],
+                capture_output=True, text=True, shell=False,
+                cwd=repo_root,
+            )
+            status_lines = status_result.stdout.splitlines() if status_result.returncode == 0 else []
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            status_lines = []
+
+    # --- collect cached diff ---
+    if cached_diff_provider is not None:
+        cached_lines = cached_diff_provider(repo_root)
+    else:
+        try:
+            cached_result = subprocess.run(
+                ["git", "diff", "--cached", "--name-only"],
+                capture_output=True, text=True, shell=False,
+                cwd=repo_root,
+            )
+            cached_lines = cached_result.stdout.splitlines() if cached_result.returncode == 0 else []
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            cached_lines = []
+
+    cached_set = set(c for c in cached_lines if c.strip())
+
+    # --- helper: classify a filename as residue (exact or prefix) ---
+    def _is_residue(filename: str) -> bool:
+        if filename in residue_set:
+            return True
+        # prefix match for directory-type residue (e.g. captures/foo.txt)
+        for rp in residue_set:
+            if filename.startswith(rp + "/"):
+                return True
+        return False
+
+    # --- classify each porcelain status line ---
+    for line in status_lines:
+        raw = line.rstrip('\n\r')
+        if not raw or len(raw) < 4:
+            continue
+        status_code = raw[:2]
+        filename = raw[3:].rstrip()
+        if not filename:
+            continue
+
+        # Known generated residue
+        if _is_residue(filename):
+            # Staged residue (index status is M, A, D, R, C)
+            if status_code[:1] in ("M", "A", "D", "R", "C"):
+                staged_residue.append(filename)
+                reason_codes.append(REASON_COMMIT_PAYLOAD_STAGED_RESIDUE)
+            elif status_code == "??":
+                # Untracked known residue — allowed
+                known_residue.append(filename)
+            else:
+                # Tracked/modified known residue — blocks
+                forbidden_tracked.append(filename)
+                reason_codes.append(REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE)
+            continue
+
+        # Forbidden tracked paths
+        if filename in forbidden_set:
+            forbidden_tracked.append(filename)
+            reason_codes.append(REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE)
+            continue
+
+        # Allowed payload
+        if filename in allowed_set:
+            allowed_payload.append(filename)
+            continue
+
+        # Unknown untracked
+        if status_code == "??":
+            unknown_untracked.append(filename)
+            reason_codes.append(REASON_COMMIT_PAYLOAD_UNKNOWN_UNTRACKED)
+            continue
+
+        # Any other tracked modification outside allowed files
+        forbidden_tracked.append(filename)
+        reason_codes.append(REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE)
+
+    # --- classify cached diff files ---
+    for cached_file in cached_set:
+        if cached_file in allowed_set:
+            if cached_file not in allowed_payload:
+                allowed_payload.append(cached_file)
+            continue
+
+        if _is_residue(cached_file):
+            staged_residue.append(cached_file)
+            if REASON_COMMIT_PAYLOAD_STAGED_RESIDUE not in reason_codes:
+                reason_codes.append(REASON_COMMIT_PAYLOAD_STAGED_RESIDUE)
+            continue
+
+        if cached_file in forbidden_set:
+            if cached_file not in forbidden_tracked:
+                forbidden_tracked.append(cached_file)
+            if REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE not in reason_codes:
+                reason_codes.append(REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE)
+            continue
+
+        # Cached diff file outside approved payload
+        cached_diff.append(cached_file)
+        reason_codes.append(REASON_COMMIT_PAYLOAD_FORBIDDEN_CACHED_DIFF)
+
+    # Deduplicate reason codes while preserving order
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for rc in reason_codes:
+        if rc not in seen:
+            seen.add(rc)
+            deduped.append(rc)
+    reason_codes = deduped
+
+    is_clean = len(reason_codes) == 0
+
+    return PayloadCleanlinessResult(
+        is_clean=is_clean,
+        allowed_payload_files=tuple(allowed_payload),
+        known_residue_files=tuple(known_residue),
+        forbidden_tracked_files=tuple(forbidden_tracked),
+        staged_residue_files=tuple(staged_residue),
+        unknown_untracked_files=tuple(unknown_untracked),
+        cached_diff_files=tuple(cached_diff),
+        reason_codes=tuple(reason_codes),
+    )
+
+
+# ---------------------------------------------------------------------------
 # Check git baseline
 # ---------------------------------------------------------------------------
 
@@ -742,6 +968,7 @@ def run_ariadne_task(
     clock_provider: Optional[Callable] = None,
     baseline_check_fn: Optional[Callable] = None,
     branch_sync_fn: Optional[Callable] = None,
+    payload_cleanliness_fn: Optional[Callable] = None,
 ) -> AriadneTaskCliResult:
     """Run the ariadne task orchestration.
 
@@ -765,6 +992,9 @@ def run_ariadne_task(
     branch_sync_fn:
         Injectable branch sync check function.
         Default: ``_check_branch_sync``.
+    payload_cleanliness_fn:
+        Injectable payload cleanliness gate function.
+        Default: ``_check_payload_cleanliness``.
 
     Returns
     -------
@@ -781,6 +1011,7 @@ def run_ariadne_task(
     executor_fn = git_boundary_executor_fn or execute_git_boundary_plan
     baseline_fn = baseline_check_fn or _check_git_baseline
     branch_fn = branch_sync_fn or _check_branch_sync
+    payload_fn = payload_cleanliness_fn or _check_payload_cleanliness
 
     # Auto-default runs_root when run_id is explicitly provided
     if request.run_id and not request.runs_root:
@@ -937,6 +1168,53 @@ def run_ariadne_task(
 
     # 4a. Cleanup runtime residue before proof finalization
     _cleanup_runtime_residue(request.repo_root, request.pr_id)
+
+    # 4a-1. Payload cleanliness gate (after cleanup, before proof finalization)
+    if request.execute:
+        payload_result = payload_fn(
+            repo_root=request.repo_root,
+            allowed_files=request.allowed_files,
+        )
+        if not payload_result.is_clean:
+            codes.extend(payload_result.reason_codes)
+            if payload_result.forbidden_tracked_files:
+                warnings.append(
+                    "Forbidden tracked changes: " + ", ".join(payload_result.forbidden_tracked_files)
+                )
+            if payload_result.staged_residue_files:
+                warnings.append(
+                    "Staged residue files: " + ", ".join(payload_result.staged_residue_files)
+                )
+            if payload_result.unknown_untracked_files:
+                warnings.append(
+                    "Unknown untracked files: " + ", ".join(payload_result.unknown_untracked_files)
+                )
+            if payload_result.cached_diff_files:
+                warnings.append(
+                    "Cached diff files outside approved payload: " + ", ".join(payload_result.cached_diff_files)
+                )
+            finished_at = clock_provider() if clock_provider else None
+            return _persist_and_return(
+                request, persistence_fn, clock_provider,
+                AriadneTaskCliResult(
+                    status=AriadneTaskCliStatus.BLOCKED,
+                    reason_codes=tuple(codes),
+                    task_description=request.task_description,
+                    task_description_hash=task_description_hash,
+                    pipeline_status=pipeline_status,
+                    pipeline_final_action=pipeline_final_action,
+                    pipeline_has_blockers=pipeline_has_blockers,
+                    git_boundary_status=None,
+                    command_plan=None,
+                    execution_attempted=False,
+                    execution_results=(),
+                    warnings=tuple(warnings),
+                    next_action="stop",
+                    started_at=started_at,
+                    finished_at=finished_at,
+                    details="Payload cleanliness gate failed",
+                ),
+            )
 
     # 4b. Render dogfood proof (before baseline)
     if request.files_to_stage:

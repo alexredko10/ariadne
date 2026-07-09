@@ -1,0 +1,290 @@
+schema_version: "0.1"
+pr_id: "0134-commit-payload-cleanliness-gate"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-09T12:00:28Z"
+head_verified: "3628ac9a2d30e09df95d56132757c228f13d49b8"
+branch_confirmed: "0134-commit-payload-cleanliness-gate"
+snapshot_delta:
+  plan_base_sha: "609c65fa89d976eab8f5436593c52cbc90a76f6b"
+  current_head: "3628ac9a2d30e09df95d56132757c228f13d49b8"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - ".project-memory/pr/0134-commit-payload-cleanliness-gate/reviews/precommit-review.yml"
+  actual_files:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0134-commit-payload-cleanliness-gate/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/pr/0134-commit-payload-cleanliness-gate/PLAN.md"
+  - ".project-memory/pr/0134-commit-payload-cleanliness-gate/reviews/plan-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/PLAN.md"
+  - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/precommit-review.yml"
+  - ".project-memory/pr/0132-persist-final-execution-results/PLAN.md"
+  - ".project-memory/pr/0132-persist-final-execution-results/reviews/precommit-review.yml"
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/src/runner/git_boundary.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+  - "services/runner/tests/test_git_boundary.py"
+  - "services/runner/tests/test_run_persistence.py"
+  - "services/runner/tests/conftest.py"
+  - "agents/coder.yml"
+  - "agents/precommit-review.yml"
+files_written:
+  - ".project-memory/pr/0134-commit-payload-cleanliness-gate/reviews/precommit-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "3628ac9a2d30e09df95d56132757c228f13d49b8"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0134-commit-payload-cleanliness-gate"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "M ariadne_task_cli.py, M test_ariadne_task_cli.py (both unstaged), ?? precommit-review.yml"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "services/runner/src/runner/ariadne_task_cli.py, services/runner/tests/test_ariadne_task_cli.py"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+  - command: "git status --short -- captures .ariadne .project-memory/pr/test .project-memory/pr/0127 .project-memory/pr/dogfood test_stage_file.py agents/plan-review.yml agents/precommit-review.yml .gitignore ROADMAP.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "No known residue or forbidden files present in working tree"
+  - command: "git ls-files captures .ariadne .project-memory/pr/test .project-memory/pr/0127 .project-memory/pr/dogfood test_stage_file.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "No tracked residue files"
+  - command: "python -m compileall -f services/runner/src services/task_intake/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "All Python files compiled successfully"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest services/runner/tests/test_ariadne_task_cli.py services/runner/tests/test_git_boundary.py services/runner/tests/test_run_persistence.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "194 passed in 1.22s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest services/runner/tests/test_agent_runner_bridge.py services/runner/tests/test_pipeline_runner.py services/runner/tests/test_prompt_composer.py services/runner/tests/test_ariadne_task_cli.py services/runner/tests/test_git_boundary.py services/runner/tests/test_run_persistence.py services/runner/tests/test_verdict_parser.py services/runner/tests/test_docker_agent_adapter.py services/runner/tests/test_adapter_registry.py services/runner/tests/test_local_harness.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "444 passed in 2.66s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest services/runner/tests/test_ariadne_task_cli.py::TestPayloadCleanlinessGate -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "14 passed in 0.15s"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'commit_payload|payload_clean|known_generated_residue|forbidden_tracked|staged_residue|unknown_untracked|forbidden_cached_diff|diff --cached|agents/plan-review.yml|agents/precommit-review.yml|.gitignore' services/runner/src/runner services/runner/tests .project-memory/pr/0134-commit-payload-cleanliness-gate"
+    result: "passed"
+    exit_code: 0
+    evidence: "40+ matches in ariadne_task_cli.py (PayloadCleanlinessResult dataclass at L122-133, _KNOWN_RESIDUE_PATHS at L642-649, _FORBIDDEN_TRACKED_PATHS at L651-657, _check_payload_cleanliness function at L665, reason codes at L150-153, integration at L1175-1231) and test_ariadne_task_cli.py (14 new test functions in TestPayloadCleanlinessGate)"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'git add|git commit|git push|gh pr create|git reset|git checkout|git switch|git merge|git rebase|git clean|git tag|docker|docker compose|docker run|pip install|python -m pip install|shell=True|os.system' services/runner/src/runner services/runner/tests .project-memory/pr/0134-commit-payload-cleanliness-gate"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only reference patterns in pre-existing session_continuity.py and improvement_backlog.py (not PR 0134). No new unsafe mutations added. Tests use fake providers and tmp_path."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'Run Report|dashboard|control plane|retry|model health|parallel queue|Decision Core|Context Warehouse|eval harness|faithfulness|frontend' .project-memory/pr/0134-commit-payload-cleanliness-gate services/runner/src/runner services/runner/tests 2>/dev/null || true"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only in PLAN.md non-goals list (lines 492-494) and pre-existing code. No new frozen scope started in PR 0134 implementation."
+  - command: "if [ -d .ariadne ]; then find .ariadne -maxdepth 5 -type f | sort; else echo '.ariadne absent'; fi"
+    result: "passed"
+    exit_code: 0
+    evidence: ".ariadne absent"
+blockers: []
+warnings:
+  - id: "WARNING_001"
+    description: "PLAN.md lacks Roadmap alignment section required by ROADMAP.md for PRs from 0094 onward (inherited from plan-review)"
+    evidence: "ROADMAP.md requires a '### Roadmap alignment' section. PLAN.md has none. PR 0134 is past PR 0094."
+    recommendation: "Add a Roadmap alignment section confirming this is a Stage 3 production-hardening PR, explaining why scope differs from roadmap's 'Run Report' description."
+decisions_made:
+  - decision: "Payload cleanliness gate fully implemented and tested"
+    reason: "Implementation adds _check_payload_cleanliness() with PayloadCleanlinessResult, _KNOWN_RESIDUE_PATHS, _FORBIDDEN_TRACKED_PATHS, 4 reason codes, injectable provider, and integration at 4a-1 in run_ariadne_task(). 14 tests cover all 13 plan-specified scenarios plus ROADMAP.md blocking."
+  - decision: "Known generated residue correctly classified"
+    reason: "Captures, .ariadne, .project-memory/pr/test, .project-memory/pr/0127, .project-memory/pr/dogfood, test_stage_file.py defined as _KNOWN_RESIDUE_PATHS. Untracked residue allowed (test passes). Staged residue blocks with commit_payload_staged_residue (test passes). Tracked modification blocks with commit_payload_forbidden_tracked_change (test passes)."
+  - decision: "Forbidden tracked paths correctly classified"
+    reason: "agents/plan-review.yml, agents/precommit-review.yml, ROADMAP.md, .gitignore in _FORBIDDEN_TRACKED_PATHS. Each has a dedicated test proving gate blocks. All 4 tests pass."
+  - decision: "Cached diff inspection implemented"
+    reason: "git diff --cached --name-only inspected via cached_diff_provider. Cached files outside approved payload trigger commit_payload_forbidden_cached_diff (test passes)."
+  - decision: "Structured evidence produced"
+    reason: "PayloadCleanlinessResult contains 7 fields: allowed_payload_files, known_residue_files, forbidden_tracked_files, staged_residue_files, unknown_untracked_files, cached_diff_files, reason_codes. Test test_structured_evidence_lists_returned passes."
+  - decision: "All 4 reason codes emitted"
+    reason: "REASON_COMMIT_PAYLOAD_FORBIDDEN_TRACKED_CHANGE, REASON_COMMIT_PAYLOAD_STAGED_RESIDUE, REASON_COMMIT_PAYLOAD_UNKNOWN_UNTRACKED, REASON_COMMIT_PAYLOAD_FORBIDDEN_CACHED_DIFF all defined and tested. Test test_required_reason_codes_emitted passes."
+  - decision: "Injectable provider pattern implemented"
+    reason: "payload_cleanliness_fn parameter added to run_ariadne_task() with default _check_payload_cleanliness. Existing tests use _clean_payload_check provider to bypass gate. Test clean_tree_with_known_residue_passes_full_task passes with real gate provider."
+  - decision: "Git Boundary authority preserved"
+    reason: "git_boundary.py not modified. _is_forbidden_path unchanged. Gate runs before git boundary planning."
+  - decision: "Dirty-tree checks not weakened"
+    reason: "_check_git_baseline unchanged. FORBIDDEN_PAYLOAD_PREFIXES, IGNORED_BASELINE_PREFIXES unchanged."
+  - decision: "PR 0132 and PR 0133 behavior preserved"
+    reason: "run_persistence.py and conftest.py unchanged. All persistence and residue-isolation tests pass (194 focused, 444 regression)."
+  - decision: "Forbidden files clean"
+    reason: "git diff --name-only shows only ariadne_task_cli.py and test_ariadne_task_cli.py. ROADMAP.md, agents/*.yml, .gitignore unmodified."
+  - decision: "No frozen scope started"
+    reason: "grep for Run Report, dashboard, control plane, etc. returns only PLAN.md non-goals list and pre-existing code references."
+context_used:
+  labels:
+    - production-hardening
+    - commit-payload-cleanliness
+    - git-boundary
+    - precommit-review
+    - pr-0134
+  memory_files_read:
+    - ".project-memory/pr/0134-commit-payload-cleanliness-gate/PLAN.md"
+    - ".project-memory/pr/0134-commit-payload-cleanliness-gate/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/PLAN.md"
+    - ".project-memory/pr/0133-runner-test-runtime-residue-isolation/reviews/precommit-review.yml"
+    - ".project-memory/pr/0132-persist-final-execution-results/PLAN.md"
+    - ".project-memory/pr/0132-persist-final-execution-results/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "ariadne_task_cli.py: PayloadCleanlinessResult L122-133, reason codes L150-153, _KNOWN_RESIDUE_PATHS L642-649, _FORBIDDEN_TRACKED_PATHS L651-657, _check_payload_cleanliness L665-847, payload_cleanliness_fn parameter L971, integration at L1175-1231"
+    - "test_ariadne_task_cli.py: _clean_payload_check L203-217, updated existing test classes with payload_cleanliness_fn, 14 new tests in TestPayloadCleanlinessGate at L3360-3754"
+    - "git_boundary.py: unchanged, _is_forbidden_path unchanged"
+    - "run_persistence.py: unchanged"
+    - "conftest.py: unchanged, PR 0133 fixture intact"
+  files_modified:
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+  files_intentionally_ignored:
+    - "git_boundary.py (unchanged, not in scope)"
+    - "run_persistence.py (unchanged, not in scope)"
+    - "conftest.py (unchanged, not in scope)"
+    - "test_git_boundary.py (unchanged, not in scope)"
+    - "test_run_persistence.py (unchanged, not in scope)"
+checks:
+  branch_correct: "pass"
+  changed_file_scope_within_plan: "pass"
+  changed_files_read: "pass"
+  compile_check: "pass"
+  focused_tests_pass: "pass"
+  regression_tests_pass: "pass"
+  gate_behaviour_covered_by_tests: "pass"
+  evidence_lists_produced: "pass"
+  no_broad_ignore: "pass"
+  dirty_tree_checks_preserved: "pass"
+  git_boundary_authority_preserved: "pass"
+  pr_0132_preserved: "pass"
+  pr_0133_preserved: "pass"
+  no_frozen_scope: "pass"
+  artifact_written_readback: "pass"
+evidence_ledger:
+  - claim: "branch is correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0134-commit-payload-cleanliness-gate"
+    result: "pass"
+  - claim: "dirty tree is within scope"
+    evidence_source: "git diff --name-only"
+    exact_observed_evidence: "services/runner/src/runner/ariadne_task_cli.py, services/runner/tests/test_ariadne_task_cli.py - only PLAN-allowed files"
+    result: "pass"
+  - claim: "all changed files were read"
+    evidence_source: "read_file + git diff ariadne_task_cli.py and test_ariadne_task_cli.py"
+    exact_observed_evidence: "Both files read in full via read_file and git diff output. 278 lines added to ariadne_task_cli.py (gate function + integration). 415 lines added to test_ariadne_task_cli.py (14 tests + _clean_payload_check helper + existing test class updates)."
+    result: "pass"
+  - claim: "required validation passed"
+    evidence_source: "compileall + pytest commands"
+    exact_observed_evidence: "compileall EXIT:0. Focused tests: 194 passed in 1.22s. Regression tests: 444 passed in 2.66s. Gate-specific tests: 14 passed in 0.15s."
+    result: "pass"
+  - claim: "feature-specific behavior exists"
+    evidence_source: "grep + test results"
+    exact_observed_evidence: "_check_payload_cleanliness() implemented at L665-847. PayloadCleanlinessResult dataclass at L122-133. _KNOWN_RESIDUE_PATHS at L642-649. _FORBIDDEN_TRACKED_PATHS at L651-657. 4 reason codes at L150-153. Injectable provider at L971. Integration at L1175-1231. 14 tests cover all classification scenarios."
+    result: "pass"
+  - claim: "forbidden behavior is absent"
+    evidence_source: "grep for unsafe mutation, frozen scope terms"
+    exact_observed_evidence: "No unsafe real git mutation added. No new frozen capability work. ROADMAP.md, agents/*.yml, .gitignore unmodified. git_boundary.py and run_persistence.py unmodified."
+    result: "pass"
+  - claim: "artifact physically written"
+    evidence_source: "write_file .project-memory/pr/0134-commit-payload-cleanliness-gate/reviews/precommit-review.yml"
+    exact_observed_evidence: "write_file called at correct path; 17690 bytes written"
+    result: "pass"
+  - claim: "artifact read back"
+    evidence_source: "test -f + sed precommit-review.yml"
+    exact_observed_evidence: "test -f exits 0. sed confirms full content readable."
+    result: "pass"
+boundary_confirmations:
+  - "Only precommit-review.yml artifact written; no implementation, test, PLAN, or schema files modified"
+  - "Branch confirmed: 0134-commit-payload-cleanliness-gate"
+  - "Dirty tree within scope: only ariadne_task_cli.py and test_ariadne_task_cli.py modified"
+  - "PayloadCleanlinessResult dataclass: 7 evidence fields (allowed_payload_files, known_residue_files, forbidden_tracked_files, staged_residue_files, unknown_untracked_files, cached_diff_files, reason_codes)"
+  - "_KNOWN_RESIDUE_PATHS: captures, .ariadne, .project-memory/pr/test, .project-memory/pr/0127, .project-memory/pr/dogfood, test_stage_file.py"
+  - "_FORBIDDEN_TRACKED_PATHS: agents/plan-review.yml, agents/precommit-review.yml, ROADMAP.md, .gitignore"
+  - "Reason codes: commit_payload_forbidden_tracked_change, commit_payload_staged_residue, commit_payload_unknown_untracked, commit_payload_forbidden_cached_diff"
+  - "Gateway integration: 4a-1 after cleanup, before proof finalization (per PLAN)"
+  - "Injectable provider: payload_cleanliness_fn parameter with default _check_payload_cleanliness"
+  - "14 tests: untracked residue allowed, staged residue blocked, tracked residue blocked, unknown untracked blocked, agents/*.yml blocked, ROADMAP.md blocked, .gitignore blocked, approved payload passes, cached diff blocked, evidence lists, reason codes, gate failure blocks commit path, known residue passes full task"
+  - "Existing tests updated with _clean_payload_check provider: TestDirtyTreeOutOfScope, TestRunPersistenceGuarantee, TestDirtyBaselineEnforcement, TestDryRunNoDryRunBehavior"
+  - "No .gitignore changes"
+  - "Dirty-tree checks preserved: _check_git_baseline unchanged"
+  - "Git Boundary authority preserved: git_boundary.py not modified"
+  - "PR 0132 execution persistence preserved: run_persistence.py not modified, all persistence tests pass"
+  - "PR 0133 residue isolation preserved: conftest.py unchanged, all residue tests pass"
+  - "No frozen scope started: Run Report not implemented"
+  - "All validation commands pass: compileall EXIT:0, 194 focused tests passed, 444 regression tests passed, 14 gate-specific tests passed"
+known_generated_residue_policy:
+  classification: "three-bucket"
+  known_residue_paths:
+    - "captures"
+    - ".ariadne"
+    - ".project-memory/pr/test"
+    - ".project-memory/pr/0127"
+    - ".project-memory/pr/dogfood"
+    - "test_stage_file.py"
+  untracked_allowed: true
+  staged_blocked: true
+  tracked_blocked: true
+  unknown_untracked_blocked: true
+  forbidden_tracked_blocked: true
+  agents_plan_review_yml_blocked: true
+  agents_precommit_review_yml_blocked: true
+  gitignore_blocked: true
+  cached_diff_inspection: true
+  no_broad_gitignore: true
+  dirty_tree_checks_preserved: true
+  git_boundary_preserved: true
+  gate_implemented: true
+commit_readiness: "ready"
+summary: |
+  PR 0134 precommit review PASSES.
+
+  Implementation adds a commit payload cleanliness gate as specified by PLAN.md:
+
+  - PayloadCleanlinessResult frozen dataclass with 7 structured evidence lists
+  - _KNOWN_RESIDUE_PATHS: captures, .ariadne, .project-memory/pr/test, .project-memory/pr/0127,
+    .project-memory/pr/dogfood, test_stage_file.py
+  - _FORBIDDEN_TRACKED_PATHS: agents/plan-review.yml, agents/precommit-review.yml,
+    ROADMAP.md, .gitignore
+  - 4 reason codes: commit_payload_forbidden_tracked_change, commit_payload_staged_residue,
+    commit_payload_unknown_untracked, commit_payload_forbidden_cached_diff
+  - _check_payload_cleanliness() classifies files into 3 buckets (allowed payload,
+    known generated residue, forbidden/unknown) using git status --porcelain=v1
+    and git diff --cached --name-only
+  - Injectable provider pattern: payload_cleanliness_fn parameter on run_ariadne_task()
+  - Integration at 4a-1 (after cleanup, before proof finalization)
+
+  14 tests cover all required scenarios (untracked residue allowed, staged/tracked residue
+  blocked, unknown untracked blocked, 4 forbidden file types blocked, cached diff blocked,
+  approved payload passes, evidence lists, reason codes, full task integration).
+
+  All validation passes:
+  - Compileall: EXIT:0
+  - Focused tests: 194 passed
+  - Regression tests: 444 passed
+  - Gate-specific tests: 14 passed
+  - Forbidden tracked files clean
+  - Git Boundary authority preserved
+  - PR 0132/0133 behavior preserved
+  - No frozen scope started
