@@ -1135,7 +1135,7 @@ class TestLocalArtifactMaterialization:
     def test_local_materializer_dogfood_proof(self, tmp_path):
         """Dogfood-proof.yml materialization works in temp path."""
         agents_dir = _agents_dir(tmp_path)
-        artifact_path = ".project-memory/pr/dogfood/dogfood-proof.yml"
+        artifact_path = ".project-memory/pr/test/dogfood-proof.yml"
         result = run_agent_runner_bridge(
             agent_name="test-agent",
             task_prompt="Create dogfood proof.",
