@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import os
 from urllib.parse import parse_qs
+import re
 
 from task_intake.app import accept_task
 from task_intake.backlog_decision import BacklogDecisionInput, record_human_decision
@@ -36,6 +37,10 @@ from task_intake.normalize import normalize_task_intake
 from task_intake.context_preview import generate_context_preview
 from task_intake.runs import create_mock_run
 from runner.runtime_evidence import list_run_evidence_summaries
+from runner.runtime_evidence import read_run_evidence_detail
+
+# Safe run_id pattern: alphanumeric, underscore, hyphen only
+_RUN_ID_RE = re.compile(r"^[a-zA-Z0-9_\-]+$")
 from task_intake.mock_loop import run_mock_loop
 from task_intake.execution_handoff import run_mock_execution_handoff
 
@@ -906,6 +911,89 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
             await _send_json(send, 200, body)
         return
 
+    # Detail route: GET /runs/<run_id>
+    if method == "GET" and path.startswith("/runs/"):
+        run_id = path[len("/runs/"):]
+        # Validate run_id
+        if not run_id or not _RUN_ID_RE.match(run_id) or len(run_id) > 128:
+            body = json.dumps({
+                "ok": False,
+                "error": "invalid run_id",
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+            return
+
+        # Parse optional runs_root query parameter
+        query_string = scope.get("query_string", b"").decode("utf-8")
+        params = parse_qs(query_string)
+        runs_root = params.get("runs_root", [None])[0]
+        if not runs_root:
+            runs_root = os.path.join(os.getcwd(), ".ariadne", "runs")
+
+        if not os.path.isdir(runs_root):
+            body = json.dumps({
+                "ok": False,
+                "error": "runs_root not found or unreadable",
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+            return
+
+        result = read_run_evidence_detail(runs_root, run_id)
+
+        # Build response from RuntimeEvidenceReadResult
+        response: dict[str, Any] = {
+            "ok": result.ok,
+            "error": result.error,
+        }
+
+        if result.summary is not None:
+            s = result.summary
+            response["summary"] = {
+                "run_id": s.run_id,
+                "status": s.status,
+                "reason_codes": list(s.reason_codes),
+                "pipeline_status": s.pipeline_status,
+                "git_boundary_status": s.git_boundary_status,
+                "execution_attempted": s.execution_attempted,
+                "created_at": s.created_at,
+                "run_json_available": s.run_json_path is not None,
+                "manifest_available": s.manifest_path is not None,
+                "run_report_available": s.run_report_path is not None,
+                "missing_evidence": list(s.missing_evidence),
+                "malformed_evidence": list(s.malformed_evidence),
+                "pr_url": s.pr_url,
+            }
+        else:
+            response["summary"] = None
+
+        if result.detail is not None:
+            d = result.detail
+            response["detail"] = {
+                "execution_results": list(d.execution_results),
+                "manifest_files": list(d.manifest_files),
+                "run_json_hash": d.run_json_hash,
+                "report_preview": d.report_preview,
+                "evidence_paths": list(d.evidence_paths),
+                "source_errors": list(d.source_errors),
+            }
+        else:
+            response["detail"] = None
+
+        response["payload_cleanliness"] = result.detail.payload_cleanliness if result.detail is not None else None
+        response["readiness"] = result.detail.readiness if result.detail is not None else None
+        response["missing"] = [
+            {"expected_path": n.expected_path, "reason": n.reason}
+            for n in result.missing
+        ]
+        response["malformed"] = [
+            {"expected_path": n.expected_path, "reason": n.reason}
+            for n in result.malformed
+        ]
+
+        body = json.dumps(response, sort_keys=True, ensure_ascii=False).encode("utf-8")
+        await _send_json(send, 200, body)
+        return
+
     if method == "GET" and path == "/runs":
         # Parse optional runs_root query parameter
         query_string = scope.get("query_string", b"").decode("utf-8")
@@ -1137,6 +1225,11 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 <p id="run-history-placeholder">No runs yet. Submit a task to see your run history.</p>
 <button id="clear-history-btn" style="display:none;">Clear history</button>
 <div id="run-history-list"></div>
+</div>
+<div id="run-detail-panel" style="display:none;">
+<h2>Run Detail</h2>
+<p><strong>Selected run:</strong> <span id="detail-run-id"></span></p>
+<div id="run-detail-content"></div>
 </div>
 <div id="execution-trace-section">
 <h3>Execution Trace</h3>
@@ -1776,11 +1869,13 @@ function fetchRuns() {
                     evidenceIndicators += " <span style=\"color:#a00;\" title=\"Malformed: " + r.malformed_evidence.join(", ") + "\">[" + r.malformed_evidence.length + " malformed]</span>";
                 }
                 var prLink = r.pr_url ? " <a href=\"" + r.pr_url + "\" target=\"_blank\">PR</a>" : "";
+                var viewBtn = " <button onclick=\"fetchRunDetail('" + r.run_id + "')\" style=\"cursor:pointer;\">View</button>";
                 html += "<div class=\"history-entry\">"
                     + "<span class=\"history-index\">" + r.run_id + "</span>"
                     + "<span class=\"history-status " + statusClass + "\">" + r.status + "</span>"
                     + evidenceIndicators
                     + prLink
+                    + viewBtn
                     + "</div>";
             }
             list.innerHTML = html;
@@ -1837,6 +1932,130 @@ function recordSessionSignal() {
     });
 }
 window.__ariadne_session_start = Date.now();
+// Run detail panel
+function fetchRunDetail(runId) {
+    var panel = document.getElementById("run-detail-panel");
+    var content = document.getElementById("run-detail-content");
+    var runIdSpan = document.getElementById("detail-run-id");
+    panel.style.display = "";
+    runIdSpan.textContent = runId;
+    content.innerHTML = "<em>Loading...</em>";
+    fetch("/runs/" + encodeURIComponent(runId))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            renderRunDetail(data);
+        })
+        .catch(function(err) {
+            content.innerHTML = "<p class=\"status-error\">Error: " + err.message + "</p>";
+        });
+}
+function esc(s) {
+    if (s == null) return "not available";
+    if (typeof s === "string") return s;
+    return String(s);
+}
+function escHtml(s) {
+    var div = document.createElement("div");
+    div.textContent = esc(s);
+    return div.innerHTML;
+}
+function renderRunDetail(data) {
+    var content = document.getElementById("run-detail-content");
+    var html = "";
+    html += "<p><strong>OK:</strong> <span class=\"" + (data.ok ? "ok-true\">true" : "ok-false\">false") + "</span></p>";
+    if (data.error) {
+        html += "<p><strong>Error:</strong> " + escHtml(data.error) + "</p>";
+    }
+    // Summary
+    if (data.summary) {
+        var s = data.summary;
+        html += "<h3>Summary</h3>";
+        html += "<p><strong>Run ID:</strong> " + escHtml(s.run_id) + "</p>";
+        html += "<p><strong>Status:</strong> <span class=\"status-" + s.status + "\">" + escHtml(s.status) + "</span></p>";
+        html += "<p><strong>Reason codes:</strong> " + (s.reason_codes && s.reason_codes.length > 0 ? escHtml(s.reason_codes.join(", ")) : "none") + "</p>";
+        html += "<p><strong>Pipeline status:</strong> " + escHtml(s.pipeline_status) + "</p>";
+        html += "<p><strong>Git boundary:</strong> " + escHtml(s.git_boundary_status) + "</p>";
+        html += "<p><strong>Execution attempted:</strong> " + (s.execution_attempted ? "yes" : "no") + "</p>";
+        html += "<p><strong>Created at:</strong> " + escHtml(s.created_at) + "</p>";
+        html += "<p><strong>Run JSON:</strong> " + (s.run_json_available ? "available" : "not available") + "</p>";
+        html += "<p><strong>Manifest:</strong> " + (s.manifest_available ? "available" : "not available") + "</p>";
+        html += "<p><strong>Run report:</strong> " + (s.run_report_available ? "available" : "not available") + "</p>";
+        if (s.pr_url) {
+            html += "<p><strong>PR URL:</strong> <a href=\"" + escHtml(s.pr_url) + "\" target=\"_blank\">" + escHtml(s.pr_url) + "</a></p>";
+        } else {
+            html += "<p><strong>PR URL:</strong> not available</p>";
+        }
+    }
+    // Detail
+    if (data.detail) {
+        var d = data.detail;
+        html += "<h3>Execution Results</h3>";
+        if (d.execution_results && d.execution_results.length > 0) {
+            html += "<ul>";
+            for (var i = 0; i < d.execution_results.length; i++) {
+                html += "<li>" + JSON.stringify(d.execution_results[i]) + "</li>";
+            }
+            html += "</ul>";
+        } else {
+            html += "<p><em>none</em></p>";
+        }
+        html += "<h3>Manifest Files</h3>";
+        if (d.manifest_files && d.manifest_files.length > 0) {
+            html += "<ul>";
+            for (var i = 0; i < d.manifest_files.length; i++) {
+                html += "<li>" + escHtml(d.manifest_files[i]) + "</li>";
+            }
+            html += "</ul>";
+        } else {
+            html += "<p><em>none</em></p>";
+        }
+        html += "<h3>Report Preview</h3>";
+        if (d.report_preview) {
+            html += "<pre>" + escHtml(d.report_preview) + "</pre>";
+        } else {
+            html += "<p><em>not available</em></p>";
+        }
+        html += "<h3>Evidence Paths</h3>";
+        if (d.evidence_paths && d.evidence_paths.length > 0) {
+            html += "<ul>";
+            for (var i = 0; i < d.evidence_paths.length; i++) {
+                html += "<li>" + escHtml(d.evidence_paths[i]) + "</li>";
+            }
+            html += "</ul>";
+        } else {
+            html += "<p><em>none</em></p>";
+        }
+        html += "<p><strong>Run JSON hash:</strong> " + escHtml(d.run_json_hash) + "</p>";
+        html += "<p><strong>Source errors:</strong> " + (d.source_errors && d.source_errors.length > 0 ? escHtml(d.source_errors.join(", ")) : "none") + "</p>";
+    }
+    // Unavailable values
+    html += "<h3>Unavailable Values</h3>";
+    html += "<p><strong>Payload cleanliness:</strong> " + escHtml(data.payload_cleanliness) + "</p>";
+    html += "<p><strong>Readiness:</strong> " + escHtml(data.readiness) + "</p>";
+    // Missing evidence
+    html += "<h3>Notices</h3>";
+    html += "<h4>Missing Evidence</h4>";
+    if (data.missing && data.missing.length > 0) {
+        html += "<ul>";
+        for (var i = 0; i < data.missing.length; i++) {
+            html += "<li><strong>" + escHtml(data.missing[i].expected_path) + "</strong>: " + escHtml(data.missing[i].reason) + "</li>";
+        }
+        html += "</ul>";
+    } else {
+        html += "<p><em>none</em></p>";
+    }
+    html += "<h4>Malformed Evidence</h4>";
+    if (data.malformed && data.malformed.length > 0) {
+        html += "<ul>";
+        for (var i = 0; i < data.malformed.length; i++) {
+            html += "<li><strong>" + escHtml(data.malformed[i].expected_path) + "</strong>: " + escHtml(data.malformed[i].reason) + "</li>";
+        }
+        html += "</ul>";
+    } else {
+        html += "<p><em>none</em></p>";
+    }
+    content.innerHTML = html;
+}
 // Fetch evidence-backed run list on page load
 fetchRuns();
 </script>
