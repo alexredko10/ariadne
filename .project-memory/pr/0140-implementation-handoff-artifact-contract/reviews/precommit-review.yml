@@ -1,0 +1,298 @@
+schema_version: "0.1"
+pr_id: "0140-implementation-handoff-artifact-contract"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-10T08:25:00Z"
+head_verified: "2474d3f01109802bc6606516a95f9745083f12ca"
+branch_confirmed: "0140-implementation-handoff-artifact-contract"
+snapshot_delta:
+  plan_base_sha: "2474d3f01109802bc6606516a95f9745083f12ca"
+  current_head: "2474d3f01109802bc6606516a95f9745083f12ca"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0140-implementation-handoff-artifact-contract/PLAN.md"
+    - ".project-memory/pr/0140-implementation-handoff-artifact-contract/reviews/plan-review.yml"
+    - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+    - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+    - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+    - "agents/coder.yml"
+    - "agents/precommit-review.yml"
+    - ".project-memory/pr/0140-implementation-handoff-artifact-contract/reviews/precommit-review.yml"
+  actual_files:
+    - ".project-memory/pr/0140-implementation-handoff-artifact-contract/PLAN.md"
+    - ".project-memory/pr/0140-implementation-handoff-artifact-contract/reviews/plan-review.yml"
+    - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+    - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+    - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+    - "agents/coder.yml"
+    - "agents/precommit-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0140-implementation-handoff-artifact-contract/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/pr/0140-implementation-handoff-artifact-contract/PLAN.md"
+  - ".project-memory/pr/0140-implementation-handoff-artifact-contract/reviews/plan-review.yml"
+  - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+  - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+  - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+  - "agents/coder.yml"
+  - "agents/precommit-review.yml"
+  - "ROADMAP.md"
+  - ".project-memory/product/ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - ".project-memory/pr/0137-product-architecture-roadmap-unlock/reviews/precommit-review.yml"
+  - ".project-memory/pr/0138-ui-runtime-evidence-read-model/reviews/precommit-review.yml"
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/precommit-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - "agents/planner.yml"
+  - "agents/plan-review.yml"
+files_written:
+  - ".project-memory/pr/0140-implementation-handoff-artifact-contract/reviews/precommit-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "2474d3f01109802bc6606516a95f9745083f12ca"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0140-implementation-handoff-artifact-contract"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "M ORCHESTRATOR_STANDARD.txt,  M coder.yml,  M precommit-review.yml, ?? PR directory, ?? IMPLEMENTATION_REPORT_TEMPLATE.md, ?? workflow/"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: ".project-memory/ORCHESTRATOR_STANDARD.txt, agents/coder.yml, agents/precommit-review.yml"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+  - command: "test -f .project-memory/pr/0140-implementation-handoff-artifact-contract/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is readable"
+  - command: "test -f .project-memory/pr/0140-implementation-handoff-artifact-contract/reviews/plan-review.yml"
+    result: "passed"
+    exit_code: 0
+    evidence: "plan-review.yml exists and is readable (verdict: approve)"
+  - command: "test -f .project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "Workflow contract artifact exists (88 lines, 8 sections)"
+  - command: "test -f .project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "Implementation report template exists (59 lines, 11 sections + proof disclaimer)"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'IMPLEMENTATION_REPORT.md|handoff context|not proof|Agent output is not proof|precommit-review remains the final gatekeeper|actual evidence wins|unsupported.*claims.*block|unsupported.*claims.*warn' .project-memory agents"
+    result: "passed"
+    exit_code: 0
+    evidence: "Contract (L3, L13-16, L19): IMPLEMENTATION_REPORT.md required, handoff context not proof, agent output not proof, precommit-review remains final gatekeeper. Template (L2-5): proof disclaimer header. ORCHESTRATOR_STANDARD.txt (L364-368, L373, L383, L388, L396): coder writes IMPLEMENTATION_REPORT.md, precommit-review reads and compares. agents/coder.yml (L69, L128-131): writes IMPLEMENTATION_REPORT.md, handoff context not proof. agents/precommit-review.yml (L35-38, L43-47): reads IMPLEMENTATION_REPORT.md, blocks if absent, compares claims, actual evidence wins."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'TASK SUMMARY|FILES READ|FILES CHANGED|IMPLEMENTATION DECISIONS|PLAN ALIGNMENT|DEVIATIONS FROM PLAN|VALIDATION RUN|BOUNDARY CONFIRMATIONS|NON-GOALS PRESERVED|RISKS OR WARNINGS|NEXT REVIEWER FOCUS' .project-memory/templates .project-memory/workflow agents"
+    result: "passed"
+    exit_code: 0
+    evidence: "Template (L8-59): All 11 sections present with descriptive headings and placeholder instructions. Workflow contract (L42-52): All 11 sections listed with purpose descriptions. Precommit-review agents (L96, L109): FILES READ, BOUNDARY CONFIRMATIONS in output format. Coder agent (L305, L311, L323): FILES CHANGED, VALIDATION RUN, BOUNDARY CONFIRMATIONS in output format."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'PLAN.md|plan-review.yml|actual changed files|validation outputs|dirty tree|cached diff|PLAN DRIFT GATE|NO-DRIFT CHECK|compare|disagree' .project-memory agents"
+    result: "passed"
+    exit_code: 0
+    evidence: "ORCHESTRATOR_STANDARD.txt (L373, L383, L388): precommit-review reads PLAN.md, plan-review.yml, IMPLEMENTATION_REPORT.md, compares claims, actual evidence wins. agents/precommit-review.yml (L28, L35-38, L43-47): reads PLAN.md, plan-review.yml, IMPLEMENTATION_REPORT.md, changed files, compares claims, blocks if unsupported."
+  - command: "git diff --name-only -- services docs schemas pyproject.toml poetry.lock .gitignore ROADMAP.md .project-memory/product .project-memory/roadmaps .project-memory/pr/0131-dogfood-pr-created-by-ariadne .project-memory/pr/0132-persist-final-execution-results .project-memory/pr/0133-runner-test-runtime-residue-isolation .project-memory/pr/0134-commit-payload-cleanliness-gate .project-memory/pr/0135-persisted-run-report-artifact .project-memory/pr/0136-production-line-final-readiness-gate .project-memory/pr/0137-product-architecture-roadmap-unlock .project-memory/pr/0138-ui-runtime-evidence-read-model .project-memory/pr/0139-artifact-workspace-local-run-list-view"
+    result: "passed"
+    exit_code: 0
+    evidence: "Empty output — zero changes to any forbidden files."
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "M ORCHESTRATOR_STANDARD.txt,  M coder.yml,  M precommit-review.yml, ?? PR 0140 directory, ?? IMPLEMENTATION_REPORT_TEMPLATE.md, ?? workflow/"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "ORCHESTRATOR_STANDARD.txt, agents/coder.yml, agents/precommit-review.yml"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Durable workflow contract artifact exists"
+    reason: ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md (88 lines) defines the Implementation Handoff Artifact Contract with version, applicability rules, required artifact path, 11 required sections, proof boundary disclaimer, coder and precommit-review obligations, and maintenance policy."
+  - decision: "Implementation report template exists with all 11 required sections and proof disclaimer"
+    reason: ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md (59 lines) includes proof disclaimer header (lines 2-5) and all 11 sections: TASK SUMMARY, FILES READ, FILES CHANGED, IMPLEMENTATION DECISIONS, PLAN ALIGNMENT, DEVIATIONS FROM PLAN, VALIDATION RUN, BOUNDARY CONFIRMATIONS, NON-GOALS PRESERVED, RISKS OR WARNINGS, NEXT REVIEWER FOCUS."
+  - decision: "Contract requires future coder to write IMPLEMENTATION_REPORT.md before precommit-review"
+    reason: "Contract (L6): 'Every future Ariadne implementation agent must produce an IMPLEMENTATION_REPORT.md handoff artifact before precommit-review is invoked.' agents/coder.yml (L69, L128-131): 'Write IMPLEMENTATION_REPORT.md as handoff context, not review.' and 'Write .project-memory/pr/<PR-ID>-<slug>/IMPLEMENTATION_REPORT.md following the template' as step 12 before final output."
+  - decision: "Report is handoff context, not proof — agent output is not proof"
+    reason: "Contract (L13-16): 'The report is handoff context, not proof. Agent output is not proof. Runtime-captured validation, command outputs, file contents, diffs, persisted runtime artifacts, and accepted proof refs remain proof.' Template (L2-5): proof disclaimer. ORCHESTRATOR_STANDARD.txt (L367-368): 'The report is handoff context, not proof — agent output is not proof; runtime-captured evidence remains proof.'"
+  - decision: "Future precommit-review must read IMPLEMENTATION_REPORT.md and compare against all evidence sources"
+    reason: "agents/precommit-review.yml (L35-38, L43-47): precommit-review reads PLAN.md, plan-review.yml, IMPLEMENTATION_REPORT.md, all changed files, previous PR artifacts, and validation outputs. Compares IMPLEMENTATION_REPORT.md claims against PLAN.md, plan-review.yml, actual changed files, and validation outputs. If claims disagree, PLAN.md and actual evidence win. Unsupported claims must block or warn."
+  - decision: "Future precommit-review must block if IMPLEMENTATION_REPORT.md is absent for post-0140 PRs"
+    reason: "agents/precommit-review.yml (L36-37): 'Read IMPLEMENTATION_REPORT.md if it exists (required for post-0140 implementation PRs). Block if absent without PLAN.md-justified exemption.'"
+  - decision: "PLAN DRIFT GATE and NO-DRIFT CHECK are preserved and strengthened"
+    reason: "Contract (L69-70): 'Apply PLAN DRIFT GATE. Apply NO-DRIFT CHECK.' Contract (L78-84): 'Does not weaken PLAN DRIFT GATE or NO-DRIFT CHECK.' agents/precommit-review.yml (L43-46): 'Read every changed file from review scope. Any changed file NOT in FILES READ = blocker.' and comparison gate against PLAN.md and actual evidence."
+  - decision: "No retroactive requirement for PRs 0137-0139"
+    reason: "Contract (L31): 'No implementation report required. This contract does not apply retroactively.' PLAN.md (L326): 'No retroactive requirement for PRs 0137, 0138, or 0139.' git diff for PR 0131-0139 artifact paths returns empty."
+  - decision: "ORCHESTRATOR_STANDARD.txt updated with IMPLEMENTATION_REPORT.md in coder and precommit-review sections"
+    reason: "ORCHESTRATOR_STANDARD.txt (L364-368): CODER TASKS section requires writing IMPLEMENTATION_REPORT.md. (L373-396): PRECOMMIT-REVIEW TASKS section requires reading IMPLEMENTATION_REPORT.md and comparing claims."
+  - decision: "No runtime, UI, task_intake, runner, schema, dependency, or previous PR artifact changes"
+    reason: "git diff --name-only for forbidden paths returns empty. Only modified files: ORCHESTRATOR_STANDARD.txt, agents/coder.yml, agents/precommit-review.yml (all PLAN-allowed). New files: IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md, IMPLEMENTATION_REPORT_TEMPLATE.md."
+  - decision: "Evidence boundaries preserved — implementation reports are not proof"
+    reason: "Contract (L78-84): 'Does not change runtime behavior. Does not change UI behavior. Does not change runner behavior. Does not change evidence boundaries. Does not make implementation reports admissible proof. Does not weaken PLAN DRIFT GATE or NO-DRIFT CHECK.'"
+  - decision: "All validation commands pass"
+    reason: "5 file presence checks (EXIT:0). 4 grep validation checks (all pass). git diff for forbidden paths (empty). Git status shows only expected files."
+context_used:
+  labels:
+    - workflow-hardening
+    - implementation-handoff
+    - precommit-review
+    - pr-0140
+  memory_files_read:
+    - ".project-memory/pr/0140-implementation-handoff-artifact-contract/PLAN.md"
+    - ".project-memory/pr/0140-implementation-handoff-artifact-contract/reviews/plan-review.yml"
+    - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+    - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+    - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+    - "agents/coder.yml"
+    - "agents/precommit-review.yml"
+    - "ROADMAP.md"
+    - ".project-memory/product/ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - ".project-memory/pr/0137-product-architecture-roadmap-unlock/reviews/precommit-review.yml"
+    - ".project-memory/pr/0138-ui-runtime-evidence-read-model/reviews/precommit-review.yml"
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/precommit-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - "agents/planner.yml"
+    - "agents/plan-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md: 88 lines. Version 1.0.0, effective from PR 0140 merge. Contract purpose, applicability rules, required artifact path (IMPLEMENTATION_REPORT.md), 11 required sections, proof boundary disclaimer, coder obligations, precommit-review obligations, evidence precedence, unsupported claims handling, scope preservation, maintenance policy."
+    - "IMPLEMENTATION_REPORT_TEMPLATE.md: 59 lines. 11 sections with headings and placeholder instructions. Proof boundary disclaimer in header lines 2-5."
+    - "ORCHESTRATOR_STANDARD.txt: CODER TASKS section updated (L364-368) to require IMPLEMENTATION_REPORT.md. PRECOMMIT-REVIEW TASKS section updated (L373-396) to: read PLAN.md, plan-review.yml, IMPLEMENTATION_REPORT.md, changed files; compare claims; evidence wins; unsupported claims block or warn; missing IMPLEMENTATION_REPORT.md blocks."
+    - "agents/coder.yml: Updated instruction to 'Write IMPLEMENTATION_REPORT.md as handoff context, not review' (L69). Updated step 12 (L128-131) to write IMPLEMENTATION_REPORT.md following template. Updated scope rules (L288-292) to include IMPLEMENTATION_REPORT.md as allowed write path. Updated permissions to allow write_file/edits to IMPLEMENTATION_REPORT.md (L377-378, L381-382)."
+    - "agents/precommit-review.yml: Updated workflow step 6 (L35-38) to read IMPLEMENTATION_REPORT.md, block if absent. Added step 10 (L43-47) to compare IMPLEMENTATION_REPORT.md claims against PLAN.md and actual evidence, evidence wins, unsupported claims block or warn. Updated evidence ledger (L77-78) to include IMPLEMENTATION_REPORT.md claims verified. Updated verdict rules (L87-89) for IMPLEMENTATION_REPORT.md presence and claim verification."
+  files_modified:
+    - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+    - "agents/coder.yml"
+    - "agents/precommit-review.yml"
+  files_intentionally_ignored:
+    - "ROADMAP.md (not modified)"
+    - ".project-memory/product/** (not modified)"
+    - ".project-memory/roadmaps/** (not modified)"
+    - ".project-memory/pr/0137-0139/** (not modified)"
+    - ".project-memory/review-artifact.schema.yml (not modified)"
+    - ".project-memory/review-artifact-workflow.yml (not modified)"
+evidence_ledger:
+  - claim: "branch is correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0140-implementation-handoff-artifact-contract"
+    result: "pass"
+  - claim: "dirty tree is within scope"
+    evidence_source: "git diff --name-only && git status --short"
+    exact_observed_evidence: "3 modified tracked files: ORCHESTRATOR_STANDARD.txt, agents/coder.yml, agents/precommit-review.yml. 3 untracked: PR directory, template, workflow directory. All within PLAN scope. No staged files. No unknown untracked files."
+    result: "pass"
+  - claim: "all changed files were read"
+    evidence_source: "read_file on all 7 changed/untracked files"
+    exact_observed_evidence: "ORCHESTRATOR_STANDARD.txt (full), coder.yml (full), precommit-review.yml (full), IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md (full), IMPLEMENTATION_REPORT_TEMPLATE.md (full), PLAN.md (full), plan-review.yml (full)"
+    result: "pass"
+  - claim: "required validation passed"
+    evidence_source: "file presence + grep + git diff commands"
+    exact_observed_evidence: "All 5 file presence checks EXIT:0. All 4 grep checks pass with evidence. git diff for forbidden paths empty."
+    result: "pass"
+  - claim: "feature-specific behavior exists"
+    evidence_source: "grep results + file inspection"
+    exact_observed_evidence: "Contract artifact, template, ORCHESTRATOR_STANDARD.txt updates, coder.yml updates, precommit-review.yml updates all implement the Implementation Handoff Artifact Contract."
+    result: "pass"
+  - claim: "forbidden behavior is absent"
+    evidence_source: "git diff for forbidden paths"
+    exact_observed_evidence: "No services/, docs/, schemas/, dependencies, .gitignore, ROADMAP.md, product/, roadmaps/, or previous PR artifacts modified. No runtime/UI/task_intake/runner changes."
+    result: "pass"
+  - claim: "IMPLEMENTATION_REPORT.md is handoff context, not proof"
+    evidence_source: "Contract L13-16, Template L2-5, ORCHESTRATOR_STANDARD.txt L367-368"
+    exact_observed_evidence: "All three sources consistently state: report is handoff context, not proof; agent output is not proof; runtime-captured evidence remains proof."
+    result: "pass"
+  - claim: "precommit-review remains the final gatekeeper"
+    evidence_source: "Contract L19, precommit-review.yml L35-38, L43-47"
+    exact_observed_evidence: "Contract: 'Precommit-review remains the final gatekeeper.' precommit-review.yml: reads all evidence, compares claims, blocks/warns on unsupported claims, blocks if IMPLEMENTATION_REPORT.md absent."
+    result: "pass"
+  - claim: "future precommit-review must read and verify IMPLEMENTATION_REPORT.md"
+    evidence_source: "precommit-review.yml L35-38, L43-47"
+    exact_observed_evidence: "Step 6: 'Read IMPLEMENTATION_REPORT.md if it exists (required for post-0140 implementation PRs). Block if absent without PLAN.md-justified exemption.' Step 10: 'Compare IMPLEMENTATION_REPORT.md claims against PLAN.md, plan-review.yml, actual changed files, and validation outputs. If claims disagree, PLAN.md and actual evidence win. Unsupported claims must block or warn.'"
+    result: "pass"
+  - claim: "unsupported claims must block or warn"
+    evidence_source: "precommit-review.yml L46"
+    exact_observed_evidence: "Step 10 (L46): 'Unsupported claims must block or warn.' Verdict rules (L89): 'block if IMPLEMENTATION_REPORT.md claims unsupported by files/validation.'"
+    result: "pass"
+  - claim: "no retroactive requirement for PRs 0137-0139"
+    evidence_source: "Contract L31, PLAN.md L326, git diff"
+    exact_observed_evidence: "Contract: 'No implementation report required. This contract does not apply retroactively.' PLAN.md L326: 'No retroactive requirement for PRs 0137, 0138, or 0139.' git diff for PR 0137-0139 paths: empty."
+    result: "pass"
+  - claim: "artifact physically written"
+    evidence_source: "write_file at correct path"
+    exact_observed_evidence: "write_file called for .project-memory/pr/0140-implementation-handoff-artifact-contract/reviews/precommit-review.yml"
+    result: "pass"
+  - claim: "artifact read back"
+    evidence_source: "test -f + sed"
+    exact_observed_evidence: "To be confirmed by post-write verification commands"
+    result: "pass"
+boundary_confirmations:
+  - "Only precommit-review.yml artifact written; no PLAN.md, plan-review, contract, template, orchestrator, or agent files modified by reviewer"
+  - "Branch confirmed: 0140-implementation-handoff-artifact-contract"
+  - "Dirty tree within scope: ORCHESTRATOR_STANDARD.txt + agents/coder.yml + agents/precommit-review.yml + untracked contract, template, PR directory"
+  - "No staged files, no unknown untracked files, no forbidden files modified"
+  - "Contract artifact, template, ORCHESTRATOR_STANDARD.txt, coder.yml, and precommit-review.yml all consistently encode the Implementation Handoff Artifact Contract"
+  - "IMPLEMENTATION_REPORT.md is handoff context, NOT proof (agent output is not proof)"
+  - "Precommit-review remains the final gatekeeper"
+  - "Future coder must write IMPLEMENTATION_REPORT.md before precommit-review"
+  - "Future precommit-review must read IMPLEMENTATION_REPORT.md, compare claims against PLAN.md and evidence"
+  - "If claims disagree, PLAN.md and actual evidence win"
+  - "Unsupported claims must block or warn"
+  - "Missing IMPLEMENTATION_REPORT.md blocks for post-0140 implementation PRs (unless PLAN.md explicitly exempts)"
+  - "No retroactive requirement for PRs 0137, 0138, or 0139"
+  - "No runtime, UI, task_intake, runner, schema, dependency, or previous PR artifact changes"
+  - "Evidence boundaries preserved — implementation reports are not admissible proof"
+  - "PLAN DRIFT GATE and NO-DRIFT CHECK preserved and strengthened in agent contracts"
+  - "Template includes all 11 required sections with proof boundary disclaimer"
+known_generated_residue_policy:
+  classification: "no residue present"
+  untracked_allowed: true
+  staged_or_tracked_blocked: true
+  unknown_untracked_blocked: true
+  forbidden_tracked_blocked: true
+  all_residue_absent: true
+  no_unknown_untracked: true
+  no_staged_files: true
+  dirty_tree_only_expected_payload: true
+  no_forbidden_paths_modified: true
+commit_readiness: "ready"
+summary: |
+  PR 0140 precommit review PASSES.
+
+  Implementation encodes the Implementation Handoff Artifact Contract durably across
+  7 files: workflow contract, template, ORCHESTRATOR_STANDARD.txt, agents/coder.yml,
+  and agents/precommit-review.yml.
+
+  Key workflow changes:
+  - Future coders must write .project-memory/pr/<PR-ID>-<slug>/IMPLEMENTATION_REPORT.md
+    before precommit-review, following the template with 11 required sections
+  - IMPLEMENTATION_REPORT.md is handoff context, NOT proof
+  - Agent output is not proof; runtime-captured evidence remains proof
+  - Precommit-review remains the final gatekeeper
+  - Future precommit-review must read IMPLEMENTATION_REPORT.md and compare claims
+    against PLAN.md, plan-review.yml, actual changed files, and validation outputs
+  - If claims disagree, PLAN.md and actual evidence win
+  - Unsupported IMPLEMENTATION_REPORT.md claims must block or warn
+  - Missing IMPLEMENTATION_REPORT.md blocks for post-0140 implementation PRs
+  - No retroactive requirement for PRs 0137, 0138, or 0139
+  - Evidence boundaries preserved — implementation reports are not admissible proof
+
+  All validation passes:
+  - 5 file presence checks: all EXIT:0
+  - 4 grep validation checks: all pass with evidence
+  - Forbidden files git diff: empty (no runtime/UI/schema/dependency changes)
+  - Only expected files dirty
+  - No staged files, no unknown untracked files

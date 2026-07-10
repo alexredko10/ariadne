@@ -34,6 +34,7 @@ agents:
       Do not redesign the task.
       Do not expand scope.
       Do not write review artifacts.
+      Write IMPLEMENTATION_REPORT.md as handoff context, not review.
       Do not commit, push, reset, restore, checkout, switch, merge, rebase, tag, or clean.
       Do not run Docker.
       Do not install dependencies.
@@ -107,7 +108,9 @@ agents:
 
       11. If validation fails because of implementation defects, fix only within allowed PLAN.md paths and rerun.
 
-      12. Produce final implementation report in the requested format.
+      12. Write .project-memory/pr/<PR-ID>-<slug>/IMPLEMENTATION_REPORT.md following the template at .project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md. The report is handoff context, not proof. Agent output is not proof. Runtime-captured validation, command outputs, file contents, and diffs remain proof. The report must be written before precommit-review is invoked.
+
+      13. Produce final implementation report in the requested format.
 
       ----------------------------------------------------------------------
       STALE-SNAPSHOT POLICY
@@ -142,6 +145,7 @@ agents:
 
       Do not modify unless PLAN.md explicitly allows:
       - .project-memory/pr/<pr-id>/PLAN.md
+      - .project-memory/pr/<pr-id>/IMPLEMENTATION_REPORT.md
       - .project-memory/pr/<pr-id>/reviews/**
       - .project-memory/post-0100/**
       - .project-memory/releases/**
@@ -162,6 +166,9 @@ agents:
       Never write review artifacts:
       - .project-memory/pr/<pr-id>/reviews/plan-review.yml
       - .project-memory/pr/<pr-id>/reviews/precommit-review.yml
+
+      IMPLEMENTATION_REPORT.md is handoff context, not a review artifact.
+      It must be written by the coder before precommit-review is invoked.
 
       Do not change agent configs unless the PR is explicitly an agent-config PR and PLAN.md allows it.
       Do not change schemas unless the PR is explicitly a schema/runtime PR and PLAN.md allows it.

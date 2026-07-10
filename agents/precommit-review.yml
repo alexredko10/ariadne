@@ -39,20 +39,23 @@ agents:
       3. Read PLAN.md.
       4. Read plan-review artifact. If verdict is block → stop and block.
       5. Read .project-memory/review-artifact.schema.yml if present.
-      6. Read every changed file from review scope (all untracked implementation/test files expected by PLAN). Any changed file NOT in FILES READ = blocker.
-      7. Read other task-specific required files.
-      8. Run ALL validation commands from PLAN.md. Record command, exit code, short output. Never skip. If a command cannot run, record reason and block.
-      9. Run grep safety checks (forbidden names, subprocess, os.system, PLACEHOLDER etc.). Record all output.
-      10. Run .ariadne residue check:
+      6. Read IMPLEMENTATION_REPORT.md if it exists (required for post-0140 implementation PRs). Block if absent without PLAN.md-justified exemption.
+      7. Read every changed file from review scope (all untracked implementation/test files expected by PLAN). Any changed file NOT in FILES READ = blocker.
+      8. Read other task-specific required files.
+      9. Run ALL validation commands from PLAN.md. Record command, exit code, short output. Never skip. If a command cannot run, record reason and block.
+      10. Compare IMPLEMENTATION_REPORT.md claims against PLAN.md, plan-review.yml, actual changed files, and validation outputs. If claims disagree, PLAN.md and actual evidence win. Unsupported claims must block or warn.
+      11. Run grep safety checks (forbidden names, subprocess, os.system, PLACEHOLDER etc.). Record all output.
+      12. Run .ariadne residue check:
           `if [ -d .ariadne ]; then find .ariadne -maxdepth 5 -type f | sort; else echo ".ariadne absent"; fi`
-      11. Assemble artifact IN MEMORY with all observed values. Leave NO empty strings or placeholders.
-      12. Write artifact to: .project-memory/pr/<pr-id>/reviews/precommit-review.yml
-      13. Verify write: `test -f <path>` + read back. If fails → block: artifact-not-physically-written.
+      13. Assemble artifact IN MEMORY with all observed values. Leave NO empty strings or placeholders.
+      14. Write artifact to: .project-memory/pr/<pr-id>/reviews/precommit-review.yml
+      15. Verify write: `test -f <path>` + read back. If fails → block: artifact-not-physically-written.
 
       ## Evidence ledger (mandatory rows)
       - branch is correct
       - dirty tree is within scope
       - all changed files were read
+      - IMPLEMENTATION_REPORT.md claims verified (if report exists)
       - required validation passed
       - feature-specific behavior exists
       - forbidden behavior is absent
@@ -61,12 +64,13 @@ agents:
       All rows must have non-empty `exact_observed_evidence`.
 
       ## Verdict
-      - pass: 0 blockers, all validation passed, all changed files read, dirty tree clean, artifact written & read back, all ledger rows pass.
+      - pass: 0 blockers, all validation passed, all changed files read, dirty tree clean, artifact written & read back, all ledger rows pass, IMPLEMENTATION_REPORT.md present when required (post-0140) or explicitly exempted by PLAN.md.
       - warning: same as pass but non-blocking warnings present.
-      - block: any blocker, validation skipped/failed, changed files not read, unexpected dirty files, placeholder, artifact not written/read back, any ledger row block.
+      - block: any blocker, validation skipped/failed, changed files not read, unexpected dirty files, placeholder, artifact not written/read back, any ledger row block, IMPLEMENTATION_REPORT.md missing (post-0140) without PLAN.md exemption, IMPLEMENTATION_REPORT.md claims unsupported by files/validation.
 
       ## Scope
       Writes only: .project-memory/pr/<pr-id>/reviews/precommit-review.yml
+      Reads: PLAN.md, plan-review.yml, IMPLEMENTATION_REPORT.md, all changed files, previous PR artifacts.
       Never touch: implementation, tests, PLAN.md, plan-review, ROADMAP.md, services/**, schemas/**, docs/**, agents/**, packages/**, apps/**, docker/**, .github/**, pyproject.toml, package.json, Makefile, .project-memory/post-0100/**, releases/**, memory_index.yml, project_contract.yml, anchors.yml, templates/**.
 
       ## Post-0100 anti-committee-mode
@@ -186,6 +190,8 @@ permissions:
     - "write_file:ROADMAP.md"
     - "write_file:.project-memory/pr/*/PLAN.md"
     - "edit_file:.project-memory/pr/*/PLAN.md"
+    - "write_file:.project-memory/pr/*/IMPLEMENTATION_REPORT.md"
+    - "edit_file:.project-memory/pr/*/IMPLEMENTATION_REPORT.md"
     - "write_file:.project-memory/pr/*/reviews/plan-review.yml"
     - "edit_file:.project-memory/pr/*/reviews/plan-review.yml"
     - "write_file:.project-memory/post-0100/**"
