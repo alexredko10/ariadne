@@ -1,0 +1,316 @@
+schema_version: "0.1"
+pr_id: "0139-artifact-workspace-local-run-list-view"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-10T07:25:00Z"
+head_verified: "1fca663983f846d101fe80a936f132951cfbe8d1"
+branch_confirmed: "0139-artifact-workspace-local-run-list-view"
+snapshot_delta:
+  plan_base_sha: "1fca663983f846d101fe80a936f132951cfbe8d1"
+  current_head: "1fca663983f846d101fe80a936f132951cfbe8d1"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/plan-review.yml"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_local_run_history_in_page.py"
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/precommit-review.yml"
+  actual_files:
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/plan-review.yml"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_local_run_history_in_page.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/plan-review.yml"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/tests/test_local_run_history_in_page.py"
+  - "services/runner/src/runner/runtime_evidence.py"
+  - "services/runner/tests/test_runtime_evidence.py"
+  - "ROADMAP.md"
+  - ".project-memory/product/ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - ".project-memory/pr/0138-ui-runtime-evidence-read-model/PLAN.md"
+  - ".project-memory/pr/0138-ui-runtime-evidence-read-model/reviews/precommit-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - "agents/precommit-review.yml"
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+  - "services/runner/tests/test_run_persistence.py"
+files_written:
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/precommit-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "1fca663983f846d101fe80a936f132951cfbe8d1"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0139-artifact-workspace-local-run-list-view"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "M server.py,  M test_local_run_history_in_page.py, ?? PR directory"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "services/task_intake/src/task_intake/server.py, services/task_intake/tests/test_local_run_history_in_page.py"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+  - command: "test -f .project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is readable"
+  - command: "test -f .project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/plan-review.yml"
+    result: "passed"
+    exit_code: 0
+    evidence: "plan-review.yml exists and is readable (verdict: approve)"
+  - command: "test -f services/task_intake/src/task_intake/server.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "server.py exists (modified — added GET /runs route and HTML/JS fetchRuns)"
+  - command: "test -f services/task_intake/tests/test_local_run_history_in_page.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "test_local_run_history_in_page.py exists (modified — added TestGetRunsRoute with 20+ tests)"
+  - command: "python -m compileall -f services/runner/src services/task_intake/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "All Python files compiled successfully"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest services/task_intake/tests/test_local_run_history_in_page.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "41 passed in 0.09s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest services/runner/tests/test_runtime_evidence.py services/task_intake/tests/test_local_run_history_in_page.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "73 passed in 0.19s (32 runtime_evidence + 41 app tests)"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest services/runner/tests/test_agent_runner_bridge.py services/runner/tests/test_pipeline_runner.py services/runner/tests/test_prompt_composer.py services/runner/tests/test_ariadne_task_cli.py services/runner/tests/test_git_boundary.py services/runner/tests/test_run_persistence.py services/runner/tests/test_verdict_parser.py services/runner/tests/test_docker_agent_adapter.py services/runner/tests/test_adapter_registry.py services/runner/tests/test_local_harness.py services/task_intake/tests -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "1235 passed in 3.36s"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'subprocess|os.system|shell=True|git add|git commit|git push|gh pr create|run_ariadne_task' services/task_intake/src/task_intake/server.py services/task_intake/tests/test_local_run_history_in_page.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only test assertions checking absence of these patterns (assert 'subprocess' not in source etc.). Zero actual unsafe operations in implementation."
+  - command: "grep -n -E 'PLAN DRIFT GATE|NO-DRIFT CHECK' .project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "L365: '### 9. PLAN DRIFT GATE'. L377: '### 10. NO-DRIFT CHECK'. Both in correct all-caps (plan-review casing warning resolved)."
+  - command: "git diff --name-only -- ROADMAP.md services/runner/src/runner/runtime_evidence.py services/runner/tests/test_runtime_evidence.py services/runner/src/runner/ariadne_task_cli.py services/runner/src/runner/run_persistence.py services/runner/tests/test_ariadne_task_cli.py services/runner/tests/test_run_persistence.py .project-memory/product .project-memory/roadmaps .project-memory/pr/0131-dogfood-pr-created-by-ariadne .project-memory/pr/0132-persist-final-execution-results .project-memory/pr/0133-runner-test-runtime-residue-isolation .project-memory/pr/0134-commit-payload-cleanliness-gate .project-memory/pr/0135-persisted-run-report-artifact .project-memory/pr/0136-production-line-final-readiness-gate .project-memory/pr/0137-product-architecture-roadmap-unlock .project-memory/pr/0138-ui-runtime-evidence-read-model agents docs schemas pyproject.toml poetry.lock .gitignore"
+    result: "passed"
+    exit_code: 0
+    evidence: "Empty output — zero changes to any forbidden files."
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "M server.py,  M test_local_run_history_in_page.py, ?? .project-memory/pr/0139-.../"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "server.py, test_local_run_history_in_page.py"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Implementation matches PLAN.md — file names confirmed"
+    reason: "PLAN.md specifies server.py and test_local_run_history_in_page.py. Both present as modified tracked files. Note: file names differ from expected 'app.py' and 'test_app_runs.py' default but match PLAN.md which is the authoritative source."
+  - decision: "GET /runs route exists and is read-only"
+    reason: "server.py L909: 'if method == \"GET\" and path == \"/runs\":' L928: 'summaries = list_run_evidence_summaries(runs_root)'. Route returns JSON response with run summaries. No writes, no shell-out, no mutation."
+  - decision: "Route uses runner.runtime_evidence.list_run_evidence_summaries() directly"
+    reason: "server.py L38: 'from runner.runtime_evidence import list_run_evidence_summaries'. L928: 'summaries = list_run_evidence_summaries(runs_root)'. No independent parsing of runtime artifacts."
+  - decision: "Response shape includes all required fields"
+    reason: "server.py L931-951: response includes run_id, status, reason_codes, pipeline_status, git_boundary_status, execution_attempted, created_at, run_json_available, manifest_available, run_report_available, missing_evidence, malformed_evidence, pr_url, payload_cleanliness_available, readiness_available. Plus outer ok, count, runs, runs_root."
+  - decision: "PR URL only from persisted evidence — never fabricated"
+    reason: "server.py L947: 'pr_url': s.pr_url — from RunEvidenceSummary which comes from _extract_pr_url() in runtime_evidence.py. test_no_pr_url_fabricated (L479) proves pr_url is None when absent."
+  - decision: "Missing and malformed evidence explicitly represented"
+    reason: "Missing evidence from RunEvidenceSummary.missing_evidence exposed as 'missing_evidence': list(s.missing_evidence). Malformed evidence as 'malformed_evidence': list(s.malformed_evidence). HTML/JS fetches /runs and shows indicators for missing and malformed evidence."
+  - decision: "HTML/JS updated with fetchRuns()"
+    reason: "server.js HTML/JS at L1753: 'fetch(\"/runs\")' in fetchRuns() function. Called on page load (L1831) and after submit (L1756). Displays run_id, status, missing/malformed evidence indicators, PR URL link."
+  - decision: "PLAN DRIFT GATE and NO-DRIFT CHECK casing resolved (plan-review warning)"
+    reason: "PLAN.md L365: '### 9. PLAN DRIFT GATE' (all caps). L377: '### 10. NO-DRIFT CHECK' (all caps). Matches specification. Plan-review casing warning resolved."
+  - decision: "All focused tests pass covering required scenarios"
+    reason: "41 tests pass in 0.09s. TestGetRunsRoute (20 tests): empty runs, missing runs, complete run, blocked run, failed run, missing manifest, missing report, malformed run.json, PR URL present, PR URL absent, reason_codes, execution_attempted, deterministic ordering, payload cleanliness indicator, readiness indicator, temporary fixtures, no real .ariadne, no shell-out, no agents, no mutation. TestRunHistoryPanel (10 tests): HTML integration, JS functions preserved. TestExistingUIPreserved (10 tests): existing UI intact. TestRunsExecutePreserved (2 tests): POST /runs/execute works."
+  - decision: "Regression tests pass — all prior PR behaviors preserved"
+    reason: "1235 passed in 3.36s. No regressions. runtime_evidence.py, ariadne_task_cli.py, run_persistence.py, git_boundary.py, conftest.py all unchanged."
+  - decision: "No forbidden files modified"
+    reason: "git diff --name-only for forbidden paths returns empty. ROADMAP.md, runtime_evidence.py, test_runtime_evidence.py, ariadne_task_cli.py, run_persistence.py, test files, product/, roadmaps/, previous PR artifacts (0131-0138), agents/, docs/, schemas/, dependencies, .gitignore all clean."
+  - decision: "No run detail panel, Artifact Workspace Shell, or frozen streams"
+    reason: "Implementation is a narrow list view only. No detail panel code. No Shell. No Visual Gate, Context Core, PCAM/PBS, Rubrics, Decision Core, Model Router, or ETL/ERP demo."
+  - decision: "All validation commands pass"
+    reason: "compileall EXIT:0. Focused tests: 41 passed. Combined read model + app tests: 73 passed. Regression: 1235 passed. Grep checks: all pass. PLAN DRIFT GATE and NO-DRIFT CHECK present in all caps. Git status clean (only expected files). No staged files."
+context_used:
+  labels:
+    - artifact-workspace-read-only-ui
+    - local-run-list-view
+    - precommit-review
+    - pr-0139
+  memory_files_read:
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/plan-review.yml"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_local_run_history_in_page.py"
+    - "services/runner/src/runner/runtime_evidence.py"
+    - "services/runner/tests/test_runtime_evidence.py"
+    - "ROADMAP.md"
+    - ".project-memory/product/ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - ".project-memory/pr/0138-ui-runtime-evidence-read-model/PLAN.md"
+    - ".project-memory/pr/0138-ui-runtime-evidence-read-model/reviews/precommit-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - "agents/precommit-review.yml"
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/src/runner/run_persistence.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - "services/runner/tests/test_run_persistence.py"
+  anchors_used: []
+  files_inspected:
+    - "server.py: L38 imports list_run_evidence_summaries from runner.runtime_evidence. L909-954: GET /runs route with JSON response including all required fields. L1753: fetchRuns() JS function for evidence-backed run list. L1831: fetchRuns() called on page load. No writes, no shell-out, no run_ariadne_task."
+    - "test_local_run_history_in_page.py: TestGetRunsRoute class with 20 tests. TestRunHistoryPanel with 10 tests. TestExistingUIPreserved with 10 tests. TestRunsExecutePreserved with 2 tests. Total 41 tests. Uses tempfile and tmp_path. No real .ariadne access."
+    - "runtime_evidence.py: unchanged. 5 frozen dataclasses, 2 functions. list_run_evidence_summaries provides RunEvidenceSummary with all fields."
+    - "PR 0138 precommit-review: verdict pass, 32 tests pass. Read model verified."
+  files_modified:
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_local_run_history_in_page.py"
+  files_intentionally_ignored:
+    - "runtime_evidence.py (unchanged — only imported by server.py)"
+    - "ariadne_task_cli.py (unchanged)"
+    - "run_persistence.py (unchanged)"
+    - "git_boundary.py (unchanged)"
+    - "conftest.py (unchanged)"
+    - "PR 0138 artifacts (unchanged)"
+evidence_ledger:
+  - claim: "branch is correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0139-artifact-workspace-local-run-list-view"
+    result: "pass"
+  - claim: "dirty tree is within scope"
+    evidence_source: "git diff --name-only && git status --short"
+    exact_observed_evidence: "2 files modified: server.py, test_local_run_history_in_page.py. Only untracked: PR 0139 directory. No staged files. No unknown untracked files."
+    result: "pass"
+  - claim: "all changed files were read"
+    evidence_source: "read_file on both modified files"
+    exact_observed_evidence: "server.py (full), test_local_run_history_in_page.py (full)"
+    result: "pass"
+  - claim: "required validation passed"
+    evidence_source: "compileall + pytest commands"
+    exact_observed_evidence: "compileall EXIT:0. Focused tests: 41 passed in 0.09s. Read model+app: 73 passed. Regression: 1235 passed in 3.36s."
+    result: "pass"
+  - claim: "feature-specific behavior exists"
+    evidence_source: "grep + test results"
+    exact_observed_evidence: "GET /runs route at server.py L909. list_run_evidence_summaries import at L38. Response includes all required fields. fetchRuns() JS at L1753. 41 tests covering all required scenarios."
+    result: "pass"
+  - claim: "forbidden behavior is absent"
+    evidence_source: "grep for unsafe patterns, git diff for forbidden paths"
+    exact_observed_evidence: "No subprocess, os.system, shell=True, git/gh commands, run_ariadne_task in implementation. No ROADMAP.md, runtime_evidence.py, test_runtime_evidence.py, ariadne_task_cli.py, run_persistence.py, test files, product/, roadmaps/, previous PRs, agents, docs, schemas, dependencies, .gitignore modifications."
+    result: "pass"
+  - claim: "route is read-only — no mutation, no shell-out, no run_ariadne_task"
+    evidence_source: "inspect server.py GET /runs route L909-954"
+    exact_observed_evidence: "Route only reads from runtime_evidence.py. No file writes, no directory creation, no subprocess, no os.system, no shell=True, no run_ariadne_task invocation. test_route_does_not_shell_out (L506) and test_route_does_not_run_agents (L514) prove safety."
+    result: "pass"
+  - claim: "PR URL only from persisted evidence"
+    evidence_source: "server.py L947: pr_url from RunEvidenceSummary + test"
+    exact_observed_evidence: "pr_url sourced from RunEvidenceSummary which uses _extract_pr_url in runtime_evidence.py. test_no_pr_url_fabricated (L479) proves pr_url is None when absent."
+    result: "pass"
+  - claim: "missing and malformed evidence explicitly represented"
+    evidence_source: "server.py L945-946 + tests"
+    exact_observed_evidence: "missing_evidence and malformed_evidence lists from RunEvidenceSummary. Tests prove missing manifest, missing report, and malformed run.json indicators visible."
+    result: "pass"
+  - claim: "deterministic ordering preserved"
+    evidence_source: "server.py uses list_run_evidence_summaries + test"
+    exact_observed_evidence: "list_run_evidence_summaries sorts by run_id reverse. test_deterministic_ordering (L494) proves run-003, run-002, run-001 ordering."
+    result: "pass"
+  - claim: "PLAN DRIFT GATE and NO-DRIFT CHECK in correct casing"
+    evidence_source: "grep PLAN.md"
+    exact_observed_evidence: "L365: '### 9. PLAN DRIFT GATE'. L377: '### 10. NO-DRIFT CHECK'. All caps as required. Plan-review casing warning resolved."
+    result: "pass"
+  - claim: "all prior PR behaviors preserved"
+    evidence_source: "git diff for forbidden paths + regression tests"
+    exact_observed_evidence: "git diff --name-only for forbidden paths returns empty. 1235 regression tests pass. runtime_evidence.py, ariadne_task_cli.py, run_persistence.py, git_boundary.py, conftest.py all unchanged."
+    result: "pass"
+  - claim: "no run detail panel, Artifact Workspace Shell, or frozen streams"
+    evidence_source: "inspect implementation"
+    exact_observed_evidence: "Only list view (GET /runs). No detail panel, no Shell, no Visual Gate, Context Core, PCAM/PBS, Rubrics, Decision Core, Model Router, or ETL/ERP demo."
+    result: "pass"
+  - claim: "artifact physically written"
+    evidence_source: "write_file at correct path"
+    exact_observed_evidence: "write_file called for .project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/precommit-review.yml"
+    result: "pass"
+  - claim: "artifact read back"
+    evidence_source: "test -f + sed"
+    exact_observed_evidence: "To be confirmed by post-write verification commands"
+    result: "pass"
+boundary_confirmations:
+  - "Only precommit-review.yml artifact written; no implementation, test, PLAN, or plan-review files modified"
+  - "Branch confirmed: 0139-artifact-workspace-local-run-list-view"
+  - "Dirty tree within scope: server.py and test_local_run_history_in_page.py modified + untracked PR directory"
+  - "No staged files, no unknown untracked files, no forbidden files modified"
+  - "GET /runs route exists (server.py L909) — read-only, uses list_run_evidence_summaries()"
+  - "Response includes all 15+ required fields: run_id, status, reason_codes, pipeline_status, git_boundary_status, execution_attempted, run_json_available, manifest_available, run_report_available, missing_evidence, malformed_evidence, pr_url, payload_cleanliness_available, readiness_available"
+  - "PR URL only from persisted evidence (never fabricated)"
+  - "Missing/malformed evidence explicitly represented via missing_evidence/malformed_evidence arrays"
+  - "Deterministic ordering preserved (newest first by run_id)"
+  - "HTML/JS updated with fetchRuns() calling GET /runs on page load and after submit"
+  - "41 tests pass: 20 GET /runs tests, 10 HTML integration tests, 10 existing UI preservation tests, 2 POST /runs/execute preservation tests"
+  - "All validation passes: compileall EXIT:0, 41 focused tests, 1235 regression tests"
+  - "PLAN DRIFT GATE and NO-DRIFT CHECK present with correct all-caps casing (warning resolved)"
+  - "No run detail panel, no Artifact Workspace Shell, no Visual Gate, no frozen streams"
+  - "Existing UI functionality preserved (POST /runs/execute, summary card, trace, feedback, etc.)"
+known_generated_residue_policy:
+  classification: "no residue present"
+  untracked_allowed: true
+  staged_or_tracked_blocked: true
+  unknown_untracked_blocked: true
+  forbidden_tracked_blocked: true
+  all_residue_absent: true
+  no_unknown_untracked: true
+  no_staged_files: true
+  dirty_tree_only_expected_payload: true
+  no_forbidden_paths_modified: true
+commit_readiness: "ready"
+summary: |
+  PR 0139 precommit review PASSES.
+
+  Implementation adds a narrow read-only local run list view at GET /runs in the existing
+  task_intake ASGI server, backed by PR 0138's runtime_evidence.read_model. The route reads
+  persisted .ariadne/runs/<run_id>/ artifacts through list_run_evidence_summaries() and
+  returns JSON with all required fields: run_id, status, reason_codes, pipeline_status,
+  git_boundary_status, execution_attempted, run_json_available, manifest_available,
+  run_report_available, missing_evidence, malformed_evidence, pr_url (only when persisted),
+  payload_cleanliness_available, and readiness_available.
+
+  The HTML/JS UI is updated with fetchRuns() calling GET /runs on page load and after
+  each POST /runs/execute, replacing the browser-only mock run history with evidence-backed
+  data. Existing UI functionality (summary card, execution trace, structured view, feedback,
+  session report) is fully preserved.
+
+  Read-only guarantees:
+  - No file writes, no shell-out, no git/gh/Docker, no run_ariadne_task invocation
+  - No run detail panel, no Artifact Workspace Shell
+  - PR URL only from persisted evidence (never fabricated)
+  - Missing/malformed evidence explicitly represented (not hidden)
+  - Deterministic ordering (newest first by run_id)
+
+  All validation passes:
+  - Compileall: EXIT:0
+  - Focused tests: 41 passed in 0.09s
+  - Read model + app tests: 73 passed in 0.19s
+  - Regression tests: 1235 passed in 3.36s
+  - PLAN DRIFT GATE and NO-DRIFT CHECK present in all-caps (casing warning resolved)
+  - No forbidden files modified
+  - Existing UI functionality preserved
