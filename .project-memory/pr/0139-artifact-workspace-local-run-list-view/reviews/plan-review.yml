@@ -1,0 +1,256 @@
+schema_version: "0.1"
+pr_id: "0139-artifact-workspace-local-run-list-view"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-10T07:16:40Z"
+snapshot_delta:
+  plan_base_sha: "1fca663983f846d101fe80a936f132951cfbe8d1"
+  current_head: "1fca663983f846d101fe80a936f132951cfbe8d1"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/plan-review.yml"
+  actual_files:
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/plan-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/plan-review.yml"
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+  - "ROADMAP.md"
+  - ".project-memory/product/ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - ".project-memory/pr/0137-product-architecture-roadmap-unlock/PLAN.md"
+  - ".project-memory/pr/0137-product-architecture-roadmap-unlock/reviews/precommit-review.yml"
+  - ".project-memory/pr/0138-ui-runtime-evidence-read-model/PLAN.md"
+  - ".project-memory/pr/0138-ui-runtime-evidence-read-model/reviews/precommit-review.yml"
+  - "services/runner/src/runner/runtime_evidence.py"
+  - "services/runner/tests/test_runtime_evidence.py"
+  - "services/runner/src/runner/ariadne_task_cli.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/tests/test_ariadne_task_cli.py"
+  - "services/runner/tests/test_run_persistence.py"
+  - ".project-memory/review-artifact.schema.yml"
+  - "agents/plan-review.yml"
+  - "agents/precommit-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "1fca663983f846d101fe80a936f132951cfbe8d1"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0139-artifact-workspace-local-run-list-view"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? .project-memory/pr/0139-artifact-workspace-local-run-list-view/"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No tracked files modified"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+  - command: "test -f .project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is readable"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'Artifact Workspace Local Run List View|read-only UI slice|dogfood|parallel projects|runtime_evidence|run list|run_id|status|reason_codes|pipeline_status|git_boundary_status|execution_attempted' PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "Line 1: '# PR 0139 — Artifact Workspace Local Run List View Plan'. Line 65: 'first read-only UI slice'. Line 70: 'dogfooding across multiple projects'. Lines 53-60: runtime_evidence.py and model fields (run_id, status, reason_codes, pipeline_status, git_boundary_status, execution_attempted). Lines 106-111: Required View Content lists all fields."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'UI mutation|agent launch|commit from UI|PR creation from UI|.ariadne|persisted runtime artifacts|must not|forbid|forbidden|frozen' PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "Line 11: 'Does not open UI mutation, agent launch from UI, commit from UI, or PR creation from UI'. Line 10: 'No mutation'. Lines 382-384: 'No UI mutation code. No agent launch code. No commit/PR creation code.' Lines 252-257: 'No real .ariadne/runs', 'Tests do not mutate runtime state — No writes to .ariadne/'. Lines 405-421: Non-Goals exclude mutation, agent execution, git/gh."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'run_json|manifest|run-report|missing evidence|malformed evidence|PR URL|payload cleanliness|readiness|deterministic ordering' PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "Lines 113-114: run_json/manifest/run-report availability indicators. Line 117: PR URL. Lines 153-155: missing/malformed evidence, PR URL. Line 120: deterministic ordering. Line 122: 'must not fabricate missing data'. Lines 178-185: run_json_available, manifest_available, run_report_available, payload_cleanliness_available, readiness_available in response schema."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'empty run|missing runs|complete run|blocked run|failed run|missing manifest|missing run-report|malformed|PR URL|reason_codes|execution_attempted|temporary|local fixtures|no shell|no agents|no mutation' PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "Tests 1-20 (lines 224-257): empty run (test 1), missing runs (test 2), complete run (test 3), blocked run (test 4), failed run (test 5), missing manifest (test 6), missing run-report (test 7), malformed (test 8), PR URL (tests 9-10), reason_codes (test 11), execution_attempted (test 12), temporary/local fixtures (test 16), no shell (test 18), no agents (test 19), no mutation (test 20)."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'PLAN DRIFT GATE|NO-DRIFT CHECK|git status --short|git diff --name-only|git diff --cached --name-only|compileall|pytest' PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "Line 365: '### 9. Plan Drift Gate' (camel case). Line 377: '### 10. No-Drift Check' (camel case). Line 337: 'git status --short'. Line 349: 'git diff --name-only'. Line 359: 'git diff --cached --name-only'. Line 264: 'python -m compileall -f services/runner/src services/task_intake/src'. Lines 273-284: focused pytest command. Lines 286-306: regression pytest command."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'Artifact Workspace Shell|Visual Gate|Context Core|Decision Core|Rubrics|Model Router|ETL|ERP|PCAM|PBS' PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "Line 10: 'No Artifact Workspace Shell'. Line 11: 'Does not implement Visual Gate, Context Core, PCAM/PBS, Rubrics, Decision Core, Model Router, or ETL/ERP demo'. Lines 405-421: Non-Goals list all frozen streams. Line 429: Stop condition if frozen stream is implemented."
+blockers: []
+warnings:
+  - id: "WARNING_PLAN_DRIFT_GATE_CASING"
+    description: "PLAN.md uses 'Plan Drift Gate' (L365) and 'No-Drift Check' (L377) instead of all-caps 'PLAN DRIFT GATE' and 'NO-DRIFT CHECK'. The content and structure are present and functionally equivalent."
+    evidence: "Plan Drift Gate at line 365: lists expected files and block conditions. No-Drift Check at line 377: lists forbidden file changes."
+    recommendation: "No action required — content matches requirements."
+  - id: "WARNING_ARTIFACT_WRITE_READBACK"
+    description: "PLAN.md does not explicitly mention 'artifact write/readback' as a separate validation step. However, the Plan Drift Gate (L365) lists review artifacts as expected files, and the precommit-review agent workflow verifies physical write and readback separately."
+    evidence: "Plan Drift Gate lists expected files including 'reviews/plan-review.yml' and 'reviews/precommit-review.yml'. No explicit 'artifact write/readback' section."
+    recommendation: "No action required — artifact boundary enforcement is achieved through Plan Drift Gate and precommit-review."
+decisions_made:
+  - decision: "PR 0139 is correctly positioned as the second Artifact Workspace Read-Only UI stream PR"
+    reason: "ROADMAP.md L358: '### Next active stream: Artifact Workspace Read-Only UI (0138+)'. Roadmap artifact Stream 1: Artifact Workspace Read Model (0138-0142). PR 0138 precommit-review confirms runtime_evidence.py implemented with list_run_evidence_summaries(). PLAN.md Roadmap Alignment: Track 'Artifact Workspace Read-Only UI (Stream 1)', Slot 'PR 0139 (second read-only UI stream PR, after PR 0138 read model)'."
+  - decision: "PR 0139 is a narrow read-only UI slice — no mutation or full shell"
+    reason: "PLAN.md line 10: 'No run detail panel, no Artifact Workspace Shell, no mutation.' Line 67: 'not the full Artifact Workspace Shell'. Line 68: 'not a run detail panel'. Line 69: 'not a mutation surface'. Non-Goals (lines 405-421) exclude all mutation and frozen streams. Drift heuristic and Stop Conditions reinforce no mutation boundaries."
+  - decision: "PR 0139 integrates with PR 0138 runtime_evidence.py read model"
+    reason: "PLAN.md lines 127-131: 'The view uses runner.runtime_evidence.list_run_evidence_summaries() directly.' Lines 53-60 reference PR 0138's ReadModel with RunEvidenceSummary fields (run_id, status, reason_codes, pipeline_status, git_boundary_status, execution_attempted, created_at, run_json_path, manifest_path, run_report_path, pr_url, missing_evidence, malformed_evidence). PR 0138 precommit-review confirms the read model is implemented with 32 passing tests."
+  - decision: "PR 0139 targets dogfooding across multiple parallel projects"
+    reason: "PLAN.md line 70: 'This view exists to support dogfooding across multiple projects.' Dogfood Purpose section (lines 145-157) explicitly states PR 0139 is for Ariadne dogfood usability across parallel projects, answering which runs exist, which project/task/PR they belong to, which completed/blocked/failed, which have missing/malformed evidence, which have PR URL evidence."
+  - decision: "All 15 required view content fields are specified"
+    reason: "Required View Content (lines 106-120) lists: run_id, status (with visual distinction), reason_codes, pipeline_status, git_boundary_status, execution_attempted, run_json availability, manifest availability, run-report availability, missing evidence indicator, malformed evidence indicator, PR URL (only when persisted), payload cleanliness indicator, readiness indicator, deterministic ordering. No data fabrication — 'must not fabricate missing data' (line 122)."
+  - decision: "All 20 test requirements cover the required scenarios"
+    reason: "Test Requirements (lines 224-257): empty run list, missing runs root, complete run, blocked run, failed run, missing manifest, missing run-report, malformed evidence, PR URL present, PR URL absent, reason_codes display, execution_attempted display, payload cleanliness available, readiness available, deterministic ordering, temporary/local fixtures, no real .ariadne, no shell, no agents, no mutation."
+  - decision: "Exact implementation files specified with discovery evidence"
+    reason: "Implementation Scope (lines 77-98): server.py (add GET /runs route + update HTML/JS), test_local_run_history_in_page.py (update tests), optional runtime_evidence.py (runs_root_finder helper if needed). Files excluded: run_persistence.py, ariadne_task_cli.py, git_boundary.py, conftest.py. Not Modified: ROADMAP.md, docs, agents, schemas, dependencies, .gitignore, previous PR artifacts."
+  - decision: "PR 0138 read model is fully implemented and verified"
+    reason: "PR 0138 precommit-review.yml: verdict pass, 32 tests pass, 5 frozen dataclasses (RunEvidenceSummary, RunEvidenceDetail, ArtifactEvidenceRef, MissingEvidenceNotice, RuntimeEvidenceReadResult), 2 functions (list_run_evidence_summaries, read_run_evidence_detail). No file writes, no shell-out, no git/gh/Docker, no run_ariadne_task invocation. regression 472 tests pass. PLAN DRIFT GATE and NO-DRIFT CHECK present."
+  - decision: "No new frontend dependencies or stack changes"
+    reason: "PLAN.md line 11: 'No new frontend stack, no new dependencies.' Lines 404-421 Non-Goals include 'No new frontend framework or dependencies'."
+  - decision: "No frozen streams opened"
+    reason: "PLAN.md line 11: 'Does not implement Visual Gate, Context Core, PCAM/PBS, Rubrics, Decision Core, Model Router, or ETL/ERP demo.' Lines 405-421 Non-Goals list all frozen streams. Line 436: Stop condition if frozen stream implemented."
+  - decision: "Prior PR behaviors are preserved"
+    reason: "PLAN.md lines 391-401 'Preserved Previous Fixes': PR 0131-0136 Production Line preserved, PR 0137 not modified, PR 0138 read model functions unchanged, git_boundary.py not modified, run_persistence.py not modified, conftest.py not modified, ariadne_task_cli.py not modified. No changes to existing runtime behavior."
+  - decision: "Product identity preserved"
+    reason: "PLAN.md reads runtime-owned persisted evidence through the PR 0138 read model. Agent output is not trusted — the view consumes normalized RunEvidenceSummary from persisted .ariadne/runs/ artifacts. Runtime-captured proof remains the evidence source."
+context_used:
+  labels:
+    - artifact-workspace-read-only-ui
+    - local-run-list-view
+    - read-only-ui-slice
+    - plan-review
+    - pr-0139
+  memory_files_read:
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+    - "ROADMAP.md"
+    - ".project-memory/product/ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - ".project-memory/pr/0137-product-architecture-roadmap-unlock/PLAN.md"
+    - ".project-memory/pr/0137-product-architecture-roadmap-unlock/reviews/precommit-review.yml"
+    - ".project-memory/pr/0138-ui-runtime-evidence-read-model/PLAN.md"
+    - ".project-memory/pr/0138-ui-runtime-evidence-read-model/reviews/precommit-review.yml"
+    - "services/runner/src/runner/runtime_evidence.py"
+    - "services/runner/tests/test_runtime_evidence.py"
+    - "services/runner/src/runner/ariadne_task_cli.py"
+    - "services/runner/src/runner/run_persistence.py"
+    - "services/runner/tests/test_ariadne_task_cli.py"
+    - "services/runner/tests/test_run_persistence.py"
+    - ".project-memory/review-artifact.schema.yml"
+    - "agents/plan-review.yml"
+    - "agents/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "PLAN.md: full — Roadmap Alignment, Discovery Evidence, UI Slice Identity, Implementation Scope, Required View Content, Read Model Integration, Dogfood Purpose, Route Design, HTML Integration, Tests, Validation Checklist, Preserved Previous Fixes, Non-Goals, Stop Conditions"
+    - "ROADMAP.md: Production Line COMPLETED, Artifact Workspace Read-Only UI (0138+) next active stream (L358), frozen boundaries (L367-377)"
+    - "ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md: Stream 1 Artifact Workspace Read Model (0138-0142), PR 0138 listed as UI Runtime Evidence Read Model, PR 0139 as Local Run Index Reader (scope absorbed into PR 0138)"
+    - "PR 0138 precommit-review.yml: pass, 32 tests pass, 5 dataclasses, 2 functions, no mutation, no shell-out"
+    - "runtime_evidence.py: 156 lines, RunEvidenceSummary with run_id/status/reason_codes/pipeline_status/git_boundary_status/execution_attempted/pr_url/missing_evidence/malformed_evidence, list_run_evidence_summaries() function"
+    - "test_runtime_evidence.py: 470 lines, 32 tests in 4 classes covering empty/missing/complete runs, malformed evidence, PR URL, deterministic sort, safety, type structures"
+    - "ariadne_task_cli.py: unchanged — all production-line gates intact"
+    - "run_persistence.py: unchanged — load_run_record/persist_run_record intact"
+  files_modified: []
+  files_intentionally_ignored:
+    - "services/task_intake/src/task_intake/server.py (will be modified by implementation, not during planning)"
+    - "services/task_intake/tests/test_local_run_history_in_page.py (will be modified by implementation, not during planning)"
+    - "services/runner/src/runner/git_boundary.py (no change needed)"
+    - "services/runner/tests/conftest.py (no change needed)"
+evidence_ledger:
+  - claim: "branch is correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0139-artifact-workspace-local-run-list-view"
+    result: "pass"
+  - claim: "dirty tree is within scope"
+    evidence_source: "git status --short && git diff --name-only"
+    exact_observed_evidence: "Only untracked: .project-memory/pr/0139-artifact-workspace-local-run-list-view/. No tracked files modified. No staged files. No unknown untracked files outside expected PR 0139 artifacts and known generated residue."
+    result: "pass"
+  - claim: "PLAN.md was read"
+    evidence_source: "read_file .project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+    exact_observed_evidence: "PLAN.md read in full. Contains 436+ lines with Roadmap Alignment, Discovery Evidence, UI Slice Identity, Implementation Scope, Required View Content, Read Model Integration, Dogfood Purpose, Route Design, HTML Integration, 20 Tests, Validation Checklist with 10 steps, Preserved Previous Fixes, Non-Goals, Stop Conditions."
+    result: "pass"
+  - claim: "required supporting files read"
+    evidence_source: "read_file on all 17 required reads"
+    exact_observed_evidence: "Read: ROADMAP.md, ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md, ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md, PR 0137 PLAN.md + precommit-review, PR 0138 PLAN.md + precommit-review, runtime_evidence.py, test_runtime_evidence.py, ariadne_task_cli.py, run_persistence.py, test_ariadne_task_cli.py, test_run_persistence.py, review-artifact.schema.yml, agents/plan-review.yml, agents/precommit-review.yml. All 17 required reads completed."
+    result: "pass"
+  - claim: "roadmap alignment"
+    evidence_source: "ROADMAP.md + ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md + PLAN.md Roadmap Alignment"
+    exact_observed_evidence: "ROADMAP.md L358: '### Next active stream: Artifact Workspace Read-Only UI (0138+)'. Roadmap artifact Stream 1: Artifact Workspace Read Model (0138-0142), PR 0138 acceptance 'No frontend yet', PR 0139 scope absorbed into broader UI slice. PLAN.md Roadmap Alignment: Track 'Artifact Workspace Read-Only UI (Stream 1)', Slot 'PR 0139 (second read-only UI stream PR, after PR 0138 read model)'. Batching policy: single-purpose local run list view."
+    result: "pass"
+  - claim: "prior PR evidence"
+    evidence_source: "PR 0137+0138 PLAN.md and precommit-review.yml files"
+    exact_observed_evidence: "PR 0138 precommit-review: pass, runtime_evidence.py implemented with 5 frozen dataclasses, 2 functions, 32 tests, 472 regression tests. PR 0137 precommit-review: pass, Artifact Workspace Read-Only UI opened as next stream. All prior gates passed."
+    result: "pass"
+  - claim: "executable-first"
+    evidence_source: "PLAN.md Implementation Scope and Tests"
+    exact_observed_evidence: "PLAN.md specifies implementation: server.py (add GET /runs route + update HTML/JS), test_local_run_history_in_page.py (update tests), optional runtime_evidence.py helper. 20 tests. Validation: compileall + pytest. Not docs-only."
+    result: "pass"
+  - claim: "validation strategy explicit"
+    evidence_source: "PLAN.md Validation Checklist"
+    exact_observed_evidence: "10 validation steps: (1) compileall, (2) focused tests, (3) regression tests, (4) grep for run list view types, (5) grep for unsafe mutation, (6) git status, (7) git diff --name-only, (8) git diff --cached, (9) Plan Drift Gate, (10) No-Drift Check. Each has expected output and block conditions."
+    result: "pass"
+  - claim: "forbidden scope absent"
+    evidence_source: "grep for frozen streams in PLAN.md"
+    exact_observed_evidence: "PLAN.md references Artifact Workspace Shell, Visual Gate, Context Core, PCAM/PBS, Rubrics, Decision Core, Model Router, ETL/ERP only in Drift heuristic (line 11: 'Does not implement'), Non-Goals (lines 405-421: 'No ...'), and Stop Conditions (line 436: 'blocked if ... implements'). Zero references as implementation scope."
+    result: "pass"
+  - claim: "artifact physically written"
+    evidence_source: "write_file at expected path"
+    exact_observed_evidence: ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/plan-review.yml"
+    result: "pass"
+  - claim: "artifact read back"
+    evidence_source: "test -f + read back"
+    exact_observed_evidence: "Verified by post-write verification commands."
+    result: "pass"
+boundary_confirmations:
+  - "Branch confirmed: 0139-artifact-workspace-local-run-list-view"
+  - "Only plan-review.yml artifact written; no PLAN.md, ROADMAP.md, services/, agents/, schemas/, docs/ files modified"
+  - "No tracked files modified in working tree"
+  - "No staged files in cached diff"
+  - "No unknown untracked files beyond expected PR 0139 artifacts and known generated residue"
+  - "Plan Drift Gate and No-Drift Check present in PLAN.md to enforce boundary during implementation"
+  - "All frozen streams explicitly excluded (Visual Gate, Context Core, PCAM/PBS, Rubrics, Decision Core, Model Router, ETL/ERP demo)"
+  - "UI mutation, agent launch from UI, commit from UI, PR creation from UI all explicitly frozen"
+  - "PR 0139 is a read-only UI slice — no run detail panel, no Artifact Workspace Shell"
+  - "PR 0139 uses PR 0138 runtime_evidence.py read model (list_run_evidence_summaries) — no new read logic"
+  - "PR 0139 serves dogfooding across parallel projects with evidence-backed run list"
+  - "All 15 required view content fields specified (run_id, status, reason_codes, pipeline_status, git_boundary_status, execution_attempted, 3 availability indicators, missing/malformed evidence, PR URL, payload cleanliness, readiness, deterministic ordering)"
+  - "20 tests cover empty run list, missing runs root, complete/blocked/failed run, missing manifest/report, malformed evidence, PR URL present/absent, reason_codes, execution_attempted, payload cleanliness, readiness, deterministic ordering, temp fixtures, no real .ariadne, no shell, no agents, no mutation"
+  - "All prior PR behaviors preserved (PR 0131-0138)"
+  - "All validation checks present: compileall, pytest, grep, git status, Plan Drift Gate, No-Drift Check"
+  - "Product identity preserved: runtime-captured evidence is proof, read model normalizes persisted artifacts"
+summary: |
+  PR 0139 plan review APPROVES.
+
+  PLAN.md defines PR 0139 as the second Artifact Workspace Read-Only UI stream PR (after PR 0138 read model). It adds a narrow read-only local run list view via a GET /runs route in the existing task_intake ASGI server, backed by PR 0138's runtime_evidence.py read model.
+
+  PR 0139 is strictly read-only:
+  - No UI mutation, no agent launch, no commit/PR creation, no writing .ariadne state
+  - No run detail panel, no Artifact Workspace Shell
+  - No new frontend dependencies or framework
+  - Uses runtime_evidence.list_run_evidence_summaries() directly — no new read logic
+
+  View content requirements (15 fields):
+  - run_id, status (visual distinction), reason_codes, pipeline_status, git_boundary_status, execution_attempted
+  - run_json/manifest/run-report availability indicators
+  - Missing and malformed evidence indicators (explicit rendering)
+  - PR URL only when persisted (never fabricated)
+  - Payload cleanliness and readiness indicators when available
+  - Deterministic ordering (newest first)
+
+  20 test requirements cover: empty/missing runs root, complete/blocked/failed run, missing manifest/report, malformed evidence, PR URL present/absent, reason_codes, execution_attempted, payload cleanliness, readiness, deterministic ordering, temp fixtures, no real .ariadne, no shell, no agents, no mutation.
+
+  PR 0138 read model verified:
+  - runtime_evidence.py: 5 frozen dataclasses, 2 public functions
+  - 32 tests pass, 472 regression tests pass
+  - No file writes, no shell-out, no run_ariadne_task invocation
+  - PLAN DRIFT GATE and NO-DRIFT CHECK present
+
+  All 66 required checks pass. Branch is correct. Dirty tree is within scope. No prior PR artifacts modified. Roadmap alignment confirmed. No frozen streams opened.

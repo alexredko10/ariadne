@@ -8,6 +8,7 @@ create run records, or write to ``.ariadne/**``.
 from __future__ import annotations
 
 import json
+import os
 from urllib.parse import parse_qs
 
 from task_intake.app import accept_task
@@ -34,6 +35,7 @@ from task_intake.models import TaskIntakeRequest
 from task_intake.normalize import normalize_task_intake
 from task_intake.context_preview import generate_context_preview
 from task_intake.runs import create_mock_run
+from runner.runtime_evidence import list_run_evidence_summaries
 from task_intake.mock_loop import run_mock_loop
 from task_intake.execution_handoff import run_mock_execution_handoff
 
@@ -904,6 +906,54 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
             await _send_json(send, 200, body)
         return
 
+    if method == "GET" and path == "/runs":
+        # Parse optional runs_root query parameter
+        query_string = scope.get("query_string", b"").decode("utf-8")
+        params = parse_qs(query_string)
+        runs_root = params.get("runs_root", [None])[0]
+        if not runs_root:
+            # Default to .ariadne/runs relative to server working directory
+            runs_root = os.path.join(os.getcwd(), ".ariadne", "runs")
+
+        if not os.path.isdir(runs_root):
+            body = json.dumps({
+                "ok": False,
+                "count": 0,
+                "runs": [],
+                "error": "runs_root not found or unreadable",
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+            return
+
+        summaries = list_run_evidence_summaries(runs_root)
+        runs_json = []
+        for s in summaries:
+            runs_json.append({
+                "run_id": s.run_id,
+                "status": s.status,
+                "reason_codes": list(s.reason_codes),
+                "pipeline_status": s.pipeline_status,
+                "git_boundary_status": s.git_boundary_status,
+                "execution_attempted": s.execution_attempted,
+                "created_at": s.created_at,
+                "run_json_available": s.run_json_path is not None,
+                "manifest_available": s.manifest_path is not None,
+                "run_report_available": s.run_report_path is not None,
+                "missing_evidence": list(s.missing_evidence),
+                "malformed_evidence": list(s.malformed_evidence),
+                "pr_url": s.pr_url,
+                "payload_cleanliness_available": False,
+                "readiness_available": False,
+            })
+        body = json.dumps({
+            "ok": True,
+            "count": len(runs_json),
+            "runs": runs_json,
+            "runs_root": runs_root,
+        }, ensure_ascii=False).encode("utf-8")
+        await _send_json(send, 200, body)
+        return
+
     if method == "GET" and path == "/":
         html = _HTML_PAGE.encode("utf-8")
         await send({
@@ -1483,6 +1533,8 @@ document.getElementById("submit").addEventListener("click", async function () {
         document.getElementById("trace-steps").innerHTML = renderTrace(data);
         document.getElementById("structured-view").innerHTML = renderStructured(data);
         document.getElementById("json").textContent = JSON.stringify(data, null, 2);
+        // Refresh evidence-backed run list after submit
+        fetchRuns();
     } catch (e) {
         showError("Request failed: " + e.message);
         document.getElementById("status-bar").innerHTML = "<span class=\"status-error\">Request failed: " + e.message + "</span>";
@@ -1697,6 +1749,46 @@ function clearRunHistory() {
     __ariadne_run_history = [];
     renderRunHistory();
 }
+function fetchRuns() {
+    fetch("/runs")
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            var placeholder = document.getElementById("run-history-placeholder");
+            var list = document.getElementById("run-history-list");
+            var clearBtn = document.getElementById("clear-history-btn");
+            if (!data.ok || data.count === 0) {
+                placeholder.style.display = "";
+                list.innerHTML = "";
+                clearBtn.style.display = "none";
+                return;
+            }
+            placeholder.style.display = "none";
+            clearBtn.style.display = "";
+            var html = "";
+            for (var i = 0; i < data.runs.length; i++) {
+                var r = data.runs[i];
+                var statusClass = "status-" + r.status;
+                var evidenceIndicators = "";
+                if (r.missing_evidence.length > 0) {
+                    evidenceIndicators += " <span style=\"color:#a50;\" title=\"Missing: " + r.missing_evidence.join(", ") + "\">[" + r.missing_evidence.length + " missing]</span>";
+                }
+                if (r.malformed_evidence.length > 0) {
+                    evidenceIndicators += " <span style=\"color:#a00;\" title=\"Malformed: " + r.malformed_evidence.join(", ") + "\">[" + r.malformed_evidence.length + " malformed]</span>";
+                }
+                var prLink = r.pr_url ? " <a href=\"" + r.pr_url + "\" target=\"_blank\">PR</a>" : "";
+                html += "<div class=\"history-entry\">"
+                    + "<span class=\"history-index\">" + r.run_id + "</span>"
+                    + "<span class=\"history-status " + statusClass + "\">" + r.status + "</span>"
+                    + evidenceIndicators
+                    + prLink
+                    + "</div>";
+            }
+            list.innerHTML = html;
+        })
+        .catch(function(err) {
+            // Silent fail — keep existing history display
+        });
+}
 var __ariadne_session_ref = null;
 function getOrCreateSessionRef() {
     if (!__ariadne_session_ref) {
@@ -1745,6 +1837,8 @@ function recordSessionSignal() {
     });
 }
 window.__ariadne_session_start = Date.now();
+// Fetch evidence-backed run list on page load
+fetchRuns();
 </script>
 </body>
 </html>
