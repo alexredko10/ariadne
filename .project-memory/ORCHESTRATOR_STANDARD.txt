@@ -360,18 +360,42 @@ The coder prompt must stop if it needs to modify files outside ALLOWED FILES.
 
 The coder prompt must not write review artifacts.
 
+The coder prompt must write
+.project-memory/pr/<PR-ID>-<slug>/IMPLEMENTATION_REPORT.md before
+precommit-review is invoked. The report must follow the template in
+.project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md and must include all
+11 required sections. The report is handoff context, not proof — agent output
+is not proof; runtime-captured evidence remains proof.
+
 PRECOMMIT-REVIEW TASKS
 
-The precommit-review prompt must review implementation against PLAN.md and
-plan-review.yml.
+The precommit-review prompt must review implementation against PLAN.md,
+plan-review.yml, and IMPLEMENTATION_REPORT.md.
 
 The precommit-review prompt must write only:
 
   .project-memory/pr/<pr-id>/reviews/precommit-review.yml
 
+The precommit-review must read:
+
+  1. .project-memory/pr/<pr-id>/PLAN.md
+  2. .project-memory/pr/<pr-id>/reviews/plan-review.yml
+  3. .project-memory/pr/<pr-id>/IMPLEMENTATION_REPORT.md
+  4. All actual changed files
+  5. Relevant previous PR artifacts
+  6. Validation outputs
+
+The precommit-review must compare IMPLEMENTATION_REPORT.md claims against
+PLAN.md, actual file evidence, and validation outputs. If claims disagree,
+PLAN.md and actual evidence win. Unsupported claims must block or warn.
+
 The precommit-review must verify that changed files are within scope, all
 changed files were read, validation passed, dirty tree is expected, and artifact
 write/readback succeeded.
+
+The precommit-review must block if IMPLEMENTATION_REPORT.md is absent for a
+post-0140 implementation PR unless the PR PLAN.md explicitly exempts it with
+justification.
 
 The precommit-review must block if implementation drifted from PLAN.md, tests
 are missing, validation is missing or failing, forbidden files changed, or
