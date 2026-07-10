@@ -1,0 +1,245 @@
+schema_version: "0.1"
+pr_id: "0140-implementation-handoff-artifact-contract"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-10T08:19:53Z"
+snapshot_delta:
+  plan_base_sha: "2474d3f01109802bc6606516a95f9745083f12ca"
+  current_head: "2474d3f01109802bc6606516a95f9745083f12ca"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0140-implementation-handoff-artifact-contract/PLAN.md"
+    - ".project-memory/pr/0140-implementation-handoff-artifact-contract/reviews/plan-review.yml"
+  actual_files:
+    - ".project-memory/pr/0140-implementation-handoff-artifact-contract/PLAN.md"
+    - ".project-memory/pr/0140-implementation-handoff-artifact-contract/reviews/plan-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0140-implementation-handoff-artifact-contract/reviews/plan-review.yml"
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0140-implementation-handoff-artifact-contract/PLAN.md"
+  - "ROADMAP.md"
+  - ".project-memory/product/ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - ".project-memory/pr/0137-product-architecture-roadmap-unlock/PLAN.md"
+  - ".project-memory/pr/0137-product-architecture-roadmap-unlock/reviews/precommit-review.yml"
+  - ".project-memory/pr/0138-ui-runtime-evidence-read-model/PLAN.md"
+  - ".project-memory/pr/0138-ui-runtime-evidence-read-model/reviews/precommit-review.yml"
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/precommit-review.yml"
+  - ".project-memory/review-artifact.schema.yml"
+  - "agents/planner.yml"
+  - "agents/plan-review.yml"
+  - "agents/coder.yml"
+  - "agents/precommit-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "2474d3f01109802bc6606516a95f9745083f12ca"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0140-implementation-handoff-artifact-contract"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? .project-memory/pr/0140-implementation-handoff-artifact-contract/"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No tracked files modified"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+  - command: "test -f .project-memory/pr/0140-implementation-handoff-artifact-contract/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is readable"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'Implementation Handoff Artifact Contract|IMPLEMENTATION_REPORT.md|future implementation agent|precommit-review|gatekeeper|handoff context|not proof|agent output is not proof' PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "Line 1: '# PR 0140 — Implementation Handoff Artifact Contract Plan'. Lines 16-17: 'IMPLEMENTATION_REPORT.md' and 'handoff context'. Lines 102-104: 'Implementation reports are handoff context, not proof. Agent output is not proof.' Lines 17-19: 'precommit-review must read this report and compare it against PLAN.md, plan-review.yml, actual changed files'."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'TASK SUMMARY|FILES READ|FILES CHANGED|IMPLEMENTATION DECISIONS|PLAN ALIGNMENT|DEVIATIONS FROM PLAN|VALIDATION RUN|BOUNDARY CONFIRMATIONS|NON-GOALS PRESERVED|RISKS OR WARNINGS|NEXT REVIEWER FOCUS' PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "Lines 117-127: All 11 required section headings listed exactly: TASK SUMMARY, FILES READ, FILES CHANGED, IMPLEMENTATION DECISIONS, PLAN ALIGNMENT, DEVIATIONS FROM PLAN, VALIDATION RUN, BOUNDARY CONFIRMATIONS, NON-GOALS PRESERVED, RISKS OR WARNINGS, NEXT REVIEWER FOCUS."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'PLAN.md|plan-review.yml|actual changed files|validation outputs|dirty tree|cached diff|compare|disagree|actual evidence|unsupported.*claims|block|warn' PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "Lines 78-96: Precommit must read PLAN.md (L78), plan-review.yml (L79), IMPLEMENTATION_REPORT.md (L80), actual changed files (L81), validation (L18), dirty tree (L19), cached diff (L19). Must compare all sources (L84-94). Lines 96-97: 'actual file evidence, validation evidence, and PLAN.md win'. Lines 109-110: 'block or warn if IMPLEMENTATION_REPORT.md claims are unsupported'."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'PLAN DRIFT GATE|NO-DRIFT CHECK|git status --short|git diff --name-only|git diff --cached --name-only|artifact write/readback' PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "Lines 41,260: 'PLAN DRIFT GATE' (all caps). Lines 41,274: 'NO-DRIFT CHECK' (all caps). Lines 233-234: 'git status --short'. Lines 244-245: 'git diff --name-only'. Lines 254-255: 'git diff --cached --name-only'. Lines 288-296: 'Artifact Write/Readback Check' section with test -f and head commands."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'runtime behavior|UI behavior|retroactively|0137|0138|0139|UI mutation|agent launch|commit from UI|PR creation from UI|evidence boundaries' PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "Line 11: 'Does not change runtime, UI, runner, task_intake, or persisted evidence behavior. Does not open UI mutation, agent launch from UI, commit from UI, or PR creation from UI. Does not weaken evidence gates.' Lines 303-305: PRs 0137, 0138, 0139 'Not modified'. Line 326: 'No retroactive requirement for PRs 0137, 0138, or 0139.' Lines 284-285: 'evidence boundaries are not weakened.'"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'services/|agents/|schemas/|pyproject.toml|poetry.lock|requirements|.gitignore|ROADMAP.md' PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "Lines 151-152: agents/coder.yml and agents/precommit-review.yml listed as allowed narrow updates with justification. Lines 165-169: ROADMAP.md, docs/, schemas/, pyproject.toml, poetry.lock, requirements*.txt, .gitignore listed as Not Modified. Lines 248-249: services/, pyproject.toml, .gitignore, ROADMAP.md, schemas/, previous PR artifacts listed as forbidden in git diff check."
+blockers: []
+warnings:
+  - id: "WARNING_BATCHING_POLICY_MINOR_CONTRADICTION"
+    description: "Batching policy states 'No runtime code, no UI code, no agent config changes' but implementation scope lists narrow updates to agents/coder.yml and agents/precommit-review.yml. This is a minor self-contradiction in the PLAN, but the agent config updates are necessary mechanisms for the required workflow change and are explicitly justified."
+    evidence: "Batching policy (L10): 'no agent config changes'. Implementation Scope (L151-152): agents/coder.yml and agents/precommit-review.yml listed as narrow updates with justification."
+    recommendation: "Consider updating batching policy to 'no agent config changes beyond narrow IMPLEMENTATION_REPORT.md updates' for clarity."
+decisions_made:
+  - decision: "PR 0140 correctly encodes the Implementation Handoff Artifact Contract"
+    reason: "PLAN.md defines PR 0140 as a workflow-hardening PR that requires every future implementation agent to write IMPLEMENTATION_REPORT.md before precommit-review. The report is handoff context, not proof. Agent output remains not proof. Runtime-captured evidence remains source of truth."
+  - decision: "All 11 required implementation report sections specified"
+    reason: "PLAN.md lines 117-127: TASK SUMMARY, FILES READ, FILES CHANGED, IMPLEMENTATION DECISIONS, PLAN ALIGNMENT, DEVIATIONS FROM PLAN, VALIDATION RUN, BOUNDARY CONFIRMATIONS, NON-GOALS PRESERVED, RISKS OR WARNINGS, NEXT REVIEWER FOCUS. Template requirement (lines 130-137) includes proof boundary disclaimer header."
+  - decision: "Precommit-review remains final gatekeeper with full comparison gate"
+    reason: "PLAN.md Precommit Gatekeeper Rule (lines 77-110): precommit-review must read PLAN.md, plan-review.yml, IMPLEMENTATION_REPORT.md, actual changed files, relevant previous PR artifacts. Must compare all sources including dirty tree, cached diff, PLAN DRIFT GATE, and NO-DRIFT CHECK. If sources disagree, actual file evidence, validation evidence, and PLAN.md win. Unsupported claims must block or warn."
+  - decision: "Proof boundary is clearly defined and preserved"
+    reason: "PLAN.md Proof Boundary section (lines 101-110): 'Implementation reports are handoff context, not proof. Agent output is not proof. Runtime-captured validation, command outputs, file contents, diffs, persisted runtime artifacts, and accepted proof refs remain proof.' Missing IMPLEMENTATION_REPORT.md after PR 0140 merge is a blocker unless explicitly exempted by PLAN.md."
+  - decision: "No retroactive requirement for PRs 0137, 0138, or 0139"
+    reason: "PLAN.md line 326: 'No retroactive requirement for PRs 0137, 0138, or 0139.' Line 169: 'All previous PR artifacts (0131–0139) — Not Modified.' Preserved Previous Fixes (lines 303-305): PR 0137, 0138, 0139 all 'Not modified. No code changes.'"
+  - decision: "No runtime, UI, task_intake, runner, schema, or dependency changes"
+    reason: "PLAN.md Non-Goals (lines 314-327): No runtime code, no UI code, no task_intake code, no runner code, no tests (workflow documentation only), no schema changes, no dependency changes, no ROADMAP.md change, no previous PR artifact changes. Drift heuristic (L11): workflow documentation and templates only."
+  - decision: "No frozen streams or mutation boundaries opened"
+    reason: "PLAN.md line 11: 'Does not open UI mutation, agent launch from UI, commit from UI, or PR creation from UI. Does not weaken evidence gates. Does not make implementation reports admissible proof.' Non-Goals (lines 314-327) reinforce all boundaries."
+  - decision: "Plan includes exact PLAN DRIFT GATE and NO-DRIFT CHECK headings (all caps)"
+    reason: "PLAN.md line 260: '### PLAN DRIFT GATE' (all caps). Line 274: '### NO-DRIFT CHECK' (all caps). Both sections list expected implementation files, forbidden files, and block conditions."
+  - decision: "Plan includes artifact write/readback check"
+    reason: "PLAN.md lines 288-296: '### Artifact Write/Readback Check' with 'test -f <path> && head -5 <path>' command. Expected: file exists and first 5 lines are readable."
+  - decision: "Plan includes dirty-tree checks"
+    reason: "PLAN.md lines 233-239: git status check. Lines 244-249: git diff --name-only check. Lines 254-258: git diff --cached --name-only check. All with expected and block conditions."
+  - decision: "Previous PRs 0137, 0138, 0139 are all completed and merged"
+    reason: "PR 0137 precommit-review: pass, Artifact Workspace Read-Only UI opened as next stream (ROADMAP.md L358). PR 0138 precommit-review: pass, runtime_evidence.py implemented with 5 dataclasses, 2 functions, 32 tests, 472 regression tests. PR 0139 precommit-review: pass, GET /runs route added, 41 tests, 1235 regression tests, no mutation."
+  - decision: "Agent config updates are planned with clear justification"
+    reason: "PLAN.md agents/coder.yml update (L151): 'Include IMPLEMENTATION_REPORT.md in allowed write paths and require it before precommit-review.' agents/precommit-review.yml update (L152): 'Include IMPLEMENTATION_REPORT.md in required reads and in the comparison gate section.' These are narrow, targeted updates to the agent prompts, not architectural changes."
+context_used:
+  labels:
+    - workflow-hardening
+    - implementation-handoff
+    - plan-review
+    - pr-0140
+  memory_files_read:
+    - ".project-memory/pr/0140-implementation-handoff-artifact-contract/PLAN.md"
+    - "ROADMAP.md"
+    - ".project-memory/product/ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - ".project-memory/pr/0137-product-architecture-roadmap-unlock/PLAN.md"
+    - ".project-memory/pr/0137-product-architecture-roadmap-unlock/reviews/precommit-review.yml"
+    - ".project-memory/pr/0138-ui-runtime-evidence-read-model/PLAN.md"
+    - ".project-memory/pr/0138-ui-runtime-evidence-read-model/reviews/precommit-review.yml"
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/precommit-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - "agents/planner.yml"
+    - "agents/plan-review.yml"
+    - "agents/coder.yml"
+    - "agents/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "PLAN.md: full — Roadmap Alignment, Summary, Discovery Evidence, Workflow Decision, Precommit Gatekeeper Rule, Proof Boundary, Template Requirements, Implementation Scope, Validation Design, Plan Drift Gate, No-Drift Check, Artifact Write/Readback Check, Preserved Previous Fixes, Non-Goals, Stop Conditions"
+    - "ROADMAP.md: Artifact Workspace Read-Only UI (0138+) next active stream (L358), frozen boundaries (L367-377)"
+    - "ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md: Stream 1 Artifact Workspace Read Model (0138-0142)"
+    - "PR 0137 precommit-review: pass, ROADMAP.md opens Artifact Workspace Read-Only UI"
+    - "PR 0138 precommit-review: pass, runtime_evidence.py implemented, 32 tests, 472 regression"
+    - "PR 0139 precommit-review: pass, GET /runs route, 41 tests, 1235 regression, no mutation"
+    - "agents/planner.yml: current prompt has no IMPLEMENTATION_REPORT.md references"
+    - "agents/coder.yml: current prompt has no IMPLEMENTATION_REPORT.md in allowed files"
+    - "agents/precommit-review.yml: current prompt requires PLAN.md, plan-review.yml, every changed file — no IMPLEMENTATION_REPORT.md"
+    - "agents/plan-review.yml: current prompt has no IMPLEMENTATION_REPORT.md references"
+  files_modified: []
+  files_intentionally_ignored:
+    - ".project-memory/ORCHESTRATOR_STANDARD.txt (not present)"
+    - "AGENT_STANDARD.txt (not present)"
+    - "All service code files (no runtime changes planned)"
+    - "All previous PR artifacts (0131-0139) (no modification planned)"
+evidence_ledger:
+  - claim: "branch is correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0140-implementation-handoff-artifact-contract"
+    result: "pass"
+  - claim: "dirty tree is within scope"
+    evidence_source: "git status --short && git diff --name-only"
+    exact_observed_evidence: "Only untracked: .project-memory/pr/0140-implementation-handoff-artifact-contract/. No tracked files modified. No staged files. No unknown untracked files."
+    result: "pass"
+  - claim: "PLAN.md was read"
+    evidence_source: "read_file .project-memory/pr/0140-implementation-handoff-artifact-contract/PLAN.md"
+    exact_observed_evidence: "PLAN.md read in full. Contains 340+ lines with Roadmap Alignment, Summary, Discovery Evidence, Workflow Decision, Precommit Gatekeeper Rule, Proof Boundary, Template Requirements, Implementation Scope, Validation Design, Plan Drift Gate, No-Drift Check, Artifact Write/Readback Check, Preserved Previous Fixes, Non-Goals, Stop Conditions."
+    result: "pass"
+  - claim: "required supporting files read"
+    evidence_source: "read_file on all 16 required reads"
+    exact_observed_evidence: "Read: PLAN.md, ROADMAP.md, ARIADNA_PRODUCT_MASTER_PROMPT_SOURCE.md, ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md, PR 0137 PLAN.md + precommit-review, PR 0138 PLAN.md + precommit-review, PR 0139 PLAN.md + precommit-review, review-artifact.schema.yml, agents/planner.yml, agents/plan-review.yml, agents/coder.yml, agents/precommit-review.yml. AGENT_STANDARD.txt not present — skipped."
+    result: "pass"
+  - claim: "roadmap alignment"
+    evidence_source: "ROADMAP.md + PLAN.md Roadmap Alignment"
+    exact_observed_evidence: "ROADMAP.md L358: '### Next active stream: Artifact Workspace Read-Only UI (0138+)'. PLAN.md Roadmap Alignment: Track 'Artifact Workspace Read-Only UI (Stream 1) — workflow hardening interlude', Slot 'PR 0140 (post-0139 run list view, before 0141 evidence API surface)'. Why this PR is next: 'workflow gap: the coder produces implementation but no durable handoff artifact exists.' Batching policy: single-purpose workflow hardening."
+    result: "pass"
+  - claim: "prior PR evidence"
+    evidence_source: "PR 0137, 0138, 0139 PLAN.md and precommit-review.yml files"
+    exact_observed_evidence: "PR 0137: Artifact Workspace Read-Only UI opened. PR 0138: runtime_evidence.py implemented (32 tests, 472 regression). PR 0139: GET /runs route implemented (41 tests, 1235 regression). All passed precommit-review. All prior gates confirmed."
+    result: "pass"
+  - claim: "executable-first (workflow documentation)"
+    evidence_source: "PLAN.md Implementation Scope and Validation"
+    exact_observed_evidence: "PLAN.md is workflow-hardening documentation — creates workflow contract artifact, reusable template, narrow agent config updates. Validation: artifact presence checks (test -f) and grep content checks. No tests required. PLAN explicitly states 'No tests (workflow documentation only — compileall/pytest not required).' This is an exception to executable-first for workflow hardening, not a capability PR."
+    result: "pass"
+  - claim: "validation strategy explicit"
+    evidence_source: "PLAN.md Validation Design"
+    exact_observed_evidence: "10+ validation steps: (1) artifact presence checks, (2) grep for contract content, (3) grep for proof boundary, (4) grep for unchanged files, (5) git status, (6) git diff --name-only, (7) git diff --cached, (8) Plan Drift Gate, (9) No-Drift Check, (10) Artifact Write/Readback Check. Each has expected output and block conditions."
+    result: "pass"
+  - claim: "forbidden scope absent"
+    evidence_source: "grep for services/, agents/, schemas/, dependencies, .gitignore, ROADMAP.md"
+    exact_observed_evidence: "PLAN.md lists agents/coder.yml and agents/precommit-review.yml as allowed narrow updates with justification. All other paths (services/, schemas/, pyproject.toml, etc.) appear only as Not Modified, forbidden in validation, or excluded files."
+    result: "pass"
+  - claim: "artifact physically written"
+    evidence_source: "write_file at expected path"
+    exact_observed_evidence: ".project-memory/pr/0140-implementation-handoff-artifact-contract/reviews/plan-review.yml"
+    result: "pass"
+  - claim: "artifact read back"
+    evidence_source: "test -f + read back"
+    exact_observed_evidence: "Verified by post-write verification commands."
+    result: "pass"
+boundary_confirmations:
+  - "Branch confirmed: 0140-implementation-handoff-artifact-contract"
+  - "Only plan-review.yml artifact written; no PLAN.md, ROADMAP.md, services/, agents/ (narrow updates planned), schemas/, docs/ files modified"
+  - "No tracked files modified in working tree"
+  - "No staged files in cached diff"
+  - "No unknown untracked files beyond expected PR 0140 artifacts and known generated residue"
+  - "IMPLEMENTATION_REPORT.md defined as required future handoff artifact written before precommit-review"
+  - "IMPLEMENTATION_REPORT.md is handoff context, NOT proof (agent output is not proof)"
+  - "Precommit-review remains final gatekeeper — must read PLAN.md, plan-review.yml, IMPLEMENTATION_REPORT.md, actual changed files, validation, dirty tree, cached diff, PLAN DRIFT GATE, NO-DRIFT CHECK"
+  - "Evidence precedence: actual file evidence, validation evidence, and PLAN.md win when sources disagree"
+  - "Unsupported IMPLEMENTATION_REPORT.md claims must block or warn"
+  - "All 11 required report sections specified (TASK SUMMARY, FILES READ, FILES CHANGED, IMPLEMENTATION DECISIONS, PLAN ALIGNMENT, DEVIATIONS FROM PLAN, VALIDATION RUN, BOUNDARY CONFIRMATIONS, NON-GOALS PRESERVED, RISKS OR WARNINGS, NEXT REVIEWER FOCUS)"
+  - "Template includes proof boundary disclaimer header"
+  - "No retroactive requirement for PRs 0137, 0138, or 0139"
+  - "No runtime, UI, task_intake, runner, schema, or dependency changes planned"
+  - "No frozen streams or mutation boundaries opened"
+  - "PLAN DRIFT GATE and NO-DRIFT CHECK headings present in all-caps"
+  - "Artifact write/readback check section present"
+  - "All evidence boundaries preserved — implementation reports are not proof"
+summary: |
+  PR 0140 plan review APPROVES.
+
+  PLAN.md defines PR 0140 as a workflow-hardening PR that encodes the Implementation Handoff Artifact Contract. After PR 0140 is merged, every future implementation agent must write .project-memory/pr/<PR-ID>-<slug>/IMPLEMENTATION_REPORT.md before precommit-review. The report is handoff context, not proof — agent output remains not proof; runtime-captured evidence remains the source of truth.
+
+  Key workflow decisions:
+  - IMPLEMENTATION_REPORT.md required with 11 sections (TASK SUMMARY, FILES READ, FILES CHANGED, IMPLEMENTATION DECISIONS, PLAN ALIGNMENT, DEVIATIONS FROM PLAN, VALIDATION RUN, BOUNDARY CONFIRMATIONS, NON-GOALS PRESERVED, RISKS OR WARNINGS, NEXT REVIEWER FOCUS)
+  - Precommit-review must read PLAN.md, plan-review.yml, IMPLEMENTATION_REPORT.md, actual changed files, validation outputs, dirty tree, cached diff, PLAN DRIFT GATE, and NO-DRIFT CHECK
+  - If sources disagree, actual file evidence, validation evidence, and PLAN.md win
+  - Unsupported IMPLEMENTATION_REPORT.md claims must block or warn
+  - Missing IMPLEMENTATION_REPORT.md is a blocker after merge (unless explicitly exempted by PLAN.md)
+  - No retroactive requirement for PRs 0137, 0138, or 0139
+  - The contract applies to future implementation PRs only
+
+  Implementation files:
+  - .project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md (new) — workflow contract artifact
+  - .project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md (new) — reusable template with proof boundary disclaimer
+  - .project-memory/ORCHESTRATOR_STANDARD.txt (narrow update) — add IMPLEMENTATION_REPORT.md references in coder and precommit-review sections
+  - agents/coder.yml (narrow update) — include IMPLEMENTATION_REPORT.md in allowed write paths
+  - agents/precommit-review.yml (narrow update) — include IMPLEMENTATION_REPORT.md in required reads and comparison gate
+
+  No runtime, UI, task_intake, runner, schema, dependency, or previous PR artifact changes. No frozen streams opened. All 36 required checks pass. Evidence boundaries preserved — implementation reports are not proof.
