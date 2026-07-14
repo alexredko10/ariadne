@@ -1,0 +1,272 @@
+schema_version: "0.1"
+pr_id: "0143-artifact-workspace-4-zone-shell-skeleton"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-10T16:00:00Z"
+head_verified: "01856eba8ee4083f4d24df6b3bfa3d2d7c8e4366"
+branch_confirmed: "0143-artifact-workspace-4-zone-shell-skeleton"
+snapshot_delta:
+  plan_base_sha: "01856eba8ee4083f4d24df6b3bfa3d2d7c8e4366"
+  current_head: "01856eba8ee4083f4d24df6b3bfa3d2d7c8e4366"
+  origin_main: "01856eba8ee4083f4d24df6b3bfa3d2d7c8e4366"
+  merge_base: "01856eba8ee4083f4d24df6b3bfa3d2d7c8e4366"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0143-artifact-workspace-4-zone-shell-skeleton/PLAN.md"
+    - ".project-memory/pr/0143-artifact-workspace-4-zone-shell-skeleton/reviews/plan-review.yml"
+  actual_files:
+    - ".project-memory/pr/0143-artifact-workspace-4-zone-shell-skeleton/PLAN.md"
+    - ".project-memory/pr/0143-artifact-workspace-4-zone-shell-skeleton/reviews/plan-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0143-artifact-workspace-4-zone-shell-skeleton/reviews/plan-review.yml"
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+  - ".project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md"
+  - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+  - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "agents/plan-review.yml"
+  - "ROADMAP.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - ".project-memory/pr/0143-artifact-workspace-4-zone-shell-skeleton/PLAN.md"
+  - ".project-memory/pr/0137-product-architecture-roadmap-unlock/PLAN.md"
+  - ".project-memory/pr/0137-product-architecture-roadmap-unlock/reviews/precommit-review.yml"
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/precommit-review.yml"
+  - ".project-memory/pr/0141-artifact-workspace-run-detail-evidence-panel/PLAN.md"
+  - ".project-memory/pr/0142-run-evidence-serialization-contract/PLAN.md"
+  - ".project-memory/pr/0142-run-evidence-serialization-contract/reviews/precommit-review.yml"
+  - ".project-memory/pr/0142a-orchestrator-three-response-workflow-standard/PLAN.md"
+  - ".project-memory/pr/0142a-orchestrator-three-response-workflow-standard/reviews/precommit-review.yml"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/runtime_evidence_serialization.py"
+  - "services/task_intake/tests/test_local_run_history_in_page.py"
+  - "services/task_intake/tests/test_runtime_evidence_serialization_contract.py"
+  - "services/task_intake/tests/test_task_intake.py"
+  - "services/runner/src/runner/runtime_evidence.py"
+  - "services/runner/tests/test_runtime_evidence.py"
+files_written:
+  - ".project-memory/pr/0143-artifact-workspace-4-zone-shell-skeleton/reviews/plan-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "01856eba8ee4083f4d24df6b3bfa3d2d7c8e4366"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0143-artifact-workspace-4-zone-shell-skeleton"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? .project-memory/pr/0143-artifact-workspace-4-zone-shell-skeleton/"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No tracked files modified"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+  - command: "git log --oneline --decorate -n 10"
+    result: "passed"
+    exit_code: 0
+    evidence: "HEAD=01856eb (main) = PR 0142A merged #168. Previous PRs: PR 0142 (#167), PR 0141 (#166), PR 0140 (#165), PR 0139 (#164), PR 0138 (#163), PR 0137 (#162)"
+  - command: "test -s .project-memory/pr/0143-artifact-workspace-4-zone-shell-skeleton/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is non-empty"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'Artifact Workspace|artifact workspace|workspace|timeline|artifact canvas|gates|proofs|logs|captures' ROADMAP.md .project-memory services/task_intake 2>/dev/null | head -5"
+    result: "passed"
+    exit_code: 0
+    evidence: "ROADMAP.md L368: 'Artifact Workspace 4-Zone Shell Skeleton' as PR 0143. L378: 'Artifact Workspace UI' as next active stream. PLAN.md defines four zones: timeline, artifact canvas, gates & proofs, logs & captures with stable IDs zone-timeline, zone-canvas, zone-gates-proofs, zone-logs-captures."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'GET /runs|GET /runs/<run_id>|ev_contract_version|serialize_run_index|serialize_run_evidence_detail|run-history-section|run-detail-panel' .project-memory services/task_intake services/runner 2>/dev/null | head -5"
+    result: "passed"
+    exit_code: 0
+    evidence: "server.py: GET /runs at L955, GET /runs/<run_id> at L920. runtime_evidence_serialization.py: EVIDENCE_CONTRACT_VERSION = '1', serialize_run_index, serialize_run_evidence_detail. server.py L1003, L1159: run-history-section, run-detail-panel present in _HTML_PAGE."
+  - command: "grep -n -E 'if method == \"GET\"|_HTML_PAGE|run-history-section|run-detail-panel|fetch\\(|innerHTML|textContent' services/task_intake/src/task_intake/server.py 2>/dev/null | head -10"
+    result: "passed"
+    exit_code: 0
+    evidence: "Server.py: GET / route at L981 with _HTML_PAGE. run-history-section at L1159. run-detail-panel at L1165. fetch() for runs/execute and /runs. innerHTML/textContent used in existing JS for rendering. PLAN.md references the existing escHtml safe rendering from server.js."
+blockers: []
+warnings: []
+checks:
+  branch_correct: "pass"
+  plan_presence: "pass"
+  no_staged_files: "pass"
+  no_tracked_modifications: "pass"
+  dirty_tree_scope: "pass"
+  pr_0142a_merged: "pass"
+  pr_0143_roadmap_slot: "pass"
+  later_slots_preserved: "pass"
+  dedicated_workspace_route: "pass"
+  four_zones_defined: "pass"
+  data_connection_fixture: "pass"
+  no_local_interaction_modification: "pass"
+  no_api_contract_change: "pass"
+  no_mutation_controls: "pass"
+  no_agent_git_gh: "pass"
+  exact_implementation_scope: "pass"
+  plan_drift_gate: "PASS"
+  no_drift_check: "PASS"
+commit_readiness: "ready"
+decisions_made:
+  - decision: "PR 0143 correctly identified as Stream 2 Artifact Workspace Shell first PR"
+    reason: "ROADMAP.md L368: 'Artifact Workspace 4-Zone Shell Skeleton (GOVERNANCE INSERTION)' note after PR 0142A. L368-374: PR 0143 remains next product PR. Roadmap artifact: Stream 2 (0143-0147), PR 0143 = Artifact Workspace 4-Zone Shell Skeleton. PLAN.md Roadmap Alignment: active stream 'Stream 2 — Artifact Workspace Shell', slot 'PR 0143'."
+  - decision: "Governance insertion PR 0142A correctly identified as not consuming product slot"
+    reason: "PLAN.md Governance Insertion Statement and Roadmap State: 'PR 0142A consumed no product slot — product PR 0143 is unchanged.' git log confirms PR 0142A merged as #168 before this branch."
+  - decision: "Dedicated GET /workspace route chosen — preserves closed Local Interaction track"
+    reason: "PLAN.md Route Decision: new GET /workspace route, not inlining into _HTML_PAGE. Rationale: prevents destabilizing closed track, follows repository convention (GET /runs, GET /product/iterations), enables future evolution, preserves GET /, allows isolated renderer module. Local Interaction _HTML_PAGE untouched — no content removed, no IDs renamed, no HTML/CSS/JS modified."
+  - decision: "All four zones defined with stable semantic selectors and accessible headings"
+    reason: "PLAN.md Four-Zone Contract: zone-timeline (h2 'Timeline'), zone-canvas (h2 'Artifact Canvas'), zone-gates-proofs (h2 'Gates & Proofs'), zone-logs-captures (h2 'Logs & Captures'). Each zone has heading, initial placeholder state, responsive behavior, and test assertions. Placeholder text explicitly avoids fabricated evidence."
+  - decision: "Data connection uses contract-faithful deterministic fixture with ev_contract_version '1'"
+    reason: "PLAN.md Data Connection Contract: inline deterministic fixture matching GET /runs envelope shape with ev_contract_version '1'. Full GET /runs fetch deferred to PR 0144. escHtml safe rendering used. No fabricated evidence. No mutation."
+  - decision: "Later slots (PR 0144-0147) explicitly preserved — no absorption"
+    reason: "PLAN.md Data Connection Contract: fields deferred to PR 0144-0147 (full run list, detail panel, report viewer, proof/manifest viewer). Implementation Scope: 'Rejected candidate: test_local_run_history_in_page.py edit — not needed.' Non-Goals: PR 0144-0147 scope not implemented."
+  - decision: "Implementation scope is narrow and evidence-based"
+    reason: "PLAN.md Implementation File Scope: artifact_workspace.py (new, HTML/CSS/JS), server.py (narrow route addition), test_artifact_workspace_shell.py (new). No changes to runtime_evidence.py, runtime_evidence_serialization.py, existing tests, ROADMAP.md, agents, schemas, or dependencies."
+  - decision: "Existing API contracts unchanged — ev_contract_version remains '1'"
+    reason: "PLAN.md: GET /runs and GET /runs/<run_id> behavior 'unchanged — must continue to return versioned JSON with ev_contract_version 1.' runtime_evidence_serialization.py not modified. runtime_evidence.py not modified."
+  - decision: "24 test requirements cover all needed dimensions"
+    reason: "PLAN.md Test Plan: workspace route tests (status, content-type, 4 zones, 4 headings, empty states, unsupported methods, mutation absence, external asset absence, version compatibility, existing page regression, existing API regression). Tests use _request() helper, isolated temp dirs, no real git/gh/Docker/subprocess/network."
+  - decision: "Validation plan covers 17 steps"
+    reason: "PLAN.md Validation Plan: compileall, workspace tests, GET / regression, GET /runs regression, task_intake regression, four-zone selector grep, mutation-control prohibition grep, external-asset prohibition grep, prohibited execution import grep, existing API route preservation grep, forbidden-path diff, planning-lock diff, whitespace check, dirty-tree inspection, cached-diff inspection, IMPLEMENTATION_REPORT.md existence, IMPLEMENTATION_REPORT.md readback."
+  - decision: "IMPLEMENTATION_REPORT.md required with all 11 sections and proof disclaimer"
+    reason: "PLAN.md Implementation Report Obligation: exact path, 11 standard sections, handoff context not proof, fresh/continuation/rerun/unexplained-preexisting policies defined."
+  - decision: "PLAN DRIFT GATE present in all caps with 24 block conditions"
+    reason: "PLAN.md '### PLAN DRIFT GATE' (all caps). 24 conditions: out-of-scope files, locked artifact changes, GET / breaks, GET /runs contract changes, GET /runs/<run_id> contract changes, ev_contract_version changes, runtime_evidence.py changes, missing zones, missing selectors, fabricated evidence, mutation controls, agent-launch controls, git/gh controls, arbitrary filesystem access, non-GET methods, external assets, dependencies, later-slot absorption, _HTML_PAGE rewrite, weak tests, absent validation, missing IMPLEMENTATION_REPORT.md, unknown untracked files, generated residue."
+  - decision: "NO-DRIFT CHECK present in all caps with 25 confirmation requirements"
+    reason: "PLAN.md '### NO-DRIFT CHECK' (all caps). 25 confirmations: correct branch, approved files, locked planning artifacts, PR 0143 scope, PR 0144-0147 separate, exact workspace route, workspace root, four zones, zone headings, non-fabricated placeholders, GET / preserved, GET /runs preserved, GET /runs/<run_id> preserved, ev_contract_version '1', runtime_evidence.py unchanged, no mutation/execution authority, no arbitrary filesystem access, no external assets, required tests pass, IMPLEMENTATION_REPORT.md exists, PLAN DRIFT GATE passed, actual evidence overrides."
+roadmap_alignment:
+  active_stream: "Stream 2 — Artifact Workspace Shell"
+  product_slot: "PR 0143"
+  pr_purpose: "Artifact Workspace 4-Zone Shell Skeleton"
+  governance_insertion_correct: "PR 0142A did not consume product slot"
+  batching_policy: "ADR 0011 exception — architect-approved coherent multi-zone frontend shell"
+  drift_heuristic: "Not triggered — new route and new module"
+  architect_sign_off: "yes — human architect requested next roadmap step after PR 0142A"
+  later_slots_preserved: true
+  closed_track_reopened: false
+  frozen_stream_opened: false
+current_surface_review:
+  get_root_unchanged: true
+  local_interaction_preserved: true
+  get_runs_preserved: true
+  get_runs_detail_preserved: true
+  ev_contract_version_unchanged: true
+  runtime_evidence_serialization_unchanged: true
+  runtime_evidence_model_unchanged: true
+route_contract_review:
+  exact_route: "GET /workspace"
+  method: "GET only"
+  content_type: "text/html"
+  status_success: 200
+  unsupported_methods: "404 via catch-all"
+  existing_routes_preserved: true
+  no_mutation_endpoint: true
+  no_arbitrary_file_path: true
+  no_full_run_list: true
+  no_full_detail_viewer: true
+four_zone_contract_review:
+  workspace_root: "artifact-workspace"
+  zones:
+    - id: "zone-timeline"
+      label: "Timeline"
+      purpose: "Run history navigation"
+      initial_state: "placeholder with deterministic fixture"
+      responsive: "stacks vertically below 768px"
+    - id: "zone-canvas"
+      label: "Artifact Canvas"
+      purpose: "Selected artifact display"
+      initial_state: "placeholder — 'Select a run... No artifact loaded.'"
+      responsive: "appears second in stack"
+    - id: "zone-gates-proofs"
+      label: "Gates & Proofs"
+      purpose: "Gate status and proof acceptance"
+      initial_state: "placeholder — 'No gate checks available.'"
+      responsive: "appears third in stack"
+    - id: "zone-logs-captures"
+      label: "Logs & Captures"
+      purpose: "Execution logs and captures"
+      initial_state: "placeholder — 'No logs available.'"
+      responsive: "appears at bottom"
+  evidence_fabrication_prohibited: true
+  accessible_headings: true
+  responsive_defined: true
+data_connection_review:
+  strategy: "contract-faithful deterministic inline fixture"
+  ev_contract_version_matches: "1"
+  loading_state: "not applicable (inline fixture)"
+  empty_state: "placeholder text — 'No runs available.'"
+  error_state: "not applicable (fixture)"
+  safe_rendering: "escHtml via textContent"
+  no_fabricated_evidence: true
+  no_mutation: true
+  no_arbitrary_filesystem: true
+  deferred_fields: "full list, detail, report, proof/manifest deferred to PR 0144-0147"
+implementation_scope_review:
+  approved_files:
+    - "services/task_intake/src/task_intake/artifact_workspace.py (new)"
+    - "services/task_intake/src/task_intake/server.py (narrow edit)"
+    - "services/task_intake/tests/test_artifact_workspace_shell.py (new)"
+    - "IMPLEMENTATION_REPORT.md (new)"
+    - "precommit-review.yml (new)"
+  server_py_edits: "one import + one route block"
+  no_broad_refactor: true
+  no_runtime_evidence_changes: true
+  no_serialization_changes: true
+  no_dependency_changes: true
+  no_existing_test_changes: true
+test_contract_review:
+  route_success: true
+  html_content_type: true
+  workspace_root: true
+  four_zone_selectors: true
+  four_zone_headings: true
+  empty_states: true
+  existing_get_root_regression: true
+  existing_get_runs_regression: true
+  existing_get_runs_detail_regression: true
+  version_compatibility: true
+  unsupported_methods: true
+  mutation_control_absence: true
+  agent_control_absence: true
+  git_pr_control_absence: true
+  arbitrary_path_absence: true
+  external_asset_absence: true
+  safe_rendering: true
+  responsive_structure: true
+  full_regression: true
+boundary_confirmations:
+  - "Branch confirmed: 0143-artifact-workspace-4-zone-shell-skeleton"
+  - "Only plan-review.yml artifact written; no PLAN.md, ROADMAP.md, services/, agents/, schemas/, docs/ files modified"
+  - "No tracked files modified in working tree"
+  - "No staged files in cached diff"
+  - "HEAD equals origin/main and merge-base — PR 0142A merged as latest (#168)"
+  - "PR 0143 is Stream 2, Artifact Workspace 4-Zone Shell Skeleton — first product PR after governance insertion"
+  - "PR 0144 through PR 0147 remain fully separate — no absorption"
+  - "GET /workspace is the dedicated route — preserves closed Local Interaction track"
+  - "All four zones defined with stable IDs, h2 headings, and non-fabricated placeholders"
+  - "Data connection uses contract-faithful deterministic fixture with ev_contract_version '1'"
+  - "Existing GET /, GET /runs, GET /runs/<run_id> behavior completely unchanged"
+  - "escapeHtml safe rendering — no innerHTML for untrusted API values"
+  - "No mutation controls, no agent launch, no git/gh operations"
+  - "No external assets, no frontend framework, no dependencies"
+  - "Implementation scope: artifact_workspace.py, server.py (narrow), test_artifact_workspace_shell.py"
+  - "Neither runtime_evidence.py nor runtime_evidence_serialization.py modified"
+  - "24 test requirements cover all zones, selectors, headings, empty states, regressions, safety"
+  - "17 validation steps with exact commands, expected results, and block consequences"
+  - "IMPLEMENTATION_REPORT.md required with all 11 sections and proof disclaimer"
+  - "PLAN DRIFT GATE: all caps, 24 block conditions"
+  - "NO-DRIFT CHECK: all caps, 25 confirmation requirements"
+  - "No frozen streams opened"
+plan_drift_gate: "PASS — PLAN.md includes exact '### PLAN DRIFT GATE' heading (all caps) with 24 block conditions covering out-of-scope files, locked artifacts, GET / breaks, GET /runs contract changes, GET /runs/<run_id> contract changes, ev_contract_version changes, runtime_evidence.py changes, missing zones/missing selectors, fabricated evidence, mutation controls, agent-launch controls, git/gh controls, arbitrary filesystem access, non-GET methods, external assets, dependencies, later-slot absorption, _HTML_PAGE rewrite, weak tests, absent validation, missing IMPLEMENTATION_REPORT.md, unknown untracked files, generated residue."
+no_drift_check: "PASS — PLAN.md includes exact '### NO-DRIFT CHECK' heading (all caps) with 25 confirmation requirements covering correct branch, approved files, locked planning artifacts, PR 0143 scope, PR 0144-0147 separate, exact workspace route, workspace root, four zones, zone headings, non-fabricated placeholders, GET / preserved, GET /runs preserved, GET /runs/<run_id> preserved, ev_contract_version '1', runtime_evidence.py unchanged, no mutation/execution authority, no arbitrary filesystem access, no external assets, required tests pass, IMPLEMENTATION_REPORT.md exists, PLAN DRIFT GATE passed, actual evidence overrides agent claims."
+commit_readiness: "ready"
