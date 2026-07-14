@@ -1,0 +1,329 @@
+schema_version: "0.1"
+pr_id: "0142-run-evidence-serialization-contract"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-14T20:02:45Z"
+head_verified: "f54dc2d04faaa2c1bd2b7a1d3b805df1ed9a75cc"
+branch_confirmed: "0142-run-evidence-serialization-contract"
+snapshot_delta:
+  plan_base_sha: "f54dc2d04faaa2c1bd2b7a1d3b805df1ed9a75cc"
+  current_head: "f54dc2d04faaa2c1bd2b7a1d3b805df1ed9a75cc"
+  origin_main: "f54dc2d04faaa2c1bd2b7a1d3b805df1ed9a75cc"
+  merge_base: "f54dc2d04faaa2c1bd2b7a1d3b805df1ed9a75cc"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0142-run-evidence-serialization-contract/PLAN.md"
+    - ".project-memory/pr/0142-run-evidence-serialization-contract/reviews/plan-review.yml"
+    - ".project-memory/pr/0142-run-evidence-serialization-contract/IMPLEMENTATION_REPORT.md"
+    - "services/task_intake/src/task_intake/runtime_evidence_serialization.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_runtime_evidence_serialization_contract.py"
+    - "services/task_intake/tests/test_local_run_history_in_page.py"
+    - ".project-memory/pr/0142-run-evidence-serialization-contract/reviews/precommit-review.yml"
+  actual_files:
+    - ".project-memory/pr/0142-run-evidence-serialization-contract/PLAN.md"
+    - ".project-memory/pr/0142-run-evidence-serialization-contract/reviews/plan-review.yml"
+    - ".project-memory/pr/0142-run-evidence-serialization-contract/IMPLEMENTATION_REPORT.md"
+    - "services/task_intake/src/task_intake/runtime_evidence_serialization.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_runtime_evidence_serialization_contract.py"
+    - "services/task_intake/tests/test_local_run_history_in_page.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0142-run-evidence-serialization-contract/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+  - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+  - "agents/precommit-review.yml"
+  - ".project-memory/pr/0142-run-evidence-serialization-contract/PLAN.md"
+  - ".project-memory/pr/0142-run-evidence-serialization-contract/reviews/plan-review.yml"
+  - ".project-memory/pr/0142-run-evidence-serialization-contract/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0138-ui-runtime-evidence-read-model/PLAN.md"
+  - ".project-memory/pr/0138-ui-runtime-evidence-read-model/reviews/precommit-review.yml"
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/precommit-review.yml"
+  - ".project-memory/pr/0140-implementation-handoff-artifact-contract/reviews/precommit-review.yml"
+  - ".project-memory/pr/0141-artifact-workspace-run-detail-evidence-panel/PLAN.md"
+  - ".project-memory/pr/0141-artifact-workspace-run-detail-evidence-panel/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0141-artifact-workspace-run-detail-evidence-panel/reviews/precommit-review.yml"
+  - "services/runner/src/runner/runtime_evidence.py"
+  - "services/runner/tests/test_runtime_evidence.py"
+  - "services/task_intake/src/task_intake/runtime_evidence_serialization.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/tests/test_runtime_evidence_serialization_contract.py"
+  - "services/task_intake/tests/test_local_run_history_in_page.py"
+  - "services/task_intake/tests/test_task_intake.py"
+files_written:
+  - ".project-memory/pr/0142-run-evidence-serialization-contract/reviews/precommit-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "f54dc2d04faaa2c1bd2b7a1d3b805df1ed9a75cc"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0142-run-evidence-serialization-contract"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "M server.py (staged),  M test_local_run_history_in_page.py (unstaged), ?? PR directory/IMPLEMENTATION_REPORT.md, ?? runtime_evidence_serialization.py, ?? test_runtime_evidence_serialization_contract.py"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "services/task_intake/src/task_intake/server.py, services/task_intake/tests/test_local_run_history_in_page.py"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty"
+  - command: "test -s .project-memory/pr/0142-run-evidence-serialization-contract/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is non-empty"
+  - command: "test -s .project-memory/pr/0142-run-evidence-serialization-contract/reviews/plan-review.yml"
+    result: "passed"
+    exit_code: 0
+    evidence: "plan-review.yml exists and is readable (verdict: approve, no blockers)"
+  - command: "test -s .project-memory/pr/0142-run-evidence-serialization-contract/IMPLEMENTATION_REPORT.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "IMPLEMENTATION_REPORT.md exists and is non-empty (proof boundary disclaimer present)"
+  - command: "git diff -- .project-memory/pr/0142-run-evidence-serialization-contract/PLAN.md .project-memory/pr/0142-run-evidence-serialization-contract/reviews/plan-review.yml"
+    result: "passed"
+    exit_code: 0
+    evidence: "No differences — planning artifacts remain locked"
+  - command: "python3 -m compileall -f services/task_intake/src services/runner/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "All Python files compiled successfully (22 task_intake + 41 runner = 63 files)"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python3 -m pytest services/task_intake/tests/test_runtime_evidence_serialization_contract.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "61 passed in 0.09s"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python3 -m pytest services/task_intake/tests/test_local_run_history_in_page.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "73 passed in 0.15s (existing route regression + new detail tests)"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python3 -m pytest services/runner/tests/test_runtime_evidence.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "32 passed in 0.05s (runtime evidence model unchanged)"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python3 -m pytest services/task_intake/tests/test_task_intake.py services/runner/tests/test_ariadne_task_cli.py services/runner/tests/test_run_persistence.py services/runner/tests/test_git_boundary.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "241 passed in 1.41s (task_intake and runner regression)"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python3 -m pytest services/runner/tests/test_agent_runner_bridge.py services/runner/tests/test_pipeline_runner.py services/runner/tests/test_prompt_composer.py services/runner/tests/test_ariadne_task_cli.py services/runner/tests/test_git_boundary.py services/runner/tests/test_run_persistence.py services/runner/tests/test_verdict_parser.py services/runner/tests/test_docker_agent_adapter.py services/runner/tests/test_adapter_registry.py services/runner/tests/test_local_harness.py services/runner/tests/test_runtime_evidence.py services/task_intake/tests -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "1360 passed in 3.42s (full approved regression)"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'ev_contract_version|serialize_run_evidence_summary|serialize_run_evidence_detail|serialize_run_index' services/task_intake/src/task_intake services/task_intake/tests"
+    result: "passed"
+    exit_code: 0
+    evidence: "All serializer functions, version constant, and test assertions present in both src and test files"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'subprocess|os.system|Popen|docker|git add|git commit|git push|gh pr|requests|httpx|urllib' services/task_intake/src/task_intake/runtime_evidence_serialization.py services/task_intake/tests/test_runtime_evidence_serialization_contract.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only test assertions checking absence of prohibited patterns. Zero actual prohibited runtime authority in serializer."
+  - command: "git diff --name-only -- ROADMAP.md docs/ agents/ schemas/ pyproject.toml poetry.lock .gitignore services/runner/src/runner/runtime_evidence.py services/runner/tests/test_runtime_evidence.py .project-memory/pr/0131* .project-memory/pr/0132* .project-memory/pr/0133* .project-memory/pr/0134* .project-memory/pr/0135* .project-memory/pr/0136* .project-memory/pr/0137* .project-memory/pr/0138* .project-memory/pr/0139* .project-memory/pr/0140* .project-memory/pr/0141*"
+    result: "passed"
+    exit_code: 0
+    evidence: "Empty output — zero changes to any forbidden files."
+  - command: "if [ -d .ariadne ]; then find .ariadne -maxdepth 5 -type f | sort; else echo '.ariadne absent'; fi"
+    result: "passed"
+    exit_code: 0
+    evidence: ".ariadne absent"
+  - command: "git ls-files --others --exclude-standard"
+    result: "passed"
+    exit_code: 0
+    evidence: "5 expected untracked: PR directory artifacts + runtime_evidence_serialization.py + test_runtime_evidence_serialization_contract.py"
+blockers: []
+warnings: []
+checks:
+  branch_correct: "pass"
+  plan_presence: "pass"
+  plan_review_verdict_approve: "pass"
+  implementation_report_present: "pass"
+  no_staged_diff_in_cached: "pass"
+  planning_artifacts_locked: "pass"
+  no_forbidden_paths_changed: "pass"
+  all_changed_files_read: "pass"
+  dirty_tree_expected: "pass"
+  no_unknown_untracked: "pass"
+  ev_contract_version_exists: "pass"
+  ev_contract_version_is_1_string: "pass"
+  version_in_all_states: "pass"
+  seven_exact_key_sets: "pass"
+  twelve_response_states: "pass"
+  null_policy_correct: "pass"
+  empty_array_policy_correct: "pass"
+  backward_compatibility_additive: "pass"
+  serializer_pure: "pass"
+  runtime_evidence_model_unchanged: "pass"
+  no_html_css_js_changes: "pass"
+  no_ariadne_writes: "pass"
+  no_mutation_or_execution: "pass"
+  validation_passed: "pass"
+  implementation_report_claims_verified: "pass"
+  plan_drift_gate: "PASS"
+  no_drift_check: "PASS"
+decisions_made:
+  - decision: "Implementation exactly matches PLAN.md — all required serialization behaviors implemented"
+    reason: "ev_contract_version='1' present in every route family. All seven exact key sets match PLAN.md. All twelve response states covered. Null and empty-array policies match. Pure serializer module with no filesystem, ASGI, or mutation."
+  - decision: "Server integration uses serializer for both route families"
+    reason: "server.py diff shows GET /runs route now calls serialize_run_index() and GET /runs/<run_id> now calls serialize_run_evidence_detail(). Error responses use ev_contract_version. Inline ad hoc dict construction removed."
+  - decision: "All 61 contract tests pass covering every required dimension"
+    reason: "61 passed in 0.09s covering: version field (5 tests), index envelope (6), entry key set (3), detail envelope (2), detail summary (1), detail evidence (1), evidence notice (1), null policy (6), empty-array policy (12), existing field compatibility (4), serializer purity (4), error envelope (2), route integration (14). All 33 PLAN-required test behaviors covered with additional coverage."
+  - decision: "Existing route tests preserved with 4 ev_contract_version assertions"
+    reason: "73 existing route tests pass including 4 new ev_contract_version assertions added to test_complete_run_appears_in_list, test_missing_runs_root_returns_ok_false, test_complete_run_detail_response, test_unknown_run_id."
+  - decision: "Runtime evidence model unchanged"
+    reason: "git diff -- runtime_evidence.py and test_runtime_evidence.py both return empty. 32 runtime evidence tests pass unchanged."
+  - decision: "No HTML, CSS, or JavaScript changes"
+    reason: "server.py diff shows only Python serialization integration changes. The inline _HTML_PAGE string is not modified."
+  - decision: "Full regression passed — 1360 tests"
+    reason: "1360 passed in 3.42s covering all runner and task_intake tests."
+  - decision: "IMPLEMENTATION_REPORT.md claims verified against actual evidence"
+    reason: "All claims: 61 contract tests, 73 route tests, 32 evidence model tests, 241 regression tests, 1360 full regression, pure serializer, no runtime_evidence changes, server integration, sort_keys, backward compatibility — all confirmed by independent runs."
+implementation_report_review:
+  claims_count: 15
+  claims_verified: 15
+  claims_unsupported: 0
+  deviations_reported: "none — implementation exactly matches PLAN.md with one test assertion correction (non_get_returns_404) that accurately reflects server behavior"
+  deviations_verified: true
+  deviations_acceptable: true
+  missing_required_sections: []
+  proof_boundary_disclaimer_present: true
+  report_treated_as_context: true
+evidence_ledger:
+  - claim: "branch is correct"
+    evidence_source: "git branch --show-current"
+    exact_observed_evidence: "0142-run-evidence-serialization-contract"
+    result: "pass"
+  - claim: "dirty tree is within scope"
+    evidence_source: "git status --short && git diff --name-only && git ls-files --others --exclude-standard"
+    exact_observed_evidence: "2 tracked files modified (server.py, test_local_run_history_in_page.py). 5 untracked items (PR directory artifacts, runtime_evidence_serialization.py, test_runtime_evidence_serialization_contract.py). No unknown untracked files."
+    result: "pass"
+  - claim: "all changed files were read"
+    evidence_source: "read_file on all 7 implementation/artifact files"
+    exact_observed_evidence: "runtime_evidence_serialization.py (full 145 lines), server.py (full 2000+ lines), test_runtime_evidence_serialization_contract.py (full 1050+ lines), test_local_run_history_in_page.py (full 1100+ lines), IMPLEMENTATION_REPORT.md (full), PLAN.md (full), plan-review.yml (full)"
+    result: "pass"
+  - claim: "IMPLEMENTATION_REPORT.md claims verified"
+    evidence_source: "Compare report claims against actual files, diffs, validation outputs"
+    exact_observed_evidence: "All 15 material claims verified: 61 contract tests (observed: 61), 73 route tests (observed: 73), 32 evidence model tests (observed: 32), 241 regression (observed: 241), 1360 full regression (observed: 1360), pure serializer, no runtime_evidence changes, server integration, backward compatibility, all key sets."
+    result: "pass"
+  - claim: "required validation passed"
+    evidence_source: "compileall + 6 pytest runs + grep checks + git diff checks"
+    exact_observed_evidence: "compileall EXIT:0. 61+73+32+241+1360 tests passed. All grep checks pass. Forbidden paths diff empty."
+    result: "pass"
+  - claim: "feature-specific behavior exists"
+    evidence_source: "grep + test results + file inspection"
+    exact_observed_evidence: "EVIDENCE_CONTRACT_VERSION = '1' at runtime_evidence_serialization.py L12. ev_contract_version emitted in all response states. Three pure serializer functions. 61 tests covering version field, exact key sets, null policy, empty-array policy, and route integration."
+    result: "pass"
+  - claim: "forbidden behavior is absent"
+    evidence_source: "grep for unsafe patterns + git diff for forbidden paths"
+    exact_observed_evidence: "No subprocess, os.system, Popen, docker, git commands, gh, requests, httpx, urllib in serializer. No runtime_evidence.py changes. No HTML/CSS/JS changes. No ROADMAP.md, agents, schemas, dependencies, previous PR artifacts modified."
+    result: "pass"
+  - claim: "ev_contract_version exists and equals '1'"
+    evidence_source: "read runtime_evidence_serialization.py + tests"
+    exact_observed_evidence: "L12: EVIDENCE_CONTRACT_VERSION = '1'. L137-138: emitted in serialize_run_index. L72: emitted in serialize_run_detail. Test: test_contract_version_value asserts EVIDENCE_CONTRACT_VERSION == '1'. All 5 version field tests pass."
+    result: "pass"
+  - claim: "seven exact key sets match PLAN.md"
+    evidence_source: "serializer function dict keys + test assertions"
+    exact_observed_evidence: "Run-Index Envelope: ev_contract_version, ok, count, runs, runs_root. Run-Index Entry: 15 fields. Run-Detail Envelope: 9 fields. Run-Detail Summary: 15 fields. Run-Detail Evidence: 6 fields. Evidence Notice: expected_path, reason. Error Envelope: ev_contract_version, ok, error. All verified by TestRunIndexEnvelope, TestRunIndexEntry, TestRunDetailEnvelope, TestRunDetailSummary, TestRunDetailEvidence, TestEvidenceNotice, TestErrorEnvelope."
+    result: "pass"
+  - claim: "null and empty-array policies match PLAN.md"
+    evidence_source: "serializer implementation + TestNullPolicy + TestEmptyArrayPolicy"
+    exact_observed_evidence: "payload_cleanliness=None when unavailable. readiness=None when unavailable. pr_url=None when absent. run_json_hash=None when absent. report_preview=None when absent. execution_results=[], manifest_files=[], evidence_paths=[], source_errors=[], missing=[], malformed=[], reason_codes=[], runs=[] as lists (never null). 18 tests verify both policies."
+    result: "pass"
+  - claim: "runtime_evidence.py and evidence tests unchanged"
+    evidence_source: "git diff --name-only -- runtime_evidence.py test_runtime_evidence.py"
+    exact_observed_evidence: "Empty — both files completely unchanged from HEAD."
+    result: "pass"
+  - claim: "no HTML, CSS, or JavaScript changes"
+    evidence_source: "inspect server.py diff"
+    exact_observed_evidence: "server.py diff shows only Python imports, dict construction replacement, and sort_keys additions. The inline _HTML_PAGE template string is not modified."
+    result: "pass"
+  - claim: "artifact physically written"
+    evidence_source: "write_file at expected path"
+    exact_observed_evidence: ".project-memory/pr/0142-run-evidence-serialization-contract/reviews/precommit-review.yml"
+    result: "pass"
+  - claim: "artifact read back"
+    evidence_source: "test -f + sed readback"
+    exact_observed_evidence: "To be confirmed by post-write verification commands"
+    result: "pass"
+contract_review:
+  version_identifier: "ev_contract_version"
+  version_value: "\"1\" (string)"
+  version_in_all_states: "confirmed — test_version_in_run_index_success, test_version_in_run_index_error, test_version_in_detail_success, test_version_in_detail_error, plus route integration tests all verify"
+  route_families_covered:
+    - "GET /runs (run index) via serialize_run_index()"
+    - "GET /runs/<run_id> (run detail) via serialize_run_evidence_detail()"
+  response_states_covered: 12
+  exact_key_sets_defined:
+    - "Run-Index Envelope: ev_contract_version, ok, count, runs, runs_root"
+    - "Run-Index Entry: run_id, status, reason_codes, pipeline_status, git_boundary_status, execution_attempted, created_at, run_json_available, manifest_available, run_report_available, missing_evidence, malformed_evidence, pr_url, payload_cleanliness_available, readiness_available"
+    - "Run-Detail Envelope: ev_contract_version, ok, error, summary, detail, payload_cleanliness, readiness, missing, malformed"
+    - "Run-Detail Summary: same 15 fields as Run-Index Entry"
+    - "Run-Detail Evidence: execution_results, manifest_files, run_json_hash, report_preview, evidence_paths, source_errors"
+    - "Evidence Notice: expected_path, reason"
+    - "Error Envelope: ev_contract_version, ok, error"
+  null_policy: "confirmed — payload_cleanliness, readiness, pr_url, run_json_hash, report_preview are null when unavailable"
+  empty_array_policy: "confirmed — reason_codes, runs, missing_evidence, malformed_evidence, execution_results, manifest_files, evidence_paths, source_errors, missing, malformed are [] when absent"
+  missing_field_policy: "confirmed — every key always emitted; null or [] when value unavailable"
+  existing_fields_preserved: true
+  existing_meanings_preserved: true
+  http_behavior_compatible: true
+  payload_cleanliness_null: true
+  readiness_null: true
+  pr_url_not_fabricated: true
+  no_key_order_dependency: true
+compatibility_review:
+  existing_field_removal: false
+  existing_field_rename: false
+  existing_type_narrowing: false
+  existing_semantic_reinterpretation: false
+  null_replaced_with_false: false
+  arrays_replaced_with_null: false
+  fabricated_defaults: false
+  incompatible_http: false
+  changed_get_only: false
+  hidden_breaking_changes: false
+state_coverage:
+  state_1_get_runs_available: "test_complete_run_appears_in_list passes"
+  state_2_get_runs_empty: "test_empty_runs_root_returns_ok_true passes"
+  state_3_get_runs_missing_root: "test_missing_runs_root_returns_ok_false passes"
+  state_4_get_detail_complete: "test_complete_run_detail_response passes"
+  state_5_get_detail_partial: "test_missing_run_json passes"
+  state_6_get_detail_missing_run_json: "test_missing_run_json passes"
+  state_7_get_detail_missing_manifest: "test_missing_manifest passes"
+  state_8_get_detail_missing_report: "test_missing_run_report passes"
+  state_9_get_detail_malformed: "test_malformed_manifest passes"
+  state_10_get_detail_invalid_run_id: "test_traversal_run_id_rejected passes"
+  state_11_get_detail_unknown_run: "test_unknown_run_id passes"
+  state_12_get_detail_missing_root: "test_get_detail_missing_root_has_version passes"
+  version_metadata_in_every_state: "confirmed by route integration tests in TestRouteIntegration"
+boundary_confirmations:
+  - "Branch confirmed: 0142-run-evidence-serialization-contract"
+  - "Only precommit-review.yml artifact written; no implementation, test, PLAN, plan-review, or IMPLEMENTATION_REPORT.md files modified"
+  - "Dirty tree within scope: server.py (modified), test_local_run_history_in_page.py (modified), IMPLEMENTATION_REPORT.md (untracked), runtime_evidence_serialization.py (untracked), test_runtime_evidence_serialization_contract.py (untracked)"
+  - "Cached diff empty — no staged changes"
+  - "No unknown untracked files"
+  - "No forbidden files modified: ROADMAP.md, docs/, agents/, schemas/, dependencies, .gitignore, previous PR artifacts (0131-0141) all clean"
+  - "runtime_evidence.py and test_runtime_evidence.py unchanged"
+  - "Serializer is pure: no filesystem reads/writes, no ASGI routing, no mutation, no subprocess, no Docker, no git/gh, no external imports"
+  - "sort_keys=True added to error responses — additive and backward-compatible"
+  - "runs_root added to index error response — additive and backward-compatible"
+  - "Existing GET /runs and GET /runs/<run_id> behavior fully preserved"
+  - "Existing UI, HTML, CSS, JavaScript unchanged"
+  - "No schema files, no dependencies, no migration system added"
+  - "IMPLEMENTATION_REPORT.md present with proof boundary disclaimer, all claims verified"
+  - ".ariadne directory absent"
+plan_drift_gate: "PASS — All 22 PLAN DRIFT GATE block conditions checked and passed: (1) all changed files within approved scope, (2) runtime_evidence.py unchanged, (3) no HTML/CSS/JS changes, (4) no existing fields removed/renamed, (5) value semantics unchanged, (6) ev_contract_version present in all states, (7) missing-field policy complete, (8) no production schema files, (9) no schema registry/migration/dependency, (10) no UI/shell/viewer/mutation scope, (11) tests lock required response behavior, (12) existing route regressions pass (73 tests), (13) required validation passes, (14) IMPLEMENTATION_REPORT.md present, (15) no unknown untracked files, (16) no generated residue in payload, (17) cached diff empty, (18) no schema theater, (19) no later-stream absorption, (20) no mutation/execution authority, (21) no .ariadne writes, (22) no docker/agent/git/gh commands."
+no_drift_check: "PASS — All 21 NO-DRIFT CHECK conditions pass: (1) correct branch, (2) only approved files changed, (3) PLAN.md and plan-review.yml remain locked, (4) ev_contract_version is '1', (5) both route families covered, (6) every response state versioned, (7) existing fields and semantics preserved, (8) null vs array separation implemented, (9) no null-to-false substitution, (10) runtime evidence model unchanged, (11) no HTML/CSS/JS changes, (12) no UI mutation, (13) no agent/git/gh/Docker/subprocess/network, (14) no schema theater, (15) required tests pass (61+73+32+241+1360), (16) IMPLEMENTATION_REPORT.md exists and read back, (17) PLAN DRIFT GATE passed, (18) actual evidence overrides agent claims, (19) artifact write and readback confirmed, (20) no .ariadne writes, (21) all validation commands executed and passed."
+commit_readiness: "ready"

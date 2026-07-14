@@ -38,6 +38,11 @@ from task_intake.context_preview import generate_context_preview
 from task_intake.runs import create_mock_run
 from runner.runtime_evidence import list_run_evidence_summaries
 from runner.runtime_evidence import read_run_evidence_detail
+from task_intake.runtime_evidence_serialization import (
+    EVIDENCE_CONTRACT_VERSION,
+    serialize_run_evidence_detail,
+    serialize_run_index,
+)
 
 # Safe run_id pattern: alphanumeric, underscore, hyphen only
 _RUN_ID_RE = re.compile(r"^[a-zA-Z0-9_\-]+$")
@@ -917,9 +922,10 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
         # Validate run_id
         if not run_id or not _RUN_ID_RE.match(run_id) or len(run_id) > 128:
             body = json.dumps({
+                "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
                 "ok": False,
                 "error": "invalid run_id",
-            }, ensure_ascii=False).encode("utf-8")
+            }, sort_keys=True, ensure_ascii=False).encode("utf-8")
             await _send_json(send, 200, body)
             return
 
@@ -932,64 +938,16 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
 
         if not os.path.isdir(runs_root):
             body = json.dumps({
+                "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
                 "ok": False,
                 "error": "runs_root not found or unreadable",
-            }, ensure_ascii=False).encode("utf-8")
+            }, sort_keys=True, ensure_ascii=False).encode("utf-8")
             await _send_json(send, 200, body)
             return
 
         result = read_run_evidence_detail(runs_root, run_id)
 
-        # Build response from RuntimeEvidenceReadResult
-        response: dict[str, Any] = {
-            "ok": result.ok,
-            "error": result.error,
-        }
-
-        if result.summary is not None:
-            s = result.summary
-            response["summary"] = {
-                "run_id": s.run_id,
-                "status": s.status,
-                "reason_codes": list(s.reason_codes),
-                "pipeline_status": s.pipeline_status,
-                "git_boundary_status": s.git_boundary_status,
-                "execution_attempted": s.execution_attempted,
-                "created_at": s.created_at,
-                "run_json_available": s.run_json_path is not None,
-                "manifest_available": s.manifest_path is not None,
-                "run_report_available": s.run_report_path is not None,
-                "missing_evidence": list(s.missing_evidence),
-                "malformed_evidence": list(s.malformed_evidence),
-                "pr_url": s.pr_url,
-            }
-        else:
-            response["summary"] = None
-
-        if result.detail is not None:
-            d = result.detail
-            response["detail"] = {
-                "execution_results": list(d.execution_results),
-                "manifest_files": list(d.manifest_files),
-                "run_json_hash": d.run_json_hash,
-                "report_preview": d.report_preview,
-                "evidence_paths": list(d.evidence_paths),
-                "source_errors": list(d.source_errors),
-            }
-        else:
-            response["detail"] = None
-
-        response["payload_cleanliness"] = result.detail.payload_cleanliness if result.detail is not None else None
-        response["readiness"] = result.detail.readiness if result.detail is not None else None
-        response["missing"] = [
-            {"expected_path": n.expected_path, "reason": n.reason}
-            for n in result.missing
-        ]
-        response["malformed"] = [
-            {"expected_path": n.expected_path, "reason": n.reason}
-            for n in result.malformed
-        ]
-
+        response = serialize_run_evidence_detail(result)
         body = json.dumps(response, sort_keys=True, ensure_ascii=False).encode("utf-8")
         await _send_json(send, 200, body)
         return
@@ -1004,41 +962,19 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
             runs_root = os.path.join(os.getcwd(), ".ariadne", "runs")
 
         if not os.path.isdir(runs_root):
-            body = json.dumps({
-                "ok": False,
-                "count": 0,
-                "runs": [],
-                "error": "runs_root not found or unreadable",
-            }, ensure_ascii=False).encode("utf-8")
+            response = serialize_run_index(
+                summaries=(),
+                runs_root=runs_root,
+                ok=False,
+                error="runs_root not found or unreadable",
+            )
+            body = json.dumps(response, sort_keys=True, ensure_ascii=False).encode("utf-8")
             await _send_json(send, 200, body)
             return
 
         summaries = list_run_evidence_summaries(runs_root)
-        runs_json = []
-        for s in summaries:
-            runs_json.append({
-                "run_id": s.run_id,
-                "status": s.status,
-                "reason_codes": list(s.reason_codes),
-                "pipeline_status": s.pipeline_status,
-                "git_boundary_status": s.git_boundary_status,
-                "execution_attempted": s.execution_attempted,
-                "created_at": s.created_at,
-                "run_json_available": s.run_json_path is not None,
-                "manifest_available": s.manifest_path is not None,
-                "run_report_available": s.run_report_path is not None,
-                "missing_evidence": list(s.missing_evidence),
-                "malformed_evidence": list(s.malformed_evidence),
-                "pr_url": s.pr_url,
-                "payload_cleanliness_available": False,
-                "readiness_available": False,
-            })
-        body = json.dumps({
-            "ok": True,
-            "count": len(runs_json),
-            "runs": runs_json,
-            "runs_root": runs_root,
-        }, ensure_ascii=False).encode("utf-8")
+        response = serialize_run_index(summaries=summaries, runs_root=runs_root)
+        body = json.dumps(response, sort_keys=True, ensure_ascii=False).encode("utf-8")
         await _send_json(send, 200, body)
         return
 
