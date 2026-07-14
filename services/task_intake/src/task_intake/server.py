@@ -43,6 +43,7 @@ from task_intake.runtime_evidence_serialization import (
     serialize_run_evidence_detail,
     serialize_run_index,
 )
+from task_intake.artifact_workspace import render_artifact_workspace
 
 # Safe run_id pattern: alphanumeric, underscore, hyphen only
 _RUN_ID_RE = re.compile(r"^[a-zA-Z0-9_\-]+$")
@@ -976,6 +977,19 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
         response = serialize_run_index(summaries=summaries, runs_root=runs_root)
         body = json.dumps(response, sort_keys=True, ensure_ascii=False).encode("utf-8")
         await _send_json(send, 200, body)
+        return
+
+    if method == "GET" and path == "/workspace":
+        html = render_artifact_workspace().encode("utf-8")
+        await send({
+            "type": "http.response.start",
+            "status": 200,
+            "headers": [
+                (b"content-type", b"text/html; charset=utf-8"),
+                (b"content-length", str(len(html)).encode("utf-8")),
+            ],
+        })
+        await send({"type": "http.response.body", "body": html})
         return
 
     if method == "GET" and path == "/":
