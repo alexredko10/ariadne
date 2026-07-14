@@ -1,0 +1,212 @@
+schema_version: "0.1"
+pr_id: "0142-run-evidence-serialization-contract"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-10T13:15:00Z"
+head_verified: "f54dc2d04faaa2c1bd2b7a1d3b805df1ed9a75cc"
+branch_confirmed: "0142-run-evidence-serialization-contract"
+snapshot_delta:
+  plan_base_sha: "f54dc2d04faaa2c1bd2b7a1d3b805df1ed9a75cc"
+  current_head: "f54dc2d04faaa2c1bd2b7a1d3b805df1ed9a75cc"
+  origin_main: "f54dc2d04faaa2c1bd2b7a1d3b805df1ed9a75cc"
+  merge_base: "f54dc2d04faaa2c1bd2b7a1d3b805df1ed9a75cc"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0142-run-evidence-serialization-contract/PLAN.md"
+    - ".project-memory/pr/0142-run-evidence-serialization-contract/reviews/plan-review.yml"
+  actual_files:
+    - ".project-memory/pr/0142-run-evidence-serialization-contract/PLAN.md"
+    - ".project-memory/pr/0142-run-evidence-serialization-contract/reviews/plan-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0142-run-evidence-serialization-contract/reviews/plan-review.yml"
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+  - ".project-memory/review-artifact.schema.yml"
+  - "agents/plan-review.yml"
+  - "ROADMAP.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+  - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+  - ".project-memory/pr/0142-run-evidence-serialization-contract/PLAN.md"
+  - ".project-memory/pr/0138-ui-runtime-evidence-read-model/PLAN.md"
+  - ".project-memory/pr/0138-ui-runtime-evidence-read-model/reviews/precommit-review.yml"
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/precommit-review.yml"
+  - ".project-memory/pr/0140-implementation-handoff-artifact-contract/PLAN.md"
+  - ".project-memory/pr/0140-implementation-handoff-artifact-contract/reviews/plan-review.yml"
+  - ".project-memory/pr/0140-implementation-handoff-artifact-contract/reviews/precommit-review.yml"
+  - ".project-memory/pr/0141-artifact-workspace-run-detail-evidence-panel/PLAN.md"
+  - ".project-memory/pr/0141-artifact-workspace-run-detail-evidence-panel/reviews/precommit-review.yml"
+  - "services/runner/src/runner/runtime_evidence.py"
+  - "services/runner/tests/test_runtime_evidence.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/tests/test_local_run_history_in_page.py"
+  - "services/task_intake/tests/test_task_intake.py"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+files_written:
+  - ".project-memory/pr/0142-run-evidence-serialization-contract/reviews/plan-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "f54dc2d04faaa2c1bd2b7a1d3b805df1ed9a75cc"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0142-run-evidence-serialization-contract"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? .project-memory/pr/0142-run-evidence-serialization-contract/"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No tracked files modified"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+  - command: "test -s .project-memory/pr/0142-run-evidence-serialization-contract/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is non-empty"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'schema_version|serialization|response contract|golden|fixture|sort_keys' services/task_intake services/runner .project-memory/pr/0142-run-evidence-serialization-contract/PLAN.md 2>/dev/null | head -10"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md: 'serialization' throughout. 'ev_contract_version' defined as version field. 'serialize_run_evidence_summary', 'serialize_run_evidence_detail', 'serialize_run_index' pure helper functions. No golden/fixture references in PLAN except test assertions on parsed JSON. sort_keys already used in server.py."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'path == \"/runs\"|path.startswith\(\"/runs/\"\)|list_run_evidence_summaries|read_run_evidence_detail|payload_cleanliness|readiness|missing|malformed' services/task_intake/src/task_intake/server.py services/runner/src/runner/runtime_evidence.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "server.py L39: list_run_evidence_summaries import. L40: read_run_evidence_detail import. L997: GET /runs route. L915: GET /runs/<run_id> via path.startswith. L941: read_run_evidence_detail called. L982-983: payload_cleanliness/readiness null handling. runtime_evidence.py: RunEvidenceDetail with payload_cleanliness=None (L401), readiness=None (L402). missing/malformed notices via MissingEvidenceNotice."
+blockers: []
+warnings: []
+checks:
+  branch_correct: "pass"
+  plan_presence: "pass"
+  no_staged_files: "pass"
+  no_tracked_modifications: "pass"
+  dirty_tree_scope: "pass"
+  roadmap_alignment: "pass"
+  roadmap_slot_correct: "pass"
+  contract_completeness: "pass"
+  backward_compatibility: "pass"
+  implementation_design_pure: "pass"
+  test_coverage: "pass"
+  implementation_report_required: "pass"
+  plan_drift_gate_present: "pass"
+  no_drift_check_present: "pass"
+  no_ui_html_changes: "pass"
+  no_frozen_streams: "pass"
+  no_schema_theater: "pass"
+  runtime_evidence_unchanged: "pass"
+  plan_drift_gate: "PASS"
+  no_drift_check: "PASS"
+commit_readiness: "ready"
+decisions_made:
+  - decision: "Roadmap alignment confirmed — PR 0142 is the correct serialization-contract slot"
+    reason: "ROADMAP.md L358: 'Artifact Workspace Read-Only UI (0138+)'. Roadmap artifact Stream 1: Artifact Workspace Read Model (0138-0142), PR 0142 is 'Run Evidence Serialization Contract'. PLAN.md Roadmap Alignment confirms track 'Artifact Workspace Read Model (Stream 1)', slot 'PR 0142', task 'freezes response shapes into versioned contract'. Absorption Statement explains PR 0141 explicitly stated it was 'not a serialization-contract PR' — PR 0142 remains the exact roadmap slot. ADR 0011 confirms roadmap alignment gate enforcement."
+  - decision: "Complete current response inventory derived from actual server.py code"
+    reason: "PLAN.md Current Response Inventory (lines 59-101) catalogs 12 distinct response states from server.py: GET /runs with available runs, empty root, missing root; GET /runs/<run_id> complete, partial, missing run.json, missing manifest, missing report, malformed evidence, invalid run_id, unknown run, missing detail root. All field names and value types match actual server.py code confirmed by grep evidence."
+  - decision: "Versioned contract with exact key sets, null policy, empty-array policy, and missing-field policy"
+    reason: "PLAN.md Versioned Contract section defines ev_contract_version: '1' (string) present in every response state. Exact key sets for 7 structures: Run-Index Envelope, Run-Index Entry, Run-Detail Envelope, Run-Detail Summary, Run-Detail Evidence, Evidence Notice, Error Envelope. Null policy: null means unavailable; no null-to-false or null-to-empty-string substitution. Empty-array policy: [] when absent; no array-to-null substitution. Optional-field policy: every key always emitted. Unknown-additive-field consumer policy: consumers must tolerate unknown keys."
+  - decision: "Backward-compatibility rules defined with breaking-change escalation path"
+    reason: "PLAN.md Future Breaking Versions: breaking version (ev_contract_version: '2') allowed only when existing field must be removed/renamed/semantics-changed, or route/HTTP behavior must diverge. Requires architect sign-off, new PLAN.md, new PR. Cannot be silently introduced. PLAN explicitly blocks existing field removal, rename, type narrowing, semantic reinterpretation, null-to-false, array-to-null, fabricated defaults, incompatible HTTP, changed GET-only, hidden breaking changes, and consumer dependence on object-key ordering."
+  - decision: "Serialization design is pure — no filesystem, no ASGI routing, no mutation"
+    reason: "PLAN.md Serialization Helper: pure functions (serialize_run_evidence_summary, serialize_run_evidence_detail, serialize_run_index) taking read-model dataclasses and returning dicts. Explicit list of what helper must not contain: no filesystem access (os.path, open, os.listdir, os.makedirs), no ASGI routing (scope, send, receive, path matching), no mutation (no writes, git, gh, agents, Docker, subprocess), no import of server.py or ASGI-specific modules."
+  - decision: "Both route families covered with same contract rules"
+    reason: "PLAN.md Implementation Design: serialize_run_index for GET /runs, serialize_run_evidence_detail for GET /runs/<run_id>. Both use serialize_run_evidence_summary for run entries. Both add ev_contract_version. Server.py changes limited to replacing inline dict construction with helper calls."
+  - decision: "33 executable contract tests covering all required dimensions"
+    reason: "PLAN.md Test Plan: (1) version field presence, (2-5) version in all states, (6-8) index envelope states, (9) exact entry key set, (10-18) detail envelope states, (19-21) exact key sets for summary/detail/notices, (22) exact value types, (23-30) null/empty-array policies, (31) existing fields preserved, (32) existing route tests pass, (33) non-GET returns 404. Tests assert parsed JSON behavior — not grep or prose assertions."
+  - decision: "No runtime_evidence.py changes — no evidence-triggered gap demonstrated"
+    reason: "PLAN.md Candidate Scope: runtime_evidence.py not listed as allowed change. Non-Goals: 'Changing runtime_evidence.py without evidence.' PLAN DRIFT GATE: blocks runtime_evidence.py changes without approved reason. Current read-model dataclasses provide all fields needed for serialization."
+  - decision: "No HTML, CSS, or JavaScript changes planned"
+    reason: "PLAN.md Implementation Design: 'No changes to routing order, HTML, CSS, or JavaScript.' Server.py changes limited to serialization integration only. PLAN DRIFT GATE: block if inline HTML/CSS/JS changes."
+  - decision: "No production schema theater — no YAML/JSON Schema files planned"
+    reason: "PLAN.md Non-Goals: 'Adding a production schema system (YAML/JSON Schema files).' PLAN DRIFT GATE: block if production schema file introduced. No golden fixtures — tests parse live JSON responses."
+  - decision: "IMPLEMENTATION_REPORT.md required with all 11 sections and proof disclaimer"
+    reason: "PLAN.md Implementation Report Obligation section: coder writes IMPLEMENTATION_REPORT.md per PR 0140 contract. All 11 template sections required. Report is handoff context, not proof. Agent output is not proof. Fresh/continuation/rerun/unexplained-preexisting policy defined. Precommit-review compares claims against actual files."
+  - decision: "PLAN DRIFT GATE present in all caps with 16 block conditions"
+    reason: "PLAN.md line: '### PLAN DRIFT GATE' (all caps). 16 block conditions covering out-of-scope files, runtime_evidence.py changes without evidence, HTML/CSS/JS changes, existing field removal/rename, value semantic changes, missing ev_contract_version, incomplete missing-field policy, production schema files, schema registry/migration/dependency, UI/shell/viewer/mutation scope, weak tests, failed regressions, missing validation, absent IMPLEMENTATION_REPORT.md, unknown untracked files, generated residue in payload."
+  - decision: "NO-DRIFT CHECK present in all caps with 18 confirmation requirements"
+    reason: "PLAN.md line: '### NO-DRIFT CHECK' (all caps). 18 confirmation requirements: correct branch, approved files only, locked PLAN/plan-review, one contract version (1), both route families covered, every state versioned, existing fields preserved, null/array policy implemented, no null-to-false, no evidence model change, no HTML/CSS/JS change, no UI mutation, no agent/git/gh/Docker/subprocess/shell/network, no schema theater, required tests pass, IMPLEMENTATION_REPORT.md exists with readback, PLAN DRIFT GATE passed, actual evidence remains proof."
+  - decision: "No frozen streams or mutation boundaries opened"
+    reason: "PLAN.md Non-Goals (16-25): no Artifact Workspace Shell, no report viewer, no manifest/proof viewer, no UI mutation, no artifact acceptance/rejection, no agent launch, no commit/PR creation, no Visual Gate, no Artifact Registry mutation, no PCAM/PBS, no Context Core, no Rubrics, no Decision Core, no Model Router, no ETL/ERP work."
+roadmap_alignment:
+  active_stream: "Artifact Workspace Read Model (Stream 1)"
+  expected_slot: "PR 0142"
+  roadmap_purpose: "Run Evidence Serialization Contract"
+  batching_classification: "substrate/execution-contract"
+  drift_heuristic: "not triggered — PR is substrate contract, not UI feature"
+  architect_sign_off: "not required per ADR 0011 — drift heuristic not triggered"
+  closed_track_reopened: false
+  later_stream_absorbed: false
+contract_review:
+  version_identifier: "ev_contract_version: '1' (string, present in every state)"
+  route_families_covered:
+    - "GET /runs (run index)"
+    - "GET /runs/<run_id> (run detail)"
+  response_states_inventoried: 12
+  exact_key_sets_defined:
+    - "Run-Index Envelope: ev_contract_version, ok, count, runs, runs_root"
+    - "Run-Index Entry: 15 fields including run_id, status, reason_codes, etc."
+    - "Run-Detail Envelope: 9 fields including ev_contract_version, ok, error, summary, detail, payload_cleanliness, readiness, missing, malformed"
+    - "Run-Detail Summary: 13 fields"
+    - "Run-Detail Evidence: 6 fields"
+    - "Evidence Notice: expected_path, reason"
+    - "Error Envelope: ev_contract_version, ok, error"
+  null_policy: "null means unavailable; no null-to-false or null-to-empty-string"
+  empty_array_policy: "[] when absent; no array-to-null"
+  missing_field_policy: "every key always emitted; null or [] when unavailable"
+  error_envelope_policy: "defined for missing root, unknown run, invalid run_id"
+  notice_shapes_defined: "MissingEvidenceNotice with expected_path (str) and reason (str)"
+  existing_fields_preserved: true
+  existing_meanings_preserved: true
+  http_behavior_compatible: true
+  payload_cleanliness_null_when_unavailable: true
+  readiness_null_when_unavailable: true
+  pr_url_not_fabricated: true
+  no_key_order_dependency: true
+  future_breaking_requires_new_version: true
+compatibility_review:
+  existing_field_removal: false
+  existing_field_rename: false
+  existing_type_narrowing: false
+  existing_semantic_reinterpretation: false
+  null_replaced_with_false: false
+  arrays_replaced_with_null: false
+  fabricated_defaults: false
+  incompatible_http: false
+  changed_get_only: false
+  hidden_breaking_changes: false
+  consumer_key_order_dependency: false
+boundary_confirmations:
+  - "Branch confirmed: 0142-run-evidence-serialization-contract"
+  - "Only plan-review.yml artifact written; no PLAN.md, ROADMAP.md, services/, agents/, schemas/, docs/ files modified"
+  - "No tracked files modified in working tree"
+  - "HEAD equals origin/main and merge-base — no stale snapshot"
+  - "ADR 0011 confirmed: docs/adr/0011-pr-batching-and-roadmap-discipline.md found and read"
+  - "Roadmap slot correct: PR 0142 is Run Evidence Serialization Contract (Stream 1)"
+  - "Current response inventory matches actual server.py code — no invented fields"
+  - "Versioned contract defined: ev_contract_version '1' in every response state"
+  - "Both route families covered (GET /runs, GET /runs/<run_id>)"
+  - "All 12 response states inventoried with exact key sets"
+  - "Backward-compatibility: existing fields preserved, null/array policies defined"
+  - "Serialization design: pure helper module (runtime_evidence_serialization.py), no filesystem, no ASGI routing, no mutation"
+  - "33 executable contract tests covering version, key sets, types, null/array policies, all states"
+  - "No runtime_evidence.py changes — no evidence-triggered gap"
+  - "No HTML, CSS, or JavaScript changes"
+  - "No production schema files (YAML/JSON Schema) planned"
+  - "IMPLEMENTATION_REPORT.md required with all 11 sections and proof disclaimer"
+  - "PLAN DRIFT GATE: present in all caps with 16 block conditions"
+  - "NO-DRIFT CHECK: present in all caps with 18 confirmation requirements"
+  - "No frozen streams or mutation boundaries opened"
+  - "No dependency changes, no schema registry, no migration framework"
+plan_drift_gate: "PASS — PLAN.md includes exact '### PLAN DRIFT GATE' heading (all caps, ~L570) with 16 block conditions covering out-of-scope files, runtime_evidence.py changes without evidence, HTML/CSS/JS changes, existing field removal/rename, value semantic changes, missing ev_contract_version, incomplete missing-field policy, production schema files, schema registry/migration/dependency, UI/shell/viewer/mutation scope, weak tests, failed regressions, missing validation, absent IMPLEMENTATION_REPORT.md, unknown untracked files, generated residue in payload."
+no_drift_check: "PASS — PLAN.md includes exact '### NO-DRIFT CHECK' heading (all caps, ~L590) with 18 confirmation requirements covering correct branch, approved files only, locked artifacts, one contract version, both route families covered, every state versioned, existing fields preserved, null/array policy implemented, no null-to-false substitution, no evidence model change, no HTML/CSS/JS change, no UI mutation, no agent/git/gh/Docker/subprocess/shell/network behavior, no schema theater, required tests pass, IMPLEMENTATION_REPORT.md exists with readback, PLAN DRIFT GATE passed, actual evidence overrides agent claims."
+commit_readiness: "ready"

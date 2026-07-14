@@ -146,6 +146,8 @@ class TestGetRunsRoute:
         status, raw = _request("GET", "/runs?runs_root=" + runs_root)
         assert status == 200
         data = json.loads(raw)
+        # Contract version present in error state
+        assert data["ev_contract_version"] == "1"
         assert data["ok"] is False
         assert "error" in data
 
@@ -183,6 +185,8 @@ class TestGetRunsRoute:
         status, raw = _request("GET", "/runs?runs_root=" + runs_root)
         assert status == 200
         data = json.loads(raw)
+        # Contract version present
+        assert data["ev_contract_version"] == "1"
         assert data["ok"] is True
         assert data["count"] == 1
         assert data["runs"][0]["run_id"] == "test-run-001"
@@ -710,6 +714,8 @@ class TestRunDetailEndpoint:
         status, raw = _request("GET", "/runs/run-001?runs_root=" + paths["runs_root"])
         assert status == 200
         data = json.loads(raw)
+        # Contract version present
+        assert data["ev_contract_version"] == "1"
         assert data["ok"] is True
         assert data["summary"] is not None
         assert data["summary"]["run_id"] == "run-001"
@@ -746,6 +752,8 @@ class TestRunDetailEndpoint:
         status, raw = _request("GET", "/runs/nonexistent-run?runs_root=" + runs_root)
         assert status == 200
         data = json.loads(raw)
+        # Contract version present in error state
+        assert data["ev_contract_version"] == "1"
         assert data["ok"] is False
         assert data["error"] is not None
 
