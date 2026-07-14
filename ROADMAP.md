@@ -355,6 +355,24 @@ prompt as a durable source artifact, records the post-0136 roadmap, and opens
 **Artifact Workspace Read-Only UI** as the next active stream. No runtime or
 UI implementation happens in this PR.
 
+### PR 0142 — Run Evidence Serialization Contract (COMPLETED)
+
+PR 0142 completes the Artifact Workspace Read Model stream (0138-0142) by
+freezing the JSON response shapes for GET /runs and GET /runs/<run_id> into
+a versioned, backward-compatible serialization contract.
+
+### PR 0142A — Ariadne Three-Response Orchestrator Happy Path Standard (GOVERNANCE INSERTION)
+
+This PR is a non-product governance insertion authorized by the human architect
+between product PR 0142 (Run Evidence Serialization Contract) and product PR 0143
+(Artifact Workspace 4-Zone Shell Skeleton).
+
+PR 0142A codifies the current optimal orchestrator workflow as a durable
+repository artifact. It does not consume or renumber product roadmap slot PR 0143.
+No product capability is implemented. No frozen stream is opened.
+
+PR 0143 remains the next product PR: Artifact Workspace 4-Zone Shell Skeleton.
+
 ### Next active stream: Artifact Workspace Read-Only UI (0138+)
 
 The next active stream is read-only Artifact Workspace UI. Detailed roadmap

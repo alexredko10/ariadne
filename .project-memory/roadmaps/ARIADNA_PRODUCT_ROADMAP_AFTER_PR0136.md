@@ -159,6 +159,12 @@ Backward-compatible missing-field policy.
 No production schema theater; only executable tests.
 ```
 
+### Governance Insertion: PR 0142A
+
+PR 0142A is a non-product governance insertion authorized by the human architect.
+It does not consume a product roadmap slot and does not renumber later product slots.
+PR 0143 (Artifact Workspace 4-Zone Shell Skeleton) remains the next product PR.
+
 ---
 
 ### Stream 2 — Artifact Workspace Shell
