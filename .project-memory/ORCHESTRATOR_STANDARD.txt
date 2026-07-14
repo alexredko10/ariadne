@@ -2,7 +2,7 @@
 ARIADNE ORCHESTRATOR STANDARD — .project-memory/ORCHESTRATOR_STANDARD.txt
 ================================================================================
 
-VERSION: 1.1
+VERSION: 1.2
 APPLIES TO: orchestrator
 LANGUAGE: plain text only inside generated task prompts
 DELIVERY: generated prompts may be wrapped in an editable UI block by ChatGPT,
@@ -28,8 +28,11 @@ of the Ariadne agents:
   precommit-review
 
 The generated task prompt must follow the structure defined in this document
-and must remain compatible with .project-memory/AGENT_STANDARD.txt and the
-local agent files under agents/.
+and must remain compatible with the local agent files under agents/.
+
+The orchestrator must read .project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md
+before generating workflow responses. This document is a mandatory companion
+to ARIADNE ORCHESTRATOR STANDARD.
 
 The generated task prompt must be a runnable instruction artifact. It must not
 contain explanations for the human, apologies, commentary, or decorative
@@ -147,7 +150,7 @@ HARD RULES
 
 Use a numbered list.
 
-Rules must be derived from .project-memory/AGENT_STANDARD.txt and from
+Rules must be derived from the project-memory review-artifact schema and from
 task-specific non-negotiable constraints.
 
 Most critical rules must appear first.
@@ -238,8 +241,7 @@ For planner and coder tasks, require plain text output with these CAPS sections:
   NEXT REQUIRED ACTION
 
 For plan-review and precommit-review tasks, require YAML output following the
-review schema defined by .project-memory/AGENT_STANDARD.txt and, where
-applicable, .project-memory/review-artifact.schema.yml.
+review schema defined by .project-memory/review-artifact.schema.yml.
 
 Review output must include these fields:
 
@@ -317,6 +319,15 @@ ORCHESTRATOR RULES
 16. Do not ask agents to prove success by intent. Require physical artifact
     write/readback, command outputs, dirty-tree evidence, and file path
     evidence.
+
+  17. The Ariadne PR lifecycle follows a three-response happy path defined in
+    .project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md.
+    Response 1 prepares the branch and issues planner and plan-review prompts.
+    Response 2 evaluates plan-review, locks planning artifacts, and issues
+    coder and precommit-review prompts. Response 3 evaluates precommit-review,
+    commits implementation, and submits the PR. Blocked or failed paths may
+    require additional repair responses. Do not require a fourth routine
+    response for a successful PR.
 
 
 ================================================================================
@@ -410,5 +421,8 @@ This document is a plain text artifact following the Ariadne Agent Standard.
 
 It serves as the system prompt and output contract for the Orchestrator agent.
 
-Version: 1.1
+The companion artifact .project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md
+defines the workflow lifecycle and must be read before orchestrating a PR lifecycle.
+
+Version: 1.2
 Maintained in: .project-memory/ORCHESTRATOR_STANDARD.txt
