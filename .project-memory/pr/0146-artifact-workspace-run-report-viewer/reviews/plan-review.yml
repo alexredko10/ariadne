@@ -1,0 +1,271 @@
+schema_version: "0.1"
+pr_id: "0146-artifact-workspace-run-report-viewer"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-10T19:00:00Z"
+head_verified: "08953716699db6c1968f0dd57aabd8d3060363aa"
+branch_confirmed: "0146-artifact-workspace-run-report-viewer"
+snapshot_delta:
+  plan_base_sha: "08953716699db6c1968f0dd57aabd8d3060363aa"
+  current_head: "08953716699db6c1968f0dd57aabd8d3060363aa"
+  origin_main: "08953716699db6c1968f0dd57aabd8d3060363aa"
+  merge_base: "08953716699db6c1968f0dd57aabd8d3060363aa"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0146-artifact-workspace-run-report-viewer/PLAN.md"
+    - ".project-memory/pr/0146-artifact-workspace-run-report-viewer/reviews/plan-review.yml"
+  actual_files:
+    - ".project-memory/pr/0146-artifact-workspace-run-report-viewer/PLAN.md"
+    - ".project-memory/pr/0146-artifact-workspace-run-report-viewer/reviews/plan-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0146-artifact-workspace-run-report-viewer/reviews/plan-review.yml"
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+  - ".project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md"
+  - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+  - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "agents/plan-review.yml"
+  - "ROADMAP.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - ".project-memory/pr/0146-artifact-workspace-run-report-viewer/PLAN.md"
+  - ".project-memory/pr/0138-ui-runtime-evidence-read-model/PLAN.md"
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+  - ".project-memory/pr/0141-artifact-workspace-run-detail-evidence-panel/PLAN.md"
+  - ".project-memory/pr/0142-run-evidence-serialization-contract/PLAN.md"
+  - ".project-memory/pr/0143-artifact-workspace-4-zone-shell-skeleton/PLAN.md"
+  - ".project-memory/pr/0144-artifact-workspace-local-run-list-page/PLAN.md"
+  - ".project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/PLAN.md"
+  - "services/task_intake/src/task_intake/artifact_workspace.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/runtime_evidence_serialization.py"
+  - "services/task_intake/tests/test_artifact_workspace_shell.py"
+  - "services/task_intake/tests/test_local_run_history_in_page.py"
+  - "services/task_intake/tests/test_runtime_evidence_serialization_contract.py"
+  - "services/task_intake/tests/test_task_intake.py"
+  - "services/runner/src/runner/runtime_evidence.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/tests/test_runtime_evidence.py"
+  - "services/runner/tests/test_run_persistence.py"
+files_written:
+  - ".project-memory/pr/0146-artifact-workspace-run-report-viewer/reviews/plan-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "08953716699db6c1968f0dd57aabd8d3060363aa"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0146-artifact-workspace-run-report-viewer"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? .project-memory/pr/0146-artifact-workspace-run-report-viewer/"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No tracked files modified"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+  - command: "git log --oneline --decorate -n 10"
+    result: "passed"
+    exit_code: 0
+    evidence: "HEAD=0895371 (main) = PR 0145 merged #171. PR 0144 (#170), PR 0143 (#169), PR 0142A (#168), PR 0142 (#167), PR 0141 (#166)"
+  - command: "test -s .project-memory/pr/0146-artifact-workspace-run-report-viewer/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is non-empty"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'report_preview|run-report.txt|run_report_available|preview|truncat|limit|read_text|open\(' services/task_intake services/runner 2>/dev/null | head -10"
+    result: "passed"
+    exit_code: 0
+    evidence: "runtime_evidence.py L300: read_run_evidence_detail with _safe_read_text(path, 2000). L366: report_preview = report_content[:500] — confirms 500-char truncation with no indicator. run-report.txt used in test fixtures as report file."
+  - command: "grep -n -E 'renderDetail|report_preview|manifest_files|zone-canvas|detail-content|detailRequestCounter|selectedRunId' services/task_intake/src/task_intake/artifact_workspace.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "renderDetail (L265), detailRequestCounter (L164), selectedRunId (L165) all present. No report_preview or manifest_files rendering in current workspace — confirmed as deferred."
+  - command: "grep -n -E 'startswith\(\"/runs/\"\)|serialize_run_evidence_detail|read_run_evidence_detail|run_id' services/task_intake/src/task_intake/server.py services/task_intake/src/task_intake/runtime_evidence_serialization.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "server.py L921: 'if method == \"GET\" and path.startswith(\"/runs/\")'. L949: read_run_evidence_detail(). L951: serialize_run_evidence_detail(). runtime_evidence_serialization.py L55: serialize_run_evidence_detail()."
+blockers: []
+warnings: []
+checks:
+  branch_correct: "pass"
+  plan_presence: "pass"
+  no_staged_files: "pass"
+  no_tracked_modifications: "pass"
+  dirty_tree_scope: "pass"
+  pr_0145_merged: "pass"
+  preview_completeness_determined: "pass"
+  option_b_selected: "pass"
+  no_option_ambiguity: "pass"
+  report_source_accurate: "pass"
+  provenance_contract_defined: "pass"
+  safe_rendering: "pass"
+  pr_0145_preserved: "pass"
+  pr_0147_deferred: "pass"
+  plan_drift_gate: "PASS"
+  no_drift_check: "PASS"
+commit_readiness: "ready"
+decisions_made:
+  - decision: "PR 0146 correctly positioned as Stream 2 fourth product PR"
+    reason: "Roadmap artifact: PR 0146 = Run Report Viewer. git log: PR 0145 merged as #171. PLAN.md: 'expected slot PR 0146 (Run Report Viewer)', predecessor 'PR 0145 (Run Detail Evidence Panel) is complete.' PR 0147 remains separate."
+  - decision: "report_preview completeness definitively determined — 500-char truncated fragment"
+    reason: "PLAN.md Report Generation Inventory and Completeness Assessment: runtime_evidence.py L300 (_safe_read_text with max_chars=2000), L366 (report_preview = report_content[:500] — 500-char slice). No truncation indicator. Not suitable for report viewer. Confirmed by grep."
+  - decision: "OPTION B selected — new GET /runs/<run_id>/report endpoint with 100KB limit"
+    reason: "PLAN.md Option Decision: OPTION B — NARROW READ-ONLY REPORT API. Option A rejected because detail.report_preview is 500-char fragment. New route: GET /runs/<run_id>/report with ev_contract_version '1', 100KB content limit, explicit truncated flag. Reuses existing _RUN_ID_RE and runs_root pattern."
+  - decision: "Report provenance contract defined with evidence-backed linkage"
+    reason: "PLAN.md Provenance Contract: linked (manifest contains run-report.txt + run.json exists), linkage_unavailable (manifest missing), linkage_malformed (manifest unreadable). 'Report is displayed as evidence context' — not independently verified proof."
+  - decision: "Report viewer uses plain-text textContent rendering — no execution"
+    reason: "PLAN.md Safe Rendering Contract: textContent on pre element. Whitespace preserved. HTML/Markdown/Mermaid/ANSI/javascript rendered as inert text. No innerHTML for report content. No auto-linkification. No report editing/saving/regeneration/deletion/approval/download."
+  - decision: "PR 0145 detail behavior fully preserved"
+    reason: "PLAN.md PR 0145 Preservation Contract: timeline live list, selected-row aria-selected, encodeURIComponent, detailRequestCounter, bounded detail rows, missing/malformed notices, safe URL policy, evidence paths as non-clickable text — all preserved. Report viewer is appended after existing detail content."
+  - decision: "PR 0147 completely deferred"
+    reason: "PLAN.md PR 0147 Deferral Contract: manifest browsing, proof-ref viewing, command captures/logs, gate results, proof acceptance — all deferred. Gates & Proofs and Logs & Captures remain unchanged placeholders. Manifest inspected only for provenance linkage, not rendered as browsable viewer."
+  - decision: "Implementation scope includes server.py, artifact_workspace.py, and tests"
+    reason: "PLAN.md Implementation File Scope: server.py (new GET /runs/<run_id>/report route), artifact_workspace.py (report viewer rendering), test files. runtime_evidence.py, run_persistence.py, runtime_evidence_serialization.py unchanged. No report generation or persistence changes."
+  - decision: "21 validation steps with exact commands and block consequences"
+    reason: "PLAN.md Validation Plan: report API tests, report contract tests, existing detail tests, existing Local Interaction tests, serialization contract full tests, runtime evidence tests, compileall, report-source completeness grep, viewer selectors/states grep, plain-text rendering grep, arbitrary-path prohibition grep, mutation-control prohibition grep, unsafe-rendering prohibition grep, external-asset prohibition grep, PR 0147 deferral grep, forbidden-path diff, planning-lock diff, whitespace, dirty-tree, cached-diff, IMPLEMENTATION_REPORT.md existence and readback."
+  - decision: "PLAN DRIFT GATE present in all caps with 21 block conditions"
+    reason: "PLAN.md '### PLAN DRIFT GATE' (all caps). 21 conditions covering out-of-scope files, locked artifacts, OPTION B non-compliance, truncated-as-complete, missing-as-empty, malformed-as-missing, proof-trust, fabricated linkage, arbitrary paths, persistence changes, report byte changes, existing route breakage, PR 0145 breakage, unsafe HTML, report execution, manifest browsing, gate/log absorption, mutation controls, external assets, weak tests, absent IMPLEMENTATION_REPORT.md."
+  - decision: "NO-DRIFT CHECK present in all caps with 36 confirmation requirements"
+    reason: "PLAN.md '### NO-DRIFT CHECK' (all caps). 36 confirmations covering correct branch, approved files, locked artifacts, PR 0146 scope, PR 0147 separate, controlled API source, completeness honesty, no arbitrary path, no byte modification, all states (initial, loading, complete, empty, missing, malformed, version-mismatch, invalid-payload, fetch-failure, stale), provenance-linked state, provenance-unavailable state, not-proof label, plain-text rendering, whitespace preservation, inert content, PR 0145 preserved, PR 0147 deferred, no mutation, no external assets, tests pass, IMPLEMENTATION_REPORT.md exists, PLAN DRIFT GATE passed."
+report_generation_assessment:
+  generator: "_write_run_report() in ariadne_task_cli.py L1607"
+  filename: "run-report.txt"
+  location: "<runs_root>/<run_id>/run-report.txt"
+  encoding: "UTF-8"
+  size_limit_in_generator: "none"
+  reporter_writer: "pipeline runner after execution"
+  manifest_entry: "run-report.txt listed in manifest_files when report_path provided"
+report_read_contract_assessment:
+  current_read_method: "_safe_read_text(path, max_chars=2000)"
+  current_max_chars: "2000 (read), 500 (stored as report_preview)"
+  current_complete: false
+  current_truncation_marker: "none"
+  current_missing_behavior: "MissingEvidenceNotice (file_not_found)"
+  current_malformed_behavior: "MissingEvidenceNotice (read_error/OSEror)"
+  current_serialized_field: "detail.report_preview"
+preview_completeness_assessment:
+  definitively_truncated: true
+  truncation_location: "runtime_evidence.py L366: report_preview = report_content[:500]"
+  truncation_marker: "absent"
+  suitable_as_report_viewer: false
+option_decision_assessment:
+  selected: "OPTION B — NARROW READ-ONLY REPORT API"
+  new_route: "GET /runs/<run_id>/report"
+  max_content_size: 100000 bytes
+  truncated_flag: "explicit truncated boolean"
+  version_field: "ev_contract_version '1' (additive)"
+  run_id_validation: "reuse existing _RUN_ID_RE"
+  runs_root: "consistent with existing"
+  report_reading_only: true
+api_contract_assessment:
+  method: "GET only"
+  status: "200 with versioned JSON envelope"
+  content_type: "application/json"
+  path_ordering: "check /runs/<run_id>/report before /runs/<run_id> detail catch-all"
+  response_states:
+    - complete_report
+    - empty_report
+    - missing_report
+    - unreadable_malformed
+    - invalid_run_id
+    - unknown_run
+provenance_contract_assessment:
+  linked_state: "manifest contains run-report.txt + run.json exists"
+  linkage_unavailable: "manifest missing"
+  linkage_malformed: "manifest unreadable"
+  no_report: "report file missing"
+  not_proof_label: "'Report is displayed as evidence context. It is not independently verified proof.'"
+viewer_contract_assessment:
+  location: "#zone-canvas after #detail-content"
+  container: "#report-viewer"
+  heading: "h3 'Run Report'"
+  content_element: "<pre id='report-text'>"
+  provenance_element: "#report-provenance span"
+  rendering_method: "textContent on pre element"
+  whitespace_preservation: "pre element"
+  scrollable_max_height: "400px"
+  no_autolinkification: true
+  no_report_editing: true
+  no_copy_download: true
+state_contract_assessment:
+  states:
+    - initial (no selection)
+    - loading
+    - complete_report
+    - empty_report
+    - missing_report
+    - malformed_report
+    - version_mismatch
+    - invalid_envelope
+    - fetch_failure
+    - stale_response (via detailRequestCounter)
+safe_rendering_assessment:
+  textContent_used: true
+  innerHTML_restricted: true
+  no_eval: true
+  no_markdown_to_html: true
+  no_mermaid_execution: true
+  no_iframe_srcdoc: true
+  no_ansi_execution: true
+  no_javascript_urls: true
+  no_external_assets: true
+  no_dependencies: true
+pr0145_preservation_assessment:
+  timeline_preserved: true
+  selected_row_preserved: true
+  aria_selected_preserved: true
+  encoded_request_preserved: true
+  detailRequestCounter_preserved: true
+  detail_rows_preserved: true
+  missing_malformed_notices_preserved: true
+  evidence_paths_text_only: true
+pr0147_deferral_assessment:
+  manifest_browsing_deferred: true
+  proof_refs_deferred: true
+  command_captures_deferred: true
+  gates_proofs_unchanged: true
+  logs_captures_unchanged: true
+  bounded_provenance_only: true
+implementation_scope_assessment:
+  files:
+    - "services/task_intake/src/task_intake/server.py (edit — new report route)"
+    - "services/task_intake/src/task_intake/artifact_workspace.py (edit — report viewer)"
+    - "services/task_intake/tests/test_artifact_workspace_shell.py (edit)"
+    - "services/task_intake/tests/test_runtime_evidence_serialization_contract.py (edit)"
+  runtime_evidence_unchanged: true
+  run_persistence_unchanged: true
+  serialization_unchanged: true
+  no_dependency_changes: true
+boundary_confirmations:
+  - "Branch confirmed: 0146-artifact-workspace-run-report-viewer"
+  - "Only plan-review.yml artifact written; no PLAN.md, ROADMAP.md, services/, agents/, schemas/ modified"
+  - "No tracked files modified; no staged files; PR 0145 merged (#171)"
+  - "report_preview completeness definitively determined: 500-char truncated fragment at runtime_evidence.py L366"
+  - "OPTION B selected: new GET /runs/<run_id>/report route with 100KB limit and explicit truncated flag"
+  - "Provenance contract defined: linked/manifest-evidence-backed, linkage_unavailable, linkage_malformed, not-proof label"
+  - "Report viewer: plain-text textContent on pre element, whitespace preserved, no copy/download/editing"
+  - "No report execution, auto-linkification, Markdown rendering, or Mermaid execution"
+  - "PR 0145 detail behavior fully preserved (timeline, selection, stale protection, notices, evidence paths)"
+  - "PR 0147 completely deferred (manifest browsing, proof refs, commands, gates, logs)"
+  - "Implementation scope: server.py (new route), artifact_workspace.py (viewer), tests"
+  - "No runtime_evidence.py, run_persistence.py, or runtime_evidence_serialization.py changes"
+  - "No report generation or persistence changes"
+  - "IMPLEMENTATION_REPORT.md required with all 11 sections and proof disclaimer"
+  - "PLAN DRIFT GATE: all caps, 21 block conditions"
+  - "NO-DRIFT CHECK: all caps, 36 confirmation requirements"
+plan_drift_gate: "PASS — PLAN.md includes exact '### PLAN DRIFT GATE' heading (all caps) with 21 block conditions covering out-of-scope files, locked artifacts, OPTION B non-compliance, truncated-as-complete, missing-as-empty, malformed-as-missing, proof-trust, fabricated linkage, arbitrary paths, persistence changes, report byte changes, existing route breakage, PR 0145 breakage, unsafe HTML, report execution, manifest browsing, gate/log absorption, mutation controls, external assets, weak tests, absent IMPLEMENTATION_REPORT.md."
+no_drift_check: "PASS — PLAN.md includes exact '### NO-DRIFT CHECK' heading (all caps) with 36 confirmation requirements covering correct branch, approved files, locked planning artifacts, PR 0146 scope, PR 0147 separate, controlled API source, completeness honesty, no arbitrary path, no byte modification, all states (initial, loading, complete, empty, missing, malformed, version-mismatch, invalid-payload, fetch-failure, stale), provenance-linked state, provenance-unavailable state, not-proof label, plain-text rendering, whitespace preservation, inert content, PR 0145 preserved, PR 0147 deferred, no mutation, no external assets, tests pass, IMPLEMENTATION_REPORT.md exists, PLAN DRIFT GATE passed, actual evidence overrides."
+commit_readiness: "ready"
