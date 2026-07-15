@@ -917,15 +917,21 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
             await _send_json(send, 200, body)
         return
 
-    # Detail route: GET /runs/<run_id>
+    # Combined route handler: GET /runs/<run_id>/report and GET /runs/<run_id>
     if method == "GET" and path.startswith("/runs/"):
-        run_id = path[len("/runs/"):]
+        is_report = path.endswith("/report")
+        if is_report:
+            # Report route: GET /runs/<run_id>/report
+            run_id = path[len("/runs/"):-len("/report")]
+        else:
+            # Detail route: GET /runs/<run_id>
+            run_id = path[len("/runs/"):]
         # Validate run_id
         if not run_id or not _RUN_ID_RE.match(run_id) or len(run_id) > 128:
             body = json.dumps({
                 "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
                 "ok": False,
-                "error": "invalid run_id",
+                "error": "invalid_run_id",
             }, sort_keys=True, ensure_ascii=False).encode("utf-8")
             await _send_json(send, 200, body)
             return
@@ -946,8 +952,137 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
             await _send_json(send, 200, body)
             return
 
-        result = read_run_evidence_detail(runs_root, run_id)
+        if is_report:
+            # --- Report route: GET /runs/<run_id>/report ---
+            run_dir = os.path.join(runs_root, run_id)
 
+            # Check if run directory exists
+            if not os.path.isdir(run_dir):
+                body = json.dumps({
+                    "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                    "ok": False,
+                    "error": "run not found",
+                    "run_id": run_id,
+                    "content": None,
+                    "content_length": 0,
+                    "truncated": False,
+                    "truncation_limit": None,
+                    "report_exists": False,
+                    "manifest_lists_report": False,
+                    "provenance": (
+                        "Report provenance: cannot verify "
+                        "— manifest evidence is unavailable."
+                    ),
+                }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                await _send_json(send, 200, body)
+                return
+
+            # --- Provenance: read manifest and run.json ---
+            manifest_path = os.path.join(run_dir, "manifest.json")
+            run_json_path = os.path.join(run_dir, "run.json")
+
+            manifest_lists_report = False
+            manifest_available = False
+            manifest_malformed = False
+            run_json_available = os.path.exists(run_json_path)
+
+            if os.path.exists(manifest_path):
+                try:
+                    with open(manifest_path, "r", encoding="utf-8") as f:
+                        manifest_data = json.load(f)
+                    if isinstance(manifest_data, dict):
+                        manifest_available = True
+                        files = manifest_data.get("files", [])
+                        if "run-report.txt" in files:
+                            manifest_lists_report = True
+                except (json.JSONDecodeError, OSError):
+                    manifest_malformed = True
+
+            # Determine provenance text
+            if manifest_available and manifest_lists_report and run_json_available:
+                provenance = (
+                    "run.json and manifest.json exist for this run_id. "
+                    "run-report.txt is listed in manifest files."
+                )
+            elif manifest_malformed:
+                provenance = "Report provenance: manifest evidence is malformed."
+            else:
+                provenance = (
+                    "Report provenance: cannot verify "
+                    "— manifest evidence is unavailable."
+                )
+
+            # --- Read report file ---
+            report_path = os.path.join(run_dir, "run-report.txt")
+            report_exists = os.path.exists(report_path)
+
+            if not report_exists:
+                body = json.dumps({
+                    "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                    "ok": False,
+                    "error": "file_not_found",
+                    "run_id": run_id,
+                    "content": None,
+                    "content_length": 0,
+                    "truncated": False,
+                    "truncation_limit": None,
+                    "report_exists": False,
+                    "manifest_lists_report": manifest_lists_report,
+                    "provenance": provenance,
+                }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                await _send_json(send, 200, body)
+                return
+
+            # Read report content with 100,001 char max to detect truncation
+            content_raw = None
+            read_err = None
+            truncation_limit = 100000
+            try:
+                with open(report_path, "r", encoding="utf-8") as f:
+                    content_raw = f.read(truncation_limit + 1)
+            except OSError as e:
+                read_err = f"read_error: {e}"
+
+            if read_err is not None:
+                body = json.dumps({
+                    "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                    "ok": False,
+                    "error": read_err,
+                    "run_id": run_id,
+                    "content": None,
+                    "content_length": 0,
+                    "truncated": False,
+                    "truncation_limit": None,
+                    "report_exists": True,
+                    "manifest_lists_report": manifest_lists_report,
+                    "provenance": provenance,
+                }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                await _send_json(send, 200, body)
+                return
+
+            # Determine truncation and slice content
+            content_length = len(content_raw)
+            truncated = content_length > truncation_limit
+            content = content_raw[:truncation_limit] if truncated else content_raw
+
+            body = json.dumps({
+                "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                "ok": True,
+                "error": None,
+                "run_id": run_id,
+                "content": content,
+                "content_length": min(content_length, truncation_limit),
+                "truncated": truncated,
+                "truncation_limit": truncation_limit if truncated else None,
+                "report_exists": True,
+                "manifest_lists_report": manifest_lists_report,
+                "provenance": provenance,
+            }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+            return
+
+        # --- Detail route: GET /runs/<run_id> (existing) ---
+        result = read_run_evidence_detail(runs_root, run_id)
         response = serialize_run_evidence_detail(result)
         body = json.dumps(response, sort_keys=True, ensure_ascii=False).encode("utf-8")
         await _send_json(send, 200, body)

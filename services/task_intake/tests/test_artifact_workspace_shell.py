@@ -1017,3 +1017,540 @@ class TestDetailDeferrals:
         _, html = _request("GET", "/workspace")
         assert "retry" not in html.lower()
         assert "rerun" not in html.lower()
+
+
+# ---------------------------------------------------------------------------
+# PR 0146 Report API and Viewer Tests
+# ---------------------------------------------------------------------------
+
+
+def _make_report_run(tmp_dir, run_id="run-001", include_report=True,
+                      include_manifest=True, include_run_json=True,
+                      report_content="Ariadne Run Report\nTest content.",
+                      malformed_manifest=False, malformed_report=False,
+                      report_encoding="utf-8", empty_report=False,
+                      oversized_report=False):
+    """Create a run directory with run.json, manifest.json, and run-report.txt."""
+    runs_root = os.path.join(tmp_dir, ".ariadne", "runs")
+    run_dir = os.path.join(runs_root, run_id)
+    os.makedirs(run_dir, exist_ok=True)
+
+    if include_run_json:
+        run_json_path = os.path.join(run_dir, "run.json")
+        run_json = {
+            "schema_version": "1", "run_id": run_id,
+            "status": "completed", "pipeline_status": "completed",
+            "git_boundary_status": "approved",
+            "reason_codes": ["completed"], "execution_attempted": True,
+            "execution_results_summary": [],
+            "started_at": "2026-07-15T12:00:00Z",
+            "finished_at": "2026-07-15T12:05:00Z",
+        }
+        with open(run_json_path, "w", encoding="utf-8") as f:
+            json.dump(run_json, f, sort_keys=True, ensure_ascii=False, indent=2)
+
+    if include_manifest:
+        manifest_path = os.path.join(run_dir, "manifest.json")
+        if malformed_manifest:
+            with open(manifest_path, "w", encoding="utf-8") as f:
+                f.write("{bad manifest")
+        else:
+            manifest = {
+                "schema_version": "1", "run_id": run_id,
+                "run_json_hash": "abc123",
+                "files": ["run.json", "run-report.txt"],
+            }
+            with open(manifest_path, "w", encoding="utf-8") as f:
+                json.dump(manifest, f, sort_keys=True, ensure_ascii=False, indent=2)
+
+    if include_report:
+        report_path = os.path.join(run_dir, "run-report.txt")
+        if malformed_report:
+            with open(report_path, "w", encoding="utf-8") as f:
+                f.write(report_content)
+            os.chmod(report_path, 0o000)
+        elif empty_report:
+            with open(report_path, "w", encoding="utf-8") as f:
+                f.write("")
+        elif oversized_report:
+            with open(report_path, "w", encoding="utf-8") as f:
+                f.write("X" * 100001)
+        else:
+            with open(report_path, "w", encoding=report_encoding) as f:
+                f.write(report_content)
+
+    return runs_root
+
+
+class TestReportApi:
+    """PR 0146: Tests for GET /runs/<run_id>/report API."""
+
+    def test_report_returns_200_with_json(self):
+        """GET /runs/<run_id>/report returns 200 with JSON."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = _make_report_run(tmp_dir, "run-001")
+        status, raw = _request("GET", "/runs/run-001/report?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert "ev_contract_version" in data
+
+    def test_report_has_ev_contract_version_1(self):
+        """Report response has ev_contract_version '1'."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = _make_report_run(tmp_dir, "run-001")
+        status, raw = _request("GET", "/runs/run-001/report?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ev_contract_version"] == "1"
+
+    def test_complete_report_content_returned(self):
+        """Complete report content is returned with correct content_length."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        content = "Ariadne Run Report\nRun ID: run-001\nStatus: completed\n"
+        runs_root = _make_report_run(tmp_dir, "run-001", report_content=content)
+        status, raw = _request("GET", "/runs/run-001/report?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ok"] is True
+        assert data["content"] == content
+        assert data["content_length"] == len(content)
+        assert data["truncated"] is False
+        assert data["report_exists"] is True
+
+    def test_empty_report_returns_content_empty(self):
+        """Empty report returns content='' and report_exists=True."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = _make_report_run(tmp_dir, "run-001", empty_report=True)
+        status, raw = _request("GET", "/runs/run-001/report?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ok"] is True
+        assert data["content"] == ""
+        assert data["content_length"] == 0
+        assert data["report_exists"] is True
+
+    def test_missing_report_returns_file_not_found(self):
+        """Missing report returns ok=False, error='file_not_found'."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = _make_report_run(tmp_dir, "run-001", include_report=False)
+        status, raw = _request("GET", "/runs/run-001/report?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ok"] is False
+        assert data["error"] == "file_not_found"
+        assert data["content"] is None
+        assert data["report_exists"] is False
+
+    def test_unreadable_report_returns_error(self):
+        """Unreadable report returns ok=False with read_error."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        content = "test"
+        runs_root = _make_report_run(
+            tmp_dir, "run-001",
+            report_content=content, malformed_report=True,
+        )
+        # Restore perms so test can clean up
+        try:
+            status, raw = _request(
+                "GET", "/runs/run-001/report?runs_root=" + runs_root)
+            assert status == 200
+            data = json.loads(raw)
+            assert data["ok"] is False
+            assert "read_error" in str(data["error"])
+            assert data["report_exists"] is True
+        finally:
+            report_dir = os.path.join(runs_root, "run-001")
+            rp = os.path.join(report_dir, "run-report.txt")
+            if os.path.exists(rp):
+                os.chmod(rp, 0o644)
+
+    def test_invalid_run_id_returns_error(self):
+        """Invalid run_id returns error."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = _make_report_run(tmp_dir, "run-001")
+        status, raw = _request(
+            "GET", "/runs/../etc/report?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ok"] is False
+        assert data["error"] == "invalid_run_id"
+
+    def test_unknown_run_returns_run_not_found(self):
+        """Unknown run_id returns error='run not found'."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = _make_report_run(tmp_dir, "run-001")
+        status, raw = _request(
+            "GET", "/runs/nonexistent/report?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ok"] is False
+        assert data["error"] == "run not found"
+
+    def test_report_envelope_has_exact_keys(self):
+        """Report response has exact key set."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = _make_report_run(tmp_dir, "run-001")
+        status, raw = _request("GET", "/runs/run-001/report?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        expected_keys = {
+            "ev_contract_version", "ok", "error", "run_id", "content",
+            "content_length", "truncated", "truncation_limit",
+            "report_exists", "manifest_lists_report", "provenance",
+        }
+        assert set(data.keys()) == expected_keys
+
+    def test_manifest_lists_report_true(self):
+        """manifest_lists_report is True when manifest includes run-report.txt."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = _make_report_run(tmp_dir, "run-001")
+        status, raw = _request("GET", "/runs/run-001/report?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert data["manifest_lists_report"] is True
+        assert "run-report.txt is listed in manifest files" in data["provenance"]
+
+    def test_provenance_linked_when_manifest_and_run_json_available(self):
+        """Provenance indicates linked when manifest and run.json exist."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = _make_report_run(tmp_dir, "run-001")
+        status, raw = _request("GET", "/runs/run-001/report?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert "run.json and manifest.json exist" in data["provenance"]
+
+    def test_provenance_unavailable_when_manifest_missing(self):
+        """Provenance indicates unavailable when manifest is missing."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = _make_report_run(tmp_dir, "run-001", include_manifest=False)
+        status, raw = _request("GET", "/runs/run-001/report?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert "cannot verify" in data["provenance"]
+        assert data["manifest_lists_report"] is False
+
+    def test_provenance_malformed_when_manifest_unreadable(self):
+        """Provenance indicates malformed when manifest is broken."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = _make_report_run(
+            tmp_dir, "run-001", malformed_manifest=True)
+        status, raw = _request("GET", "/runs/run-001/report?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert "manifest evidence is malformed" in data["provenance"]
+
+    def test_oversize_report_truncated_flag(self):
+        """Report exceeding 100KB has truncated=True."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = _make_report_run(
+            tmp_dir, "run-001", oversized_report=True)
+        status, raw = _request("GET", "/runs/run-001/report?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ok"] is True
+        assert data["truncated"] is True
+        assert data["truncation_limit"] == 100000
+        assert len(data["content"]) == 100000
+
+    def test_non_get_returns_404(self):
+        """Non-GET methods on /runs/<run_id>/report return 404."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = _make_report_run(tmp_dir, "run-001")
+        for method in ["POST", "PUT", "PATCH", "DELETE"]:
+            status, _ = _request(
+                method, "/runs/run-001/report?runs_root=" + runs_root)
+            assert status == 404, (
+                f"{method} should return 404, got {status}")
+
+    def test_report_preview_not_used_as_full_report(self):
+        """Report endpoint does not return 500-char preview."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        long_content = "X" * 600
+        runs_root = _make_report_run(
+            tmp_dir, "run-001", report_content=long_content)
+        status, raw = _request("GET", "/runs/run-001/report?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert len(data["content"]) == 600
+        assert data["content_length"] == 600
+
+    def test_missing_runs_root_returns_error(self):
+        """Missing runs_root returns ok=False."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = os.path.join(tmp_dir, ".ariadne", "runs")
+        status, raw = _request(
+            "GET", "/runs/run-001/report?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ok"] is False
+        assert "runs_root not found" in data["error"]
+
+
+class TestReportViewer:
+    """PR 0146: Tests for report viewer rendering in workspace."""
+
+    def test_report_viewer_css_present(self):
+        """#report-viewer CSS is present in workspace."""
+        _, html = _request("GET", "/workspace")
+        assert "#report-viewer" in html
+
+    def test_report_text_css_present(self):
+        """#report-text CSS is present."""
+        _, html = _request("GET", "/workspace")
+        assert "#report-text" in html
+
+    def test_report_provenance_css_present(self):
+        """#report-provenance CSS is present."""
+        _, html = _request("GET", "/workspace")
+        assert "#report-provenance" in html
+
+    def test_report_viewer_function_present(self):
+        """getOrCreateReportViewer function exists."""
+        _, html = _request("GET", "/workspace")
+        assert "function getOrCreateReportViewer" in html
+
+    def test_fetch_report_function_present(self):
+        """fetchReport function exists."""
+        _, html = _request("GET", "/workspace")
+        assert "function fetchReport" in html
+
+    def test_render_report_function_present(self):
+        """renderReport function exists."""
+        _, html = _request("GET", "/workspace")
+        assert "function renderReport" in html
+
+    def test_report_heading_present(self):
+        """Report viewer has 'Run Report' heading."""
+        _, html = _request("GET", "/workspace")
+        assert '"Run Report"' in html
+
+    def test_loading_report_text_present(self):
+        """Loading report state text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Loading report..." in html
+
+    def test_complete_report_textcontent_usage(self):
+        """Report content uses textContent on pre element."""
+        _, html = _request("GET", "/workspace")
+        assert "pre.textContent" in html
+
+    def test_empty_report_state_text_present(self):
+        """Empty report state text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Report file exists but contains no content" in html
+
+    def test_missing_report_state_text_present(self):
+        """Missing report state text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Run report not available" in html
+
+    def test_unreadable_report_state_text_present(self):
+        """Unreadable report error state text pattern exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Report could not be read" in html
+
+    def test_unknown_run_state_text_present(self):
+        """Unknown run state text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Report not available: run not found" in html
+
+    def test_version_mismatch_state_present(self):
+        """Version mismatch state text exists."""
+        _, html = _request("GET", "/workspace")
+        # Version mismatch text for report viewer
+        assert "Contract version mismatch" in html
+
+    def test_invalid_envelope_state_present(self):
+        """Invalid envelope state text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Unexpected report response format" in html
+
+    def test_fetch_failure_state_present(self):
+        """Fetch failure state text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Failed to load report" in html
+
+    def test_truncated_report_state_present(self):
+        """Truncated report notice text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "(Report truncated at " in html
+
+    def test_not_proof_wording_present(self):
+        """Not-proof disclaimer wording exists."""
+        _, html = _request("GET", "/workspace")
+        assert "not independently verified proof" in html
+
+    def test_stale_response_check_present(self):
+        """Stale response check for report fetch exists."""
+        _, html = _request("GET", "/workspace")
+        assert "requestId !== detailRequestCounter" in html
+
+    def test_report_viewer_region_role(self):
+        """Report viewer uses role='region'."""
+        _, html = _request("GET", "/workspace")
+        assert 'role", "region"' in html
+
+    def test_report_viewer_aria_labelledby(self):
+        """Report viewer uses aria-labelledby."""
+        _, html = _request("GET", "/workspace")
+        assert 'aria-labelledby", "report-heading"' in html
+
+    def test_fetch_report_uses_encode_uri_component(self):
+        """fetchReport uses encodeURIComponent for safe URLs."""
+        _, html = _request("GET", "/workspace")
+        assert 'encodeURIComponent(runId) + "/report"' in html
+
+
+class TestReportApiSafety:
+    """PR 0146: Tests for safe report rendering."""
+
+    def test_no_innerhtml_for_report_content(self):
+        """No innerHTML used for report content."""
+        _, html = _request("GET", "/workspace")
+        # Verify pre.textContent is used instead of pre.innerHTML
+        assert "pre.textContent" in html
+
+    def test_no_eval_in_report_code(self):
+        """No eval in report viewer code."""
+        _, html = _request("GET", "/workspace")
+        assert "eval(" not in html
+
+    def test_no_document_write(self):
+        """No document.write in report viewer."""
+        _, html = _request("GET", "/workspace")
+        assert "document.write" not in html
+
+    def test_no_iframe_srcdoc(self):
+        """No iframe srcdoc in report viewer."""
+        _, html = _request("GET", "/workspace")
+        assert "srcdoc" not in html
+
+    def test_no_javascript_urls(self):
+        """No javascript: URLs in report viewer."""
+        _, html = _request("GET", "/workspace")
+        assert "javascript:" not in html
+
+    def test_no_arbitrary_path_input(self):
+        """No file path or directory input in report viewer."""
+        _, html = _request("GET", "/workspace")
+        assert '<input type="file"' not in html
+
+    def test_no_external_assets_in_report(self):
+        """No external assets in report viewer code."""
+        _, html = _request("GET", "/workspace")
+        assert 'src="http' not in html
+
+    def test_hostile_html_returned_safely_in_json(self):
+        """Hostile HTML in report returned as JSON string safely."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        hostile = '<script>alert("xss")</script>'
+        runs_root = _make_report_run(tmp_dir, "run-001", report_content=hostile)
+        status, raw = _request("GET", "/runs/run-001/report?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ok"] is True
+        # Content is JSON-encoded, so script tags are in the string
+        assert "<script>" in data["content"]
+
+    def test_missing_runs_root_not_path_traversal(self):
+        """Path traversal via run_id is blocked by _RUN_ID_RE."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = _make_report_run(tmp_dir, "run-001")
+        # Try various path traversal attempts
+        for bad_id in ["../etc", "..%2Fetc", "run-001/../etc"]:
+            status, raw = _request(
+                "GET", f"/runs/{bad_id}/report?runs_root=" + runs_root)
+            assert status == 200
+            data = json.loads(raw)
+            assert data["ok"] is False
+
+
+class TestReportPreservation:
+    """PR 0146: Tests that PR 0145 behavior is preserved and PR 0147 is deferred."""
+
+    def test_detail_panel_rendering_preserved(self):
+        """Detail panel rendering functions remain."""
+        _, html = _request("GET", "/workspace")
+        assert "function renderDetail" in html
+        assert "function showDetailLoading" in html
+        assert "function showDetailFetchFailure" in html
+
+    def test_detail_request_counter_preserved(self):
+        """detailRequestCounter is still used."""
+        _, html = _request("GET", "/workspace")
+        assert "detailRequestCounter" in html
+
+    def test_selected_run_id_preserved(self):
+        """selectedRunId variable still exists."""
+        _, html = _request("GET", "/workspace")
+        assert "selectedRunId" in html
+
+    def test_aria_selected_preserved(self):
+        """aria-selected still managed in selectRun."""
+        _, html = _request("GET", "/workspace")
+        assert "aria-selected" in html
+
+    def test_timeline_selected_class_preserved(self):
+        """timeline-selected CSS class still present."""
+        _, html = _request("GET", "/workspace")
+        assert "timeline-selected" in html
+
+    def test_gates_zone_still_deferred(self):
+        """Gates & Proofs zone still deferred."""
+        _, html = _request("GET", "/workspace")
+        assert "No gate checks available" in html
+
+    def test_logs_zone_still_deferred(self):
+        """Logs & Captures zone still deferred."""
+        _, html = _request("GET", "/workspace")
+        assert "No logs available" in html
+
+    def test_no_manifest_browsing_viewer(self):
+        """No full manifest browsing viewer."""
+        _, html = _request("GET", "/workspace")
+        assert "manifest_viewer" not in html
+        assert "manifest-browser" not in html
+
+    def test_no_proof_ref_rendering(self):
+        """No proof_ref rendering."""
+        _, html = _request("GET", "/workspace")
+        assert "proof_ref" not in html
+
+    def test_no_command_capture_rendering(self):
+        """No command_capture rendering."""
+        _, html = _request("GET", "/workspace")
+        assert "command_capture" not in html
+
+    def test_no_mutation_controls_in_report(self):
+        """No mutation controls in report viewer."""
+        _, html = _request("GET", "/workspace")
+        assert "accept" not in html.lower() or "No artifact loaded" in html
+
+    def test_get_runs_still_has_ev_contract_version_1(self):
+        """GET /runs ev_contract_version remains '1'."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = _make_report_run(tmp_dir, "run-001")
+        status, raw = _request("GET", "/runs?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ev_contract_version"] == "1"
+
+    def test_get_runs_detail_still_has_ev_contract_version_1(self):
+        """GET /runs/<run_id> ev_contract_version remains '1'."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = _make_report_run(tmp_dir, "run-001")
+        status, raw = _request("GET", "/runs/run-001?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ev_contract_version"] == "1"
+
+    def test_workspace_still_returns_200(self):
+        """GET /workspace still returns 200."""
+        status, _ = _request("GET", "/workspace")
+        assert status == 200
+
+    def test_get_root_still_returns_200(self):
+        """GET / still returns Local Interaction page."""
+        status, html = _request("GET", "/")
+        assert status == 200
+        assert "Ariadne — Local Interaction" in html

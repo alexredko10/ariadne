@@ -94,6 +94,15 @@ body {{ font-family: sans-serif; margin: 0; padding: 0; }}
 #detail-content .detail-exec-result {{ margin: 0.2rem 0; padding-left: 1rem; font-size: 0.9rem; }}
 #detail-loading {{ color: #888; font-style: italic; }}
 
+/* --- Report viewer --- */
+#report-viewer {{ margin-top: 1.5rem; padding-top: 0.5rem; border-top: 2px solid #eee; }}
+#report-viewer h3 {{ margin: 0 0 0.5rem 0; font-size: 1rem; color: #333; }}
+#report-provenance {{ font-size: 0.85rem; color: #666; margin-bottom: 0.5rem; display: block; }}
+#report-text {{ background: #f5f5f5; padding: 1rem; overflow: auto; max-height: 400px; white-space: pre-wrap; font-family: monospace; font-size: 0.85rem; margin: 0.5rem 0; border-radius: 4px; }}
+#report-loading {{ color: #888; font-style: italic; }}
+#report-not-proof {{ font-size: 0.85rem; color: #666; margin-top: 0.5rem; }}
+#report-truncated-notice {{ color: #a50; font-size: 0.85rem; margin-top: 0.25rem; }}
+
 /* --- Desktop layout: two rows --- */
 @media (min-width: 769px) {{
     #zone-timeline {{ flex: 0 0 220px; max-width: 220px; }}
@@ -200,6 +209,9 @@ function selectRun(runId) {{
             if (requestId !== detailRequestCounter) return; // stale
             showDetailFetchFailure();
         }});
+
+    // Fetch report in parallel with detail
+    fetchReport(runId);
 }}
 
 // Show loading state in the canvas
@@ -495,6 +507,210 @@ function renderDetail(data) {{
     }}
 
     canvas.appendChild(content);
+}}
+
+// ---- Report Viewer ----
+
+function fetchReport(runId) {{
+    var requestId = ++detailRequestCounter;
+    showReportLoading();
+
+    fetch("/runs/" + encodeURIComponent(runId) + "/report")
+        .then(function(resp) {{
+            if (!resp.ok) {{
+                throw new Error("HTTP " + resp.status);
+            }}
+            return resp.json();
+        }})
+        .then(function(data) {{
+            if (requestId !== detailRequestCounter) return; // stale
+            renderReport(data);
+        }})
+        .catch(function(err) {{
+            if (requestId !== detailRequestCounter) return; // stale
+            showReportFetchFailure();
+        }});
+}}
+
+function showReportLoading() {{
+    var viewer = getOrCreateReportViewer();
+    if (!viewer) return;
+    var loading = viewer.querySelector("#report-loading");
+    var pre = viewer.querySelector("#report-text");
+    var provenance = viewer.querySelector("#report-provenance");
+    if (loading) loading.style.display = "";
+    if (pre) pre.style.display = "none";
+    if (provenance) provenance.textContent = "";
+    if (loading) loading.textContent = "Loading report...";
+}}
+
+function showReportFetchFailure() {{
+    var viewer = getOrCreateReportViewer();
+    if (!viewer) return;
+    setReportState(viewer, "Failed to load report. Check that the server is running.", "");
+}}
+
+function getOrCreateReportViewer() {{
+    var canvas = document.getElementById("zone-canvas");
+    if (!canvas) return null;
+
+    var viewer = canvas.querySelector("#report-viewer");
+    if (!viewer) {{
+        viewer = document.createElement("div");
+        viewer.id = "report-viewer";
+        viewer.setAttribute("role", "region");
+        viewer.setAttribute("aria-labelledby", "report-heading");
+
+        var heading = document.createElement("h3");
+        heading.id = "report-heading";
+        heading.textContent = "Run Report";
+        viewer.appendChild(heading);
+
+        var provenanceSpan = document.createElement("span");
+        provenanceSpan.id = "report-provenance";
+        viewer.appendChild(provenanceSpan);
+
+        var loadingP = document.createElement("p");
+        loadingP.id = "report-loading";
+        loadingP.className = "zone-placeholder";
+        loadingP.textContent = "Loading report...";
+        viewer.appendChild(loadingP);
+
+        var pre = document.createElement("pre");
+        pre.id = "report-text";
+        pre.style.display = "none";
+        viewer.appendChild(pre);
+
+        canvas.appendChild(viewer);
+    }}
+    return viewer;
+}}
+
+function clearReportViewer() {{
+    var canvas = document.getElementById("zone-canvas");
+    if (!canvas) return;
+    var viewer = canvas.querySelector("#report-viewer");
+    if (viewer) viewer.remove();
+}}
+
+function setReportState(viewer, message, provenanceText) {{
+    if (!viewer) return;
+    var loading = viewer.querySelector("#report-loading");
+    var pre = viewer.querySelector("#report-text");
+    var provenance = viewer.querySelector("#report-provenance");
+
+    if (loading) loading.style.display = "none";
+    if (pre) pre.style.display = "none";
+    if (provenance) provenance.textContent = provenanceText || "";
+
+    // Remove truncation notice and not-proof disclaimer
+    var truncNotice = viewer.querySelector("#report-truncated-notice");
+    if (truncNotice) truncNotice.remove();
+    var nproof = viewer.querySelector("#report-not-proof");
+    if (nproof) nproof.remove();
+
+    if (message) {{
+        if (loading) {{
+            loading.style.display = "";
+            loading.textContent = message;
+        }}
+    }}
+}}
+
+function renderReport(data) {{
+    var viewer = getOrCreateReportViewer();
+    if (!viewer) return;
+
+    var loading = viewer.querySelector("#report-loading");
+    var pre = viewer.querySelector("#report-text");
+    var provenance = viewer.querySelector("#report-provenance");
+
+    // Clear prior state
+    loading.style.display = "none";
+    pre.style.display = "";
+    pre.textContent = "";
+    provenance.textContent = "";
+    var truncNotice = viewer.querySelector("#report-truncated-notice");
+    if (truncNotice) truncNotice.remove();
+    var nproof = viewer.querySelector("#report-not-proof");
+    if (nproof) nproof.remove();
+
+    // Validate version
+    if (!data.ev_contract_version || data.ev_contract_version !== "1") {{
+        var actual = data.ev_contract_version || "missing";
+        setReportState(viewer,
+            "Contract version mismatch. Expected '1' but received '" + actual + "'.",
+            "");
+        return;
+    }}
+
+    // Validate envelope
+    if (typeof data.ok !== "boolean") {{
+        setReportState(viewer, "Unexpected report response format.", "");
+        return;
+    }}
+
+    // Set provenance
+    if (data.provenance) {{
+        provenance.textContent = data.provenance;
+    }}
+
+    // Error states
+    if (data.ok === false) {{
+        var err = data.error || "unknown error";
+        if (err === "file_not_found") {{
+            setReportState(viewer,
+                "Run report not available.",
+                data.provenance || "");
+        }} else if (err === "run not found") {{
+            setReportState(viewer,
+                "Report not available: run not found.",
+                data.provenance || "");
+        }} else if (err && err.indexOf("read_error") === 0) {{
+            setReportState(viewer,
+                "Report could not be read: " + err + ".",
+                data.provenance || "");
+        }} else {{
+            setReportState(viewer,
+                "Report could not be read: " + err + ".",
+                data.provenance || "");
+        }}
+        return;
+    }}
+
+    // Success — set report content via textContent
+    if (data.content === "" || data.content === null) {{
+        if (data.report_exists) {{
+            setReportState(viewer,
+                "Report file exists but contains no content.",
+                data.provenance || "");
+        }} else {{
+            setReportState(viewer,
+                "Run report not available.",
+                data.provenance || "");
+        }}
+        return;
+    }}
+
+    // Complete report — use textContent on pre element
+    pre.textContent = data.content;
+
+    // Show truncation notice if truncated
+    if (data.truncated) {{
+        var truncP = document.createElement("p");
+        truncP.id = "report-truncated-notice";
+        truncP.className = "zone-placeholder";
+        truncP.textContent = "(Report truncated at " + data.truncation_limit + " characters.)";
+        viewer.insertBefore(truncP, pre.nextSibling);
+    }}
+
+    // Add "not proof" disclaimer
+    var disclaimer = document.createElement("p");
+    disclaimer.id = "report-not-proof";
+    disclaimer.textContent =
+        "Report text is displayed as evidence context. " +
+        "It is not independently verified proof.";
+    viewer.appendChild(disclaimer);
 }}
 
 // Show a state message in the timeline entries container
