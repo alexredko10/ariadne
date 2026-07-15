@@ -103,6 +103,13 @@ body {{ font-family: sans-serif; margin: 0; padding: 0; }}
 #report-not-proof {{ font-size: 0.85rem; color: #666; margin-top: 0.5rem; }}
 #report-truncated-notice {{ color: #a50; font-size: 0.85rem; margin-top: 0.25rem; }}
 
+/* --- Gates & Proofs and Logs & Captures zone content --- */
+#gates-content h3, #logs-content h3 {{ margin: 0.75rem 0 0.25rem 0; font-size: 1rem; color: #333; border-bottom: 1px solid #eee; padding-bottom: 0.2rem; }}
+#gates-content .gate-entry, #logs-content .log-entry {{ margin: 0.25rem 0; font-size: 0.85rem; }}
+#gates-content .gate-label, #logs-content .log-label {{ font-weight: bold; }}
+#gates-content .gate-classification, #logs-content .log-classification {{ color: #666; font-size: 0.8rem; margin-left: 0.5rem; }}
+.gate-not-available {{ color: #888; font-style: italic; font-size: 0.85rem; }}
+
 /* --- Desktop layout: two rows --- */
 @media (min-width: 769px) {{
     #zone-timeline {{ flex: 0 0 220px; max-width: 220px; }}
@@ -137,12 +144,12 @@ body {{ font-family: sans-serif; margin: 0; padding: 0; }}
 
 <div id="zone-gates-proofs" class="workspace-zone" role="region" aria-labelledby="zone-gates-proofs-heading">
 <h2 id="zone-gates-proofs-heading">Gates &amp; Proofs</h2>
-<p class="zone-placeholder">No gate checks available. Gates and proofs will appear after Visual Gate implementation.</p>
+<div id="gates-content"><p class="zone-placeholder">No gate checks available. Select a run to view manifest and evidence.</p></div>
 </div>
 
 <div id="zone-logs-captures" class="workspace-zone" role="region" aria-labelledby="zone-logs-captures-heading">
 <h2 id="zone-logs-captures-heading">Logs &amp; Captures</h2>
-<p class="zone-placeholder">No logs available. Captured execution output will appear here after a run is selected.</p>
+<div id="logs-content"><p class="zone-placeholder">No logs available. Select a run to view execution output.</p></div>
 </div>
 </div>
 <script>
@@ -193,6 +200,8 @@ function selectRun(runId) {{
     selectedRunId = runId;
     var requestId = ++detailRequestCounter;
     showDetailLoading(runId);
+    showGatesLoading();
+    showLogsLoading();
 
     fetch("/runs/" + encodeURIComponent(runId))
         .then(function(resp) {{
@@ -204,10 +213,14 @@ function selectRun(runId) {{
         .then(function(data) {{
             if (requestId !== detailRequestCounter) return; // stale
             renderDetail(data);
+            renderGatesProofs(data);
+            renderLogsCaptures(data);
         }})
         .catch(function(err) {{
             if (requestId !== detailRequestCounter) return; // stale
             showDetailFetchFailure();
+            showGatesUnavailable();
+            showLogsUnavailable();
         }});
 
     // Fetch report in parallel with detail
@@ -711,6 +724,306 @@ function renderReport(data) {{
         "Report text is displayed as evidence context. " +
         "It is not independently verified proof.";
     viewer.appendChild(disclaimer);
+}}
+
+// ---- Gates & Proofs Viewer ----
+
+function showGatesLoading() {{
+    var zone = document.getElementById("zone-gates-proofs");
+    if (!zone) return;
+    var content = zone.querySelector("#gates-content");
+    if (!content) return;
+    content.innerHTML = "";
+    var p = document.createElement("p");
+    p.className = "zone-placeholder";
+    p.textContent = "Loading...";
+    content.appendChild(p);
+}}
+
+function showGatesUnavailable() {{
+    var zone = document.getElementById("zone-gates-proofs");
+    if (!zone) return;
+    var content = zone.querySelector("#gates-content");
+    if (!content) return;
+    content.innerHTML = "";
+    var p = document.createElement("p");
+    p.className = "zone-placeholder";
+    p.textContent = "Gates and proofs data not available. Check that the server is running.";
+    content.appendChild(p);
+}}
+
+function renderGatesProofs(data) {{
+    var zone = document.getElementById("zone-gates-proofs");
+    if (!zone) return;
+    var content = zone.querySelector("#gates-content");
+    if (!content) return;
+
+    // Clear zone content
+    content.innerHTML = "";
+
+    // No detail data — show unavailable
+    if (!data.detail) {{
+        var p = document.createElement("p");
+        p.className = "zone-placeholder";
+        p.textContent = "Manifest and evidence not available.";
+        content.appendChild(p);
+        return;
+    }}
+
+    var d = data.detail;
+
+    // ---- Manifest Files ----
+    var mfH3 = document.createElement("h3");
+    mfH3.textContent = "Manifest Files";
+    content.appendChild(mfH3);
+
+    if (d.manifest_files && d.manifest_files.length > 0) {{
+        for (var i = 0; i < d.manifest_files.length; i++) {{
+            var entry = document.createElement("div");
+            entry.className = "gate-entry";
+            var nameSpan = document.createElement("span");
+            nameSpan.className = "gate-label";
+            nameSpan.textContent = safeText(d.manifest_files[i]);
+            entry.appendChild(nameSpan);
+            var classSpan = document.createElement("span");
+            classSpan.className = "gate-classification";
+            classSpan.textContent = "Runtime Evidence: listed in manifest.json";
+            entry.appendChild(classSpan);
+            content.appendChild(entry);
+        }}
+    }} else if (d.manifest_files && d.manifest_files.length === 0) {{
+        var emptyP = document.createElement("p");
+        emptyP.className = "gate-not-available";
+        emptyP.textContent = "Manifest file list is empty.";
+        content.appendChild(emptyP);
+    }} else {{
+        var naP = document.createElement("p");
+        naP.className = "gate-not-available";
+        naP.textContent = "Manifest not available. The manifest.json file is missing or unreadable.";
+        content.appendChild(naP);
+    }}
+
+    // ---- Evidence Paths ----
+    var epH3 = document.createElement("h3");
+    epH3.textContent = "Evidence Paths";
+    content.appendChild(epH3);
+
+    if (d.evidence_paths && d.evidence_paths.length > 0) {{
+        for (var j = 0; j < d.evidence_paths.length; j++) {{
+            var epEntry = document.createElement("div");
+            epEntry.className = "gate-entry";
+            var epName = document.createElement("span");
+            epName.className = "gate-label";
+            epName.textContent = safeText(d.evidence_paths[j]);
+            epEntry.appendChild(epName);
+            var epClass = document.createElement("span");
+            epClass.className = "gate-classification";
+            epClass.textContent = "Evidence reference";
+            epEntry.appendChild(epClass);
+            content.appendChild(epEntry);
+        }}
+    }} else {{
+        var epNA = document.createElement("p");
+        epNA.className = "gate-not-available";
+        epNA.textContent = "No evidence paths available.";
+        content.appendChild(epNA);
+    }}
+
+    // ---- Run JSON Hash ----
+    var hashH3 = document.createElement("h3");
+    hashH3.textContent = "Run JSON Hash";
+    content.appendChild(hashH3);
+
+    if (d.run_json_hash) {{
+        var hashEntry = document.createElement("div");
+        hashEntry.className = "gate-entry";
+        var hashName = document.createElement("span");
+        hashName.className = "gate-label";
+        hashName.textContent = safeText(d.run_json_hash);
+        hashEntry.appendChild(hashName);
+        var hashClass = document.createElement("span");
+        hashClass.className = "gate-classification";
+        hashClass.textContent = "(as recorded in manifest)";
+        hashEntry.appendChild(hashClass);
+        content.appendChild(hashEntry);
+    }} else {{
+        var hashNA = document.createElement("p");
+        hashNA.className = "gate-not-available";
+        hashNA.textContent = "Run JSON hash not available.";
+        content.appendChild(hashNA);
+    }}
+
+    // ---- Source Errors ----
+    var seH3 = document.createElement("h3");
+    seH3.textContent = "Source Errors";
+    content.appendChild(seH3);
+
+    if (d.source_errors && d.source_errors.length > 0) {{
+        for (var k = 0; k < d.source_errors.length; k++) {{
+            var seEntry = document.createElement("div");
+            seEntry.className = "gate-entry";
+            var seName = document.createElement("span");
+            seName.className = "gate-label";
+            seName.textContent = safeText(d.source_errors[k]);
+            seEntry.appendChild(seName);
+            var seClass = document.createElement("span");
+            seClass.className = "gate-classification";
+            seClass.textContent = "Source error";
+            seEntry.appendChild(seClass);
+            content.appendChild(seEntry);
+        }}
+    }} else {{
+        var seNA = document.createElement("p");
+        seNA.className = "gate-not-available";
+        seNA.textContent = "No source errors reported.";
+        content.appendChild(seNA);
+    }}
+
+    // ---- Agent Claims (PR URL) ----
+    if (data.summary && data.summary.pr_url) {{
+        var acH3 = document.createElement("h3");
+        acH3.textContent = "Agent Claims";
+        content.appendChild(acH3);
+
+        var acEntry = document.createElement("div");
+        acEntry.className = "gate-entry";
+        var acLabel = document.createElement("span");
+        acLabel.className = "gate-label";
+        acLabel.textContent = "Agent-performed operation: gh_pr_create";
+        acEntry.appendChild(acLabel);
+        var acUrl = document.createElement("span");
+        acUrl.className = "gate-classification";
+        if (isSafeUrl(data.summary.pr_url)) {{
+            var acLink = document.createElement("a");
+            acLink.href = data.summary.pr_url;
+            acLink.target = "_blank";
+            acLink.rel = "noopener noreferrer";
+            acLink.textContent = safeText(data.summary.pr_url);
+            acUrl.appendChild(acLink);
+        }} else {{
+            acUrl.textContent = safeText(data.summary.pr_url);
+        }}
+        acEntry.appendChild(acUrl);
+        content.appendChild(acEntry);
+    }}
+
+    // ---- Report Provenance ----
+    var rpH3 = document.createElement("h3");
+    rpH3.textContent = "Report Provenance";
+    content.appendChild(rpH3);
+
+    var rpP = document.createElement("p");
+    rpP.className = "gate-entry";
+    if (data.summary && data.summary.run_report_available) {{
+        rpP.textContent = "Run report is available. \"Report text is not independently verified proof.\"";
+    }} else {{
+        rpP.textContent = "Run report is not available.";
+    }}
+    content.appendChild(rpP);
+
+    // ---- Proof references unavailable ----
+    var prH3 = document.createElement("h3");
+    prH3.textContent = "Proof References";
+    content.appendChild(prH3);
+
+    var prP = document.createElement("p");
+    prP.className = "gate-not-available";
+    prP.textContent = "proof_refs are not stored in the current persisted evidence model. Evidence paths are file references, not independently verified proof.";
+    content.appendChild(prP);
+}}
+
+// ---- Logs & Captures Viewer ----
+
+function showLogsLoading() {{
+    var zone = document.getElementById("zone-logs-captures");
+    if (!zone) return;
+    var content = zone.querySelector("#logs-content");
+    if (!content) return;
+    content.innerHTML = "";
+    var p = document.createElement("p");
+    p.className = "zone-placeholder";
+    p.textContent = "Loading...";
+    content.appendChild(p);
+}}
+
+function showLogsUnavailable() {{
+    var zone = document.getElementById("zone-logs-captures");
+    if (!zone) return;
+    var content = zone.querySelector("#logs-content");
+    if (!content) return;
+    content.innerHTML = "";
+    var p = document.createElement("p");
+    p.className = "zone-placeholder";
+    p.textContent = "Logs and captures data not available. Check that the server is running.";
+    content.appendChild(p);
+}}
+
+function renderLogsCaptures(data) {{
+    var zone = document.getElementById("zone-logs-captures");
+    if (!zone) return;
+    var content = zone.querySelector("#logs-content");
+    if (!content) return;
+
+    // Clear zone content
+    content.innerHTML = "";
+
+    // Default explanation about captures/logs
+    var defaultP = document.createElement("p");
+    defaultP.className = "gate-not-available";
+    defaultP.textContent = "Command captures and logs are not stored in the current run evidence model. " +
+        "Each execution result shows only operation name and exit code. " +
+        "stdout, stderr, and command output are not captured.";
+    content.appendChild(defaultP);
+
+    if (!data.detail) {{
+        return;
+    }}
+
+    var d = data.detail;
+
+    // ---- Execution Summary ----
+    var esH3 = document.createElement("h3");
+    esH3.textContent = "Execution Summary";
+    content.appendChild(esH3);
+
+    if (d.execution_results && d.execution_results.length > 0) {{
+        for (var i = 0; i < d.execution_results.length; i++) {{
+            var er = d.execution_results[i];
+            var erDiv = document.createElement("div");
+            erDiv.className = "log-entry";
+            var opSpan = document.createElement("span");
+            opSpan.className = "log-label";
+            opSpan.textContent = "Execution Result: " + safeText(er.operation || "unknown");
+            erDiv.appendChild(opSpan);
+            var ecSpan = document.createElement("span");
+            ecSpan.className = "log-classification";
+            var ecText = (er.exit_code !== undefined && er.exit_code !== null)
+                ? safeText(String(er.exit_code))
+                : "unknown";
+            ecSpan.textContent = "exit_code: " + ecText;
+            erDiv.appendChild(ecSpan);
+            content.appendChild(erDiv);
+        }}
+    }} else {{
+        var erNA = document.createElement("p");
+        erNA.className = "gate-not-available";
+        erNA.textContent = "No execution results recorded.";
+        content.appendChild(erNA);
+    }}
+
+    // ---- Source Errors ----
+    if (d.source_errors && d.source_errors.length > 0) {{
+        var seH3 = document.createElement("h3");
+        seH3.textContent = "Source Errors";
+        content.appendChild(seH3);
+
+        for (var j = 0; j < d.source_errors.length; j++) {{
+            var seDiv = document.createElement("div");
+            seDiv.className = "log-entry";
+            seDiv.textContent = safeText(d.source_errors[j]);
+            content.appendChild(seDiv);
+        }}
+    }}
 }}
 
 // Show a state message in the timeline entries container
