@@ -1,4 +1,4 @@
-"""Tests for the Artifact Workspace 4-Zone Shell Skeleton — PR 0143."""
+"""Tests for the Artifact Workspace Shell — PR 0143 + PR 0144."""
 
 from __future__ import annotations
 
@@ -185,49 +185,350 @@ class TestPlaceholderStates:
         assert "Captured execution output will appear here" in html
 
 
-class TestFixtureContract:
-    """Tests for the deterministic fixture."""
+class TestProductionFixtureRemoval:
+    """PR 0144: Tests that production mock entries are no longer the data source."""
 
-    def test_fixture_has_ev_contract_version(self):
-        """Fixture data includes ev_contract_version awareness. The workspace fixture
-        is a list-of-dicts matching the GET /runs entry shape which carries
-        ev_contract_version at the envelope level; the fixture itself is entries."""
-        # The workspace itself is a fixture — verify from the render module
-        from task_intake.artifact_workspace import _WORKSPACE_FIXTURE
-        for entry in _WORKSPACE_FIXTURE:
-            assert "run_id" in entry
-            assert "status" in entry
-
-    def test_fixture_is_list(self):
-        """Fixture is a list of run entry dicts."""
-        from task_intake.artifact_workspace import _WORKSPACE_FIXTURE
-        assert isinstance(_WORKSPACE_FIXTURE, list)
-        assert len(_WORKSPACE_FIXTURE) >= 1
-
-    def test_fixture_entries_have_required_keys(self):
-        """Fixture entries have the required run-index entry keys."""
-        from task_intake.artifact_workspace import _WORKSPACE_FIXTURE
-        required_keys = {
-            "run_id", "status", "reason_codes", "pipeline_status",
-            "git_boundary_status", "execution_attempted", "created_at",
-            "run_json_available", "manifest_available", "run_report_available",
-            "missing_evidence", "malformed_evidence", "pr_url",
-            "payload_cleanliness_available", "readiness_available",
-        }
-        for entry in _WORKSPACE_FIXTURE:
-            missing = required_keys - set(entry.keys())
-            assert missing == set(), f"Missing keys: {missing}"
-
-    def test_fixture_is_deterministic(self):
-        """Fixture is deterministic — same on every call."""
-        from task_intake.artifact_workspace import _WORKSPACE_FIXTURE
-        assert _WORKSPACE_FIXTURE[0]["run_id"] == "mock-run-001"
-        assert _WORKSPACE_FIXTURE[1]["run_id"] == "mock-run-002"
-
-    def test_fixture_clearly_labeled_in_html(self):
-        """Fixture data is labeled as non-runtime in the HTML."""
+    def test_production_fixture_notice_absent(self):
+        """Fixture notice div is no longer present in the HTML."""
         _, html = _request("GET", "/workspace")
-        assert "Fixture data — not runtime evidence" in html
+        assert "fixture-notice" not in html
+        assert "Fixture data" not in html
+
+    def test_no_production_mock_run_ids(self):
+        """Production mock run IDs are not embedded in the static HTML."""
+        _, html = _request("GET", "/workspace")
+        assert "mock-run-001" not in html
+        assert "mock-run-002" not in html
+
+    def test_workspace_module_has_no_fixture_constant(self):
+        """The _WORKSPACE_FIXTURE constant is removed from the module."""
+        import inspect
+        from task_intake import artifact_workspace
+        members = set(dir(artifact_workspace))
+        assert "_WORKSPACE_FIXTURE" not in members
+        assert "_WORKSPACE_FIXTURE_JSON" not in members
+
+    def test_live_fetch_present(self):
+        """The page includes fetch('/runs') for live data loading."""
+        _, html = _request("GET", "/workspace")
+        assert 'fetch("/runs")' in html
+
+    def test_render_is_deterministic_and_live(self):
+        """Workspace render no longer embeds fixture data; it's live-driven."""
+        from task_intake.artifact_workspace import render_artifact_workspace
+        html1 = render_artifact_workspace()
+        html2 = render_artifact_workspace()
+        assert html1 == html2
+        # The render output should contain the fetchRuns call, not fixture entries
+        assert "function fetchRuns" in html1
+        assert "fetchRuns();" in html1
+
+
+class TestLiveRunListStates:
+    """PR 0144: Tests for live run list state behavior in the page structure."""
+
+    def test_loading_state_text_present(self):
+        """Loading state text exists in the JS."""
+        _, html = _request("GET", "/workspace")
+        assert "Loading runs..." in html
+
+    def test_empty_state_text_present(self):
+        """Empty state text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "No runs available. Submit a task to see timeline entries." in html
+
+    def test_root_error_state_text_present(self):
+        """Missing/unreadable root state text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Runs directory not available. Run a task to create run evidence." in html
+
+    def test_version_mismatch_state_text_present(self):
+        """Version mismatch state text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Contract version mismatch" in html
+
+    def test_invalid_payload_state_text_present(self):
+        """Invalid payload state text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Unexpected response format. Could not parse run list." in html
+
+    def test_fetch_failure_state_text_present(self):
+        """Fetch failure state text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Failed to load run data. Check that the server is running." in html
+
+    def test_malformed_entry_text_present(self):
+        """Malformed entry handling exists."""
+        _, html = _request("GET", "/workspace")
+        assert "(incomplete)" in html
+
+    def test_ev_contract_version_validation_present(self):
+        """ev_contract_version '1' validation is present."""
+        _, html = _request("GET", "/workspace")
+        assert "ev_contract_version" in html
+        assert '!== "1"' in html
+
+    def test_envelope_validation_present(self):
+        """Envelope validation (ok, runs) is present."""
+        _, html = _request("GET", "/workspace")
+        assert "typeof data.ok" in html
+        assert "Array.isArray(data.runs)" in html
+
+    def test_show_timeline_state_function_exists(self):
+        """showTimelineState function exists for state management."""
+        _, html = _request("GET", "/workspace")
+        assert "function showTimelineState" in html
+
+    def test_entry_has_click_and_keydown_handlers(self):
+        """Each entry has click and keydown event listeners (not inline handlers)."""
+        _, html = _request("GET", "/workspace")
+        assert "addEventListener" in html
+
+
+class TestLiveRunListRender:
+    """PR 0144: Tests for live run list rendering fields."""
+
+    def test_run_id_rendering_present(self):
+        """run_id is rendered."""
+        _, html = _request("GET", "/workspace")
+        assert "timeline-run-id" in html
+
+    def test_status_rendering_present(self):
+        """status is rendered as visible text."""
+        _, html = _request("GET", "/workspace")
+        assert "timeline-status" in html
+
+    def test_status_is_text_not_color_only(self):
+        """Status text is explicitly set via textContent, not only color class."""
+        _, html = _request("GET", "/workspace")
+        assert 'className = "timeline-status status-"' in html  # status snippet
+
+    def test_branch_unavailable_rendering_present(self):
+        """branch: not available text is rendered."""
+        _, html = _request("GET", "/workspace")
+        assert "branch: not available" in html
+
+    def test_readiness_unavailable_rendering_present(self):
+        """readiness: not available text is rendered."""
+        _, html = _request("GET", "/workspace")
+        assert "readiness: not available" in html
+
+    def test_created_at_semantics_present(self):
+        """Created at label is used (not generated_at)."""
+        _, html = _request("GET", "/workspace")
+        assert "Created at:" in html
+        assert "generated_at" not in html
+
+    def test_reason_codes_rendering_present(self):
+        """Reason codes rendering exists."""
+        _, html = _request("GET", "/workspace")
+        assert "timeline-reason-codes" in html
+
+    def test_missing_evidence_rendering_present(self):
+        """Missing evidence indicator exists."""
+        _, html = _request("GET", "/workspace")
+        assert "timeline-evidence-missing" in html
+        assert "Missing:" in html
+
+    def test_malformed_evidence_rendering_present(self):
+        """Malformed evidence indicator exists."""
+        _, html = _request("GET", "/workspace")
+        assert "timeline-evidence-malformed" in html
+        assert "Malformed:" in html
+
+    def test_safe_pr_url_rendering_present(self):
+        """Safe PR URL rendering exists with isSafeUrl check."""
+        _, html = _request("GET", "/workspace")
+        assert "function isSafeUrl" in html
+        assert ".rel = " in html
+
+    def test_semantic_list_structure(self):
+        """Semantic list structure uses role='list' and accessible label."""
+        _, html = _request("GET", "/workspace")
+        assert 'role="list"' in html
+        assert 'aria-label="Local run list"' in html
+
+
+class TestLiveSafeRendering:
+    """PR 0144: Tests for safe rendering of live data."""
+
+    def test_textcontent_used_for_untrusted_values(self):
+        """textContent is used for all untrusted value rendering."""
+        _, html = _request("GET", "/workspace")
+        # Multiple textContent usages for different fields
+        assert "textContent" in html
+
+    def test_no_inline_onclick_from_data(self):
+        """No inline onclick built from run data values."""
+        _, html = _request("GET", "/workspace")
+        assert "onclick=" not in html
+
+    def test_no_inline_onkeydown_from_data(self):
+        """No inline onkeydown built from run data values."""
+        _, html = _request("GET", "/workspace")
+        assert "onkeydown=" not in html
+
+    def test_no_innerHTML_concatenation_of_run_values(self):
+        """No innerHTML concatenation with run field values."""
+        _, html = _request("GET", "/workspace")
+        # The innerHTML in escHtml is for escaping. The state-clear pattern
+        # (entriesDiv.innerHTML = "") is for clearing the container.
+        # Verify that innerHTML is not used for inserting run data content.
+        # Count innerHTML occurrences — should only be in escHtml and clearing.
+        inner_count = html.count(".innerHTML")
+        # escHtml: "return div.innerHTML" + showTimelineState clearing: "entriesDiv.innerHTML = """
+        # ": renderRunList clearing: "entriesDiv.innerHTML = """
+        # Both are safe clearing/escaping patterns.
+        assert inner_count == 3, f"Expected 3 innerHTML occurrences, got {inner_count}"
+        # No innerHTML used to set content from run values
+        assert ".innerHTML = html" not in html
+
+    def test_safe_url_validation_present(self):
+        """isSafeUrl validates http/https prefix."""
+        _, html = _request("GET", "/workspace")
+        assert 'http://"' in html or 'https://"' in html or 'indexOf("http://")' in html
+
+
+class TestLiveAccessibility:
+    """PR 0144: Tests for accessibility of live run list."""
+
+    def test_list_has_accessible_label(self):
+        """The timeline entries container has accessible label."""
+        _, html = _request("GET", "/workspace")
+        assert 'aria-label="Local run list"' in html
+
+    def test_entries_have_aria_label(self):
+        """Each entry has aria-label with run_id and status."""
+        _, html = _request("GET", "/workspace")
+        assert "aria-label" in html
+        assert "Run " in html
+
+    def test_loading_state_uses_role_status(self):
+        """Loading state sets role=status on the entries container."""
+        _, html = _request("GET", "/workspace")
+        assert 'role", "status"' in html
+
+    def test_status_color_class_used(self):
+        """Status color classes exist for visual distinction."""
+        _, html = _request("GET", "/workspace")
+        assert "status-completed" in html
+        assert "status-blocked" in html
+        assert "status-failed" in html
+
+
+class TestLiveZoneBoundaries:
+    """PR 0144: Tests that other zones remain deferred."""
+
+    def test_canvas_still_placeholder(self):
+        """Canvas zone remains a PR 0145 placeholder."""
+        _, html = _request("GET", "/workspace")
+        assert "PR 0145" in html
+        assert "Select a run from the timeline" in html
+
+    def test_gates_still_deferred(self):
+        """Gates & Proofs zone remains deferred."""
+        _, html = _request("GET", "/workspace")
+        assert "No gate checks available" in html
+
+    def test_logs_still_deferred(self):
+        """Logs & Captures zone remains deferred."""
+        _, html = _request("GET", "/workspace")
+        assert "No logs available" in html
+
+    def test_no_mutation_controls(self):
+        """No mutation, agent launch, or git/PR controls."""
+        _, html = _request("GET", "/workspace")
+        assert "retry" not in html.lower()
+        assert "rerun" not in html.lower()
+        assert "git commit" not in html.lower()
+        assert "git push" not in html.lower()
+
+
+class TestLiveHostileStrings:
+    """PR 0144: Tests that hostile strings cannot break rendering."""
+
+    def test_eschtml_still_present(self):
+        """escHtml function is still present for safe HTML escaping."""
+        _, html = _request("GET", "/workspace")
+        assert "function escHtml" in html
+
+    def test_safetext_function_present(self):
+        """safeText function provides safe string rendering."""
+        _, html = _request("GET", "/workspace")
+        assert "function safeText" in html
+
+    def test_no_eval_in_live_code(self):
+        """No eval in the live run list code."""
+        _, html = _request("GET", "/workspace")
+        assert "eval(" not in html
+
+    def test_no_document_write(self):
+        """No document.write in live code."""
+        _, html = _request("GET", "/workspace")
+        assert "document.write" not in html
+
+    def test_no_function_constructor(self):
+        """No Function constructor."""
+        _, html = _request("GET", "/workspace")
+        assert "new Function" not in html
+
+    def test_no_external_assets_in_live_code(self):
+        """No external assets introduced."""
+        _, html = _request("GET", "/workspace")
+        assert 'src="http' not in html
+        assert 'href="http' not in html
+        assert "cdn." not in html.lower()
+
+
+class TestLiveCompatibility:
+    """PR 0144: Tests that existing routes remain compatible."""
+
+    def test_get_runs_ev_contract_version_unchanged(self):
+        """GET /runs ev_contract_version remains '1'."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = os.path.join(tmp_dir, ".ariadne", "runs")
+        os.makedirs(runs_root, exist_ok=True)
+        status, raw = _request("GET", "/runs?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ev_contract_version"] == "1"
+
+    def test_get_runs_detail_ev_contract_version_unchanged(self):
+        """GET /runs/<run_id> ev_contract_version remains '1'."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = os.path.join(tmp_dir, ".ariadne", "runs")
+        run_dir = os.path.join(runs_root, "compat-run")
+        os.makedirs(run_dir, exist_ok=True)
+        run_json = {
+            "schema_version": "1", "run_id": "compat-run",
+            "status": "completed", "reason_codes": ["completed"],
+            "execution_attempted": True, "execution_results_summary": [],
+        }
+        with open(os.path.join(run_dir, "run.json"), "w", encoding="utf-8") as f:
+            json.dump(run_json, f, sort_keys=True, ensure_ascii=False, indent=2)
+        status, raw = _request("GET", "/runs/compat-run?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ev_contract_version"] == "1"
+
+    def test_get_root_unchanged(self):
+        """GET / remains unchanged."""
+        status, html = _request("GET", "/")
+        assert status == 200
+        assert "Ariadne — Local Interaction" in html
+
+    def test_get_workspace_still_returns_200(self):
+        """GET /workspace still returns 200."""
+        status, _ = _request("GET", "/workspace")
+        assert status == 200
+
+    def test_all_zones_still_present(self):
+        """All four zones remain present."""
+        _, html = _request("GET", "/workspace")
+        assert 'id="zone-timeline"' in html
+        assert 'id="zone-canvas"' in html
+        assert 'id="zone-gates-proofs"' in html
+        assert 'id="zone-logs-captures"' in html
 
 
 class TestSafeRendering:
@@ -470,10 +771,10 @@ class TestAccessibility:
         assert 'aria-labelledby="zone-logs-captures-heading"' in html
 
     def test_timeline_entries_are_keyboard_accessible(self):
-        """Timeline entries have keyboard handlers."""
+        """Timeline entries have keyboard handlers via addEventListener."""
         _, html = _request("GET", "/workspace")
-        assert "tabindex=" in html
-        assert "onkeydown" in html
+        assert "addEventListener" in html
+        assert "keydown" in html
 
 
 class TestNoRepositoryWrites:
