@@ -1,0 +1,284 @@
+schema_version: "0.1"
+pr_id: "0147-artifact-workspace-proof-manifest-viewer"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-10T20:00:00Z"
+head_verified: "c7e3e7640cfec684aba1d8f1857d7c311716c26a"
+branch_confirmed: "0147-artifact-workspace-proof-manifest-viewer"
+snapshot_delta:
+  plan_base_sha: "c7e3e7640cfec684aba1d8f1857d7c311716c26a"
+  current_head: "c7e3e7640cfec684aba1d8f1857d7c311716c26a"
+  origin_main: "c7e3e7640cfec684aba1d8f1857d7c311716c26a"
+  merge_base: "c7e3e7640cfec684aba1d8f1857d7c311716c26a"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0147-artifact-workspace-proof-manifest-viewer/PLAN.md"
+    - ".project-memory/pr/0147-artifact-workspace-proof-manifest-viewer/reviews/plan-review.yml"
+  actual_files:
+    - ".project-memory/pr/0147-artifact-workspace-proof-manifest-viewer/PLAN.md"
+    - ".project-memory/pr/0147-artifact-workspace-proof-manifest-viewer/reviews/plan-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0147-artifact-workspace-proof-manifest-viewer/reviews/plan-review.yml"
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+  - ".project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md"
+  - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+  - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "agents/plan-review.yml"
+  - "ROADMAP.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - ".project-memory/pr/0147-artifact-workspace-proof-manifest-viewer/PLAN.md"
+  - ".project-memory/pr/0138-ui-runtime-evidence-read-model/PLAN.md"
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+  - ".project-memory/pr/0141-artifact-workspace-run-detail-evidence-panel/PLAN.md"
+  - ".project-memory/pr/0142-run-evidence-serialization-contract/PLAN.md"
+  - ".project-memory/pr/0143-artifact-workspace-4-zone-shell-skeleton/PLAN.md"
+  - ".project-memory/pr/0144-artifact-workspace-local-run-list-page/PLAN.md"
+  - ".project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/PLAN.md"
+  - ".project-memory/pr/0146-artifact-workspace-run-report-viewer/PLAN.md"
+  - "services/task_intake/src/task_intake/artifact_workspace.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/runtime_evidence_serialization.py"
+  - "services/task_intake/tests/test_artifact_workspace_shell.py"
+  - "services/task_intake/tests/test_local_run_history_in_page.py"
+  - "services/task_intake/tests/test_runtime_evidence_serialization_contract.py"
+  - "services/task_intake/tests/test_task_intake.py"
+  - "services/runner/src/runner/runtime_evidence.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/tests/test_runtime_evidence.py"
+  - "services/runner/tests/test_run_persistence.py"
+files_written:
+  - ".project-memory/pr/0147-artifact-workspace-proof-manifest-viewer/reviews/plan-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "c7e3e7640cfec684aba1d8f1857d7c311716c26a"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0147-artifact-workspace-proof-manifest-viewer"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? .project-memory/pr/0147-artifact-workspace-proof-manifest-viewer/"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No tracked files modified"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+  - command: "git log --oneline --decorate -n 10"
+    result: "passed"
+    exit_code: 0
+    evidence: "HEAD=c7e3e76 (main) = PR 0146 merged #172. PR 0145 (#171), PR 0144 (#170), PR 0143 (#169), PR 0142A (#168), PR 0142 (#167)"
+  - command: "test -s .project-memory/pr/0147-artifact-workspace-proof-manifest-viewer/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is non-empty"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'manifest\.json|manifest_files|proof_refs|evidence_paths|source_errors' services/task_intake services/runner 2>/dev/null | head -10"
+    result: "passed"
+    exit_code: 0
+    evidence: "manifest_files exists in serialized detail. proof_refs does NOT exist in persisted evidence — confirmed absent. evidence_paths and source_errors available in detail. manifest.json schema: {'schema_version','run_id','run_json_hash','files'}."
+  - command: "grep -n -E 'zone-gates-proofs|zone-logs-captures|renderDetail|renderReport|detailRequestCounter|selectedRunId|textContent|innerHTML' services/task_intake/src/task_intake/artifact_workspace.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "zone-gates-proofs (L138), zone-logs-captures (L143), renderDetail (L277), renderReport (L620), detailRequestCounter (L173), selectedRunId (L174) all present. textContent used throughout for runtime values. innerHTML only for static structure (L153-154, L721, L734)."
+  - command: "grep -n -E 'startswith\(\"/runs/\"\)|/report|serialize_run_evidence_detail|read_run_evidence_detail|_RUN_ID_RE' services/task_intake/src/task_intake/server.py services/task_intake/src/task_intake/runtime_evidence_serialization.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "server.py L921: path.startswith('/runs/') with is_report check at L922. _RUN_ID_RE at L49. read_run_evidence_detail L1085, serialize_run_evidence_detail L1086. runtime_evidence_serialization.py L55: serialize_run_evidence_detail."
+blockers: []
+warnings: []
+checks:
+  branch_correct: "pass"
+  plan_presence: "pass"
+  no_staged_files: "pass"
+  no_tracked_modifications: "pass"
+  dirty_tree_scope: "pass"
+  pr_0146_merged: "pass"
+  manifest_schema_accurate: "pass"
+  proof_refs_absent_acknowledged: "pass"
+  option_a_selected: "pass"
+  no_option_ambiguity: "pass"
+  evidence_classification_defined: "pass"
+  captures_logs_honest: "pass"
+  pr_0145_preserved: "pass"
+  pr_0146_preserved: "pass"
+  pr_0147a_0147b_deferred: "pass"
+  plan_drift_gate: "PASS"
+  no_drift_check: "PASS"
+commit_readiness: "ready"
+decisions_made:
+  - decision: "PR 0147 correctly positioned as final Stream 2 product PR"
+    reason: "Roadmap artifact: PR 0147 = Proof and Manifest Viewer, final PR in Artifact Workspace Shell stream (0143-0147). git log: PR 0146 merged as #172. PLAN.md: PR 0147A, PR 0147B, PR 0148+ remain separate."
+  - decision: "OPTION A selected — no new backend endpoint"
+    reason: "PLAN.md Option Decision: OPTION A — EXISTING DETAIL AND REPORT CONTRACTS. All data consumed from existing GET /runs/<run_id> and GET /runs/<run_id>/report. No new route, no serializer change, no read-model change. server.py, runtime_evidence.py, runtime_evidence_serialization.py, run_persistence.py all unchanged."
+  - decision: "Manifest schema accurately inventoried"
+    reason: "PLAN.md Manifest Persistence Inventory: manifest.json schema = {schema_version, run_id, run_json_hash, files[]}. files array = string filenames only (no types). No hash per file. Missing = file_not_found. Malformed = malformed_json. Confirmed by grep of run_persistence.py."
+  - decision: "Proof references confirmed absent from persisted evidence"
+    reason: "PLAN.md Proof-Reference Inventory: 'proof_refs in persisted evidence: Does not exist.' ArtifactEvidenceRef dataclass defined but never constructed. No proof_ref key in run.json. evidence_paths are file paths, not proof refs. Confirmed by grep."
+  - decision: "Evidence classification contract defined with honest labels"
+    reason: "PLAN.md Evidence Classification Contract: 8 categories with source, linkage predicate, visible label, and prohibited claim. Runtime evidence, evidence reference, execution summary, agent metadata, run JSON hash, source errors, report provenance, captures/logs (always unavailable). No fabricated 'Verified proof' or 'Accepted proof' labels."
+  - decision: "Captures and logs honestly presented as unavailable"
+    reason: "PLAN.md Capture and Log Inventory: captures/ is runtime cleanup directory, stdout/stderr not captured, no log files per run. PLAN.md Capture/Log Viewer: default text 'Command captures and logs are not stored in the current run evidence model. Each execution result shows only operation name and exit code.' No fabricated stdout/stderr."
+  - decision: "Gates & Proofs and Logs & Captures zones populated from existing detail data"
+    reason: "PLAN.md: Gates & Proofs shows manifest_files, evidence_paths, run_json_hash, agent claims (PR URL). Logs & Captures shows execution_results (operation+exit_code) and source_errors. Both zones re-rendered from the same renderDetail data — no additional HTTP requests."
+  - decision: "PR 0145 detail behavior fully preserved"
+    reason: "PLAN.md PR 0145 Preservation Contract: timeline, aria-selected, encodeURIComponent, detailRequestCounter, bounded detail rows, notices, safe URL policy, evidence paths as text — all unchanged. Gates/logs are separate zones outside #detail-content."
+  - decision: "PR 0146 report behavior fully preserved"
+    reason: "PLAN.md PR 0146 Preservation Contract: report viewer (#report-viewer, #report-text, #report-provenance), fetchReport, all report states unchanged."
+  - decision: "PR 0147A, PR 0147B, and later work completely deferred"
+    reason: "PLAN.md PR 0147A/0147B Deferral Contract: agent launch, orchestration, gating, launch UX, domain-neutral work, Visual Gate, Artifact Registry, proof acceptance — all deferred. No launch buttons, no execute buttons, no orchestration controls."
+  - decision: "Implementation scope minimal — only artifact_workspace.py and tests"
+    reason: "PLAN.md Implementation File Scope: artifact_workspace.py (edit — add renderGatesProofs/renderLogsCaptures), test_artifact_workspace_shell.py (edit). No server.py, runtime_evidence.py, run_persistence.py, or serialization changes."
+  - decision: "PLAN DRIFT GATE present in all caps with 27 block conditions"
+    reason: "PLAN.md '### PLAN DRIFT GATE' (all caps). 27 conditions covering out-of-scope files, locked artifacts, OPTION A non-compliance, fabricated manifest/proof/capture fields, agent-claims-as-proof, path/hash false verification, acceptance/approval inference, missing-as-empty, malformed-as-missing, fabricated captures/logs, arbitrary paths, evidence mutation, route breakage, PR 0145/0146 breakage, unsafe HTML, proof acceptance, agent launch, PR 0147A/0147B absorption, external assets, weak tests, absent IMPLEMENTATION_REPORT.md."
+  - decision: "NO-DRIFT CHECK present in all caps with 34 confirmation requirements"
+    reason: "PLAN.md '### NO-DRIFT CHECK' (all caps). 34 confirmations covering correct branch, approved files, locked artifacts, PR 0147 scope, PR 0147A/0147B/0148 separate, OPTION A, manifest schema exact, evidence classifications all correct, unavailable/malformed/unsupported states, capture/log honesty, inert paths/hashes, stale protection, PR 0145/0146 preserved, no proof acceptance, no launch/orchestration, no arbitrary filesystem, tests pass, IMPLEMENTATION_REPORT.md exists, PLAN DRIFT GATE passed."
+manifest_inventory_assessment:
+  filename: "manifest.json"
+  schema: "{schema_version, run_id, run_json_hash, files[]}"
+  files_array: "string filenames — no types, no hashes per file"
+  writer: "run_persistence.py persist_run_record"
+  serialized_as: "detail.manifest_files (array of filenames)"
+  missing_state: "MissingEvidenceNotice (file_not_found)"
+  malformed_state: "MissingEvidenceNotice (malformed_json)"
+proof_reference_inventory_assessment:
+  proof_refs_in_persisted: "DOES NOT EXIST"
+  artifact_evidence_ref_used: false
+  evidence_paths_semantics: "absolute file paths to run.json, manifest.json, run-report.txt"
+  pr_url_as_ref: "extracted from execution_results gh_pr_create"
+execution_result_inventory_assessment:
+  keys: "operation (str), exit_code (str)"
+  stdout_stored: false
+  stderr_stored: false
+  capture_paths_stored: false
+  log_paths_stored: false
+  source_errors: "free-form error strings from read_model"
+capture_log_inventory_assessment:
+  captures_persisted: false
+  logs_persisted: false
+  stdout_captured: false
+  stderr_captured: false
+option_decision_assessment:
+  selected: "OPTION A — EXISTING DETAIL AND REPORT CONTRACTS"
+  new_backend_endpoint: false
+  serializer_change: false
+  read_model_change: false
+  server_py_change: false
+evidence_classification_assessment:
+  classifications:
+    - "Runtime evidence (manifest_files from manifest.json)"
+    - "Evidence reference (evidence_paths from filesystem)"
+    - "Execution summary (execution_results from run.json)"
+    - "Agent metadata (PR URL from gh_pr_create)"
+    - "Run JSON hash (from manifest)"
+    - "Source errors (from read errors)"
+    - "Report provenance (from manifest linkage)"
+    - "Captures/logs (not available)"
+  runtime_evidence_vs_agent_claims_separated: true
+  unavailable_state_defined: true
+  malformed_state_defined: true
+  unsupported_state_defined: true
+manifest_viewer_assessment:
+  zone: "#zone-gates-proofs"
+  container: "#gates-content"
+  heading: "h3 Manifest Files"
+  entry_format: "filename (safeText) + 'Listed in manifest.json'"
+  hash_display: "Run JSON hash with '(as recorded in manifest)'"
+  no_clickable_links: true
+  no_file_download: true
+proof_evidence_viewer_assessment:
+  sections:
+    - "Evidence Paths (inert text)"
+    - "Run JSON Hash"
+    - "Source Errors"
+    - "Agent Claims (PR URL via isSafeUrl)"
+  no_accept_reject: true
+  no_gate_mutation: true
+capture_log_viewer_assessment:
+  zone: "#zone-logs-captures"
+  container: "#logs-content"
+  default_text: "'Command captures and logs are not stored in the current run evidence model.'"
+  execution_summary: "operation + exit_code via safeText"
+  source_errors_section: true
+  no_fabricated_stdout: true
+  no_command_execution: true
+selected_run_request_assessment:
+  data_source: "existing renderDetail() response — no new requests"
+  encoded_url: "encodeURIComponent(runId)"
+  stale_protection: "detailRequestCounter"
+  loading_text: "'... loading' in each zone"
+  cleanup_on_change: true
+safe_rendering_assessment:
+  textContent_used: true
+  innerHTML_restricted: true
+  no_eval: true
+  no_event_handlers_from_data: true
+  no_clickable_file_links: true
+  no_url_linkification: true
+  no_external_assets: true
+pr0145_preservation_assessment:
+  timeline_preserved: true
+  selected_row_preserved: true
+  aria_selected_preserved: true
+  encode_uri_component: true
+  detailRequestCounter_preserved: true
+  detail_rows_preserved: true
+  notices_preserved: true
+  evidence_paths_text_only: true
+pr0146_preservation_assessment:
+  report_viewer_preserved: true
+  fetch_report_preserved: true
+  report_states_preserved: true
+  provenance_label_preserved: true
+pr0147a_pr0147b_deferral_assessment:
+  agent_launch_deferred: true
+  orchestration_deferred: true
+  gating_deferred: true
+  domain_neutral_deferred: true
+  visual_gate_deferred: true
+  artifact_registry_deferred: true
+  proof_acceptance_deferred: true
+implementation_scope_assessment:
+  files:
+    - "services/task_intake/src/task_intake/artifact_workspace.py (edit)"
+    - "services/task_intake/tests/test_artifact_workspace_shell.py (edit)"
+  server_py_unchanged: true
+  runtime_evidence_unchanged: true
+  run_persistence_unchanged: true
+  serialization_unchanged: true
+  no_dependency_changes: true
+boundary_confirmations:
+  - "Branch confirmed: 0147-artifact-workspace-proof-manifest-viewer"
+  - "Only plan-review.yml artifact written; no PLAN.md, ROADMAP.md, services/, agents/, schemas/ modified"
+  - "No tracked files modified; no staged files; PR 0146 merged (#172)"
+  - "OPTION A selected — no new backend endpoint, no serializer changes"
+  - "Manifest schema accurately inventoried: {schema_version, run_id, run_json_hash, files[]}"
+  - "proof_refs confirmed absent from persisted evidence"
+  - "Captures and logs honestly presented as 'not stored in current model'"
+  - "Evidence classification defined: runtime evidence, evidence references, execution summary, agent metadata, hashes, source errors all with honest labels"
+  - "Gates & Proofs and Logs & Captures populated from existing detail data — no new HTTP requests"
+  - "All paths rendered as inert text — no clickable file links"
+  - "No fabricated stdout, stderr, proof refs, or capture paths"
+  - "PR 0145 detail behavior fully preserved"
+  - "PR 0146 report behavior fully preserved"
+  - "PR 0147A, PR 0147B, and later work completely deferred"
+  - "No server.py, runtime_evidence.py, run_persistence.py, or serialization changes"
+  - "IMPLEMENTATION_REPORT.md required with all 11 sections and proof disclaimer"
+  - "PLAN DRIFT GATE: all caps, 27 block conditions"
+  - "NO-DRIFT CHECK: all caps, 34 confirmation requirements"
+plan_drift_gate: "PASS — PLAN.md includes exact '### PLAN DRIFT GATE' heading (all caps) with 27 block conditions covering out-of-scope files, locked artifacts, OPTION A non-compliance, fabricated manifest/proof/capture fields, agent-claims-as-proof, path/hash false verification, acceptance/approval inference, missing-as-empty, malformed-as-missing, fabricated captures/logs, arbitrary paths, evidence mutation, route breakage, PR 0145/0146 breakage, unsafe HTML, proof acceptance, agent launch, PR 0147A/0147B absorption, external assets, weak tests, absent IMPLEMENTATION_REPORT.md."
+no_drift_check: "PASS — PLAN.md includes exact '### NO-DRIFT CHECK' heading (all caps) with 34 confirmation requirements covering correct branch, approved files, locked planning artifacts, PR 0147 scope, PR 0147A/0147B/0148 separate, OPTION A, manifest schema exact, evidence classifications all correct, unavailable/malformed/unsupported states, capture/log honesty, inert paths/hashes, stale protection, PR 0145/0146 preserved, no proof acceptance, no launch/orchestration, no arbitrary filesystem, tests pass, IMPLEMENTATION_REPORT.md exists, PLAN DRIFT GATE passed, actual evidence overrides agent claims."
+commit_readiness: "ready"

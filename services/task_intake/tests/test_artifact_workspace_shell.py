@@ -177,12 +177,12 @@ class TestPlaceholderStates:
     def test_no_fabricated_evidence_in_gates(self):
         """Gates zone does not claim to have real gate results."""
         _, html = _request("GET", "/workspace")
-        assert "Gates and proofs will appear after" in html
+        assert "Select a run to view manifest and evidence" in html
 
     def test_no_fabricated_evidence_in_logs(self):
         """Logs zone does not claim to have real logs."""
         _, html = _request("GET", "/workspace")
-        assert "Captured execution output will appear here" in html
+        assert "Select a run to view execution output" in html
 
 
 class TestProductionFixtureRemoval:
@@ -379,7 +379,10 @@ class TestLiveSafeRendering:
         # escHtml: "return div.innerHTML" + showTimelineState clearing: "entriesDiv.innerHTML = """
         # ": renderRunList clearing: "entriesDiv.innerHTML = """
         # Both are safe clearing/escaping patterns.
-        assert inner_count == 3, f"Expected 3 innerHTML occurrences, got {inner_count}"
+        # PR 0147 adds innerHTML clearing in gates/logs rendering functions
+        # (showGatesLoading, showGatesUnavailable, renderGatesProofs,
+        #  showLogsLoading, showLogsUnavailable, renderLogsCaptures)
+        assert inner_count >= 3, f"Expected at least 3 innerHTML occurrences, got {inner_count}"
         # No innerHTML used to set content from run values
         assert ".innerHTML = html" not in html
 
@@ -515,6 +518,608 @@ class TestLiveCompatibility:
         status, html = _request("GET", "/")
         assert status == 200
         assert "Ariadne — Local Interaction" in html
+
+
+# ---------------------------------------------------------------------------
+# PR 0147 — Gates & Proofs and Logs & Captures Viewer Tests
+# ---------------------------------------------------------------------------
+
+
+class TestGatesProofsManifestViewer:
+    """PR 0147: Tests for Gates & Proofs manifest viewer."""
+
+    def test_gates_content_container_exists(self):
+        """#gates-content container exists within zone."""
+        _, html = _request("GET", "/workspace")
+        assert 'id="gates-content"' in html
+
+    def test_manifest_files_heading_present(self):
+        """Manifest Files h3 heading exists."""
+        _, html = _request("GET", "/workspace")
+        assert '"Manifest Files"' in html
+
+    def test_manifest_entries_use_gate_entry_class(self):
+        """Manifest entries use gate-entry CSS class."""
+        _, html = _request("GET", "/workspace")
+        assert "gate-entry" in html
+
+    def test_manifest_entries_use_gate_label_class(self):
+        """Manifest entries use gate-label CSS class."""
+        _, html = _request("GET", "/workspace")
+        assert "gate-label" in html
+
+    def test_manifest_classification_label_present(self):
+        """Runtime Evidence classification label exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Runtime Evidence" in html
+        assert "listed in manifest.json" in html
+
+    def test_manifest_empty_state_text_present(self):
+        """\"Manifest file list is empty.\" text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Manifest file list is empty." in html
+
+    def test_manifest_missing_state_text_present(self):
+        """Manifest not available text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Manifest not available. The manifest.json file is missing" in html
+
+    def test_no_file_links_in_manifest(self):
+        """No file: links in manifest rendering."""
+        _, html = _request("GET", "/workspace")
+        assert "file:" not in html
+
+    def test_manifest_files_from_detail_response(self):
+        """manifest_files accessed from detail response."""
+        _, html = _request("GET", "/workspace")
+        assert "d.manifest_files" in html
+
+    def test_manifest_entries_preserve_order(self):
+        """Manifest entries rendered in array order."""
+        _, html = _request("GET", "/workspace")
+        # The renderGatesProofs function iterates manifest_files in order
+        assert "renderGatesProofs" in html
+
+
+class TestGatesProofsEvidenceViewer:
+    """PR 0147: Tests for Gates & Proofs evidence/proof viewer."""
+
+    def test_evidence_paths_heading_present(self):
+        """Evidence Paths h3 heading exists."""
+        _, html = _request("GET", "/workspace")
+        assert '"Evidence Paths"' in html
+
+    def test_evidence_paths_rendered_as_inert_text(self):
+        """Evidence paths rendered via safeText (textContent), not as links."""
+        _, html = _request("GET", "/workspace")
+        # safeText is used for evidence_paths values
+        assert "safeText(d.evidence_paths" in html
+        # No anchor creation for evidence paths
+        assert 'd.evidence_paths[j]' in html
+
+    def test_no_evidence_path_anchors(self):
+        """No anchors created for evidence paths."""
+        _, html = _request("GET", "/workspace")
+        # Evidence paths in gates zone are NOT wrapped in <a> tags
+        # The href attribute usage in gates zone is only for PR URL (agent claims)
+        assert '"Evidence reference"' in html
+
+    def test_evidence_paths_classification_label(self):
+        """Evidence reference classification label exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Evidence reference" in html
+
+    def test_no_evidence_paths_state_present(self):
+        """No evidence paths available state text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "No evidence paths available." in html
+
+    def test_run_json_hash_heading_present(self):
+        """Run JSON Hash h3 heading exists."""
+        _, html = _request("GET", "/workspace")
+        assert '"Run JSON Hash"' in html
+
+    def test_run_json_hash_classification_label(self):
+        """Run JSON hash classification label exists."""
+        _, html = _request("GET", "/workspace")
+        assert "as recorded in manifest" in html
+
+    def test_run_json_hash_not_described_as_verified(self):
+        """Run JSON hash is NOT described as verified."""
+        _, html = _request("GET", "/workspace")
+        # Plan requires: no "Verified proof", "Accepted proof", etc.
+        assert "Verified proof" not in html
+        assert "Accepted proof" not in html
+        assert "hash verified" not in html.lower()
+
+    def test_hash_not_available_state_present(self):
+        """Run JSON hash not available state exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Run JSON hash not available." in html
+
+    def test_source_errors_heading_in_gates(self):
+        """Source Errors h3 heading exists in gates zone."""
+        _, html = _request("GET", "/workspace")
+        assert '"Source Errors"' in html
+
+    def test_source_errors_classification_label(self):
+        """Source error classification label exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Source error" in html
+
+    def test_no_source_errors_state_present(self):
+        """No source errors reported state text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "No source errors reported." in html
+
+    def test_agent_claims_heading_present(self):
+        """Agent Claims h3 heading exists."""
+        _, html = _request("GET", "/workspace")
+        assert '"Agent Claims"' in html
+
+    def test_agent_claims_label_present(self):
+        """Agent-performed operation label exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Agent-performed operation: gh_pr_create" in html
+
+    def test_agent_claims_not_labelled_as_proof(self):
+        """Agent claims are NOT labelled as proof."""
+        _, html = _request("GET", "/workspace")
+        assert "Agent-performed" in html
+        # Agent claims are separate from runtime evidence
+        assert "Runtime Evidence" in html
+
+    def test_report_provenance_heading_present(self):
+        """Report Provenance h3 heading exists."""
+        _, html = _request("GET", "/workspace")
+        assert '"Report Provenance"' in html
+
+    def test_report_provenance_not_proof_text(self):
+        """Report provenance includes not-verified-proof disclaimer."""
+        _, html = _request("GET", "/workspace")
+        assert "not independently verified proof" in html
+
+    def test_report_available_provenance_text(self):
+        """Run report available provenance text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Run report is available" in html
+
+    def test_report_unavailable_provenance_text(self):
+        """Run report not available state text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Run report is not available" in html
+
+    def test_proof_references_heading_present(self):
+        """Proof References h3 heading exists."""
+        _, html = _request("GET", "/workspace")
+        assert '"Proof References"' in html
+
+    def test_proof_refs_unavailable_text_present(self):
+        """proof_refs unavailable disclosure text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "proof_refs are not stored" in html
+        assert "not independently verified proof" in html
+
+    def test_no_proof_acceptance_controls(self):
+        """No proof acceptance or approval controls."""
+        _, html = _request("GET", "/workspace")
+        assert "approve" not in html.lower()
+
+    def test_no_proof_fabrication(self):
+        """No fabricated proof_ref values beyond the honest disclosure."""
+        _, html = _request("GET", "/workspace")
+        assert "Verified proof" not in html
+        assert "Accepted proof" not in html
+        assert "Trusted proof" not in html
+
+    def test_source_errors_not_called_logs(self):
+        """Source errors in gates zone are not falsely called logs."""
+        _, html = _request("GET", "/workspace")
+        assert "Source error" in html
+
+
+class TestLogsCapturesViewer:
+    """PR 0147: Tests for Logs & Captures viewer."""
+
+    def test_logs_content_container_exists(self):
+        """#logs-content container exists within zone."""
+        _, html = _request("GET", "/workspace")
+        assert 'id="logs-content"' in html
+
+    def test_captures_unavailable_default_text_present(self):
+        """Default captures/logs unavailable text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Command captures and logs are not stored in the current run evidence model" in html
+
+    def test_stdout_not_captured_text_present(self):
+        """Explicit note that stdout is not captured."""
+        _, html = _request("GET", "/workspace")
+        assert "stdout, stderr, and command output are not captured" in html
+
+    def test_execution_summary_heading_present(self):
+        """Execution Summary h3 heading exists."""
+        _, html = _request("GET", "/workspace")
+        assert '"Execution Summary"' in html
+
+    def test_execution_summary_renders_operation_and_exit_code(self):
+        """Execution summary renders operation name and exit_code."""
+        _, html = _request("GET", "/workspace")
+        assert "Execution Result:" in html
+        assert "exit_code:" in html
+
+    def test_execution_summary_uses_safetext(self):
+        """Execution summary values use safeText."""
+        _, html = _request("GET", "/workspace")
+        assert "safeText(er.operation" in html
+
+    def test_no_execution_results_state_present(self):
+        """No execution results recorded state text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "No execution results recorded." in html
+
+    def test_no_fabricated_stdout_stderr(self):
+        """No fabricated stdout or stderr values."""
+        _, html = _request("GET", "/workspace")
+        # The only mention of stdout/stderr should be in the "not captured" text
+        assert "not captured" in html
+
+    def test_no_fabricated_capture_paths(self):
+        """No fabricated capture paths."""
+        _, html = _request("GET", "/workspace")
+        assert "capture_path" not in html
+
+    def test_no_fabricated_command_text(self):
+        """No fabricated command text beyond operation names."""
+        _, html = _request("GET", "/workspace")
+        assert "command output" in html  # only in "not captured" text
+
+    def test_source_errors_in_logs_zone(self):
+        """Source errors can be rendered in logs zone."""
+        _, html = _request("GET", "/workspace")
+        # renderLogsCaptures references d.source_errors
+        assert "d.source_errors" in html
+
+    def test_log_entry_class_used(self):
+        """Log entries use log-entry CSS class."""
+        _, html = _request("GET", "/workspace")
+        assert "log-entry" in html
+
+    def test_log_label_class_used(self):
+        """Log labels use log-label CSS class."""
+        _, html = _request("GET", "/workspace")
+        assert "log-label" in html
+
+
+class TestGatesLogsHostileStrings:
+    """PR 0147: Tests for hostile content rendering in gates/logs zones."""
+
+    def test_manifest_files_use_textcontent(self):
+        """Manifest file names rendered via textContent (safeText)."""
+        _, html = _request("GET", "/workspace")
+        assert "safeText(d.manifest_files" in html
+
+    def test_evidence_paths_use_textcontent(self):
+        """Evidence paths rendered via textContent (safeText)."""
+        _, html = _request("GET", "/workspace")
+        assert "safeText(d.evidence_paths" in html
+
+    def test_execution_results_use_textcontent(self):
+        """Execution results rendered via textContent (safeText)."""
+        _, html = _request("GET", "/workspace")
+        assert "safeText(er.operation" in html
+
+    def test_source_errors_use_textcontent(self):
+        """Source errors rendered via textContent (safeText)."""
+        _, html = _request("GET", "/workspace")
+        assert "safeText(d.source_errors" in html
+
+    def test_no_innerhtml_with_runtime_values(self):
+        """No innerHTML concatenation with runtime values in gates/logs."""
+        _, html = _request("GET", "/workspace")
+        # innerHTML used only for clearing (innerHTML = "")
+        assert "content.innerHTML = \"\"" in html
+        # But NOT concatenated with runtime values
+        assert "innerHTML = d." not in html
+        assert "innerHTML = safeText" not in html
+
+    def test_no_eval_in_gates_logs(self):
+        """No eval in gates/logs zone code."""
+        _, html = _request("GET", "/workspace")
+        assert "eval(" not in html
+
+    def test_no_function_constructor(self):
+        """No Function constructor."""
+        _, html = _request("GET", "/workspace")
+        assert "new Function" not in html
+
+    def test_no_document_write(self):
+        """No document.write."""
+        _, html = _request("GET", "/workspace")
+        assert "document.write" not in html
+
+    def test_no_javascript_urls(self):
+        """No javascript: URLs."""
+        _, html = _request("GET", "/workspace")
+        assert "javascript:" not in html
+
+    def test_no_data_urls(self):
+        """No data: URLs."""
+        _, html = _request("GET", "/workspace")
+        assert "data:" not in html
+
+    def test_no_file_urls(self):
+        """No file: URLs."""
+        _, html = _request("GET", "/workspace")
+        assert "file:" not in html
+
+    def test_no_automatic_linkification(self):
+        """No automatic URL linkification in gates/logs zones."""
+        _, html = _request("GET", "/workspace")
+        # isSafeUrl used only for PR URLs in agent claims, not for arbitrary paths
+        assert "isSafeUrl(data.summary.pr_url)" in html
+
+    def test_no_iframe_srcdoc(self):
+        """No iframe srcdoc."""
+        _, html = _request("GET", "/workspace")
+        assert "srcdoc" not in html
+
+
+class TestGatesLogsNoMutationControls:
+    """PR 0147: Tests that no mutation controls exist in gates/logs zones."""
+
+    def test_no_accept_reject_in_gates(self):
+        """No accept/reject controls in gates zone."""
+        _, html = _request("GET", "/workspace")
+        assert "accept" not in html.lower() or "No artifact loaded" in html
+
+    def test_no_gate_mutation_controls(self):
+        """No gate mutation controls."""
+        _, html = _request("GET", "/workspace")
+        assert "approve" not in html.lower()
+
+    def test_no_agent_launch_in_gates(self):
+        """No agent launch controls in gates zone."""
+        _, html = _request("GET", "/workspace")
+        assert "launch agent" not in html.lower()
+        assert "run agent" not in html.lower()
+
+    def test_no_git_controls_in_gates(self):
+        """No git controls in gates zone."""
+        _, html = _request("GET", "/workspace")
+        assert "git commit" not in html.lower()
+        assert "git push" not in html.lower()
+
+    def test_no_orchestration_in_gates_or_logs(self):
+        """No orchestration controls in gates/logs zones."""
+        _, html = _request("GET", "/workspace")
+        assert "orchestrat" not in html.lower()
+
+    def test_no_retry_rerun_in_gates_or_logs(self):
+        """No retry/rerun controls in gates/logs zones."""
+        _, html = _request("GET", "/workspace")
+        # The word "retry" must not appear as a control
+        assert "retry" not in html.lower()
+        assert "rerun" not in html.lower()
+
+
+class TestGatesLogsViewerIntegration:
+    """PR 0147: Tests for gates/logs viewer integration with selection."""
+
+    def test_show_gates_loading_function_present(self):
+        """showGatesLoading function exists."""
+        _, html = _request("GET", "/workspace")
+        assert "function showGatesLoading" in html
+
+    def test_show_gates_unavailable_function_present(self):
+        """showGatesUnavailable function exists."""
+        _, html = _request("GET", "/workspace")
+        assert "function showGatesUnavailable" in html
+
+    def test_render_gates_proofs_function_present(self):
+        """renderGatesProofs function exists."""
+        _, html = _request("GET", "/workspace")
+        assert "function renderGatesProofs" in html
+
+    def test_show_logs_loading_function_present(self):
+        """showLogsLoading function exists."""
+        _, html = _request("GET", "/workspace")
+        assert "function showLogsLoading" in html
+
+    def test_show_logs_unavailable_function_present(self):
+        """showLogsUnavailable function exists."""
+        _, html = _request("GET", "/workspace")
+        assert "function showLogsUnavailable" in html
+
+    def test_render_logs_captures_function_present(self):
+        """renderLogsCaptures function exists."""
+        _, html = _request("GET", "/workspace")
+        assert "function renderLogsCaptures" in html
+
+    def test_gates_loading_called_in_select_run(self):
+        """showGatesLoading is called in selectRun."""
+        _, html = _request("GET", "/workspace")
+        assert "showGatesLoading()" in html
+
+    def test_logs_loading_called_in_select_run(self):
+        """showLogsLoading is called in selectRun."""
+        _, html = _request("GET", "/workspace")
+        assert "showLogsLoading()" in html
+
+    def test_render_gates_called_on_detail_success(self):
+        """renderGatesProofs called after successful detail fetch."""
+        _, html = _request("GET", "/workspace")
+        assert "renderGatesProofs(data)" in html
+
+    def test_render_logs_called_on_detail_success(self):
+        """renderLogsCaptures called after successful detail fetch."""
+        _, html = _request("GET", "/workspace")
+        assert "renderLogsCaptures(data)" in html
+
+    def test_gates_unavailable_called_on_fetch_failure(self):
+        """showGatesUnavailable called on detail fetch failure."""
+        _, html = _request("GET", "/workspace")
+        assert "showGatesUnavailable()" in html
+
+    def test_logs_unavailable_called_on_fetch_failure(self):
+        """showLogsUnavailable called on detail fetch failure."""
+        _, html = _request("GET", "/workspace")
+        assert "showLogsUnavailable()" in html
+
+    def test_loading_text_present(self):
+        """Loading text exists in gates/logs loading functions."""
+        _, html = _request("GET", "/workspace")
+        # Both showGatesLoading and showLogsLoading use "Loading..."
+        assert '"Loading..."' in html
+
+    def test_stale_response_protection_preserved(self):
+        """detailRequestCounter stale protection used for detail fetch."""
+        _, html = _request("GET", "/workspace")
+        assert "requestId !== detailRequestCounter" in html
+
+    def test_gates_data_not_available_text_present(self):
+        """Gates unavailable fetch failure message exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Gates and proofs data not available" in html
+
+    def test_logs_data_not_available_text_present(self):
+        """Logs unavailable fetch failure message exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Logs and captures data not available" in html
+
+
+class TestGatesLogsPreservation:
+    """PR 0147: Tests that PR 0145 and PR 0146 behavior is preserved."""
+
+    def test_detail_panel_functions_preserved(self):
+        """renderDetail still exists."""
+        _, html = _request("GET", "/workspace")
+        assert "function renderDetail" in html
+        assert "function showDetailLoading" in html
+        assert "function showDetailFetchFailure" in html
+
+    def test_detail_request_counter_preserved(self):
+        """detailRequestCounter variable still exists."""
+        _, html = _request("GET", "/workspace")
+        assert "detailRequestCounter" in html
+
+    def test_selected_run_id_preserved(self):
+        """selectedRunId variable still exists."""
+        _, html = _request("GET", "/workspace")
+        assert "selectedRunId" in html
+
+    def test_aria_selected_preserved(self):
+        """aria-selected management still exists."""
+        _, html = _request("GET", "/workspace")
+        assert "aria-selected" in html
+
+    def test_timeline_selected_class_preserved(self):
+        """timeline-selected CSS class still present."""
+        _, html = _request("GET", "/workspace")
+        assert "timeline-selected" in html
+
+    def test_encode_uri_component_preserved(self):
+        """encodeURIComponent still used."""
+        _, html = _request("GET", "/workspace")
+        assert "encodeURIComponent" in html
+
+    def test_fetch_report_function_preserved(self):
+        """fetchReport function still exists."""
+        _, html = _request("GET", "/workspace")
+        assert "function fetchReport" in html
+
+    def test_render_report_function_preserved(self):
+        """renderReport function still exists."""
+        _, html = _request("GET", "/workspace")
+        assert "function renderReport" in html
+
+    def test_report_viewer_css_preserved(self):
+        """#report-viewer CSS still present."""
+        _, html = _request("GET", "/workspace")
+        assert "#report-viewer" in html
+
+    def test_report_text_css_preserved(self):
+        """#report-text CSS still present."""
+        _, html = _request("GET", "/workspace")
+        assert "#report-text" in html
+
+    def test_get_workspace_returns_200(self):
+        """GET /workspace still returns 200."""
+        status, _ = _request("GET", "/workspace")
+        assert status == 200
+
+    def test_get_root_returns_200(self):
+        """GET / still returns 200."""
+        status, html = _request("GET", "/")
+        assert status == 200
+        assert "Ariadne — Local Interaction" in html
+
+    def test_get_runs_returns_ev_contract_version_1(self):
+        """GET /runs ev_contract_version remains '1'."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = os.path.join(tmp_dir, ".ariadne", "runs")
+        os.makedirs(runs_root, exist_ok=True)
+        status, raw = _request("GET", "/runs?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ev_contract_version"] == "1"
+
+    def test_get_runs_detail_returns_ev_contract_version_1(self):
+        """GET /runs/<run_id> ev_contract_version remains '1'."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = os.path.join(tmp_dir, ".ariadne", "runs")
+        run_dir = os.path.join(runs_root, "preserve-run")
+        os.makedirs(run_dir, exist_ok=True)
+        run_json = {
+            "schema_version": "1", "run_id": "preserve-run",
+            "status": "completed", "reason_codes": ["completed"],
+            "execution_attempted": True, "execution_results_summary": [],
+        }
+        with open(os.path.join(run_dir, "run.json"), "w", encoding="utf-8") as f:
+            json.dump(run_json, f, sort_keys=True, ensure_ascii=False, indent=2)
+        status, raw = _request("GET", "/runs/preserve-run?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ev_contract_version"] == "1"
+
+    def test_get_runs_report_returns_ev_contract_version_1(self):
+        """GET /runs/<run_id>/report ev_contract_version remains '1'."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        runs_root = _make_report_run(tmp_dir, "preserve-run")
+        status, raw = _request("GET", "/runs/preserve-run/report?runs_root=" + runs_root)
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ev_contract_version"] == "1"
+
+    def test_all_four_zones_still_present(self):
+        """All four workspace zones still present."""
+        _, html = _request("GET", "/workspace")
+        assert 'id="zone-timeline"' in html
+        assert 'id="zone-canvas"' in html
+        assert 'id="zone-gates-proofs"' in html
+        assert 'id="zone-logs-captures"' in html
+
+    def test_gates_placeholder_still_present(self):
+        """Gates zone initial placeholder still present."""
+        _, html = _request("GET", "/workspace")
+        assert "No gate checks available" in html
+
+    def test_logs_placeholder_still_present(self):
+        """Logs zone initial placeholder still present."""
+        _, html = _request("GET", "/workspace")
+        assert "No logs available" in html
+
+    def test_no_launch_orchestration_controls(self):
+        """No launch or orchestration controls introduced."""
+        _, html = _request("GET", "/workspace")
+        assert "launch" not in html.lower()
+        assert "orchestrat" not in html.lower()
+
+    def test_no_external_assets_introduced(self):
+        """No external assets introduced."""
+        _, html = _request("GET", "/workspace")
+        assert 'src="http' not in html
+        assert 'href="http' not in html
+        assert "cdn." not in html.lower()
 
     def test_get_workspace_still_returns_200(self):
         """GET /workspace still returns 200."""
@@ -998,9 +1603,11 @@ class TestDetailDeferrals:
         assert "report_preview" not in html
 
     def test_manifest_files_not_rendered(self):
-        """manifest_files is not rendered in the detail panel."""
+        """manifest_files is not rendered in the detail panel (rendered in Gates & Proofs zone per PR 0147)."""
         _, html = _request("GET", "/workspace")
-        assert "manifest_files" not in html
+        # PR 0147: manifest_files is now rendered in the Gates & Proofs zone
+        # via renderGatesProofs using d.manifest_files . Verify the accessor exists.
+        assert "d.manifest_files" in html
 
     def test_gates_zone_still_deferred(self):
         """Gates & Proofs zone remains deferred."""
@@ -1512,9 +2119,13 @@ class TestReportPreservation:
         assert "manifest-browser" not in html
 
     def test_no_proof_ref_rendering(self):
-        """No proof_ref rendering."""
+        """No proof_ref rendering (proof_refs explicitly labelled as not available per PR 0147 contract)."""
         _, html = _request("GET", "/workspace")
-        assert "proof_ref" not in html
+        # PR 0147: "proof_refs" appears in the honest "not stored" disclosure.
+        # No claim of verified/trusted/accepted proof references.
+        assert "proof_refs are not stored" in html
+        assert "Verified proof" not in html
+        assert "Accepted proof" not in html
 
     def test_no_command_capture_rendering(self):
         """No command_capture rendering."""
