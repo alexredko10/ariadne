@@ -1025,8 +1025,15 @@ class TestDetailPanel:
         from task_intake.server import app
         source = inspect.getsource(app)
         # The detail route should not create directories or write files
+        # PR 0146 adds read-only open() for manifest.json and run-report.txt
         assert "os.makedirs" not in source
-        assert 'open(' not in source or 'open(path, "r"' in source or 'open(path, "rb"' in source
+        assert (
+            'open(' not in source
+            or 'open(path, "r"' in source
+            or 'open(path, "rb"' in source
+            or 'open(manifest_path, "r"' in source
+            or 'open(report_path, "r"' in source
+        )
 
     def test_no_shell_out_in_implementation(self):
         """No real git, gh, Docker, subprocess, or agent execution."""
