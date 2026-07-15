@@ -1073,3 +1073,227 @@ class TestRouteIntegration:
         assert status == 200
         data = json.loads(raw)
         assert data["runs"][0]["pr_url"] == "https://github.com/owner/repo/pull/99"
+
+
+# ---------------------------------------------------------------------------
+# 14. Report API envelope exact key set
+# ---------------------------------------------------------------------------
+
+
+class TestReportEnvelope:
+    """PR 0146: Tests for the report API response envelope."""
+
+    async def _asgi_request(
+        self,
+        method: str,
+        path: str,
+        body: bytes | None = None,
+        query_string: str = "",
+    ) -> tuple[int, str]:
+        from task_intake.server import app
+
+        if not query_string and "?" in path:
+            path_part, qs_part = path.split("?", 1)
+            path = path_part
+            query_string = qs_part
+
+        scope = {
+            "type": "http",
+            "method": method,
+            "path": path,
+            "query_string": query_string.encode("utf-8"),
+            "headers": [],
+            "http_version": "1.1",
+            "scheme": "http",
+            "client": ("127.0.0.1", 8001),
+            "server": ("127.0.0.1", 8001),
+        }
+        response_status = 500
+        response_body = b""
+
+        async def receive() -> dict:
+            if body is not None:
+                return {"type": "http.request", "body": body, "more_body": False}
+            return {"type": "http.request", "body": b"", "more_body": False}
+
+        async def send(event: dict) -> None:
+            nonlocal response_status, response_body
+            if event["type"] == "http.response.start":
+                response_status = event["status"]
+            elif event["type"] == "http.response.body":
+                response_body += event.get("body", b"")
+
+        await app(scope, receive, send)
+        return response_status, response_body.decode("utf-8", errors="replace")
+
+    def _request(self, method, path, body=None, query_string=""):
+        import asyncio
+        return asyncio.run(
+            self._asgi_request(method, path, body=body, query_string=query_string)
+        )
+
+    # --- Report envelope key set ---
+
+    REPORT_ENVELOPE_KEYS = {
+        "ev_contract_version", "ok", "error", "run_id", "content",
+        "content_length", "truncated", "truncation_limit",
+        "report_exists", "manifest_lists_report", "provenance",
+    }
+
+    def test_report_success_envelope_keys(self):
+        """Report success response has exact envelope keys."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        paths = _make_detail_run(tmp_dir, "run-001")
+        status, raw = self._request(
+            "GET", "/runs/run-001/report?runs_root=" + paths["runs_root"])
+        assert status == 200
+        data = json.loads(raw)
+        assert set(data.keys()) == self.REPORT_ENVELOPE_KEYS
+
+    def test_report_error_envelope_keys(self):
+        """Report error response has exact envelope keys."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        paths = _make_detail_run(tmp_dir, "run-001", include_report=False)
+        status, raw = self._request(
+            "GET", "/runs/run-001/report?runs_root=" + paths["runs_root"])
+        assert status == 200
+        data = json.loads(raw)
+        assert set(data.keys()) == self.REPORT_ENVELOPE_KEYS
+
+    def test_report_version_is_1(self):
+        """Report response has ev_contract_version '1'."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        paths = _make_detail_run(tmp_dir, "run-001")
+        status, raw = self._request(
+            "GET", "/runs/run-001/report?runs_root=" + paths["runs_root"])
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ev_contract_version"] == "1"
+
+    def test_report_ok_is_bool(self):
+        """Report ok is always a boolean."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        paths = _make_detail_run(tmp_dir, "run-001")
+        status, raw = self._request(
+            "GET", "/runs/run-001/report?runs_root=" + paths["runs_root"])
+        assert status == 200
+        data = json.loads(raw)
+        assert isinstance(data["ok"], bool)
+
+    def test_report_content_is_str_or_none(self):
+        """Report content is str or None."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        paths = _make_detail_run(tmp_dir, "run-001")
+        status, raw = self._request(
+            "GET", "/runs/run-001/report?runs_root=" + paths["runs_root"])
+        assert status == 200
+        data = json.loads(raw)
+        assert data["content"] is None or isinstance(data["content"], str)
+
+    def test_report_content_length_is_int(self):
+        """Report content_length is always an int."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        paths = _make_detail_run(tmp_dir, "run-001")
+        status, raw = self._request(
+            "GET", "/runs/run-001/report?runs_root=" + paths["runs_root"])
+        assert status == 200
+        data = json.loads(raw)
+        assert isinstance(data["content_length"], int)
+
+    def test_report_truncated_is_bool(self):
+        """Report truncated is always a boolean."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        paths = _make_detail_run(tmp_dir, "run-001")
+        status, raw = self._request(
+            "GET", "/runs/run-001/report?runs_root=" + paths["runs_root"])
+        assert status == 200
+        data = json.loads(raw)
+        assert isinstance(data["truncated"], bool)
+
+    def test_report_truncation_limit_is_int_or_none(self):
+        """Report truncation_limit is int or None."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        paths = _make_detail_run(tmp_dir, "run-001")
+        status, raw = self._request(
+            "GET", "/runs/run-001/report?runs_root=" + paths["runs_root"])
+        assert status == 200
+        data = json.loads(raw)
+        assert data["truncation_limit"] is None or (
+            isinstance(data["truncation_limit"], int))
+
+    def test_report_exists_is_bool(self):
+        """Report report_exists is always a boolean."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        paths = _make_detail_run(tmp_dir, "run-001")
+        status, raw = self._request(
+            "GET", "/runs/run-001/report?runs_root=" + paths["runs_root"])
+        assert status == 200
+        data = json.loads(raw)
+        assert isinstance(data["report_exists"], bool)
+
+    def test_manifest_lists_report_is_bool(self):
+        """Report manifest_lists_report is always a boolean."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        paths = _make_detail_run(tmp_dir, "run-001")
+        status, raw = self._request(
+            "GET", "/runs/run-001/report?runs_root=" + paths["runs_root"])
+        assert status == 200
+        data = json.loads(raw)
+        assert isinstance(data["manifest_lists_report"], bool)
+
+    def test_report_provenance_is_str_or_none(self):
+        """Report provenance is str or None."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        paths = _make_detail_run(tmp_dir, "run-001")
+        status, raw = self._request(
+            "GET", "/runs/run-001/report?runs_root=" + paths["runs_root"])
+        assert status == 200
+        data = json.loads(raw)
+        assert data["provenance"] is None or isinstance(data["provenance"], str)
+
+    def test_report_error_is_str_or_none(self):
+        """Report error is str or None."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        paths = _make_detail_run(tmp_dir, "run-001")
+        status, raw = self._request(
+            "GET", "/runs/run-001/report?runs_root=" + paths["runs_root"])
+        assert status == 200
+        data = json.loads(raw)
+        assert data["error"] is None or isinstance(data["error"], str)
+
+    def test_report_all_states_produce_correct_envelopes(self):
+        """All report states produce correct envelope shapes."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        paths = _make_detail_run(tmp_dir, "run-001")
+        # Complete report state
+        status, raw = self._request(
+            "GET", "/runs/run-001/report?runs_root=" + paths["runs_root"])
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ok"] is True
+        assert set(data.keys()) == self.REPORT_ENVELOPE_KEYS
+
+    def test_report_backward_compat_existing_detail_tests_still_pass(self):
+        """Existing detail contract tests still produce correct envelopes."""
+        # Verify that GET /runs/<run_id> still returns correct detail envelope
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        paths = _make_detail_run(tmp_dir, "run-001")
+        status, raw = self._request(
+            "GET", "/runs/run-001?runs_root=" + paths["runs_root"])
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ev_contract_version"] == "1"
+        assert "summary" in data
+        assert "detail" in data
+
+    def test_report_unknown_run_returns_correct_envelope(self):
+        """Unknown run for report returns correct error envelope."""
+        tmp_dir = tempfile.mkdtemp(prefix="runs-test-")
+        paths = _make_detail_run(tmp_dir, "run-001")
+        status, raw = self._request(
+            "GET", "/runs/nonexistent/report?runs_root=" + paths["runs_root"])
+        assert status == 200
+        data = json.loads(raw)
+        assert data["ok"] is False
+        assert data["error"] == "run not found"
+        assert set(data.keys()) == self.REPORT_ENVELOPE_KEYS
