@@ -72,6 +72,9 @@ body {{ font-family: sans-serif; margin: 0; padding: 0; }}
 .status-failed {{ color: #a00; font-weight: bold; }}
 .status-unknown {{ color: #888; font-weight: bold; }}
 
+/* --- Selected timeline entry --- */
+.timeline-selected {{ background: #d0e0f0; border-left: 3px solid #4a90d9; }}
+
 /* --- Timeline entry detail fields --- */
 .timeline-branch {{ color: #888; font-size: 0.8rem; margin-left: 0.5rem; }}
 .timeline-readiness {{ color: #888; font-size: 0.8rem; margin-left: 0.5rem; }}
@@ -80,6 +83,16 @@ body {{ font-family: sans-serif; margin: 0; padding: 0; }}
 .timeline-evidence-malformed {{ color: #a00; font-size: 0.8rem; margin-left: 0.5rem; }}
 .timeline-pr-url {{ margin-left: 0.5rem; font-size: 0.8rem; }}
 .timeline-pr-url a {{ color: #4a90d9; }}
+
+/* --- Detail panel --- */
+#detail-content {{ padding: 0.5rem; }}
+#detail-content h3 {{ margin: 0.75rem 0 0.25rem 0; font-size: 1rem; color: #333; border-bottom: 1px solid #eee; padding-bottom: 0.2rem; }}
+#detail-content .detail-row {{ margin: 0.3rem 0; font-size: 0.9rem; }}
+#detail-content .detail-label {{ font-weight: bold; display: inline-block; min-width: 10rem; }}
+#detail-content .detail-notice {{ margin: 0.3rem 0; padding-left: 1rem; font-size: 0.9rem; }}
+#detail-content .detail-notice-path {{ font-weight: bold; }}
+#detail-content .detail-exec-result {{ margin: 0.2rem 0; padding-left: 1rem; font-size: 0.9rem; }}
+#detail-loading {{ color: #888; font-style: italic; }}
 
 /* --- Desktop layout: two rows --- */
 @media (min-width: 769px) {{
@@ -144,6 +157,344 @@ function safeText(s) {{
 function isSafeUrl(url) {{
     if (typeof url !== "string") return false;
     return url.indexOf("http://") === 0 || url.indexOf("https://") === 0;
+}}
+
+// ---- Selection and Detail Panel ----
+
+var detailRequestCounter = 0;
+var selectedRunId = null;
+
+// Run selection handler — fetches detail and renders panel
+function selectRun(runId) {{
+    // Update selected state on timeline entries
+    var prevSelected = document.querySelector(".timeline-entry[aria-selected='true']");
+    if (prevSelected) {{
+        prevSelected.removeAttribute("aria-selected");
+        prevSelected.classList.remove("timeline-selected");
+    }}
+    var entries = document.querySelectorAll(".timeline-entry");
+    for (var i = 0; i < entries.length; i++) {{
+        if (entries[i].querySelector(".timeline-run-id") &&
+            entries[i].querySelector(".timeline-run-id").textContent === runId) {{
+            entries[i].setAttribute("aria-selected", "true");
+            entries[i].classList.add("timeline-selected");
+        }}
+    }}
+
+    selectedRunId = runId;
+    var requestId = ++detailRequestCounter;
+    showDetailLoading(runId);
+
+    fetch("/runs/" + encodeURIComponent(runId))
+        .then(function(resp) {{
+            if (!resp.ok) {{
+                throw new Error("HTTP " + resp.status);
+            }}
+            return resp.json();
+        }})
+        .then(function(data) {{
+            if (requestId !== detailRequestCounter) return; // stale
+            renderDetail(data);
+        }})
+        .catch(function(err) {{
+            if (requestId !== detailRequestCounter) return; // stale
+            showDetailFetchFailure();
+        }});
+}}
+
+// Show loading state in the canvas
+function showDetailLoading(runId) {{
+    var canvas = document.getElementById("zone-canvas");
+    if (!canvas) return;
+    // Remove any existing detail content or placeholder
+    var existingContent = canvas.querySelector("#detail-content");
+    if (existingContent) existingContent.remove();
+    var existingLoading = canvas.querySelector("#detail-loading");
+    if (existingLoading) existingLoading.remove();
+    var placeholder = canvas.querySelector(".zone-placeholder");
+    if (placeholder) placeholder.remove();
+
+    var loadingP = document.createElement("p");
+    loadingP.id = "detail-loading";
+    loadingP.className = "zone-placeholder";
+    loadingP.textContent = "Loading detail for " + runId + "...";
+    canvas.appendChild(loadingP);
+}}
+
+// Show a detail state message
+function showDetailState(message) {{
+    var canvas = document.getElementById("zone-canvas");
+    if (!canvas) return;
+    var existingContent = canvas.querySelector("#detail-content");
+    if (existingContent) existingContent.remove();
+    var existingLoading = canvas.querySelector("#detail-loading");
+    if (existingLoading) existingLoading.remove();
+    var placeholder = canvas.querySelector(".zone-placeholder");
+    if (placeholder) placeholder.remove();
+
+    var p = document.createElement("p");
+    p.className = "zone-placeholder";
+    p.textContent = message;
+    canvas.appendChild(p);
+}}
+
+// Show fetch failure state
+function showDetailFetchFailure() {{
+    showDetailState("Failed to load run detail. Check that the server is running.");
+}}
+
+// Render a label-value detail row
+function detailRow(label, value) {{
+    var div = document.createElement("div");
+    div.className = "detail-row";
+    var labelSpan = document.createElement("span");
+    labelSpan.className = "detail-label";
+    labelSpan.textContent = label + ":";
+    div.appendChild(labelSpan);
+    if (typeof value === "string") {{
+        div.appendChild(document.createTextNode(" " + value));
+    }} else {{
+        // value element
+        div.appendChild(document.createTextNode(" "));
+        div.appendChild(value);
+    }}
+    return div;
+}}
+
+// Render the full detail panel
+function renderDetail(data) {{
+    var canvas = document.getElementById("zone-canvas");
+    if (!canvas) return;
+
+    // Clear existing content
+    var existingContent = canvas.querySelector("#detail-content");
+    if (existingContent) existingContent.remove();
+    var existingLoading = canvas.querySelector("#detail-loading");
+    if (existingLoading) existingLoading.remove();
+    var placeholder = canvas.querySelector(".zone-placeholder");
+    if (placeholder) placeholder.remove();
+
+    // Validate version
+    if (!data.ev_contract_version || data.ev_contract_version !== "1") {{
+        var actual = data.ev_contract_version || "missing";
+        showDetailState("Contract version mismatch. Expected '1' but received '" + actual + "'.");
+        return;
+    }}
+
+    // Validate envelope
+    if (typeof data.ok !== "boolean") {{
+        showDetailState("Unexpected detail response format.");
+        return;
+    }}
+
+    // Error state — ok=false
+    if (data.ok === false) {{
+        // Unknown run or root error
+        showDetailState("Run not found: " + selectedRunId + ". The run may have been removed.");
+        return;
+    }}
+
+    // Validate summary
+    if (!data.summary || typeof data.summary !== "object") {{
+        showDetailState("Run summary not available.");
+        return;
+    }}
+
+    // Validate detail
+    if (!data.detail || typeof data.detail !== "object") {{
+        showDetailState("Detail evidence not available.");
+        return;
+    }}
+
+    // Build detail content container
+    var content = document.createElement("div");
+    content.id = "detail-content";
+
+    var s = data.summary;
+    var d = data.detail;
+
+    // ---- Summary Section ----
+    var summaryH3 = document.createElement("h3");
+    summaryH3.textContent = "Summary";
+    content.appendChild(summaryH3);
+
+    // 1. Run ID
+    content.appendChild(detailRow("Run ID", safeText(s.run_id)));
+
+    // 2. Status
+    var statusSpan = document.createElement("span");
+    statusSpan.className = "status-" + safeText(s.status);
+    statusSpan.textContent = safeText(s.status);
+    content.appendChild(detailRow("Status", statusSpan));
+
+    // 3. Reason codes
+    var rcText = (s.reason_codes && s.reason_codes.length > 0)
+        ? s.reason_codes.join(", ")
+        : "none";
+    content.appendChild(detailRow("Reason codes", safeText(rcText)));
+
+    // 4. Pipeline status
+    content.appendChild(detailRow("Pipeline status", safeText(s.pipeline_status)));
+
+    // 5. Git boundary status
+    content.appendChild(detailRow("Git boundary status", safeText(s.git_boundary_status)));
+
+    // 6. Execution attempted
+    var execAttempted = (s.execution_attempted === true) ? "yes" :
+        (s.execution_attempted === false) ? "no" : "not available";
+    content.appendChild(detailRow("Execution attempted", execAttempted));
+
+    // 7. Created at
+    content.appendChild(detailRow("Created at", safeText(s.created_at)));
+
+    // 8. PR URL
+    if (s.pr_url) {{
+        var prSpan = document.createElement("span");
+        if (isSafeUrl(s.pr_url)) {{
+            var prLink = document.createElement("a");
+            prLink.href = s.pr_url;
+            prLink.target = "_blank";
+            prLink.rel = "noopener noreferrer";
+            prLink.textContent = safeText(s.pr_url);
+            prSpan.appendChild(prLink);
+        }} else {{
+            prSpan.textContent = safeText(s.pr_url);
+        }}
+        content.appendChild(detailRow("PR URL", prSpan));
+    }}
+
+    // 9. Run JSON available
+    content.appendChild(detailRow("Run JSON available", s.run_json_available ? "available" : "not available"));
+
+    // 10. Manifest available
+    content.appendChild(detailRow("Manifest available", s.manifest_available ? "available" : "not available"));
+
+    // 11. Run report available
+    content.appendChild(detailRow("Run report available", s.run_report_available ? "available" : "not available"));
+
+    // ---- Detail Section ----
+    var detailH3 = document.createElement("h3");
+    detailH3.textContent = "Evidence";
+    content.appendChild(detailH3);
+
+    // 12. Execution results
+    var erH4 = document.createElement("h4");
+    erH4.textContent = "Execution Results";
+    content.appendChild(erH4);
+    if (d.execution_results && d.execution_results.length > 0) {{
+        for (var i = 0; i < d.execution_results.length; i++) {{
+            var er = d.execution_results[i];
+            var erDiv = document.createElement("div");
+            erDiv.className = "detail-exec-result";
+            var opText = safeText(er.operation || "unknown");
+            var ecText = (er.exit_code !== undefined && er.exit_code !== null)
+                ? safeText(String(er.exit_code))
+                : "—";
+            erDiv.textContent = opText + ": exit_code " + ecText;
+            content.appendChild(erDiv);
+        }}
+    }} else {{
+        var erEmpty = document.createElement("p");
+        erEmpty.className = "zone-placeholder";
+        erEmpty.textContent = "No execution results available.";
+        content.appendChild(erEmpty);
+    }}
+
+    // 13. Evidence paths (text only, not clickable)
+    var epH4 = document.createElement("h4");
+    epH4.textContent = "Evidence Paths";
+    content.appendChild(epH4);
+    if (d.evidence_paths && d.evidence_paths.length > 0) {{
+        for (var j = 0; j < d.evidence_paths.length; j++) {{
+            var epDiv = document.createElement("div");
+            epDiv.className = "detail-row";
+            epDiv.textContent = safeText(d.evidence_paths[j]);
+            content.appendChild(epDiv);
+        }}
+    }} else {{
+        var epEmpty = document.createElement("p");
+        epEmpty.className = "zone-placeholder";
+        epEmpty.textContent = "No evidence paths available.";
+        content.appendChild(epEmpty);
+    }}
+
+    // 14. Run JSON hash
+    content.appendChild(detailRow("Run JSON hash", safeText(d.run_json_hash)));
+
+    // 15. Source errors
+    var seH4 = document.createElement("h4");
+    seH4.textContent = "Source Errors";
+    content.appendChild(seH4);
+    if (d.source_errors && d.source_errors.length > 0) {{
+        content.appendChild(detailRow("Source errors", safeText(d.source_errors.join(", "))));
+    }} else {{
+        var seEmpty = document.createElement("p");
+        seEmpty.className = "zone-placeholder";
+        seEmpty.textContent = "No source errors reported.";
+        content.appendChild(seEmpty);
+    }}
+
+    // ---- Unavailable Values ----
+    var unavH3 = document.createElement("h3");
+    unavH3.textContent = "Unavailable Values";
+    content.appendChild(unavH3);
+
+    // 16. Payload cleanliness (always null)
+    content.appendChild(detailRow("Payload cleanliness", "not available"));
+
+    // 17. Readiness (always null)
+    content.appendChild(detailRow("Readiness", "not available"));
+
+    // ---- Notices ----
+    var noticesH3 = document.createElement("h3");
+    noticesH3.textContent = "Notices";
+    content.appendChild(noticesH3);
+
+    // 18. Missing evidence
+    var missingH4 = document.createElement("h4");
+    missingH4.textContent = "Missing Evidence";
+    content.appendChild(missingH4);
+    if (data.missing && data.missing.length > 0) {{
+        for (var k = 0; k < data.missing.length; k++) {{
+            var mDiv = document.createElement("div");
+            mDiv.className = "detail-notice";
+            var mPath = document.createElement("span");
+            mPath.className = "detail-notice-path";
+            mPath.textContent = safeText(data.missing[k].expected_path);
+            mDiv.appendChild(mPath);
+            mDiv.appendChild(document.createTextNode(": " + safeText(data.missing[k].reason)));
+            content.appendChild(mDiv);
+        }}
+    }} else {{
+        var mEmpty = document.createElement("p");
+        mEmpty.className = "zone-placeholder";
+        mEmpty.textContent = "No missing evidence.";
+        content.appendChild(mEmpty);
+    }}
+
+    // 19. Malformed evidence
+    var malformedH4 = document.createElement("h4");
+    malformedH4.textContent = "Malformed Evidence";
+    content.appendChild(malformedH4);
+    if (data.malformed && data.malformed.length > 0) {{
+        for (var l = 0; l < data.malformed.length; l++) {{
+            var mfDiv = document.createElement("div");
+            mfDiv.className = "detail-notice";
+            var mfPath = document.createElement("span");
+            mfPath.className = "detail-notice-path";
+            mfPath.textContent = safeText(data.malformed[l].expected_path);
+            mfDiv.appendChild(mfPath);
+            mfDiv.appendChild(document.createTextNode(": " + safeText(data.malformed[l].reason)));
+            content.appendChild(mfDiv);
+        }}
+    }} else {{
+        var mfEmpty = document.createElement("p");
+        mfEmpty.className = "zone-placeholder";
+        mfEmpty.textContent = "No malformed evidence.";
+        content.appendChild(mfEmpty);
+    }}
+
+    canvas.appendChild(content);
 }}
 
 // Show a state message in the timeline entries container
@@ -340,15 +691,6 @@ function fetchRuns() {{
                 "Failed to load run data. Check that the server is running."
             );
         }});
-}}
-
-// Run selection handler (placeholder — full detail in PR 0145)
-function selectRun(runId) {{
-    var canvas = document.getElementById("zone-canvas");
-    var placeholder = canvas.querySelector(".zone-placeholder");
-    if (placeholder) {{
-        placeholder.textContent = "Selected run: " + runId + " — detail panel coming in PR 0145.";
-    }}
 }}
 
 // Fetch live run list on page load

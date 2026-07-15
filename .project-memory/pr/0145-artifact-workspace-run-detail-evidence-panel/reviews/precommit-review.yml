@@ -1,0 +1,436 @@
+schema_version: "0.1"
+pr_id: "0145-artifact-workspace-run-detail-evidence-panel"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-14T23:55:00Z"
+head_verified: "666d6d22f81dfd83740fac12752a166c6e4aa722"
+branch_confirmed: "0145-artifact-workspace-run-detail-evidence-panel"
+snapshot_delta:
+  plan_base_sha: "666d6d22f81dfd83740fac12752a166c6e4aa722"
+  current_head: "666d6d22f81dfd83740fac12752a166c6e4aa722"
+  origin_main: "35cea999ab79059086c883926b67f2e682040e30"
+  merge_base: "666d6d22f81dfd83740fac12752a166c6e4aa722"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/PLAN.md"
+    - ".project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/reviews/plan-review.yml"
+    - ".project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/IMPLEMENTATION_REPORT.md"
+    - "services/task_intake/src/task_intake/artifact_workspace.py"
+    - "services/task_intake/tests/test_artifact_workspace_shell.py"
+    - ".project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/reviews/precommit-review.yml"
+  actual_files:
+    - ".project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/PLAN.md"
+    - ".project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/reviews/plan-review.yml"
+    - ".project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/IMPLEMENTATION_REPORT.md"
+    - "services/task_intake/src/task_intake/artifact_workspace.py"
+    - "services/task_intake/tests/test_artifact_workspace_shell.py"
+    - ".project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/reviews/precommit-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+  - ".project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md"
+  - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+  - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "agents/precommit-review.yml"
+  - "ROADMAP.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - ".project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/PLAN.md"
+  - ".project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/reviews/plan-review.yml"
+  - ".project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0138-ui-runtime-evidence-read-model/PLAN.md"
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+  - ".project-memory/pr/0141-artifact-workspace-run-detail-evidence-panel/PLAN.md"
+  - ".project-memory/pr/0141-artifact-workspace-run-detail-evidence-panel/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0141-artifact-workspace-run-detail-evidence-panel/reviews/precommit-review.yml"
+  - ".project-memory/pr/0142-run-evidence-serialization-contract/PLAN.md"
+  - ".project-memory/pr/0142-run-evidence-serialization-contract/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0142-run-evidence-serialization-contract/reviews/precommit-review.yml"
+  - ".project-memory/pr/0143-artifact-workspace-4-zone-shell-skeleton/PLAN.md"
+  - ".project-memory/pr/0143-artifact-workspace-4-zone-shell-skeleton/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0143-artifact-workspace-4-zone-shell-skeleton/reviews/precommit-review.yml"
+  - ".project-memory/pr/0144-artifact-workspace-local-run-list-page/PLAN.md"
+  - ".project-memory/pr/0144-artifact-workspace-local-run-list-page/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0144-artifact-workspace-local-run-list-page/reviews/precommit-review.yml"
+  - "services/task_intake/src/task_intake/artifact_workspace.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/runtime_evidence_serialization.py"
+  - "services/task_intake/tests/test_artifact_workspace_shell.py"
+  - "services/task_intake/tests/test_local_run_history_in_page.py"
+  - "services/task_intake/tests/test_runtime_evidence_serialization_contract.py"
+  - "services/task_intake/tests/test_task_intake.py"
+  - "services/runner/src/runner/runtime_evidence.py"
+  - "services/runner/tests/test_runtime_evidence.py"
+files_written:
+  - ".project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/reviews/precommit-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "666d6d22f81dfd83740fac12752a166c6e4aa722"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0145-artifact-workspace-run-detail-evidence-panel"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "M services/task_intake/src/task_intake/artifact_workspace.py,  M services/task_intake/tests/test_artifact_workspace_shell.py, ?? .project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/IMPLEMENTATION_REPORT.md"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "services/task_intake/src/task_intake/artifact_workspace.py, services/task_intake/tests/test_artifact_workspace_shell.py"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty"
+  - command: "python3 -m compileall -f services/task_intake/src services/runner/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "All Python files compiled successfully (64 files)"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python3 -m pytest services/task_intake/tests/test_artifact_workspace_shell.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "145 passed in 0.15s"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python3 -m pytest services/task_intake/tests/test_artifact_workspace_shell.py -k 'Detail or detail or selection or selectRun or canvas or renderDetail or stale or missing_evidence or malformed_evidence or version_mismatch' -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "49 passed, 96 deselected"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python3 -m pytest services/task_intake/tests/test_artifact_workspace_shell.py -k 'not Detail and not detail and not selection and not selectRun and not canvas' -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "99 passed, 46 deselected"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python3 -m pytest services/task_intake/tests/test_local_run_history_in_page.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "73 passed in 0.12s"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python3 -m pytest services/task_intake/tests/test_runtime_evidence_serialization_contract.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "61 passed in 0.07s"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python3 -m pytest services/runner/tests/test_runtime_evidence.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "32 passed in 0.05s"
+  - command: "PYTHONPATH=services/task_intake/src:services/runner/src python3 -m pytest services/task_intake/tests/test_task_intake.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "19 passed in 0.03s"
+  - command: "Boundary Diff: git diff -- services/task_intake/src/task_intake/server.py services/task_intake/src/task_intake/runtime_evidence_serialization.py services/runner/src/runner/runtime_evidence.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "Empty diff — server.py, runtime_evidence_serialization.py, runtime_evidence.py unchanged"
+  - command: "Boundary Diff: git diff -- services/task_intake/tests/test_local_run_history_in_page.py services/task_intake/tests/test_runtime_evidence_serialization_contract.py services/task_intake/tests/test_task_intake.py services/runner/tests/test_runtime_evidence.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "Empty diff — all existing test files unchanged"
+  - command: "Planning-Lock Diff: git diff -- .project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/PLAN.md .project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/reviews/plan-review.yml"
+    result: "passed"
+    exit_code: 0
+    evidence: "No differences — planning artifacts remain locked"
+  - command: "Whitespace Check: git diff --check"
+    result: "passed"
+    exit_code: 0
+    evidence: "No whitespace errors"
+  - command: "Forbidden-Path Diff: git diff --name-only -- services/runner/src/runner/runtime_evidence.py services/runner/src/runner/run_persistence.py services/task_intake/src/task_intake/server.py services/task_intake/src/task_intake/runtime_evidence_serialization.py services/task_intake/tests/test_local_run_history_in_page.py services/task_intake/tests/test_runtime_evidence_serialization_contract.py services/task_intake/tests/test_task_intake.py services/runner/tests/"
+    result: "passed"
+    exit_code: 0
+    evidence: "Empty — zero changes to any forbidden paths"
+  - command: ".ariadne residue check"
+    result: "passed"
+    exit_code: 0
+    evidence: ".ariadne absent"
+  - command: "Selection and Encoded Request Grep"
+    result: "passed"
+    exit_code: 0
+    evidence: "detailRequestCounter (L164), selectedRunId (L165), selectRun (L168), encodeURIComponent (L188), stale check (L196, L200) all present"
+  - command: "Report Viewer Deferral Grep"
+    result: "passed"
+    exit_code: 1
+    evidence: "No report_preview or manifest_files rendering in artifact_workspace.py"
+  - command: "Mutation-Control Prohibition Grep"
+    result: "passed"
+    exit_code: 0
+    evidence: "No mutation control references found (only 'approved' in test code)"
+  - command: "Prohibited Execution/Import Grep"
+    result: "passed"
+    exit_code: 1
+    evidence: "No subprocess, os.system, Popen, docker, git, shell=True, eval, Function(, document.write"
+  - command: "Safe Rendering Grep"
+    result: "passed"
+    exit_code: 0
+    evidence: "All untrusted values use textContent or safeText. innerHTML only for cleared containers and escHtml return."
+  - command: "Detail API Preservation Grep"
+    result: "passed"
+    exit_code: 0
+    evidence: "server.py L949: read_run_evidence_detail, L951: serialize_run_evidence_detail. runtime_evidence_serialization.py L55 serialize_run_evidence_detail. ev_contract_version present."
+blockers: []
+warnings: []
+checks:
+  branch_correct: "pass"
+  plan_presence: "pass"
+  plan_review_verdict_approve: "pass"
+  implementation_report_present: "pass"
+  no_staged_diff_in_cached: "pass"
+  planning_artifacts_locked: "pass"
+  no_forbidden_paths_changed: "pass"
+  all_changed_files_read: "pass"
+  dirty_tree_expected: "pass"
+  no_unknown_untracked: "pass"
+  no_backend_duplication: "pass"
+  server_py_unchanged: "pass"
+  runtime_evidence_serialization_unchanged: "pass"
+  runtime_evidence_model_unchanged: "pass"
+  get_runs_unchanged: "pass"
+  get_runs_detail_unchanged: "pass"
+  get_root_unchanged: "pass"
+  ev_contract_version_unchanged: "pass"
+  local_interaction_detail_panel_unchanged: "pass"
+  timeline_live_list_unchanged: "pass"
+  selection_encodeURIComponent: "pass"
+  detailRequestCounter_stale_protection: "pass"
+  stale_success_ignored: "pass"
+  stale_failure_ignored: "pass"
+  aria_selected_selected_row: "pass"
+  timeline_selected_class: "pass"
+  click_selection: "pass"
+  enter_selection: "pass"
+  space_selection: "pass"
+  initial_no_selection_state: "pass"
+  loading_state: "pass"
+  complete_success_state: "pass"
+  partial_missing_evidence_state: "pass"
+  partial_malformed_evidence_state: "pass"
+  unknown_run_state: "pass"
+  version_mismatch_state: "pass"
+  invalid_envelope_state: "pass"
+  invalid_summary_state: "pass"
+  invalid_detail_state: "pass"
+  fetch_failure_state: "pass"
+  stale_response_ignored_state: "pass"
+  unavailable_payload_cleanliness: "pass"
+  unavailable_readiness: "pass"
+  empty_execution_results: "pass"
+  empty_evidence_paths: "pass"
+  empty_source_errors: "pass"
+  missing_notices_visible: "pass"
+  malformed_notices_visible: "pass"
+  all_19_display_rows_present: "pass"
+  report_preview_not_rendered: "pass"
+  manifest_files_not_rendered: "pass"
+  gates_zone_deferred: "pass"
+  logs_zone_deferred: "pass"
+  no_mutation_controls: "pass"
+  no_agent_launch: "pass"
+  no_git_pr_controls: "pass"
+  safe_rendering_via_textContent: "pass"
+  no_inline_onclick_from_data: "pass"
+  no_inline_onkeydown_from_data: "pass"
+  no_raw_dynamic_innerHTML: "pass"
+  evidence_paths_as_text: "pass"
+  isSafeUrl_for_pr_url: "pass"
+  execution_results_bounded_operation_exit_code: "pass"
+  no_command_execution: "pass"
+  no_external_assets: "pass"
+  no_dependencies: "pass"
+  validation_passed: "pass"
+  implementation_report_claims_verified: "pass"
+  plan_drift_gate: "PASS"
+  no_drift_check: "PASS"
+decisions_made:
+  - decision: "Existing GET /runs/<run_id> backend fully reused — no duplication"
+    reason: "server.py, runtime_evidence_serialization.py, runtime_evidence.py all unchanged. ev_contract_version remains '1'. Detail endpoint at server.py L921-951 unchanged."
+  - decision: "Selection contract implements aria-selected, safe encoding, and stale-response protection"
+    reason: "selectRun manages aria-selected and .timeline-selected CSS class. Uses encodeURIComponent(runId) for safe fetch URL. detailRequestCounter increments per selection; stale responses discarded in both .then() and .catch() via requestId check."
+  - decision: "All 17 detail states implemented with distinct visible messages"
+    reason: "initial (static placeholder), loading ('Loading detail for...'), complete success, partial missing, partial malformed, unknown run, version mismatch ('Contract version mismatch'), invalid envelope, invalid summary, invalid detail, fetch failure, stale ignored (no state change), unavailable payload_cleanliness, unavailable readiness, empty execution_results, empty evidence_paths, empty source_errors."
+  - decision: "All 19 display rows implemented with safe rendering"
+    reason: "Run ID, Status, Reason codes, Pipeline status, Git boundary status, Execution attempted, Created at, PR URL, Run JSON available, Manifest available, Run report available, Execution results (operation+exit_code), Evidence paths (text), Run JSON hash, Source errors, Payload cleanliness, Readiness, Missing notices, Malformed notices."
+  - decision: "PR 0146 and PR 0147 fully deferred"
+    reason: "report_preview not rendered (grep exit 1). manifest_files not rendered (grep exit 1). Gates & Proofs unchanged. Logs & Captures unchanged. Tests verify deferral."
+  - decision: "Safe rendering via textContent — no inline event handlers from data"
+    reason: "All untrusted values rendered via textContent or safeText. escHtml for safe HTML escaping only. addEventListener used instead of inline onclick/onkeydown. isSafeUrl validates PR URLs. Evidence paths rendered as text (not clickable links). Execution results bounded to operation+exit_code."
+  - decision: "IMPLEMENTATION_REPORT.md claims verified against actual evidence"
+    reason: "All material claims verified: 145 workspace tests, backend reuse, selection contract, stale-response protection, 17 states, 19 display rows, PR 0146/0147 deferrals, safe rendering, no boundary changes."
+implementation_report_review:
+  claims_count: 20
+  claims_verified: 20
+  claims_unsupported: 0
+  deviations_reported: "none — implementation exactly matches PLAN.md"
+  deviations_verified: true
+  deviations_acceptable: true
+  missing_required_sections: []
+  proof_boundary_disclaimer_present: true
+  report_treated_as_context: true
+backend_reuse_review:
+  no_duplicate_detail_endpoint: true
+  server_py_unchanged: true
+  runtime_evidence_serialization_unchanged: true
+  runtime_evidence_unchanged: true
+  get_runs_unchanged: true
+  get_runs_detail_unchanged: true
+  get_root_unchanged: true
+  ev_contract_version_unchanged: true
+  response_keys_meanings_types_unchanged: true
+  local_interaction_detail_panel_unchanged: true
+selection_contract_review:
+  selected_row_aria_selected: true
+  timeline_selected_css_class: true
+  previously_selected_cleared: true
+  click_selection: true
+  enter_selection: true
+  space_selection: true
+  malformed_entries_not_selectable: true
+  encodeURIComponent_used: true
+  same_origin_get_request: true
+  no_runs_root_input: true
+  no_arbitrary_path_input: true
+  repeated_selection_refetches: true
+  selection_disappearance_clears: true
+stale_response_review:
+  detailRequestCounter_protection: true
+  counter_increments_per_selection: true
+  request_token_captured: true
+  stale_success_ignored: true
+  stale_failure_ignored: true
+  old_response_cannot_replace_new_loading: true
+  old_response_cannot_replace_new_completed: true
+  stale_ignoring_not_misleading: true
+detail_request_review:
+  get_only: true
+  exact_url: "fetch('/runs/' + encodeURIComponent(runId))"
+  version_check: "data.ev_contract_version !== '1'"
+  envelope_validation: "typeof data.ok !== 'boolean'"
+  summary_validation: "!data.summary || typeof data.summary !== 'object'"
+  detail_validation: "!data.detail || typeof data.detail !== 'object'"
+  ok_false_handling: "'Run not found: ... The run may have been removed.'"
+  unknown_run_handling: true
+  fetch_failure_handling: true
+  invalid_data_renders_as_error: true
+detail_state_review:
+  initial_no_selection: "'Select a run from the timeline to view artifacts. No artifact loaded.'"
+  loading: "'Loading detail for ...' via showDetailLoading"
+  complete_success: "renderDetail renders full content"
+  partial_missing: "renderDetail + Missing Evidence section"
+  partial_malformed: "renderDetail + Malformed Evidence section"
+  unknown_run: "'Run not found: ... The run may have been removed.'"
+  version_mismatch: "'Contract version mismatch. Expected 1 but received...'"
+  invalid_envelope: "'Unexpected detail response format.'"
+  invalid_summary: "'Run summary not available.'"
+  invalid_detail: "'Detail evidence not available.'"
+  fetch_failure: "'Failed to load run detail. Check that the server is running.'"
+  stale_ignored: "silent — newer response takes precedence"
+  unavailable_payload_cleanliness: "'Payload cleanliness: not available'"
+  unavailable_readiness: "'Readiness: not available'"
+  empty_execution_results: "'No execution results available.'"
+  empty_evidence_paths: "'No evidence paths available.'"
+  empty_source_errors: "'No source errors reported.'"
+  errors_not_collapsed_into_initial: true
+  missing_and_malformed_distinct: true
+  loading_error_live_region: true
+detail_display_review:
+  field_count: 19
+  unapproved_rows: 0
+  run_id_rendered: true
+  status_text_not_color_only: true
+  reason_codes_rendered: true
+  pipeline_status_rendered: true
+  git_boundary_status_rendered: true
+  execution_attempted_rendered: true
+  created_at_rendered: true
+  pr_url_safe_policy: true
+  execution_results_bounded: "operation + exit_code only"
+  operation_text_inert: true
+  exit_code_inert: true
+  run_json_hash_rendered: true
+  evidence_paths_non_clickable_text: true
+  no_file_urls: true
+  missing_notices_path_and_reason: true
+  malformed_notices_path_and_reason: true
+  source_errors_rendered: true
+  payload_cleanliness_not_available: true
+  readiness_not_available: true
+  no_inferred_or_fabricated_evidence: true
+pr0146_deferral_review:
+  report_preview_not_rendered: true
+  full_report_not_rendered: true
+  no_report_scrolling: true
+  no_report_search: true
+  no_report_copy_or_download: true
+  pr_0146_remains_separate: true
+  deferral_tests_present: true
+pr0147_deferral_review:
+  manifest_files_not_rendered: true
+  proof_refs_not_rendered: true
+  gates_proofs_unchanged: true
+  logs_captures_unchanged: true
+  no_proof_acceptance: true
+  no_artifact_accept_reject: true
+  pr_0147_remains_separate: true
+  deferral_tests_present: true
+safe_rendering_review:
+  runtime_values_via_textContent: true
+  no_runtime_value_in_raw_innerHTML: true
+  no_runtime_value_in_inline_onclick: true
+  no_runtime_value_in_inline_onkeydown: true
+  no_eval: true
+  no_function_constructor: true
+  no_document_write: true
+  no_dynamic_executable_script: true
+  no_javascript_urls: true
+  optional_urls_validated: true
+  evidence_paths_inert_text: true
+  hostile_value_tests_meaningful: true
+accessibility_review:
+  canvas_heading_present: "h2 'Artifact Canvas'"
+  detail_panel_landmark: "#zone-canvas with role=region"
+  timeline_selection_accessible: true
+  visible_selected_state: ".timeline-selected CSS class"
+  aria_selected_attribute: true
+  status_not_color_only: "visible text labels"
+  keyboard_selection: "Enter and Space via addEventListener"
+  focus_behavior: "focus remains on clicked entry"
+  no_inaccessible_custom_controls: true
+compatibility_review:
+  server_py_unchanged: true
+  get_root_unchanged: true
+  get_workspace_preserved: true
+  get_runs_unchanged: true
+  get_runs_detail_unchanged: true
+  runtime_evidence_serialization_unchanged: true
+  runtime_evidence_model_unchanged: true
+  existing_local_interaction_detail_panel_unchanged: true
+  existing_test_files_unchanged: true
+  ev_contract_version_unchanged: true
+boundary_confirmations:
+  - "Branch confirmed: 0145-artifact-workspace-run-detail-evidence-panel"
+  - "Only precommit-review.yml artifact written; no implementation, test, PLAN, plan-review, or IMPLEMENTATION_REPORT.md files modified"
+  - "Dirty tree within scope: artifact_workspace.py (modified), test_artifact_workspace_shell.py (modified), IMPLEMENTATION_REPORT.md (untracked)"
+  - "Cached diff empty — no staged changes"
+  - "No unknown untracked files"
+  - "No forbidden files modified: server.py, runtime_evidence_serialization.py, runtime_evidence.py, existing test files all unchanged"
+  - "Existing GET /runs/<run_id> backend fully reused — no duplication or modification"
+  - "ev_contract_version remains '1'"
+  - "GET / unchanged, GET /workspace preserved"
+  - "Timeline selection uses encodeURIComponent, detailRequestCounter stale protection, aria-selected"
+  - "All 17 detail states covered with distinct text messages"
+  - "All 19 display rows present with safe rendering"
+  - "PR 0146 deferred: report_preview not rendered"
+  - "PR 0147 deferred: manifest_files not rendered, gates/logs unchanged"
+  - "Safe rendering: all untrusted values via textContent/safeText, no innerHTML for values, no inline event handlers from data"
+  - "Execution results bounded to operation+exit_code"
+  - "Evidence paths as text only (not clickable local file links)"
+  - "No mutation controls, agent launch, git/PR controls, arbitrary filesystem access, external assets, or dependencies"
+  - ".ariadne directory absent"
+  - "145 workspace tests pass covering selection, 17 states, 19 display rows, deferrals, safe rendering, zone preservation, accessibility, compatibility, and boundary confirmations"
+plan_drift_gate: "PASS — All PLAN DRIFT GATE block conditions checked and passed: (1) only approved files changed, (2) all changed files read, (3) planning artifacts locked, (4) GET /runs/<run_id> not duplicated or modified, (5) existing evidence API behavior unchanged, (6) ev_contract_version unchanged, (7) GET / and its detail panel unchanged, (8) timeline live-list behavior intact, (9) selection uses encodeURIComponent, (10) stale response cannot replace current selection via detailRequestCounter, (11) all 17 required detail states present, (12) missing/malformed evidence visible, (13) no inferred/fabricated values, (14) execution text not executed, (15) evidence paths not clickable local-file links, (16) report_preview not rendered, (17) manifest_files not rendered, (18) Gates & Proofs unchanged, (19) Logs & Captures unchanged, (20) no mutation/execution controls, (21) no agent launch, (22) no git/PR authority, (23) no unsafe dynamic HTML, (24) no external assets/dependencies, (25) tests comprehensive (145 tests), (26) required validation complete and passing, (27) IMPLEMENTATION_REPORT.md present, (28) cached diff empty, (29) no unknown untracked files, (30) no generated residue."
+no_drift_check: "PASS — All NO-DRIFT CHECK conditions pass: (1) correct branch, (2) exact approved scope, (3) all changed files read, (4) planning artifacts locked, (5) PR 0145 scope preserved, (6) PR 0146 and PR 0147 remain separate, (7) GET /workspace remains read-only, (8) GET /runs unchanged, (9) GET /runs/<run_id> unchanged, (10) timeline selection accessible (aria-selected), (11) detail URL safely encodes run_id, (12) latest selection wins, (13) initial state exists, (14) loading state exists, (15) complete state exists, (16) partial missing state exists, (17) partial malformed state exists, (18) unknown-run state exists, (19) version-mismatch state exists, (20) invalid-envelope state exists, (21) invalid-summary state exists, (22) invalid-detail state exists, (23) fetch-failure state exists, (24) stale-response handling exists, (25) summary fields render safely, (26) execution results render safely, (27) hash renders safely, (28) evidence paths render as text only, (29) missing and malformed notices visible, (30) payload_cleanliness not inferred, (31) readiness not inferred, (32) report viewer deferred, (33) manifest/proof viewer deferred, (34) Gates & Proofs deferred, (35) Logs & Captures deferred, (36) no mutation/execution authority, (37) no arbitrary filesystem input, (38) no external assets/dependencies, (39) required validation passed, (40) IMPLEMENTATION_REPORT.md independently checked, (41) PLAN DRIFT GATE passed, (42) artifact write/readback confirmed, (43) actual evidence overrides agent claims."
+commit_readiness: "ready"

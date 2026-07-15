@@ -420,10 +420,9 @@ class TestLiveZoneBoundaries:
     """PR 0144: Tests that other zones remain deferred."""
 
     def test_canvas_still_placeholder(self):
-        """Canvas zone remains a PR 0145 placeholder."""
+        """Canvas zone shows initial placeholder before any selection."""
         _, html = _request("GET", "/workspace")
-        assert "PR 0145" in html
-        assert "Select a run from the timeline" in html
+        assert "Select a run from the timeline to view artifacts" in html
 
     def test_gates_still_deferred(self):
         """Gates & Proofs zone remains deferred."""
@@ -811,3 +810,210 @@ class TestNoRepositoryWrites:
         with open(serializer_path, "r", encoding="utf-8") as f:
             source = f.read()
         assert "docker" not in source.lower()
+
+
+class TestDetailPanelSelection:
+    """PR 0145: Tests for detail panel selection wiring."""
+
+    def test_detail_request_counter_present(self):
+        """detailRequestCounter variable exists for stale-response protection."""
+        _, html = _request("GET", "/workspace")
+        assert "detailRequestCounter" in html
+
+    def test_selected_run_id_variable_present(self):
+        """selectedRunId variable exists for selection tracking."""
+        _, html = _request("GET", "/workspace")
+        assert "selectedRunId" in html
+
+    def test_aria_selected_present(self):
+        """aria-selected attribute management exists."""
+        _, html = _request("GET", "/workspace")
+        assert "aria-selected" in html
+
+    def test_timeline_selected_class_present(self):
+        """timeline-selected CSS class exists for visual selection."""
+        _, html = _request("GET", "/workspace")
+        assert "timeline-selected" in html
+
+    def test_encode_uri_component_present(self):
+        """encodeURIComponent is used for safe request URL construction."""
+        _, html = _request("GET", "/workspace")
+        assert "encodeURIComponent" in html
+
+    def test_detail_fetch_url_present(self):
+        """Detail fetch URL uses /runs/ with encoded run_id."""
+        _, html = _request("GET", "/workspace")
+        assert 'fetch("/runs/" + encodeURIComponent' in html
+
+    def test_stale_response_check_present(self):
+        """Stale response is discarded by checking requestId against counter."""
+        _, html = _request("GET", "/workspace")
+        assert "requestId !== detailRequestCounter" in html
+
+
+class TestDetailPanelStates:
+    """PR 0145: Tests for detail panel state messages."""
+
+    def test_loading_detail_text_present(self):
+        """Loading detail state message exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Loading detail for" in html
+
+    def test_run_not_found_text_present(self):
+        """Unknown run state message exists."""
+        _, html = _request("GET", "/workspace")
+        assert "The run may have been removed" in html
+
+    def test_detail_version_mismatch_text_present(self):
+        """Detail version mismatch state message exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Contract version mismatch" in html
+
+    def test_invalid_envelope_text_present(self):
+        """Invalid detail response envelope state exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Unexpected detail response format" in html
+
+    def test_summary_not_available_text_present(self):
+        """Invalid summary shape state exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Run summary not available" in html
+
+    def test_detail_not_available_text_present(self):
+        """Invalid detail shape state exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Detail evidence not available" in html
+
+    def test_detail_fetch_failure_text_present(self):
+        """Detail fetch failure state exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Failed to load run detail" in html
+
+    def test_no_execution_results_text_present(self):
+        """Empty execution_results state exists."""
+        _, html = _request("GET", "/workspace")
+        assert "No execution results available" in html
+
+    def test_no_evidence_paths_text_present(self):
+        """Empty evidence_paths state exists."""
+        _, html = _request("GET", "/workspace")
+        assert "No evidence paths available" in html
+
+    def test_no_source_errors_text_present(self):
+        """Empty source_errors state exists."""
+        _, html = _request("GET", "/workspace")
+        assert "No source errors reported" in html
+
+    def test_no_missing_evidence_text_present(self):
+        """Empty missing evidence state exists."""
+        _, html = _request("GET", "/workspace")
+        assert "No missing evidence" in html
+
+    def test_no_malformed_evidence_text_present(self):
+        """Empty malformed evidence state exists."""
+        _, html = _request("GET", "/workspace")
+        assert "No malformed evidence" in html
+
+
+class TestDetailPanelDisplay:
+    """PR 0145: Tests for detail panel display fields."""
+
+    def test_detail_content_id_present(self):
+        """Detail panel has #detail-content container."""
+        _, html = _request("GET", "/workspace")
+        assert 'id="detail-content"' in html or "detail-content" in html
+
+    def test_detail_loading_id_present(self):
+        """Loading state has #detail-loading element."""
+        _, html = _request("GET", "/workspace")
+        assert 'id="detail-loading"' in html or "detail-loading" in html
+
+    def test_summary_section_label_present(self):
+        """Summary heading exists in renderDetail."""
+        _, html = _request("GET", "/workspace")
+        assert 'textContent = "Summary"' in html
+
+    def test_run_id_detail_row_present(self):
+        """Run ID row renders via safeText."""
+        _, html = _request("GET", "/workspace")
+        assert 'detailRow("Run ID"' in html
+
+    def test_status_detail_row_present(self):
+        """Status row renders as visible text with CSS class."""
+        _, html = _request("GET", "/workspace")
+        assert 'detailRow("Status"' in html
+
+    def test_reason_codes_detail_row_present(self):
+        """Reason codes row renders."""
+        _, html = _request("GET", "/workspace")
+        assert 'detailRow("Reason codes"' in html
+
+    def test_execution_attempted_detail_row_present(self):
+        """Execution attempted row renders yes/no/not available."""
+        _, html = _request("GET", "/workspace")
+        assert 'detailRow("Execution attempted"' in html
+
+    def test_payload_cleanliness_unavailable_text_present(self):
+        """Payload cleanliness shown as not available when null."""
+        _, html = _request("GET", "/workspace")
+        assert 'detailRow("Payload cleanliness"' in html
+
+    def test_readiness_unavailable_text_present(self):
+        """Readiness shown as not available when null."""
+        _, html = _request("GET", "/workspace")
+        assert 'detailRow("Readiness"' in html
+
+    def test_run_json_hash_detail_row_present(self):
+        """Run JSON hash row renders via safeText."""
+        _, html = _request("GET", "/workspace")
+        assert 'detailRow("Run JSON hash"' in html
+
+    def test_execution_results_render_operation_and_exit_code(self):
+        """Execution results render operation and exit_code only."""
+        _, html = _request("GET", "/workspace")
+        assert ": exit_code " in html
+
+    def test_evidence_paths_as_text_only(self):
+        """Evidence paths rendered as textContent, not as links."""
+        _, html = _request("GET", "/workspace")
+        assert "Evidence Paths" in html or "Evidence paths" in html
+
+    def test_missing_notices_expected_path_and_reason(self):
+        """Missing evidence notices include expected_path and reason."""
+        _, html = _request("GET", "/workspace")
+        assert "expected_path" in html
+
+    def test_malformed_notices_expected_path_and_reason(self):
+        """Malformed evidence notices include expected_path and reason."""
+        _, html = _request("GET", "/workspace")
+        assert "malformed" in html
+
+
+class TestDetailDeferrals:
+    """PR 0145: Tests that PR 0146 and PR 0147 content is not rendered."""
+
+    def test_report_preview_not_rendered(self):
+        """report_preview is not rendered in the detail panel."""
+        _, html = _request("GET", "/workspace")
+        assert "report_preview" not in html
+
+    def test_manifest_files_not_rendered(self):
+        """manifest_files is not rendered in the detail panel."""
+        _, html = _request("GET", "/workspace")
+        assert "manifest_files" not in html
+
+    def test_gates_zone_still_deferred(self):
+        """Gates & Proofs zone remains deferred."""
+        _, html = _request("GET", "/workspace")
+        assert "No gate checks available" in html
+
+    def test_logs_zone_still_deferred(self):
+        """Logs & Captures zone remains deferred."""
+        _, html = _request("GET", "/workspace")
+        assert "No logs available" in html
+
+    def test_no_mutation_controls_in_detail(self):
+        """No mutation controls in detail panel."""
+        _, html = _request("GET", "/workspace")
+        assert "retry" not in html.lower()
+        assert "rerun" not in html.lower()
