@@ -232,6 +232,30 @@ Command captures/logs visible when available.
 No proof acceptance mutation yet.
 ```
 
+### Governance Insertion: PR 0147A
+
+PR 0147A is a non-product governance insertion authorized by the human architect
+between PR 0147 (Proof and Manifest Viewer) and PR 0148 (Mermaid Artifact Type
+Read Model). It does not consume a product roadmap slot and does not renumber
+later product slots. PR 0148 remains the next product PR.
+
+PR 0147A implements:
+- One supported operator entrypoint (`make local-operator`).
+- ASGI runtime wrapper with server-owned runs-root configuration.
+- Loopback-only safe defaults (127.0.0.1:8000).
+- Startup diagnostics and configuration check mode (`--check`).
+- Explicit uvicorn packaging (uvicorn>=0.29.0).
+- Committed operator runbook (`docs/LOCAL_OPERATOR.md`).
+- One canonical end-to-end HTTP smoke (`scripts/smoke-local-operator.py`).
+- Operable read-only Artifact Workspace through the official entrypoint.
+
+No agent launch, orchestration, mutation, git authority, Docker, or external
+services are added.
+
+PR 0147B (Human-Gated Manual Orchestration Mode), PR 0147C (Domain-Neutral Run
+and Artifact Profile Contract), PR 0147D (Construction Estimate Read-Only
+Dogfood Adapter), and PR 0148+ remain unchanged.
+
 ---
 
 ### Stream 3 — Visual Gate / Mermaid

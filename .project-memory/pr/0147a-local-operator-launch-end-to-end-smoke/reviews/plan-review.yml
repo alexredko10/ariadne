@@ -1,0 +1,283 @@
+schema_version: "0.1"
+pr_id: "0147a-local-operator-launch-end-to-end-smoke"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-10T21:00:00Z"
+head_verified: "0b027c1b55fe302623b6c09887c60919aedd6cc4"
+branch_confirmed: "0147a-local-operator-launch-end-to-end-smoke"
+snapshot_delta:
+  plan_base_sha: "0b027c1b55fe302623b6c09887c60919aedd6cc4"
+  current_head: "0b027c1b55fe302623b6c09887c60919aedd6cc4"
+  origin_main: "0b027c1b55fe302623b6c09887c60919aedd6cc4"
+  merge_base: "0b027c1b55fe302623b6c09887c60919aedd6cc4"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/PLAN.md"
+    - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/reviews/plan-review.yml"
+  actual_files:
+    - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/PLAN.md"
+    - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/reviews/plan-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/reviews/plan-review.yml"
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+  - ".project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md"
+  - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+  - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "agents/plan-review.yml"
+  - "README.md"
+  - "Makefile"
+  - "pyproject.toml"
+  - "ROADMAP.md"
+  - "docs/START_HERE.md"
+  - "docs/REPOSITORY_STRUCTURE.md"
+  - "docs/DEVELOPMENT_ORDER.md"
+  - "docs/AGENTS.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/PLAN.md"
+  - ".project-memory/pr/0143-artifact-workspace-4-zone-shell-skeleton/PLAN.md"
+  - ".project-memory/pr/0144-artifact-workspace-local-run-list-page/PLAN.md"
+  - ".project-memory/pr/0145-artifact-workspace-run-detail-evidence-panel/PLAN.md"
+  - ".project-memory/pr/0146-artifact-workspace-run-report-viewer/PLAN.md"
+  - ".project-memory/pr/0147-artifact-workspace-proof-manifest-viewer/PLAN.md"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/artifact_workspace.py"
+  - "services/task_intake/src/task_intake/doctor.py"
+  - "services/task_intake/src/task_intake/app.py"
+  - "services/task_intake/src/task_intake/smoke.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/src/runner/runtime_evidence.py"
+  - "services/runner/tests/test_run_persistence.py"
+  - "services/runner/tests/test_runtime_evidence.py"
+files_written:
+  - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/reviews/plan-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "0b027c1b55fe302623b6c09887c60919aedd6cc4"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0147a-local-operator-launch-end-to-end-smoke"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? .project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No tracked files modified"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "No staged files"
+  - command: "git log --oneline --decorate -n 10"
+    result: "passed"
+    exit_code: 0
+    evidence: "HEAD=0b027c1 (main) = PR 0147 merged #173. PR 0146 (#172), PR 0145 (#171), PR 0144 (#170), PR 0143 (#169)"
+  - command: "test -s .project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is non-empty"
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'uvicorn|ASGI|task_intake\.server:app|python -m|serve|run-local|local operator' README.md Makefile pyproject.toml docs scripts services 2>/dev/null | head -10"
+    result: "passed"
+    exit_code: 0
+    evidence: "app.py imports uvicorn via try/except (no declared dependency). Makefile has no serve target. No docs for local operator. uvicorn is an undeclared runtime dependency."
+  - command: "grep -R -n -E --exclude-dir=__pycache__ --exclude-dir=.pytest_cache 'runs_root|ARIADNE_RUNS|\.ariadne/runs|os\.getcwd|parse_qs|query_string' services/task_intake services/runner 2>/dev/null | head -10"
+    result: "passed"
+    exit_code: 0
+    evidence: "server.py uses os.path.join(os.getcwd(), '.ariadne', 'runs') as default runs_root. Browser-supplied runs_root via parse_qs. No server-owned runs-root override in operator mode."
+blockers: []
+warnings: []
+checks:
+  branch_correct: "pass"
+  plan_presence: "pass"
+  no_staged_files: "pass"
+  no_tracked_modifications: "pass"
+  dirty_tree_scope: "pass"
+  pr_0147_merged: "pass"
+  launch_strategy_selected: "pass"
+  official_command_defined: "pass"
+  loopback_default: "pass"
+  runs_root_server_owned: "pass"
+  no_browser_path_override: "pass"
+  canonical_smoke_fixture: "pass"
+  bounded_cleanup: "pass"
+  pr_0143_0147_preserved: "pass"
+  pr_0147b_deferred: "pass"
+  plan_drift_gate: "PASS"
+  no_drift_check: "PASS"
+commit_readiness: "ready"
+decisions_made:
+  - decision: "PR 0147A correctly positioned as governance insertion after Stream 2"
+    reason: "PLAN.md Roadmap alignment: PR 0147A is an architect-authorized governance insertion after PR 0147 (Proof and Manifest Viewer) merged #173. PR 0147B, PR 0148+ remain separate. git log confirms PR 0147 merged at HEAD."
+  - decision: "Launch strategy selected: OPTION B — MINIMAL ASGI RUNTIME AND OPERATOR ENTRYPOINT"
+    reason: "PLAN.md Launch Strategy: new local_operator.py wraps existing ASGI app with server-owned runs-root configuration. Not modifying app.py to avoid fragile backward-compatibility. uvicorn added as explicit optional dependency (currently try/except undeclared)."
+  - decision: "Official command is make local-operator with loopback default"
+    reason: "PLAN.md Official Command: 'make local-operator' delegates to 'python -m task_intake.local_operator'. Default host 127.0.0.1, port 8000. Port validation (reject <1024 without flag, >65535). Runs-root normalized server-side."
+  - decision: "Runs-root security: browser override disabled in operator mode"
+    reason: "PLAN.md Runs-Root Security: POLICY A — OPERATOR APP FACTORY. server.py modified with optional runs_root parameter stored in scope['app_runs_root']. When operator provides it, browser query string runs_root ignored. Tests continue using query string as before."
+  - decision: "Complete startup diagnostics and shutdown defined"
+    reason: "PLAN.md Startup Diagnostics: prints runs root, workspace URL, health URL, read-only warning. --check flag prints config as JSON. Shutdown: Ctrl-C triggers uvicorn graceful shutdown. No custom hooks needed."
+  - decision: "Canonical smoke using real run_persistence API"
+    reason: "PLAN.md Smoke Fixture: smoke uses run_persistence.persist_run_record() to create canonical persisted run with run.json, manifest.json, run-report.txt. Isolated temporary directory. Launches official operator entrypoint as subprocess."
+  - decision: "13 route assertions in smoke cover entire platform"
+    reason: "PLAN.md Route Assertion: GET /health, GET /workspace (with 4 zones + hooks), GET /runs (version-1 envelope), GET /runs/<id> (version-1 detail), GET /runs/<id>/report (content + provenance)."
+  - decision: "Bounded process management and cleanup"
+    reason: "PLAN.md Process Cleanup: SIGTERM + 5s wait + SIGKILL escalation. try/finally ensures cleanup on success and failure. Temp directory removed. Repository .ariadne diff-checked after smoke. Subprocess strictly limited to launch/terminate."
+  - decision: "PR 0143-0147 behavior fully preserved"
+    reason: "PLAN.md Preservation: server.py modified additively (optional runs_root parameter). Existing test query string behavior unchanged. All existing routes preserved. Smoke verifies all four zones and rendering hooks."
+  - decision: "PR 0147B and later work completely deferred"
+    reason: "PLAN.md PR 0147B Deferral: prompts, agent-role routing, dangerous-action approval, commit/push/PR approval, command queues, orchestrator UI, mutation — all excluded."
+  - decision: "Implementation scope: 9 files with exact responsibilities"
+    reason: "PLAN.md Implementation File Scope: pyproject.toml (uvicorn dep), local_operator.py (new), server.py (narrow edit), LOCAL_OPERATOR.md (new), Makefile (target), smoke-local-operator.py (new), test_local_operator.py (new), IMPLEMENTATION_REPORT.md (new), precommit-review.yml (new)."
+launch_inventory_assessment:
+  existing_asgi_app: "task_intake.server:app (raw ASGI3)"
+  existing_entrypoint: "app.py main() with uvicorn try/except"
+  uvicorn_declared: false
+  existing_smoke: "smoke.py — health, submit, blank prompt only"
+  existing_makefile_targets: "install-dev, test, lint, smoke"
+  no_local_operator: true
+packaging_assessment:
+  project_name: "universal-agentic-platform"
+  python_requires: ">=3.11"
+  runtime_deps: "[] (none)"
+  uvicorn: "not declared — try/except only"
+  console_scripts: "none"
+launch_strategy_assessment:
+  selected: "OPTION B — MINIMAL ASGI RUNTIME AND OPERATOR ENTRYPOINT"
+  new_module: "local_operator.py"
+  wraps_existing_app: true
+  no_bespoke_http_server: true
+official_command_assessment:
+  primary: "make local-operator"
+  delegate: "python -m task_intake.local_operator"
+  required_dir: "repository root"
+  required_python: ">=3.11"
+  install: "make install-dev (pip install -e '.[dev]')"
+operator_configuration_assessment:
+  default_host: "127.0.0.1"
+  default_port: 8000
+  port_validation: true
+  runs_root_default: "os.path.join(repo_root, '.ariadne', 'runs')"
+  no_public_bind_default: true
+  allow_public_bind_flag: "--allow-public-bind"
+  allow_privileged_port_flag: "--allow-privileged-port"
+  check_flag: "--check"
+runs_root_security_assessment:
+  policy: "POLICY A — OPERATOR APP FACTORY"
+  browser_override_disabled: true
+  server_owned: true
+  normalized: true
+  created_if_absent: true
+  test_compat_preserved: true
+startup_diagnostics_assessment:
+  prints_runs_root: true
+  prints_workspace_url: true
+  prints_health_url: true
+  prints_read_only_warning: true
+  check_mode_outputs_json: true
+  errors_return_nonzero: true
+shutdown_assessment:
+  ctrl_c_handled: "uvicorn default"
+  no_lingering_process: true
+  no_temp_residue: true
+runbook_assessment:
+  prerequisites: true
+  installation: true
+  launch: true
+  expected_output: true
+  health_check: true
+  runs_root_explanation: true
+  shutdown: true
+  empty_states: true
+  troubleshooting: true
+  read_only_boundaries: true
+  smoke_command: true
+  cleanup_guarantee: true
+smoke_fixture_assessment:
+  canonical_persist_api: true
+  deterministic_run_id: true
+  run_json_manifest_report: true
+  isolated_temp_dir: true
+end_to_end_smoke_assessment:
+  launches_official_entrypoint: true
+  bounded_readiness_timeout: "5 seconds"
+  checks_health: true
+  checks_workspace: true
+  checks_run_index: true
+  checks_detail: true
+  checks_report: true
+  checks_four_zones: true
+  checks_detail_hooks: true
+  checks_report_hooks: true
+  checks_gates_logs_hooks: true
+process_cleanup_assessment:
+  sigterm_then_sigkill: true
+  try_finally: true
+  temp_dir_removed: true
+  repository_ariadne_unchanged: true
+  smoke_process_bounded: true
+route_assertion_assessment:
+  health: true
+  workspace_html: true
+  run_index: true
+  run_detail: true
+  run_report: true
+  four_zone_selectors: true
+pr0143_pr0147_preservation_assessment:
+  server_py_additive_change: true
+  test_query_override_preserved: true
+  all_routes_preserved: true
+  workspace_zones_verified: true
+pr0147b_deferral_assessment:
+  agent_launch_deferred: true
+  orchestration_deferred: true
+  approval_flow_deferred: true
+  commit_push_pr_deferred: true
+  mutation_deferred: true
+implementation_scope_assessment:
+  files:
+    - "pyproject.toml (edit — add uvicorn dep)"
+    - "services/task_intake/src/task_intake/local_operator.py (new)"
+    - "services/task_intake/src/task_intake/server.py (narrow edit)"
+    - "docs/LOCAL_OPERATOR.md (new)"
+    - "Makefile (edit — add target)"
+    - "scripts/smoke-local-operator.py (new)"
+    - "services/task_intake/tests/test_local_operator.py (new)"
+  backend_unchanged: true
+  artifact_workspace_unchanged: true
+  no_dependency_beyond_uvicorn: true
+  no_agent_orchestration: true
+boundary_confirmations:
+  - "Branch confirmed: 0147a-local-operator-launch-end-to-end-smoke"
+  - "Only plan-review.yml artifact written; no PLAN.md, ROADMAP.md, services/, agents/ modified"
+  - "No tracked files modified; no staged files; PR 0147 merged (#173)"
+  - "OPTION B selected: new local_operator.py with server-owned runs root"
+  - "Official command: make local-operator (delegates to python -m task_intake.local_operator)"
+  - "Loopback default: 127.0.0.1:8000, no public bind without explicit flag"
+  - "Browser runs_root override disabled in operator mode (scope['app_runs_root'])"
+  - "Complete startup diagnostics: runs root, workspace URL, health URL, read-only warning"
+  - "Smoke uses canonical run_persistence API — not handcrafted evidence"
+  - "Smoke uses isolated temporary directory — no repository .ariadne writes"
+  - "13 route assertions covering health, workspace, runs, detail, report"
+  - "Bounded readiness timeout (5s), SIGTERM+SIGKILL cleanup, try/finally"
+  - "PR 0143-0147 behavior fully preserved (additive server.py change)"
+  - "PR 0147B and later work completely deferred"
+  - "uvicorn added as explicit optional dependency"
+  - "No agent launch, orchestration, mutation, git, gh, Docker, or external services"
+  - "IMPLEMENTATION_REPORT.md required with all 11 sections and proof disclaimer"
+  - "PLAN DRIFT GATE: all caps, 21 block conditions"
+  - "NO-DRIFT CHECK: all caps, 30 confirmation requirements"
+plan_drift_gate: "PASS — PLAN.md includes exact '### PLAN DRIFT GATE' heading (all caps) with 21 block conditions covering out-of-scope files, locked artifacts, non-loopback bind, browser path override in operator mode, unowned/non-normalized runs root, missing startup diagnostics, false success on failure, lingering process, non-official entrypoint smoke, handcrafted smoke evidence, repository .ariadne mutation, unbounded timeout, cleanup failure, missing route assertions, PR 0143-0147 regression, agent/orchestration/mutation absorption, PR 0147B absorption, PR 0148 renumbering, weak tests, absent IMPLEMENTATION_REPORT.md."
+no_drift_check: "PASS — PLAN.md includes exact '### NO-DRIFT CHECK' heading (all caps) with 30 confirmation requirements covering correct branch, approved files, locked planning artifacts, PR 0147A insertion, PR 0148 numbering unchanged, one launch strategy, one primary command, one smoke command, loopback default, deterministic port, validated port override, server-owned runs root, normalized runs root, no browser override in operator mode, startup diagnostics, clear failure, clean shutdown, canonical smoke fixture, isolated temp root, official entrypoint smoke, health+workspace+runs+detail+report+zone assertions, bounded readiness timeout, success+failure cleanup, no repository .ariadne mutation, no lingering process, PR 0143-0147 regressions pass, no agent/ orchestration/mutation/git/gh/Docker, tests pass, IMPLEMENTATION_REPORT.md exists, PLAN DRIFT GATE passed, actual evidence overrides."
+commit_readiness: "ready"
