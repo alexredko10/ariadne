@@ -61,7 +61,7 @@ _CONTENT_TYPE_JSON = "application/json"
 # ---------------------------------------------------------------------------
 
 
-async def app(scope: dict, receive: callable, send: callable) -> None:
+async def app(scope: dict, receive: callable, send: callable, runs_root: str | None = None) -> None:
     """Minimal ASGI application for Task Intake HTTP.
 
     Parameters
@@ -73,6 +73,9 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
     send
         ASGI send callable.
     """
+    if runs_root is not None:
+        scope["app_runs_root"] = runs_root
+
     if scope["type"] != "http":
         return
 
@@ -939,7 +942,7 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
         # Parse optional runs_root query parameter
         query_string = scope.get("query_string", b"").decode("utf-8")
         params = parse_qs(query_string)
-        runs_root = params.get("runs_root", [None])[0]
+        runs_root = scope.get("app_runs_root") or params.get("runs_root", [None])[0]
         if not runs_root:
             runs_root = os.path.join(os.getcwd(), ".ariadne", "runs")
 
@@ -1092,7 +1095,7 @@ async def app(scope: dict, receive: callable, send: callable) -> None:
         # Parse optional runs_root query parameter
         query_string = scope.get("query_string", b"").decode("utf-8")
         params = parse_qs(query_string)
-        runs_root = params.get("runs_root", [None])[0]
+        runs_root = scope.get("app_runs_root") or params.get("runs_root", [None])[0]
         if not runs_root:
             # Default to .ariadne/runs relative to server working directory
             runs_root = os.path.join(os.getcwd(), ".ariadne", "runs")

@@ -373,6 +373,25 @@ No product capability is implemented. No frozen stream is opened.
 
 PR 0143 remains the next product PR: Artifact Workspace 4-Zone Shell Skeleton.
 
+### PR 0147A — Local Operator Launch and End-to-End Smoke (GOVERNANCE INSERTION)
+
+PR 0147A is a non-product governance insertion authorized by the human architect
+between product PR 0147 (Proof and Manifest Viewer) and product PR 0148 (Mermaid
+Artifact Type Read Model). It does not consume or renumber product roadmap slot
+PR 0148.
+
+PR 0147A adds a safe, deterministic local operator launch command
+(`make local-operator`), an ASGI runtime wrapper with server-owned runs-root
+configuration, loopback-only defaults, startup diagnostics, configuration check
+mode, explicit uvicorn packaging, a committed operator runbook, and one canonical
+end-to-end HTTP smoke that proves the full read-only Artifact Workspace through
+the official entrypoint.
+
+No agent launch, orchestration, mutation, git authority, Docker, or external
+services are added. PR 0147B (Human-Gated Manual Orchestration Mode), PR 0147C
+(Domain-Neutral Run and Artifact Profile Contract), PR 0147D (Construction
+Estimate Read-Only Dogfood Adapter), and PR 0148+ remain unchanged.
+
 ### Next active stream: Artifact Workspace Read-Only UI (0138+)
 
 The next active stream is read-only Artifact Workspace UI. Detailed roadmap

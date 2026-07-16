@@ -1,4 +1,4 @@
-.PHONY: test test-python test-js lint smoke install-dev
+.PHONY: test test-python test-js lint smoke install-dev local-operator
 
 install-dev:
 	python -m pip install --upgrade pip
@@ -17,3 +17,6 @@ lint:
 
 smoke:
 	python -m pytest -q services/*/tests
+
+local-operator:
+	python -m task_intake.local_operator $(if $(PORT),--port $(PORT))
