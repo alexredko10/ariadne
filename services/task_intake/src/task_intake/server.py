@@ -45,6 +45,7 @@ from task_intake.runtime_evidence_serialization import (
 )
 from task_intake.artifact_workspace import render_artifact_workspace
 from task_intake.manual_orchestration import read_session, session_to_dict, _validate_session_id
+from runner.run_profile import read_run_profile
 
 # Safe run_id pattern: alphanumeric, underscore, hyphen only
 _RUN_ID_RE = re.compile(r"^[a-zA-Z0-9_\-]+$")
@@ -924,9 +925,30 @@ async def app(scope: dict, receive: callable, send: callable, runs_root: str | N
     # Combined route handler: GET /runs/<run_id>/report and GET /runs/<run_id>
     if method == "GET" and path.startswith("/runs/"):
         is_report = path.endswith("/report")
+        is_profile = path.endswith("/profile")
+        if is_profile:
+            # --- Profile route: GET /runs/<run_id>/profile ---
+            profile_result = read_run_profile(runs_root, run_id)
+            response = {
+                "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                "ok": profile_result.get("ok", False),
+                "error": profile_result.get("error"),
+                "run_id": run_id,
+                "profile_exists": profile_result.get("profile_exists", False),
+                "profile_sha256": profile_result.get("profile_sha256"),
+                "hash_match": profile_result.get("hash_match"),
+                "profile": profile_result.get("profile"),
+            }
+            body = json.dumps(response, sort_keys=True, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+            return
+
         if is_report:
             # Report route: GET /runs/<run_id>/report
             run_id = path[len("/runs/"):-len("/report")]
+        elif is_profile:
+            # Profile route: GET /runs/<run_id>/profile
+            run_id = path[len("/runs/"):-len("/profile")]
         else:
             # Detail route: GET /runs/<run_id>
             run_id = path[len("/runs/"):]

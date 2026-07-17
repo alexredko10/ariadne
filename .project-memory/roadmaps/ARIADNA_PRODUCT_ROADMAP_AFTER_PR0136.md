@@ -287,6 +287,32 @@ PR 0147B implements:
 PR 0147C (Domain-Neutral Run and Artifact Profile Contract), PR 0147D
 (Construction Estimate Read-Only Dogfood Adapter), and PR 0148+ remain unchanged.
 
+### Governance Insertion: PR 0147C
+
+PR 0147C is a non-product governance insertion authorized by the human architect
+between PR 0147B (Human-Gated Manual Orchestration Mode) and PR 0148 (Mermaid
+Artifact Type Read Model). It does not consume a product roadmap slot and does not
+renumber later product slots. PR 0148 remains the next product PR.
+
+PR 0147C implements:
+- Run-Directory Profile Sidecar at `run-profile.json` alongside `run.json`.
+- OPTION A: isolated profile file, no run.json schema change.
+- Versioned profile contract (schema_version "1").
+- Deterministic self-excluding profile hashing (sha256 without profile_sha256 field).
+- Six approved neutral fact value types (text, number, date, boolean, enum, currency).
+- Bounded neutral facts (max 50), artifact groups (max 20), descriptors (max 100).
+- Domain-neutral evidence roles (input, output, report, capture, supporting).
+- Controlled references: run-relative: and sha256: only.
+- Absolute path, traversal, URL reference rejection.
+- GET-only read route: `GET /runs/<run_id>/profile`.
+- Generic safe Artifact Workspace renderer (no domain-specific branching).
+- Profile metadata labelled "not runtime proof".
+- No construction adapter, Mermaid, Visual Gate, Artifact Registry, artifact
+  acceptance, dynamic plugins, or execution.
+
+PR 0147D (Construction Estimate Read-Only Dogfood Adapter) and PR 148+
+remain unchanged.
+
 ---
 
 ### Stream 3 — Visual Gate / Mermaid

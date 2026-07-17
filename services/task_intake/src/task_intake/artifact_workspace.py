@@ -225,6 +225,9 @@ function selectRun(runId) {{
 
     // Fetch report in parallel with detail
     fetchReport(runId);
+
+    // Fetch profile in parallel
+    fetchProfile(runId);
 }}
 
 // Show loading state in the canvas
@@ -543,6 +546,225 @@ function fetchReport(runId) {{
             if (requestId !== detailRequestCounter) return; // stale
             showReportFetchFailure();
         }});
+}}
+
+// ---- Profile Viewer ----
+
+function fetchProfile(runId) {{
+    var requestId = ++detailRequestCounter;
+    showProfileLoading();
+
+    fetch("/runs/" + encodeURIComponent(runId) + "/profile")
+        .then(function(resp) {{
+            if (!resp.ok) {{
+                throw new Error("HTTP " + resp.status);
+            }}
+            return resp.json();
+        }})
+        .then(function(data) {{
+            if (requestId !== detailRequestCounter) return; // stale
+            renderProfile(data);
+        }})
+        .catch(function(err) {{
+            if (requestId !== detailRequestCounter) return; // stale
+            showProfileUnavailable();
+        }});
+}}
+
+function showProfileLoading() {{
+    var canvas = document.getElementById("zone-canvas");
+    if (!canvas) return;
+    var existing = canvas.querySelector("#profile-viewer");
+    if (existing) existing.remove();
+}}
+
+function showProfileUnavailable() {{
+    var canvas = document.getElementById("zone-canvas");
+    if (!canvas) return;
+    var existing = canvas.querySelector("#profile-viewer");
+    if (existing) existing.remove();
+}}
+
+function renderProfile(data) {{
+    var canvas = document.getElementById("zone-canvas");
+    if (!canvas) return;
+
+    // Remove existing profile viewer
+    var existing = canvas.querySelector("#profile-viewer");
+    if (existing) existing.remove();
+
+    // Profile not found — nothing to display
+    if (!data.ok) {{
+        return;
+    }}
+
+    var profile = data.profile;
+    if (!profile) {{
+        return;
+    }}
+
+    var viewer = document.createElement("div");
+    viewer.id = "profile-viewer";
+    viewer.setAttribute("role", "region");
+    viewer.setAttribute("aria-labelledby", "profile-heading");
+
+    var heading = document.createElement("h3");
+    heading.id = "profile-heading";
+    heading.textContent = "Run Profile";
+    viewer.appendChild(heading);
+
+    // Hash mismatch warning
+    if (data.hash_match === false) {{
+        var warnP = document.createElement("p");
+        warnP.style.color = "#a50";
+        warnP.style.fontWeight = "bold";
+        warnP.textContent = "Profile hash mismatch — data may be inconsistent";
+        viewer.appendChild(warnP);
+    }}
+
+    // Descriptive metadata notice
+    var metaNotice = document.createElement("p");
+    metaNotice.style.fontSize = "0.85rem";
+    metaNotice.style.color = "#666";
+    metaNotice.textContent = "Profile metadata — not runtime proof.";
+    viewer.appendChild(metaNotice);
+
+    // Profile info
+    var infoDiv = document.createElement("div");
+    infoDiv.style.marginBottom = "0.5rem";
+    infoDiv.appendChild(safeTextRow("Profile key", profile.profile_key || ""));
+    infoDiv.appendChild(safeTextRow("Schema version", profile.schema_version || ""));
+    viewer.appendChild(infoDiv);
+
+    // Neutral facts
+    var pres = profile.run_presentation;
+    if (pres && pres.neutral_facts && pres.neutral_facts.length > 0) {{
+        var factH4 = document.createElement("h4");
+        factH4.textContent = "Neutral Facts";
+        viewer.appendChild(factH4);
+
+        var table = document.createElement("table");
+        table.style.borderCollapse = "collapse";
+        table.style.width = "100%";
+        table.style.marginBottom = "0.5rem";
+
+        for (var fi = 0; fi < pres.neutral_facts.length; fi++) {{
+            var f = pres.neutral_facts[fi];
+            var tr = document.createElement("tr");
+            tr.style.borderBottom = "1px solid #eee";
+
+            var tdLabel = document.createElement("td");
+            tdLabel.style.fontWeight = "bold";
+            tdLabel.style.padding = "0.25rem 0.5rem";
+            tdLabel.style.width = "30%";
+            tdLabel.textContent = f.label || "";
+            tr.appendChild(tdLabel);
+
+            var tdValue = document.createElement("td");
+            tdValue.style.padding = "0.25rem 0.5rem";
+            if (f.value_type === "boolean") {{
+                tdValue.textContent = f.value ? "true" : "false";
+            }} else if (f.value_type === "number" && f.unit) {{
+                tdValue.textContent = String(f.value) + " " + f.unit;
+            }} else if (f.value_type === "currency" && f.currency) {{
+                tdValue.textContent = String(f.value) + " " + f.currency;
+            }} else {{
+                tdValue.textContent = String(f.value);
+            }}
+            tr.appendChild(tdValue);
+
+            table.appendChild(tr);
+        }}
+        viewer.appendChild(table);
+    }}
+
+    // Artifact groups and descriptors
+    var groups = profile.artifact_groups;
+    var descriptors = profile.artifact_descriptors;
+    if (groups && descriptors && descriptors.length > 0) {{
+        var groupH4 = document.createElement("h4");
+        groupH4.textContent = "Artifacts";
+        viewer.appendChild(groupH4);
+
+        // Build group->descriptors map
+        var groupMap = {{}};
+        var groupKeys = [];
+        for (var gk in groups) {{
+            if (groups.hasOwnProperty(gk)) {{
+                groupMap[gk] = [];
+                groupKeys.push(gk);
+            }}
+        }}
+        groupKeys.sort(function(a, b) {{
+            return (groups[a].display_order || 0) - (groups[b].display_order || 0);
+        }});
+
+        for (var di = 0; di < descriptors.length; di++) {{
+            var d = descriptors[di];
+            var gk = d.group_key;
+            if (groupMap[gk]) {{
+                groupMap[gk].push(d);
+            }}
+        }}
+
+        for (var gi = 0; gi < groupKeys.length; gi++) {{
+            var gk = groupKeys[gi];
+            var group = groups[gk];
+            var members = groupMap[gk];
+            if (!members || members.length === 0) continue;
+
+            members.sort(function(a, b) {{
+                return (a.display_order || 0) - (b.display_order || 0);
+            }});
+
+            // Group section
+            var groupDiv = document.createElement("div");
+            groupDiv.style.marginBottom = "0.5rem";
+
+            var groupLabel = document.createElement("strong");
+            groupLabel.textContent = (group && group.label) || gk;
+            groupDiv.appendChild(groupLabel);
+
+            var descList = document.createElement("ul");
+            descList.style.margin = "0.25rem 0 0 0";
+            descList.style.paddingLeft = "1.5rem";
+
+            for (var mi = 0; mi < members.length; mi++) {{
+                var m = members[mi];
+                var li = document.createElement("li");
+                var availableText = m.label || "";
+                if (m.required && m.sha256) {{
+                    availableText += " (hash: " + m.sha256.substring(0, 12) + "...)";
+                }} else if (m.required && !m.sha256) {{
+                    availableText += " — Required — not available";
+                }} else if (!m.required && !m.sha256) {{
+                    availableText += " — Optional — not available";
+                }}
+                li.textContent = availableText;
+                descList.appendChild(li);
+            }}
+
+            groupDiv.appendChild(descList);
+            viewer.appendChild(groupDiv);
+        }}
+    }}
+
+    canvas.appendChild(viewer);
+}}
+
+function safeTextRow(label, value) {{
+    var div = document.createElement("div");
+    div.style.margin = "0.2rem 0";
+    var labelSpan = document.createElement("span");
+    labelSpan.style.fontWeight = "bold";
+    labelSpan.style.display = "inline-block";
+    labelSpan.style.minWidth = "10rem";
+    labelSpan.textContent = label + ":";
+    div.appendChild(labelSpan);
+    var valSpan = document.createElement("span");
+    valSpan.textContent = String(value);
+    div.appendChild(valSpan);
+    return div;
 }}
 
 function showReportLoading() {{

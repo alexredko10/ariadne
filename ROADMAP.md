@@ -416,6 +416,28 @@ Docker, HTTP mutation, or later-roadmap capability is added.
 PR 0147C (Domain-Neutral Run and Artifact Profile Contract), PR 0147D
 (Construction Estimate Read-Only Dogfood Adapter), and PR 0148+ remain unchanged.
 
+### PR 0147C — Domain-Neutral Run and Artifact Profile Contract (GOVERNANCE INSERTION)
+
+PR 0147C is a non-product governance insertion authorized by the human architect
+between PR 0147B (Human-Gated Manual Orchestration Mode) and product PR 0148
+(Mermaid Artifact Type Read Model). It does not consume or renumber product
+roadmap slot PR 0148.
+
+PR 0147C implements OPTION A (Run-Directory Profile Sidecar): a domain-neutral
+descriptive profile for persisted runs at `run-profile.json` alongside `run.json`
+and `manifest.json`. The profile supplements runtime evidence with bounded neutral
+facts (six approved value types), artifact groups (up to 20), artifact descriptors
+(up to 100), deterministic self-excluding profile hashing, controlled run-relative
+and ArtifactStore references, a GET-only profile read route
+(`GET /runs/<run_id>/profile`), and a generic safe Artifact Workspace renderer.
+Profile metadata is explicitly labelled as descriptive, not runtime proof.
+No construction adaptation, Mermaid, Visual Gate, Artifact Registry, artifact
+acceptance, dynamic plugins, agent execution, provider calls, command execution,
+or HTTP mutation is added.
+
+PR 0147D (Construction Estimate Read-Only Dogfood Adapter) and PR 0148+
+remain unchanged.
+
 ### Next active stream: Artifact Workspace Read-Only UI (0138+)
 
 The next active stream is read-only Artifact Workspace UI. Detailed roadmap
