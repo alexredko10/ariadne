@@ -256,6 +256,37 @@ PR 0147B (Human-Gated Manual Orchestration Mode), PR 0147C (Domain-Neutral Run
 and Artifact Profile Contract), PR 0147D (Construction Estimate Read-Only
 Dogfood Adapter), and PR 0148+ remain unchanged.
 
+### Governance Insertion: PR 0147B
+
+PR 0147B is a non-product governance insertion authorized by the human architect
+between PR 0147A (Local Operator Launch and End-to-End Smoke) and PR 0148
+(Mermaid Artifact Type Read Model). It does not consume a product roadmap slot
+and does not renumber later product slots. PR 0148 remains the next product PR.
+
+PR 0147B implements:
+- A dedicated manual orchestration session store at `.ariadne/orchestration/`.
+- Canonical session source of truth: `.ariadne/orchestration/<session_id>.json`.
+- Versioned packet contract with exactly four inert prompt artifacts.
+- ArtifactStore-backed content-addressed prompt storage.
+- Deterministic session identity and state hashing (sha256[:16]).
+- Stale-state protection via expected state hashes on all mutations.
+- Exactly four ordered stages: planner, plan-review, coder, precommit-review.
+- Stage-order gates: planning-lock, plan-review-verdict, precommit-readiness.
+- Eight stage statuses: pending, ready, in_progress, completed, blocked,
+  revision_required, human_action_required, closed.
+- Physically read review verdicts from actual YAML artifact files.
+- Inert dangerous-action proposals bound to session state hash.
+- Human checkpoints that record intent only (not execution).
+- External action results as operator-reported evidence.
+- Human-run CLI with nine subcommands and stale-state exit codes.
+- GET-only read route: `GET /orchestration/<session_id>`.
+- Read-only Artifact Workspace presentation.
+- No agent launch, provider call, command execution, git, gh, Docker,
+  HTTP mutation, or later-roadmap capability.
+
+PR 0147C (Domain-Neutral Run and Artifact Profile Contract), PR 0147D
+(Construction Estimate Read-Only Dogfood Adapter), and PR 0148+ remain unchanged.
+
 ---
 
 ### Stream 3 — Visual Gate / Mermaid
