@@ -44,6 +44,7 @@ from task_intake.runtime_evidence_serialization import (
     serialize_run_index,
 )
 from task_intake.artifact_workspace import render_artifact_workspace
+from task_intake.manual_orchestration import read_session, session_to_dict, _validate_session_id
 
 # Safe run_id pattern: alphanumeric, underscore, hyphen only
 _RUN_ID_RE = re.compile(r"^[a-zA-Z0-9_\-]+$")
@@ -1141,6 +1142,49 @@ async def app(scope: dict, receive: callable, send: callable, runs_root: str | N
             ],
         })
         await send({"type": "http.response.body", "body": html})
+        return
+
+    if method == "GET" and path.startswith("/orchestration/"):
+        session_id = path[len("/orchestration/"):]
+        try:
+            _validate_session_id(session_id)
+        except ValueError:
+            body = json.dumps({
+                "ev_contract_version": "1",
+                "ok": False,
+                "error": "invalid session_id",
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 400, body)
+            return
+
+        # Resolve orchestration root
+        orchestration_root = scope.get("app_runs_root", None)
+        if orchestration_root:
+            # Derive orchestration root from runs root parent
+            orchestration_root = os.path.join(
+                os.path.dirname(os.path.dirname(orchestration_root)),
+                "orchestration",
+            )
+        else:
+            orchestration_root = os.path.join(os.getcwd(), ".ariadne", "orchestration")
+
+        session = read_session(session_id, orchestration_root)
+        if session is None:
+            body = json.dumps({
+                "ev_contract_version": "1",
+                "ok": False,
+                "error": "session not found",
+            }, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 404, body)
+            return
+
+        response_data = {
+            "ev_contract_version": "1",
+            "ok": True,
+            "session": session_to_dict(session),
+        }
+        body = json.dumps(response_data, ensure_ascii=False, sort_keys=True).encode("utf-8")
+        await _send_json(send, 200, body)
         return
 
     # --- 404 ---

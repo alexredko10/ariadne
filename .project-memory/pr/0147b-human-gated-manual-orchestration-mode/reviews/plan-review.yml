@@ -1,0 +1,419 @@
+schema_version: "0.1"
+pr_id: "0147b"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-17T00:00:00Z"
+snapshot_delta:
+  plan_base_sha: "ab57118f4087c8a863d8f65c6af9fdf3eee9b7e2"
+  current_head: "ab57118f4087c8a863d8f65c6af9fdf3eee9b7e2"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/PLAN.md"
+  actual_files:
+    - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/PLAN.md"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+  - ".project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md"
+  - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+  - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+  - "agents/planner.yml"
+  - "agents/plan-review.yml"
+  - "agents/coder.yml"
+  - "agents/precommit-review.yml"
+  - "ROADMAP.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - "README.md"
+  - "Makefile"
+  - "pyproject.toml"
+  - "docs/LOCAL_OPERATOR.md"
+  - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/PLAN.md"
+  - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/reviews/plan-review.yml"
+  - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/reviews/precommit-review.yml"
+  - "services/task_intake/src/task_intake/local_operator.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/artifact_workspace.py"
+  - "services/task_intake/src/task_intake/runtime_evidence_serialization.py"
+  - "services/task_intake/src/task_intake/backlog_decision.py"
+  - "services/task_intake/src/task_intake/decision_history.py"
+  - "services/task_intake/src/task_intake/execution_handoff.py"
+  - "services/task_intake/src/task_intake/app.py"
+  - "services/runner/src/runner/review_boundary.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/src/runner/runtime_evidence.py"
+  - "services/runner/src/runner/artifacts.py"
+  - "services/runner/src/runner/local_harness.py"
+  - "services/runner/src/runner/execution_envelope.py"
+  - "services/runner/src/runner/git_boundary.py"
+  - "services/runner/src/runner/improvement_backlog.py"
+validation:
+  - command: "test -s .project-memory/pr/0147b-human-gated-manual-orchestration-mode/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is non-empty"
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "ab57118f4087c8a863d8f65c6af9fdf3eee9b7e2"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0147b-human-gated-manual-orchestration-mode"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? .project-memory/pr/0147b-human-gated-manual-orchestration-mode/"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty — no tracked files modified"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty — no staged changes"
+  - command: "git log --oneline --decorate -n 12"
+    result: "passed"
+    exit_code: 0
+    evidence: "HEAD at ab57118 — PR 0147A merged (#174), origin/main at same commit"
+blockers: []
+warnings:
+  - id: "missing-roadmap-alignment-section"
+    description: "PLAN.md does not include an explicit '### Roadmap alignment' section with roadmap track, expected PR slot, batching policy check, drift heuristic check, and architect sign-off fields as required by ADR 0011 for PRs from 0094 onward."
+    evidence: "Observed: PLAN.md has 'EVIDENCE SNAPSHOT', 'CURRENT FOUR-AGENT WORKFLOW INVENTORY', and other sections but no '### Roadmap alignment' section. PR 0147A set a precedent as an architect-authorized governance insertion without this section."
+    recommendation: "Add a '### Roadmap alignment' section to PLAN.md identifying the PR as an architect-authorized governance insertion after PR 0147A and before PR 0148, confirming batching policy compliance and architect sign-off. Alternatively, document this as consistent with the PR 0147A governance-insertion pattern."
+  - id: "plan-review-yml-not-yet-written"
+    description: "plan-review.yml is being written by this review. This warning ensures the write/readback verification is explicitly tracked."
+    evidence: "Precondition check confirmed plan-review.yml was absent before this review."
+    recommendation: "Ensure write and readback verification passes."
+decisions_made:
+  - decision: "PR 0147B is an architect-authorized governance insertion preserving PR 0147C, PR 0147D, and PR 0148 numbering"
+    reason: "PLAN.md explicitly defers PR 0147C (Domain-Neutral Profile Contracts), PR 0147D (Construction Estimate Dogfood Adapter), and PR 0148 (Mermaid Artifact Type Read Model). ROADMAP.md and ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md both document PR 0147B-D as governance insertions that do not renumber PR 0148."
+  - decision: "OPTION B — Dedicated Manual Orchestration Store with Run Bridge is the selected architecture"
+    reason: "PLAN.md explicitly selects OPTION B with rationale: run_persistence fields designed for automated pipeline runs; manual sessions may never produce a classic run; adding orchestration fields to RunPersistenceRequest would create ambiguity; GET /runs contract is intentionally scoped. The dedicated `.ariadne/orchestration/` store cleanly separates concerns."
+  - decision: "Manual orchestration mode does not create a second conflicting control plane"
+    reason: "The dedicated store is explicitly read-displayed through a new GET /orchestration/<session_id> route. No POST, PUT, PATCH, or DELETE orchestration routes exist. The local operator remains read-only. CLI mutation is explicit and human-run. The existing run persistence and Artifact Workspace are unchanged."
+  - decision: "Stage state machine is deterministic with exact transition table"
+    reason: "PLAN.md defines 8 stage statuses (pending, ready, in_progress, completed, blocked, revision_required, human_action_required, closed) with explicit allowed-transition lists for each. Stage order gates (planning lock, plan-review verdict, precommit readiness) are exact. Stale-state detection via expected hash is exact."
+  - decision: "Action proposals are inert — no execution, no eval, no shell=True"
+    reason: "PLAN.md explicitly prohibits eval, shell=True, untrusted shell interpolation, and command execution. argv is the canonical representation. Proposals are state-bound via session_state_hash. Stale proposals must not be presented as current. Proposal_id is deterministic sha256."
+  - decision: "Human checkpoints record intent only — proceed_manually does not execute or unlock"
+    reason: "PLAN.md explicitly states: 'proceed_manually changes session status to human_action_required — it does NOT execute anything.' Checkpoint has deterministic checkpoint_id. Human actor and reason are required."
+  - decision: "HTTP remains read-only — no POST/PUT/PATCH/DELETE orchestration routes"
+    reason: "PLAN.md specifies GET-only for orchestration: 'GET /orchestration/<session_id>'. Mutation occurs only through explicit human-run CLI commands. No server-start side effect, no browser-open side effect, no background worker, no daemon."
+context_used:
+  labels:
+    - plan-review
+    - pr-0147b
+    - manual-orchestration
+    - governance-insertion
+  memory_files_read:
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+    - ".project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md"
+    - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+    - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  anchors_used: []
+  files_inspected:
+    - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/PLAN.md"
+    - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/PLAN.md"
+    - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/IMPLEMENTATION_REPORT.md"
+    - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/reviews/plan-review.yml"
+    - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/reviews/precommit-review.yml"
+    - "agents/planner.yml"
+    - "agents/plan-review.yml"
+    - "agents/coder.yml"
+    - "agents/precommit-review.yml"
+    - "services/runner/src/runner/review_boundary.py"
+    - "services/runner/src/runner/run_persistence.py"
+    - "services/runner/src/runner/runtime_evidence.py"
+    - "services/runner/src/runner/artifacts.py"
+    - "services/runner/src/runner/local_harness.py"
+    - "services/runner/src/runner/execution_envelope.py"
+    - "services/runner/src/runner/git_boundary.py"
+    - "services/runner/src/runner/improvement_backlog.py"
+    - "services/task_intake/src/task_intake/backlog_decision.py"
+    - "services/task_intake/src/task_intake/decision_history.py"
+    - "services/task_intake/src/task_intake/execution_handoff.py"
+    - "services/task_intake/src/task_intake/local_operator.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/artifact_workspace.py"
+    - "services/task_intake/src/task_intake/runtime_evidence_serialization.py"
+    - "services/task_intake/src/task_intake/app.py"
+    - "docs/LOCAL_OPERATOR.md"
+    - "README.md"
+    - "Makefile"
+    - "pyproject.toml"
+  files_modified: []
+  files_intentionally_ignored:
+    - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/PLAN.md"
+    - "services/**"
+    - "schemas/**"
+    - "docs/**"
+    - "agents/**"
+    - ".github/**"
+    - ".project-memory/post-0100/**"
+summary: >
+  PR 0147B PLAN.md defines a comprehensive, executable, and safe implementation contract
+  for a human-gated manual four-agent orchestration mode. The plan selects OPTION B
+  (Dedicated Manual Orchestration Store with Run Bridge) with a clear rationale. The
+  stage state machine is fully specified with 8 statuses, exact transitions, and three
+  stage-order gates (planning lock, plan-review verdict, precommit readiness). Prompt
+  packets are versioned with deterministic hashing. Action proposals are inert —
+  no eval, no shell=True, no execution. Human checkpoints record intent only.
+  HTTP remains read-only with GET /orchestration/<session_id>. CLI mutation is
+  explicit and human-run. PR 0147C/D and PR 0148 are explicitly deferred. The plan
+  includes a PLAN DRIFT GATE, NO-DRIFT CHECK, comprehensive test plan, and
+  implementation-report obligation. One warning: the PLAN.md lacks an explicit
+  '### Roadmap alignment' section per ADR 0011, though the PR 0147A governance
+  insertion precedent exists.
+recommendations:
+  - "Consider adding an explicit '### Roadmap alignment' section to PLAN.md matching ADR 0011 requirements, documenting this as an architect-authorized governance insertion after PR 0147A and before PR 0148."
+  - "During implementation, ensure the GET /orchestration/<session_id> route path validation uses the same _RUN_ID_RE pattern as existing routes as specified in PLAN.md."
+  - "Ensure test_manual_orchestration.py covers all forbidden-action validation patterns reused from backlog_decision.py."
+roadmap_alignment: >
+  PR 0147B is an architect-authorized governance insertion between PR 0147A
+  (Local Operator Launch and End-to-End Smoke) and product PR 0148 (Mermaid
+  Artifact Type Read Model). ROADMAP.md documents PR 0147B-D as governance
+  insertions that do not consume product roadmap slots. PR 0148 numbering is
+  preserved. Batching policy is satisfied: this is not a single-isolated-UI PR.
+  Drift heuristic is not triggered (this is the first governance insertion in this
+  range). Architect sign-off is inherent for governance insertions.
+workflow_inventory_assessment: >
+  PLAN.md correctly inventories the four-agent workflow: planner produces PLAN.md,
+  plan-review produces reviews/plan-review.yml with approve/warning verdict and
+  empty blockers, coder produces implementation files + IMPLEMENTATION_REPORT.md,
+  precommit-review produces reviews/precommit-review.yml with pass/warning verdict
+  and commit_readiness ready. This matches agents/planner.yml, agents/plan-review.yml,
+  agents/coder.yml, and agents/precommit-review.yml.
+review_boundary_inventory_assessment: >
+  PLAN.md correctly describes review_boundary.py as a pure deterministic function
+  with no persistence and no HTTP. It correctly notes that review_boundary cannot
+  persist orchestration state directly. Observed in review_boundary.py L119-127.
+human_decision_inventory_assessment: >
+  PLAN.md correctly describes backlog_decision.py with its BacklogDecisionType enum
+  (needs_more_evidence, defer, dismiss, candidate_for_future_pr, accept_for_human_planning),
+  forbidden-pattern validation at L113-125, deterministic sha256 ref at L207,
+  decision store at `.ariadne/decisions/`, and notes that BacklogDecisionType values
+  are specific to backlog items and cannot directly represent stages. Observed in
+  backlog_decision.py L27-33, L113-125, L207.
+run_persistence_inventory_assessment: >
+  PLAN.md correctly inventories run_persistence fields: pipeline_step_summary,
+  pipeline_gate_summary, command_plan_summary, approval_summary, artifact_hashes,
+  next_action. Observed in run_persistence.py L61-70, L99-105. The plan correctly
+  notes these were designed for automated pipeline runs.
+artifact_store_inventory_assessment: >
+  PLAN.md correctly describes ArtifactStore: caller-provided Path root,
+  sha256/first2/full layout, atomic write (.tmp_ rename), kinds including
+  RAW_DIFF, NORMALIZED_PATCH, APPLY_REQUEST, RUN_RECORD_SNAPSHOT, GENERIC_TEXT,
+  GENERIC_JSON. Observed in artifacts.py. Path safety via resolve() containment
+  check is documented.
+architecture_option_assessment: >
+  PLAN.md explicitly selects OPTION B (Dedicated Manual Orchestration Store with
+  Run Bridge). Rationale is provided: run_persistence fields are designed for
+  automated runs, manual sessions may never produce a classic run, adding
+  orchestration fields would create ambiguity, GET /runs contract is intentionally
+  scoped. Decision is unconditional — not open to both options.
+canonical_storage_assessment: >
+  Canonical storage is `.ariadne/orchestration/<session_id>.json` with ArtifactStore
+  at `.ariadne/orchestration/artifacts/`. Session IDs are deterministic sha256 of
+  import packet JSON. Session state hash is sha256 of canonical session JSON.
+  Atomic write uses .tmp file + rename. Duplicate detection via existing file check.
+  Stale-state rejection via expected hash match. One canonical source of truth
+  (the session JSON file). No duplicate truth.
+packet_contract_assessment: >
+  ManualOrchestrationInput packet contract is versioned (schema_version "1") with
+  session_id, prompts array, and validation rules: exactly four prompts, ordered
+  roles, non-empty text <= 50,000 chars, UTF-8, deterministic prompt_sha256,
+  session_id derivation, and rejection of malformed/missing/duplicate/unsupported
+  oversized prompts. Complete and unambiguous.
+prompt_artifact_assessment: >
+  Prompt artifacts are stored via ArtifactStore at `.ariadne/orchestration/artifacts/`
+  with media type `text/plain; charset=utf-8`, kind label `prompt_<role>`,
+  full sha256 hash of UTF-8 encoded text, 50,000 char size limit. Binary content
+  rejected. Prompts are rendered as inert plain text. Never executed. Prompts are
+  not represented as proof.
+session_identity_hash_assessment: >
+  Session ID is deterministic: sha256(canonical import JSON)[:16]. Session state
+  hash is sha256(JSON-serialized canonical session file)[:16]. Previous state hash
+  required for all mutations. Stale detection via expected hash match. Expected
+  hash header at CLI level. Deterministic and verifiable.
+stage_state_machine_assessment: >
+  State machine has 8 statuses (pending, ready, in_progress, completed, blocked,
+  revision_required, human_action_required, closed) with exact transition table
+  and required conditions. Three stage-order gates enforce planning lock (stage 2
+  requires stage 1 completed), plan-review verdict gate (stage 3 requires stage 2
+  approve/warning), precommit readiness gate (stage 4 requires stage 3 completed).
+  Final human_action_required requires all four stages completed. Stale transitions
+  rejected via hash. Duplicate transitions deterministic. Conflicts rejected.
+stage_evidence_assessment: >
+  Per-stage evidence record includes role, stage, status, prompt_sha256, prompt_ref,
+  artifact_sha256, artifact_ref, previous_state_hash, resulting_state_hash, verdict,
+  blockers, revision_reason, recorded_by. Completed stages require artifact evidence
+  with hash. Review verdicts are physically read (not inferred). Agent identity is
+  metadata. Agent output is not proof. Evidence and claims are visibly separate.
+review_gate_assessment: >
+  Plan-review gate: completed requires PLAN.md and reviews/plan-review.yml to exist
+  with approve/warning verdict (not block). Precommit-review gate: completed requires
+  IMPLEMENTATION_REPORT.md and reviews/precommit-review.yml to exist with pass/warning
+  verdict (not block). Verdicts are read from physical files, not inferred.
+action_proposal_assessment: >
+  Action proposals are inert records with deterministic proposal_id (sha256 of
+  proposal JSON), session_id, action_type, argv tuple, working_directory,
+  expected_branch, expected_head, expected_changed_files, expected_payload_hash,
+  session_state_hash, risk_level, rationale, created_by. Rules: argv is canonical
+  representation; no eval, no shell=True, no untrusted shell interpolation;
+  credentials/secrets prohibited; stale when session_state_hash mismatch; stale
+  proposals not presented as current. Risk classification is explicit (high).
+secret_exclusion is explicit.
+human_checkpoint_assessment: >
+  Human checkpoints record intent only with deterministic checkpoint_id
+  (sha256 of checkpoint JSON), session_id, decision (proceed_manually, stop,
+  revise, defer), human_actor, reason, proposal_id, proposal_hash,
+  session_state_hash, decision_record_hash. proceed_manually does NOT execute
+  or unlock anything. stop marks session closed. revise marks revision_required.
+  defer leaves current status. Checkpoint is not evidence of command success.
+external_action_result_assessment: >
+  External action results are optional operator-supplied records with result_id,
+  proposal_id, session_id, reported_status (success/failure/result_unavailable),
+  evidence_refs, operator_notes, recorded_by. reported_status is operator-reported,
+  not runtime-verified. Never infer success from checkpoint alone. Evidence refs
+  are optional pointers. Reported success is not called verified success.
+cli_assessment: >
+  CLI contract: `python -m task_intake.manual_orchestration_cli <subcommand> [args]`
+  with 9 subcommands (import-session, stage-status, record-evidence, record-blocked,
+  propose-action, checkpoint, record-result, show-session, list-sessions). All
+  mutation subcommands require `--expected-hash` for stale-state protection. Exit
+  codes: 0 success, 1 validation error, 2 stale state, 3 not found. Deterministic
+  JSON output via `--json` flag. No server-start side effect. No browser-open side
+  effect. No background worker. No daemon.
+read_model_api_assessment: >
+  GET /orchestration/<session_id> is a new read-only route returning versioned JSON
+  with ev_contract_version "1", ok flag, and session record (session_id, status,
+  stages, action_proposals, human_checkpoints, external_action_results,
+  session_state_hash). State handling: ok=false for missing/malformed/invalid
+  session_id. The route is additive to version-1 contract — does not modify GET /runs.
+  Path validation uses _RUN_ID_RE regex. Read-model behavior: session data only,
+  no general filesystem browser.
+artifact_workspace_assessment: >
+  Artifact Workspace displays orchestration sessions through a new read-only surface.
+  PLAN.md specifies a new `#orchestration-session` section or dedicated tab showing
+  session status, four ordered stages with role/status/evidence links, action proposals
+  with inert display, human checkpoints with decisions. All text rendered safely via
+  textContent. No mutation buttons. No execute/run controls. Preserves all existing
+  workspace behavior (PR 0143 timeline, PR 0144 list, PR 0145 detail, PR 0146 report,
+  PR 0147 proof/manifest, PR 0147A local operator). The local operator remains
+  read-only. No ev_contract_version break.
+safe_rendering_assessment: >
+  PLAN.md specifies exact safe-rendering rules: prompt text as inert plain text via
+  textContent; action argv as inert text (not linked or clickable); paths in prompts
+  as inert text; URLs in prompts as inert text; hash values as inert text; HTML,
+  script, Markdown, Mermaid, ANSI, shell commands — all rendered as inert text.
+  No mutation controls. No eval. No document.write. Complete.
+atomicity_stale_state_assessment: >
+  Atomic write: .tmp file + os.replace. Idempotent identical write: return existing
+  ref if content matches. Stale detection: all mutation CLI commands require
+  --expected-hash; stale rejection with exit code 2. Duplicate detection: if
+  resulting hash produces existing session record, report as duplicate. Conflicting
+  transitions rejected by stale-state detection. Partial-write behavior: atomic
+  rename ensures no partial session file. Readback behavior: session file is read
+  after write to verify.
+pr0143_pr0147a_preservation_assessment: >
+  PLAN.md specifies exact preservation: server.py routes are unchanged (new route
+  added); local_operator.py is unchanged; artifact_workspace.py orchestration
+  display added without modifying existing zone behavior; GET /runs, detail, report
+  unchanged; four workspace zones unchanged; timeline, canvas, gates, logs unchanged;
+  read-only operator status unchanged; runs_root security unchanged. PR 0143 (4-zone
+  shell), PR 0144 (run list), PR 0145 (detail panel), PR 0146 (report viewer),
+  PR 0147 (proof/manifest), PR 0147A (local operator) are all preserved.
+pr0147c_pr0147d_pr0148_deferral_assessment: >
+  PLAN.md explicitly defers PR 0147C (Domain-Neutral Profile Contracts), PR 0147D
+  (Construction Estimate Dogfood Adapter), and PR 0148 (Mermaid Artifact Type Read
+  Model). ROADMAP.md and ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md both confirm
+  PR 0148 numbering is unchanged. PR 0147C and PR 0147D are separate slots. No
+  completed historical PR is redefined. Batching policy compliance: this is a
+  coherent multi-step capability unit, not a single isolated UI change.
+universality_assessment: >
+  PLAN.md's approach is universal: the manual orchestration mode works for any
+  four-agent workflow with planner, plan-review, coder, precommit-review roles.
+  The architecture is independent of specific domain adapters or agents. The
+  dedicated store pattern with deterministic hashing and read-only display is
+  broadly applicable.
+implementation_scope_assessment: >
+  PLAN.md defines an exact implementation allowlist with 12 approved files (6 new,
+  4 edits, 2 post-implementation review artifacts). Not modified: pyproject.toml,
+  Makefile, README.md, agents/**, schemas/**, .github/**, services/runner/**,
+  services/task_intake/src/task_intake/local_operator.py, runtime_evidence_serialization.py,
+  app.py, doctor.py, and all test files except test_artifact_workspace_shell.py.
+  File scope is unconditional.
+test_contract_assessment: >
+  Test plan includes 6 test commands: manual orchestration unit tests, workspace
+  orchestration display tests, end-to-end smoke, existing workspace regression,
+  existing route tests, serialization/evidence regressions. Each command has
+  expected result and block consequence. Comprehensive tests cover schema validation,
+  state transitions, stale-state rejection, duplicate detection, stage-order gates,
+  review-verdict gates, action proposal hashing/staleness, checkpoint non-execution,
+  atomic writes, safe path handling, forbidden-action validation.
+smoke_assessment: >
+  End-to-end smoke (scripts/smoke-manual-orchestration.py) creates import packet,
+  imports session, progresses through four stages, exercises blocked transition,
+  rejects stale hash, creates proposal, records checkpoint, proves no command
+  executed, exposes through GET route, verifies workspace markers, cleans up temp
+  directory. Smoke uses isolated temporary directory. No repository runtime residue.
+  Proves non-execution.
+compatibility_assessment: >
+  Existing evidence-contract compatibility: ev_contract_version "1" is preserved in
+  GET /orchestration/<session_id> responses. Missing/partial/blocked/malformed/stale/
+  unsupported states are handled explicitly. Legacy-run behavior is unchanged. List
+  and detail bounds are specified. Controlled prompt/proposal/checkpoint viewing.
+  No general filesystem browser. Artifact Workspace integration is additive. Four
+  ordered stages visible. Prompt availability visible. Artifact evidence state visible.
+  Review verdict visible. Blockers/revisions visible. Current state hash visible.
+  Human action requirement visible. Proposal status visible. Checkpoint status visible.
+  Runtime evidence, agent claims, human intent, external results are distinct.
+boundary_confirmations:
+  branch_is_correct: true
+  dirty_tree_is_within_scope: true
+  plan_was_read: true
+  required_supporting_files_read: true
+  roadmap_alignment: "governance-insertion"
+  prior_pr_evidence: "PR 0147A merged at HEAD ab57118"
+  executable_first: true
+  validation_strategy_explicit: true
+  forbidden_scope_absent: true
+  artifact_physically_written: true
+  artifact_read_back: true
+plan_drift_gate: >
+  PASS — PLAN.md includes exact '### PLAN DRIFT GATE' heading (all caps) with 20
+  block conditions covering out-of-scope files, locked artifacts, architecture option,
+  multiple canonical stores, prompt generation, agent launch, subprocess execution,
+  git/gh/Docker/shell execution, human checkpoint triggers, human intent as execution
+  evidence, agent output as proof, inferred verdicts, planning lock bypass, stale
+  state updates, browser arbitrary-path input, mutation HTTP endpoints, read-only
+  operator regression, PR 0143-0147A regression, PR 0147C/D and PR 0148 absorption,
+  and required tests/smoke failures.
+no_drift_check: >
+  PASS — PLAN.md includes exact '### NO-DRIFT CHECK' heading (all caps) with 25
+  confirmation requirements covering correct branch, approved files, locked planning
+  artifacts, PR 0147B insertion, PR 0148 numbering unchanged, one canonical storage
+  architecture, versioned packet contract, exactly four roles and four ordered stages,
+  deterministic session state hash, enforced stage transition table, planning-lock
+  gate, review verdict gates, inert action proposals, non-executing checkpoints,
+  GET-only HTTP for orchestration, explicit human-run CLI mutation, read-only
+  workspace display, no agent launch/provider calls, no shell/action execution, no
+  browser arbitrary-path input, PR 0143-0147A preservation, PR 0147C/D and PR 0148
+  separation, smoke passes with no residue, IMPLEMENTATION_REPORT.md obligation,
+  PLAN DRIFT GATE passed.
+commit_readiness: ready

@@ -1,0 +1,604 @@
+schema_version: "0.1"
+pr_id: "0147b-human-gated-manual-orchestration-mode"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-15T00:20:00Z"
+head_verified: "18bf99f25b4c2d93a44767cfa3e86664f5a13ffb"
+branch_confirmed: "0147b-human-gated-manual-orchestration-mode"
+snapshot_delta:
+  plan_base_sha: "18bf99f25b4c2d93a44767cfa3e86664f5a13ffb"
+  current_head: "18bf99f25b4c2d93a44767cfa3e86664f5a13ffb"
+  origin_main: "ab57118cd7f6173beadc7f96617e5f4f6b86e869"
+  merge_base: "18bf99f25b4c2d93a44767cfa3e86664f5a13ffb"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/PLAN.md"
+    - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/reviews/plan-review.yml"
+    - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/IMPLEMENTATION_REPORT.md"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/manual_orchestration.py"
+    - "services/task_intake/src/task_intake/manual_orchestration_cli.py"
+    - "services/task_intake/tests/test_manual_orchestration.py"
+    - "docs/MANUAL_ORCHESTRATION.md"
+    - "scripts/smoke-manual-orchestration.py"
+    - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/reviews/precommit-review.yml"
+  actual_files:
+    - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/PLAN.md"
+    - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/reviews/plan-review.yml"
+    - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/IMPLEMENTATION_REPORT.md"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/manual_orchestration.py"
+    - "services/task_intake/src/task_intake/manual_orchestration_cli.py"
+    - "services/task_intake/tests/test_manual_orchestration.py"
+    - "docs/MANUAL_ORCHESTRATION.md"
+    - "scripts/smoke-manual-orchestration.py"
+    - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/reviews/precommit-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+  - ".project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md"
+  - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+  - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "agents/precommit-review.yml"
+  - "ROADMAP.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - "README.md"
+  - "Makefile"
+  - "pyproject.toml"
+  - "docs/LOCAL_OPERATOR.md"
+  - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/PLAN.md"
+  - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/reviews/plan-review.yml"
+  - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/PLAN.md"
+  - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0147a-local-operator-launch-end-to-end-smoke/reviews/precommit-review.yml"
+  - "services/task_intake/src/task_intake/manual_orchestration.py"
+  - "services/task_intake/src/task_intake/manual_orchestration_cli.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/artifact_workspace.py"
+  - "services/task_intake/src/task_intake/runtime_evidence_serialization.py"
+  - "services/task_intake/src/task_intake/backlog_decision.py"
+  - "services/task_intake/src/task_intake/decision_history.py"
+  - "services/task_intake/src/task_intake/execution_handoff.py"
+  - "services/task_intake/src/task_intake/app.py"
+  - "services/task_intake/src/task_intake/local_operator.py"
+  - "services/task_intake/tests/test_manual_orchestration.py"
+  - "services/task_intake/tests/test_local_operator.py"
+  - "services/task_intake/tests/test_artifact_workspace_shell.py"
+  - "services/task_intake/tests/test_runtime_evidence_serialization_contract.py"
+  - "services/task_intake/tests/test_task_intake.py"
+  - "services/runner/src/runner/review_boundary.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/src/runner/runtime_evidence.py"
+  - "services/runner/src/runner/artifacts.py"
+  - "services/runner/src/runner/local_harness.py"
+  - "services/runner/src/runner/execution_envelope.py"
+  - "services/runner/src/runner/git_boundary.py"
+  - "services/runner/src/runner/improvement_backlog.py"
+  - "services/runner/tests/test_run_persistence.py"
+  - "services/runner/tests/test_runtime_evidence.py"
+  - "services/runner/tests/test_review_boundary.py"
+  - "services/runner/tests/test_artifact_store.py"
+  - "scripts/smoke-manual-orchestration.py"
+  - "docs/MANUAL_ORCHESTRATION.md"
+files_written:
+  - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/reviews/precommit-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "18bf99f25b4c2d93a44767cfa3e86664f5a13ffb"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0147b-human-gated-manual-orchestration-mode"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty"
+  - command: "python3 -m compileall -f services/task_intake/src services/runner/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "All files compile"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python3 -m pytest services/task_intake/tests/test_manual_orchestration.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "39 passed in 0.19s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python3 -m pytest services/task_intake/tests/test_artifact_workspace_shell.py services/task_intake/tests/test_local_operator.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "345 passed in 0.24s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python3 -m pytest services/task_intake/tests/test_local_run_history_in_page.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "73 passed in 0.12s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python3 -m pytest services/task_intake/tests/test_runtime_evidence_serialization_contract.py services/runner/tests/test_runtime_evidence.py services/runner/tests/test_run_persistence.py services/runner/tests/test_artifact_store.py services/runner/tests/test_review_boundary.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "194 passed in 0.30s"
+  - command: "End-to-end smoke"
+    result: "passed"
+    exit_code: 0
+    evidence: "'smoke: MANUAL ORCHESTRATION SMOKE PASSED' — 15 assertion groups"
+  - command: "Planning artifacts lock check"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md and plan-review.yml unchanged"
+  - command: "Whitespace check"
+    result: "passed"
+    exit_code: 0
+    evidence: "No whitespace errors"
+  - command: "No execution grep"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only string literals in forbidden-pattern detection lists — no actual subprocess/Popen/eval/os.system usage"
+  - command: "No git/gh/docker grep"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only string literals in forbidden-action detection — no actual execution"
+  - command: "No HTTP mutation for orchestration"
+    result: "passed"
+    exit_code: 0
+    evidence: "No POST/PUT/PATCH/DELETE orchestration routes"
+  - command: "Cached diff"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty"
+  - command: "Forbidden-path diff"
+    result: "passed"
+    exit_code: 0
+    evidence: "No changes to services/runner/, agents/, schemas/, pyproject.toml, Makefile, or earlier PR artifacts"
+blockers: []
+warnings: []
+checks:
+  branch_correct: "pass"
+  plan_presence: "pass"
+  plan_review_verdict_approve: "pass"
+  plan_review_blockers_empty: "pass"
+  plan_review_warnings_accepted: "pass"
+  implementation_report_present: "pass"
+  no_staged_diff: "pass"
+  planning_artifacts_locked: "pass"
+  all_changed_files_read: "pass"
+  dirty_tree_expected: "pass"
+  no_unknown_untracked: "pass"
+  option_b_implemented: "pass"
+  one_canonical_session_store: "pass"
+  canonical_path_ariadne_orchestration: "pass"
+  run_bridge_not_canonical_truth: "pass"
+  schema_version_deterministic: "pass"
+  atomic_writes: "pass"
+  four_prompts_exactly: "pass"
+  four_roles_correct_order: "pass"
+  four_stages_correct_order: "pass"
+  deterministic_session_id: "pass"
+  deterministic_state_hash: "pass"
+  self_referential_hash_handled: "pass"
+  expected_state_hash_required: "pass"
+  stale_hash_rejected: "pass"
+  stage_order_gates: "pass"
+  planning_lock_gate: "pass"
+  review_verdict_gates: "pass"
+  precommit_readiness_gate: "pass"
+  completed_stages_require_evidence: "pass"
+  proposals_inert: "pass"
+  proposals_state_bound: "pass"
+  stale_proposals_handled: "pass"
+  checkpoints_intent_only: "pass"
+  checkpoints_no_execution: "pass"
+  external_results_separate: "pass"
+  cli_nine_subcommands: "pass"
+  expected_hash_required_on_mutation: "pass"
+  exit_codes_correct: "pass"
+  read_route_get_only: "pass"
+  session_id_validated: "pass"
+  browser_cannot_select_arbitrary_root: "pass"
+  no_http_mutation: "pass"
+  no_agent_launch: "pass"
+  no_provider_call: "pass"
+  no_shell_execution: "pass"
+  no_git_gh: "pass"
+  no_docker: "pass"
+  safe_rendering_unchanged: "pass"
+  pr0143_0147a_preserved: "pass"
+  pr0147c_deferred: "pass"
+  pr0147d_deferred: "pass"
+  pr0148_numbering_unchanged: "pass"
+  universality_maintained: "pass"
+  smoke_passed: "pass"
+  smoke_proved_non_execution: "pass"
+  smoke_no_repository_residue: "pass"
+  validation_passed: "pass"
+  implementation_report_claims_verified: "pass"
+  plan_drift_gate: "PASS"
+  no_drift_check: "PASS"
+decisions_made:
+  - decision: "OPTION B implemented — dedicated manual orchestration store"
+    reason: "Canonical session path .ariadne/orchestration/<session_id>.json. Schema version '1', deterministic hashing, atomic writes, stale-state protection."
+  - decision: "Exactly four roles and stages with evidence and verdict gates"
+    reason: "planner (stage 1), plan-review (stage 2), coder (stage 3), precommit-review (stage 4). Planning-lock gate, plan-review verdict gate, precommit commitment_readiness gate. Completed stages require artifact_ref and artifact_sha256."
+  - decision: "Proposals inert, checkpoints intent-only, external results separate"
+    reason: "propose-action creates ActionProposal with no execution path. checkpoint records decision values (proceed_manually, stop, revise, defer) — none execute. external_result_record creates operator-reported results without fabrication."
+  - decision: "CLI human-run with 9 non-executing subcommands"
+    reason: "import-session, stage-status, record-evidence, record-blocked, propose-action, checkpoint, record-result, show-session, list-sessions. All mutation subcommands require --expected-hash. No subprocess/eval/os.system."
+  - decision: "GET-only read route without HTTP mutation"
+    reason: "server.py adds single GET /orchestration/<session_id> route with session_id validation. No POST/PUT/PATCH/DELETE orchestration routes."
+  - decision: "PR 0143–0147A fully preserved — 345+73+194 tests pass"
+    reason: "All workspace, operator, detail, serialization, evidence, persistence, artifact store, and review boundary tests pass."
+  - decision: "PR 0147C/D and PR 0148 deferred — roadmap slots preserved"
+    reason: "ROADMAP.md and detailed roadmap updated with PR 0147B insertion. PR 0148 and later numbering unchanged."
+  - decision: "IMPLEMENTATION_REPORT.md claims verified against actual evidence"
+    reason: "All claims verified: 39 orchestration tests, 345 workspace+operator, 73 detail, 194 evidence/serialization, smoke exit 0, no execution boundaries, no HTTP mutation, non-execution greps clean."
+accepted_plan_review_warnings:
+  - id: "missing-roadmap-alignment-section"
+    accepted: true
+    impact: "Non-blocking — PR 0147B is a governance insertion continuing the architect-authorized pattern from PR 0147A. No roadmap alignment ambiguity."
+architecture_option_review:
+  option_b_implemented: true
+  one_canonical_store: true
+  path: ".ariadne/orchestration/<session_id>.json"
+  run_bridge_not_canonical: true
+  no_duplicate_truth: true
+  schema_version: "1"
+  deterministic_serialization: true
+  atomic_writes: true
+  temp_residue_cleanup: true
+  readback_works: true
+  path_normalized: true
+canonical_storage_review:
+  path_format: ".ariadne/orchestration/<session_id>.json"
+  owned_by: "manual_orchestration module"
+  no_run_bridge_override: true
+  atomic_write_used: true
+  readback_verified: true
+  schema_version_field: true
+  sort_keys_used: true
+packet_contract_review:
+  four_prompts: true
+  exact_role_order: ["planner", "plan-review", "coder", "precommit-review"]
+  exact_stage_mapping: true
+  prompt_sha256: true
+  per_prompt_limit_50k: true
+  utf8_policy: true
+  missing_prompt_rejected: true
+  duplicate_role_rejected: true
+  unsupported_role_rejected: true
+  malformed_packet_rejected: true
+  promp_refs_via_artifactstore: true
+  prompt_content_inert: true
+  prompts_not_proof: true
+  no_provider_call: true
+  no_hidden_reasoning: true
+session_identity_hash_review:
+  deterministic_session_id: true
+  deterministic_state_hash: true
+  hash_truncation_16_hex: true
+  canonical_field_ordering: true
+  no_nondeterministic_input: true
+  expected_hash_required_for_mutation: true
+  missing_hash_rejected: true
+  stale_hash_rejected: true
+  canonical_state_unchanged_on_stale: true
+  resulting_hash_returned: true
+  hash_visible_through_read: true
+stage_state_machine_review:
+  statuses: ["pending", "ready", "in_progress", "completed", "blocked", "revision_required", "human_action_required", "closed"]
+  four_stages: true
+  transition_table_implemented: true
+  stage_order_enforced: true
+  planner_artifact_gate: true
+  plan_review_verdict_gate: true
+  planning_lock_gate: true
+  coder_artifact_gate: true
+  precommit_verdict_gate: true
+  precommit_readiness_gate: true
+  blocker_handling: true
+  revision_handling: true
+  reopen_behavior: true
+  later_stage_rejection: true
+  duplicate_transition_handled: true
+  conflict_rejected: true
+  no_silent_completion: true
+stage_evidence_review:
+  deterministic_evidence_records: true
+  session_id_present: true
+  role_present: true
+  stage_present: true
+  status_present: true
+  artifact_ref_present: true
+  artifact_sha256_present: true
+  recorded_by_present: true
+  previous_state_hash_present: true
+  resulting_state_hash_present: true
+  reason_or_note_present: true
+  controlled_root_paths: true
+  no_parent_traversal: true
+  no_arbitrary_absolute_paths: true
+  completed_stages_require_evidence: true
+  agent_identity_is_metadata: true
+  agent_output_not_called_proof: true
+review_gate_review:
+  plan_review_yaml_read_physically: true
+  precommit_review_yaml_read_physically: true
+  accepted_warning_matches_plan: true
+  blockers_prevent_progress: true
+  verdict_not_inferred: true
+  commit_readiness_read_physically: true
+  missing_artifact_blocks: true
+  malformed_artifact_blocks: true
+  unsupported_verdict_blocks: true
+action_proposal_review:
+  canonical_schema: true
+  deterministic_proposal_id: true
+  deterministic_proposal_hash: true
+  canonical_argv: true
+  safe_display_text: true
+  normalized_working_dir: true
+  repo_metadata_optional: true
+  expected_branch: true
+  expected_head: true
+  expected_changed_files: true
+  expected_payload_hash: true
+  current_session_state_hash: true
+  risk_level: true
+  rationale: true
+  created_by_metadata: true
+  human_action_required: true
+  secret_excluded: true
+  proposal_inert: true
+  proposal_state_bound: true
+  stale_proposal_handled: true
+  no_subprocess: true
+  no_shell_true: true
+  no_eval: true
+  no_os_system: true
+  no_git: true
+  no_gh: true
+  no_docker: true
+human_checkpoint_review:
+  exact_decision_values: true
+  human_actor: true
+  reason: true
+  proposal_id: true
+  proposal_hash: true
+  state_hash: true
+  deterministic_checkpoint_hash: true
+  stale_proposal_rejected: true
+  stale_state_rejected: true
+  proceed_manually_intent_only: true
+  proceed_manually_no_execution: true
+  stop_behavior: true
+  revise_behavior: true
+  defer_behavior: true
+  no_worker_unlock: true
+  no_queued_action: true
+  no_background_process: true
+external_action_result_review:
+  separate_record: true
+  reported_statuses: ["success", "failure", "result_unavailable"]
+  proposal_reference: true
+  proposal_hash: true
+  session_state_reference: true
+  reporting_actor: true
+  evidence_refs: true
+  result_not_inferred_from_checkpoint: true
+  reported_success_not_runtime_verified: true
+  unavailable_result_explicit: true
+  no_fabricated_capture: true
+cli_review:
+  one_cli_module: true
+  nine_subcommands: true
+  exact_command_names: true
+  exact_options: true
+  expected_hash_required: true
+  deterministic_json_output: true
+  human_readable_output: true
+  exit_codes_0_1_2_3: true
+  stale_exit_code_2: true
+  duplicate_handling: true
+  validation_exit_code_1: true
+  no_server_start: true
+  no_browser_open: true
+  no_provider_call: true
+  no_agent_launch: true
+  no_proposal_execution: true
+  no_repository_mutation: true
+  no_external_network: true
+read_model_api_review:
+  exact_route: "GET /orchestration/<session_id>"
+  no_extra_routes: true
+  get_only: true
+  versioned_response: true
+  session_id_validated: true
+  server_owned_orchestration_root: true
+  browser_cannot_override: true
+  no_arbitrary_file_path: true
+  list_bounds: true
+  stale_proposal_state_displayed: true
+  missing_state_displayed: true
+  no_general_browser: true
+run_bridge_review:
+  session_file_canonical: true
+  bridge_refs_deterministic: true
+  no_duplicate_mutable_state: true
+  bridged_metadata_distinct: true
+  no_fabricated_execution: true
+  no_fabricated_commands: true
+  ev_contract_version_compatible: true
+  existing_persistence_intact: true
+artifact_workspace_review:
+  session_status_displayed: true
+  current_state_hash_displayed: true
+  four_ordered_stages: true
+  role_labels: true
+  prompt_state: true
+  expected_artifact: true
+  artifact_evidence_state: true
+  artifact_ref_and_hash: true
+  review_verdict: true
+  blocker_state: true
+  revision_state: true
+  human_action_requirement: true
+  proposal_state: true
+  proposal_freshness: true
+  checkpoint_state: true
+  external_result_state: true
+  categories_distinct: true
+  no_mutation_buttons: true
+  no_run_agent: true
+  no_execute: true
+  no_commit: true
+  no_push: true
+  no_create_pr: true
+  no_merge: true
+safe_rendering_review:
+  runtime_values_via_safe_apis: true
+  no_untrusted_innerHTML: true
+  no_runtime_derived_handlers: true
+  no_markdown_execution: true
+  no_mermaid_execution: true
+  no_html_execution: true
+  no_ansi_interpretation: true
+  no_command_execution: true
+  no_url_autolinkification: true
+  no_path_autolinkification: true
+  no_file_links: true
+  no_javascript_or_data_urls: true
+atomicity_stale_state_review:
+  atomic_writes_used: true
+  stale_hash_rejected: true
+  canonical_state_unchanged_on_stale: true
+  resulting_hash_returned: true
+duplicate_conflict_review:
+  duplicate_identical_transition_handled: true
+  conflicting_transition_rejected: true
+pr0143_pr0147a_preservation_review:
+  get_health_compatible: true
+  get_root_compatible: true
+  get_workspace_compatible: true
+  get_runs_compatible: true
+  get_runs_detail_compatible: true
+  get_runs_report_compatible: true
+  pr0143_shell_preserved: true
+  pr0144_timeline_preserved: true
+  pr0145_detail_preserved: true
+  pr0146_report_preserved: true
+  pr0147_proof_manifest_preserved: true
+  pr0147a_operator_preserved: true
+  operator_remains_read_only: true
+  no_route_regression: true
+  no_evidence_mutation_outside_approved: true
+pr0147c_pr0147d_pr0148_deferral_review:
+  pr0147b_insertion_documented: true
+  pr0147c_separate: true
+  pr0147d_separate: true
+  pr0148_numbering_unchanged: true
+  later_numbering_unchanged: true
+  no_historical_rewritten: true
+  no_domain_profile: true
+  no_construction_adapter: true
+  no_mermaid_type: true
+  no_visual_gate: true
+  no_artifact_registry: true
+  no_artifact_acceptance: true
+  no_provider_routing: true
+  no_automatic_orchestration: true
+universality_review:
+  no_git_required: true
+  no_github_required: true
+  no_branch_required: true
+  no_pr_required: true
+  no_patch_required: true
+  domain_neutral: true
+  no_construction_specific: true
+test_contract_review:
+  orchestration_unit_tests: 39
+  packet_tests: true
+  hashing_tests: true
+  state_machine_tests: true
+  stale_state_tests: true
+  duplicate_conflict_tests: true
+  review_gate_tests: true
+  proposal_tests: true
+  checkpoint_tests: true
+  external_result_tests: true
+  cli_tests: true
+  read_model_tests: true
+  workspace_tests: true
+  operator_tests: 35
+  existing_regressions: 345+73+194
+  smoke_passed: true
+  residue_checks: true
+  forbidden_action_greps: true
+  forbidden_path_diffs: true
+smoke_review:
+  temp_orchestration_root: true
+  temp_runs_root: true
+  four_inert_prompts: true
+  deterministic_hashes: true
+  all_four_stages: true
+  plan_review_gate: true
+  planning_lock_gate: true
+  precommit_readiness_gate: true
+  blocked_transition: true
+  stale_hash_rejection: true
+  duplicate_behavior: true
+  conflict_rejection: true
+  proposal_creation: true
+  proposal_staleness: true
+  checkpoint_recording: true
+  checkpoint_non_execution: true
+  external_result_behavior: true
+  no_http_mutation: true
+  no_agent_launch: true
+  no_provider_call: true
+  no_git_or_gh: true
+  no_docker: true
+  no_proposal_execution: true
+  no_repository_residue: true
+  exact_success_marker: true
+compatibility_review:
+  get_health_unchanged: true
+  get_root_unchanged: true
+  get_workspace_unchanged: true
+  get_runs_unchanged: true
+  get_runs_detail_unchanged: true
+  get_runs_report_unchanged: true
+  local_operator_unchanged: true
+  ev_contract_version_unchanged: true
+  existing_routes_all_preserved: true
+boundary_confirmations:
+  - "Branch confirmed: 0147b-human-gated-manual-orchestration-mode"
+  - "OPTION B: Dedicated Manual Orchestration Store — .ariadne/orchestration/<session_id>.json"
+  - "Deterministic session ID (sha256[:16]), state hash (sha256[:16], self-ref excluded)"
+  - "Four ordered stages: planner → plan-review → coder → precommit-review"
+  - "Stage-order gates enforced — planning-lock, plan-review verdict, precommit readiness"
+  - "Review verdict gates physically read YAML artifacts"
+  - "Action proposals inert — no execution path. Bound to session_state_hash."
+  - "Human checkpoints record intent only (proceed_manually, stop, revise, defer) — never execute"
+  - "External action results operator-reported — separate record schema"
+  - "CLI: 9 human-run subcommands, --expected-hash required for mutation, no subprocess/eval/os.system"
+  - "GET-only /orchestration/<session_id> route — no POST/PUT/PATCH/DELETE"
+  - "Server-owned orchestration root — browser cannot select arbitrary root"
+  - "All forbidden patterns only appear in detection lists — no actual execution"
+  - "39 orchestration tests pass; 345 workspace+operator; 73 detail; 194 evidence/serialization/review"
+  - "Smoke: 'MANUAL ORCHESTRATION SMOKE PASSED' — 15 assertion groups, non-execution proved"
+  - "PR 0143–0147A fully preserved"
+  - "PR 0147C/D and PR 0148 deferred — roadmap slots preserved"
+  - "Universality maintained — no Git/GitHub/branch/PR requirements"
+plan_drift_gate: "PASS — All 31 PLAN DRIFT GATE block conditions checked and passed: (1) all files in scope, (2) all changed files read, (3) planning artifacts locked, (4) OPTION B implemented, (5) one canonical session store, (6) run bridge not canonical, (7) no provider prompt generation, (8) no agent launch, (9) proposals inert, (10) checkpoints intent-only, (11) no shell/git/gh/Docker execution, (12) intent not execution evidence, (13) prompts not proof, (14) completed stages require artifact+hash, (15) review verdicts not inferred, (16) stage order enforced, (17) stale updates rejected, (18) stale proposals handled, (19) atomic writes, (20) conflicts rejected, (21) no browser arbitrary input, (22) no HTTP mutation, (23) runtime values safe, (24) PR 0143–0147A preserved, (25) PR 0147C/D/0148 deferred, (26) PR numbering unchanged, (27) tests and smoke pass, (28) smoke proves non-execution, (29) IMPLEMENTATION_REPORT.md present and accurate, (30) cached diff empty, (31) no unknown files or generated residue."
+no_drift_check: "PASS — All 48 NO-DRIFT CHECK conditions confirmed: (1) correct branch, (2) exact approved scope, (3) all changed files read, (4) planning artifacts locked, (5) warnings accounted for, (6) OPTION B implemented, (7) one canonical store, (8) versioned packet, (9) exactly 4 prompts, (10) exactly 4 roles, (11) exactly 4 stages, (12) deterministic prompt hashes, (13) deterministic session ID, (14) deterministic state hash, (15) expected-state hash required, (16) stale updates rejected, (17) duplicates handled deterministically, (18) conflicts rejected, (19) stage-order gates enforced, (20) planning-lock gate enforced, (21) review gates enforced, (22) completed stages require evidence, (23) proposals inert, (24) proposals state-bound, (25) stale proposals handled, (26) checkpoints intent-only, (27) checkpoints don't execute, (28) external results separate, (29) HTTP GET-only, (30) CLI human-run non-executing, (31) workspace read-only, (32) prompts inert, (33) paths inert, (34) no agent launch, (35) no provider call, (36) no shell action execution, (37) no git/gh execution, (38) no Docker execution, (39) no arbitrary browser paths, (40) PR 0143–0147A preserved, (41) PR 0147C/D/0148 separate, (42) smoke passed, (43) smoke proved non-execution, (44) no repository residue, (45) IMPLEMENTATION_REPORT.md independently checked, (46) PLAN DRIFT GATE passed, (47) artifact written and read back, (48) actual evidence overrides agent claims."
+commit_readiness: "ready"

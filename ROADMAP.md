@@ -392,6 +392,30 @@ services are added. PR 0147B (Human-Gated Manual Orchestration Mode), PR 0147C
 (Domain-Neutral Run and Artifact Profile Contract), PR 0147D (Construction
 Estimate Read-Only Dogfood Adapter), and PR 0148+ remain unchanged.
 
+### PR 0147B — Human-Gated Manual Orchestration Mode (GOVERNANCE INSERTION)
+
+PR 0147B is a non-product governance insertion authorized by the human architect
+between PR 0147A (Local Operator Launch and End-to-End Smoke) and product PR 0148
+(Mermaid Artifact Type Read Model). It does not consume or renumber product
+roadmap slot PR 0148.
+
+PR 0147B formalizes the human-directed four-agent workflow into a deterministic
+manual orchestration session store at `.ariadne/orchestration/<session_id>.json`.
+It implements OPTION B (Dedicated Manual Orchestration Store with Run Bridge):
+a versioned packet contract with exactly four inert prompt artifacts, exactly
+four ordered stages (planner, plan-review, coder, precommit-review), stage-order
+gates with planning-lock and review-verdict enforcement, deterministic session
+identity and state hashing, stale-state protection via expected hashes,
+inert dangerous-action proposals bound to session state, intent-only human
+checkpoints (do not execute), separately recorded external action results,
+a human-run CLI with nine subcommands, a GET-only read route
+(`GET /orchestration/<session_id>`), and read-only Artifact Workspace
+presentation. No agent launch, provider calls, command execution, git, gh,
+Docker, HTTP mutation, or later-roadmap capability is added.
+
+PR 0147C (Domain-Neutral Run and Artifact Profile Contract), PR 0147D
+(Construction Estimate Read-Only Dogfood Adapter), and PR 0148+ remain unchanged.
+
 ### Next active stream: Artifact Workspace Read-Only UI (0138+)
 
 The next active stream is read-only Artifact Workspace UI. Detailed roadmap
