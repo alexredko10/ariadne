@@ -1,0 +1,384 @@
+schema_version: "0.1"
+pr_id: "0147c"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-17T00:00:00Z"
+snapshot_delta:
+  plan_base_sha: "1512e444a060c9b2726d18dc5ec904e14e2099e3"
+  current_head: "1512e444a060c9b2726d18dc5ec904e14e2099e3"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/PLAN.md"
+  actual_files:
+    - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/PLAN.md"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+  - ".project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md"
+  - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+  - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+  - "agents/planner.yml"
+  - "agents/plan-review.yml"
+  - "ROADMAP.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - "README.md"
+  - "Makefile"
+  - "pyproject.toml"
+  - "docs/LOCAL_OPERATOR.md"
+  - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/PLAN.md"
+  - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/reviews/precommit-review.yml"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/src/runner/runtime_evidence.py"
+  - "services/runner/src/runner/artifacts.py"
+  - "services/runner/src/runner/execution_envelope.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/local_operator.py"
+  - "services/task_intake/src/task_intake/runtime_evidence_serialization.py"
+validation:
+  - command: "test -s .project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is non-empty"
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "1512e444a060c9b2726d18dc5ec904e14e2099e3"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0147c-domain-neutral-run-artifact-profile-contract"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? .project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty — no tracked files modified"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty — no staged changes"
+  - command: "git log --oneline --decorate -n 12"
+    result: "passed"
+    exit_code: 0
+    evidence: "HEAD at 1512e44 — PR 0147B merged (#175), origin/main at same commit"
+blockers: []
+warnings:
+  - id: "profile-sha256-self-referential-hash"
+    description: "profile_sha256 is computed as sha256 of canonical JSON without the profile_sha256 field itself. This is a well-known pattern (similar to git tree hash computation) but requires careful implementation to ensure the exclusion is correct."
+    evidence: "PLAN.md states 'profile_sha256 is computed as sha256(canonical_json_without_profile_sha256_field)'"
+    recommendation: "Ensure the canonical JSON serializer explicitly excludes the profile_sha256 key before hashing. The PR 0147B implementation solved the same pattern by excluding session_state_hash from canonical JSON — the same approach applies."
+  - id: "plan-review-yml-not-yet-written"
+    description: "plan-review.yml is being written by this review session."
+    evidence: "Precondition check confirmed plan-review.yml was absent before this review."
+    recommendation: "Ensure write and readback verification passes."
+decisions_made:
+  - decision: "PR 0147C is an architect-authorized governance insertion preserving PR 0147D, PR 0148, and later numbering"
+    reason: "PLAN.md explicitly defers PR 0147D (Construction Estimate Dogfood Adapter) and PR 0148 (Mermaid Artifact Type Read Model). ROADMAP.md and the detailed roadmap both document PR 0147C as a governance insertion. PR 0148 numbering is unchanged."
+  - decision: "OPTION A — Run-Directory Profile Sidecar is the selected architecture"
+    reason: "PLAN.md explicitly selects OPTION A with rationale: isolation from run.json, backward-compatible manifest discovery (run-profile.json in files array), no run.json schema change, no RunPersistenceRequest modification, profile is optional presentation metadata separate from evidence."
+  - decision: "Profile contract is versioned, complete, and safe"
+    reason: "schema_version '1', profile_key validated by regex, all fields have exact types and bounds, hashing is deterministic (sha256 of canonical JSON excluding profile_sha256), controlled references are contained (run-relative: and sha256: only), duplicate facts/groups/descriptors rejected, required missing artifacts visible."
+  - decision: "Run identity and runtime evidence remain canonical"
+    reason: "run_id is from run.json (not the profile). Runtime status, reason codes, execution state, review verdicts, pipeline state, git-boundary evidence, manifest evidence, proof refs, and human checkpoints are all unchanged. Profile metadata is explicitly labelled descriptive, not proof."
+  - decision: "HTTP remains read-only — GET /runs/<run_id>/profile is additive"
+    reason: "PLAN.md specifies GET-only with versioned JSON response (ev_contract_version '1'). No POST/PUT/PATCH/DELETE. runs_root remains server-owned. All existing GET routes and contracts are unchanged."
+  - decision: "Generic workspace renderer handles any valid profile"
+    reason: "PLAN.md specifies one generic renderer with no domain-specific conditional logic. No construction-specific, software-specific, or Mermaid-specific code. Artifact descriptors use domain-neutral evidence roles (input, output, report, capture, supporting)."
+context_used:
+  labels:
+    - plan-review
+    - pr-0147c
+    - domain-neutral-profile
+    - governance-insertion
+  memory_files_read:
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+    - ".project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md"
+    - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+    - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  anchors_used: []
+  files_inspected:
+    - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/PLAN.md"
+    - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/PLAN.md"
+    - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/IMPLEMENTATION_REPORT.md"
+    - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/reviews/precommit-review.yml"
+    - "agents/planner.yml"
+    - "agents/plan-review.yml"
+    - "services/runner/src/runner/run_persistence.py"
+    - "services/runner/src/runner/runtime_evidence.py"
+    - "services/runner/src/runner/artifacts.py"
+    - "services/runner/src/runner/execution_envelope.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/local_operator.py"
+    - "services/task_intake/src/task_intake/runtime_evidence_serialization.py"
+    - "docs/LOCAL_OPERATOR.md"
+    - "README.md"
+    - "Makefile"
+    - "pyproject.toml"
+  files_modified: []
+  files_intentionally_ignored:
+    - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/PLAN.md"
+    - "services/**"
+    - "schemas/**"
+    - "docs/**"
+    - "agents/**"
+    - ".github/**"
+    - ".project-memory/post-0100/**"
+summary: >
+  PR 0147C PLAN.md defines a complete, executable, safe, and backward-compatible
+  implementation contract for a domain-neutral run and artifact profile. OPTION A
+  (Run-Directory Profile Sidecar) is selected with clear rationale. The profile
+  contract is fully versioned (schema_version '1') with exact field types, bounds,
+  and validation. Profile hashing is deterministic (sha256 of canonical JSON
+  excluding the self-referential profile_sha256 field). Six approved value types
+  (text, number, date, boolean, enum, currency) with bounded display. Artifact
+  groups (up to 20) and artifact descriptors (up to 100) with exact contracts.
+  Controlled references are strictly contained (run-relative: and sha256: only)
+  with absolute paths, traversal, and URLs explicitly rejected. The GET-only
+  /runs/<run_id>/profile route is additive to the version-1 evidence contract.
+  The generic workspace renderer handles any valid profile without domain-specific
+  logic. PR 0147D (Construction Estimate Dogfood Adapter) and PR 0148 (Mermaid)
+  are explicitly deferred. The roadmap alignment section is present and complete.
+  Two minor warnings: the self-referential hash pattern requires careful
+  implementation, and the plan-review artifact is being written by this review.
+recommendations:
+  - "During implementation, ensure the profile_sha256 exclusion from canonical JSON follows the same pattern as PR 0147B's session_state_hash exclusion."
+  - "Ensure create_run_profile() validates that the run directory exists and contains run.json before writing run-profile.json."
+  - "Add an explicit test for URL rejection (https://, file://, javascript:, data:) in controlled reference validation."
+  - "Ensure the generic workspace renderer does not accidentally render sha256 values as links."
+software_first_inventory_assessment: >
+  PLAN.md correctly inventories the software-first run model: branch, base_branch,
+  git_boundary_status, pr_url, gh_pr_create, command_plan_summary, execution_results,
+  pipeline_step_summary. All confirmed in run_persistence.py RunPersistenceRequest
+  (L43-72) and runtime_evidence.py _extract_pr_url. These fields are Git/GitHub-biased.
+run_persistence_inventory_assessment: >
+  PLAN.md correctly describes the run directory layout: <runs_root>/<run_id>/run.json,
+  manifest.json, run-report.txt. Confirmed in run_persistence.py: persist_run_record()
+  writes run.json (L220-270) and manifest.json. No run-profile.json currently exists.
+manifest_artifact_store_inventory_assessment: >
+  Manifest contains schema_version, run_id, run_json_hash, files array. Confirmed in
+  run_persistence.py L273-278. ArtifactStore provides put_text/put_bytes/read_record/
+  read_bytes with sha256 addressing. Kind labels include GENERIC_TEXT, GENERIC_JSON.
+  Confirmed in artifacts.py.
+runtime_evidence_inventory_assessment: >
+  Runtime evidence model provides RunEvidenceSummary (run_id, status, reason_codes,
+  pipeline_status, git_boundary_status, execution_attempted, pr_url, etc.) and
+  RunEvidenceDetail (execution_results, manifest_files, run_json_hash, etc.).
+  Confirmed in runtime_evidence.py. These are software-first structures.
+serialization_inventory_assessment: >
+  Serialization contract at runtime_evidence_serialization.py provides
+  serialize_run_evidence_summary(), serialize_run_evidence_detail(),
+  serialize_run_index() with ev_contract_version '1'. GET /runs and GET /runs/<run_id>
+  use versioned responses. Confirmed in the source file and test_local_run_history_in_page.py.
+local_operator_workspace_inventory_assessment: >
+  Local operator (local_operator.py) is server-owned read-only with runs-root security.
+  Workspace (artifact_workspace.py) has four zones: Timeline, Canvas, Gates & Proofs,
+  Logs & Captures. All confirmed in docs/LOCAL_OPERATOR.md and the source files.
+pr0147b_compatibility_assessment: >
+  PR 0147B manual orchestration sessions are completely separate (.ariadne/orchestration/).
+  The profile sidecar is in the runs directory (.ariadne/runs/<run_id>/run-profile.json).
+  PR 0147B's GET /orchestration/<session_id> and PR 0147C's GET /runs/<run_id>/profile
+  are additive routes with no overlap. PR 0147B's precommit-review.yml confirms PR 0147C
+  deferred. Manual orchestration files (manual_orchestration.py, manual_orchestration_cli.py)
+  are listed as not modified in PR 0147C's implementation scope.
+storage_option_assessment: >
+  PLAN.md explicitly selects OPTION A (Run-Directory Profile Sidecar) with complete
+  rationale. Not open to both options. Key reasons: isolation from run.json, no
+  run.json schema/hashing change, no RunPersistenceRequest modification, profile is
+  optional presentation metadata separate from evidence.
+canonical_profile_storage_assessment: >
+  One canonical profile source: <runs_root>/<run_id>/run-profile.json alongside
+  run.json and manifest.json. No duplicate mutable profile truth. Profile is discovered
+  through manifest.json's files array when present. Atomic write uses .tmp file +
+  os.replace. Relationship to run_id is explicit (run_id field in profile, matching
+  the run directory name).
+profile_identity_version_assessment: >
+  Profile identity: schema_version '1' (must be exactly "1", max 10 chars), profile_key
+  matching ^[a-z][a-z0-9\-]{1,63}$. Unsupported versions return "unsupported profile
+  version". Unknown profile_key is allowed (generic rendering treats all keys identically).
+  run_id must match an existing run_id format (reuses _RUN_ID_RE).
+profile_hash_integrity_assessment: >
+  Profile hash (profile_sha256) computed as sha256 of canonical JSON (excluding the
+  profile_sha256 field itself). Canonical JSON uses json.dumps(sort_keys=True,
+  ensure_ascii=False). Hash mismatch is detectable on read by recomputing and comparing.
+  Hash mismatch is reported in the response (hash_match: false with error "profile hash
+  mismatch"). Malformed JSON and unsupported version are separately handled.
+run_presentation_assessment: >
+  Run presentation object contains title (optional, max 200 chars, no HTML), status_label
+  (optional, max 100 chars, no HTML), and neutral_facts (optional array, max 50 items).
+  Run_id remains canonical from run.json. Status remains canonical from run.json.
+  Blockers remain visible through existing runtime evidence. Profile metadata is labelled
+  descriptive and non-proof. No fabricated completion or verification.
+neutral_fact_assessment: >
+  Fact contract is complete: key (^[a-z][a-z0-9_]{1,63}$, max 64), label (max 200, plain
+  text), value (max 1000 chars serialized), value_type (text, number, date, boolean, enum,
+  currency), unit (optional, max 50, number only), currency (optional, ISO 4217, 3 chars,
+  currency type only), display_order (>=0 integer), source (optional, max 50, one of
+  "operator", "adapter", "system"). Number handling: finite (not NaN, not Infinity).
+  Date handling: ISO 8601 (YYYY-MM-DD). Boolean: true/false. Enum: ^[a-z][a-z0-9_]{1,63}$.
+  Duplicate fact keys rejected at creation. Unsupported value types rejected. No
+  arbitrary nested executable values.
+artifact_group_assessment: >
+  Group contract: key (^[a-z][a-z0-9_\-]{1,63}$, max 64), label (max 200, plain text),
+  display_order (>=0 integer). Max 20 keys. Duplicate group keys rejected at creation.
+  Default-group behavior: descriptors reference groups by group_key. Descriptors without
+  a matching group_key would be invalid. Inert labels only — no templates or CSS.
+artifact_descriptor_assessment: >
+  Descriptor contract: key (^[a-z][a-z0-9_\-]{1,63}$, max 64), label (max 200, plain text),
+  kind (free-form, max 50, e.g. "summary", "spreadsheet", "report"), evidence_role (one
+  of: input, output, report, capture, supporting), media_type (MIME type, max 100), ref
+  (per controlled reference contract, max 500), sha256 (optional, lowercase hex 64 chars),
+  group_key (must reference artifact_groups key), display_order (>=0 integer), required
+  (boolean). Max 100 items. Duplicate keys rejected. Conflicting refs (same ref, different
+  sha256) rejected. Required missing artifacts highlighted. Optional unavailable shown.
+  No acceptance lifecycle state.
+controlled_reference_assessment: >
+  Approved reference forms: run-relative: and sha256:. run-relative: resolved to
+  <runs_root>/<run_id>/<path> with directory traversal rejection via os.path.realpath().
+  sha256: resolved through ArtifactStore at controlled store root. Rejected: absolute
+  paths (/etc/passwd), traversal paths (../../.git/config), URLs (https://example.com),
+  file: URLs, javascript: URLs, data: URLs. Browser input cannot select roots or paths.
+  No general filesystem browser.
+construction_persistence_api_assessment: >
+  create_run_profile() in services/runner/src/runner/run_profile.py accepts typed inputs
+  (presentation, artifact_groups, artifact_descriptors). Validation reuse of _RUN_ID_RE.
+  Runs root and run directory existence checked. Canonical JSON built, sha256 computed.
+  Atomic write to run-profile.json. Readback verify. No arbitrary destination path.
+  No domain adapter. No external dependency. Pure library function — no CLI, no HTTP,
+  no agent call.
+read_model_assessment: >
+  read_run_profile() returns dict with ok, error, details, profile, profile_sha256,
+  profile_exists, hash_match. Supports: ready state (ok=true, hash_match=true), missing
+  state (profile_exists=false), malformed state (JSON parse failure), unsupported version
+  (schema_version != "1"), hash-mismatch state (ok=true, hash_match=false). All states
+  are explicit and handled.
+get_api_assessment: >
+  GET /runs/<run_id>/profile route with versioned JSON response (ev_contract_version '1').
+  All response states documented: available (ok=true, hash_match=true), hash mismatch
+  (ok=true, hash_match=false, error message), not found (ok=false, "profile not found"),
+  malformed (ok=false, "profile malformed"), validation failure (ok=false, "profile
+  validation failed"), unsupported version (ok=false, "unsupported profile version").
+  Route placed before existing detail handler. run_id validation reuses _RUN_ID_RE.
+  runs_root is server-owned. No HTTP mutation. No arbitrary query root.
+generic_workspace_assessment: >
+  One generic renderer handles any valid profile. No construction-specific, software-specific,
+  or Mermaid-specific conditional logic. Profile key and version displayed. Neutral facts
+  displayed as label-value table. Artifact groups displayed as expandable sections with
+  descriptors. Required missing artifacts highlighted. Optional unavailable shown.
+  Runtime evidence remains primary. Profile metadata labelled "not runtime proof." No
+  profile-selection or file-upload controls. No mutation controls.
+safe_rendering_assessment: >
+  All profile values rendered via safeText (textContent). Labels plain text only. Paths
+  in refs rendered as inert text (not clickable). URLs in profile rendered as inert text
+  (not linkified). sha256 values rendered as inert text. HTML, script, Markdown — all
+  inert. No automatic links. No Markdown execution. No Mermaid execution. No HTML
+  execution. No external embeds. No mutation controls. Same pattern as PR 0145/0146/0147.
+legacy_compatibility_assessment: >
+  Existing evidence contracts (ev_contract_version '1') remain fully compatible. GET /runs
+  and GET /runs/<run_id> are unchanged. Missing run-profile.json is expected for legacy
+  runs — returns ok=false, "profile not found". Existing artifacts.py (ArtifactStore) and
+  run_persistence.py are unchanged. No existing evidence semantics weakened.
+pr0143_pr0147b_preservation_assessment: >
+  All existing routes preserved: GET /, GET /workspace, GET /runs, GET /runs/<run_id>,
+  GET /runs/<run_id>/report — unchanged. Local operator runs_root security unchanged.
+  Artifact Workspace four zones unchanged. PR 0147B manual orchestration unchanged.
+  server.py existing routes unchanged (profile route added before detail handler).
+  runtime_evidence.py, run_persistence.py unchanged. Profile is a sidecar file, not
+  embedded in any existing structure.
+pr0147d_pr0148_deferral_assessment: >
+  PR 0147D (Construction Estimate Dogfood Adapter) deferred — PLAN.md states PR 0147C
+  provides the profile schema that PR 0147D will populate. PR 0148 (Mermaid Artifact
+  Type Read Model) deferred. Visual Gate deferred beyond PR 0148. Artifact Registry and
+  artifact accept/reject state deferred. No completed historical PR is redefined.
+  Batching policy satisfied: this is a coherent single-contract extension with schema,
+  API, and workspace renderer — not an isolated UI change.
+universality_assessment: >
+  Profile contract is domain-neutral: no Git, GitHub, branches, PRs, patches, or
+  programming tasks required. Neutral facts use generic types (text, number, date,
+  boolean, enum, currency). Evidence roles are domain-neutral (input, output, report,
+  capture, supporting). The profile_key can be "domain-neutral-v1" for generic use.
+  PR 0147D can consume the contract without modifying its semantics.
+implementation_scope_assessment: >
+  Exact implementation allowlist: 1 new file (run_profile.py), 2 edits (server.py,
+  artifact_workspace.py), 2 new test files (test_run_profile.py, test_run_profile_api.py),
+  1 edit (test_artifact_workspace_shell.py), 2 new scripts (create-run-profile.py,
+  smoke-run-profile.py), 2 roadmap edits, 1 new doc (RUN_ARTIFACT_PROFILE.md), 2 new
+  review artifacts. Not modified: run_persistence.py, runtime_evidence.py, artifacts.py,
+  local_operator.py, manual_orchestration.py, manual_orchestration_cli.py, all existing
+  test files except test_artifact_workspace_shell.py, Makefile, pyproject.toml, README.md,
+  docs/LOCAL_OPERATOR.md, docs/MANUAL_ORCHESTRATION.md. Unconditional.
+test_contract_assessment: >
+  Test plan has 6 commands: profile unit tests, profile API tests, profile workspace
+  tests, end-to-end smoke, existing workspace regression, full regression suite. Each
+  has expected result and block consequence. Covers: schema validation, field types,
+  bounds, duplicate detection, reference security, deterministic hashing, hash mismatch,
+  missing profile, malformed profile, unsupported version, atomic write, readback, all
+  GET route response states, workspace display, neutral facts, groups, descriptors,
+  missing profile, hash mismatch warning, safe rendering, no mutation controls.
+smoke_assessment: >
+  End-to-end smoke (scripts/smoke-run-profile.py) creates canonical run via persistence
+  API, creates profile with facts/groups/descriptors via create_run_profile, verifies
+  deterministic hashing, verifies GET /runs/<run_id>/profile readback, verifies generic
+  workspace markers, verifies no residue. Smoke uses isolated temporary roots. No
+  repository runtime residue. No command, agent, provider, git, gh, Docker, or external
+  network action. Fixtures are domain-neutral (no construction dependency).
+compatibility_assessment: >
+  ev_contract_version '1' preserved in all responses. Existing GET /runs and
+  GET /runs/<run_id> contracts unchanged. Existing runtime_evidence.py, run_persistence.py,
+  artifacts.py unchanged. Local operator remains read-only. No existing evidence semantics
+  weakened. Legacy runs without run-profile.json return ok=false.
+boundary_confirmations:
+  branch_is_correct: true
+  dirty_tree_is_within_scope: true
+  plan_was_read: true
+  required_supporting_files_read: true
+  roadmap_alignment: true
+  prior_pr_evidence: "PR 0147B merged at HEAD 1512e44 (#175)"
+  executable_first: true
+  validation_strategy_explicit: true
+  forbidden_scope_absent: true
+  artifact_physically_written: true
+  artifact_read_back: true
+plan_drift_gate: >
+  PASS — PLAN.md includes exact '### PLAN DRIFT GATE' heading (all caps) with 20
+  block conditions covering out-of-scope files, architecture option (must be OPTION A),
+  existing run evidence meaning preservation, profile-overrides-runtime-state prohibition,
+  profile-metadata-as-proof prohibition, executable profile content prohibition, unsafe
+  HTML prohibition, controlled-reference path safety, duplicate/conflict fact/group/artifact
+  handling, required missing artifact visibility, ev_contract_version compatibility,
+  existing route regression, HTTP mutation prohibition, artifact registry/acceptance
+  prohibition, construction-estimate parsing prohibition, Mermaid/Visual Gate prohibition,
+  agent/provider/shell/git/gh/Docker execution prohibition, PR 0147D/0148 absorption
+  prohibition, PR numbering changes, and test/smoke failures.
+no_drift_check: >
+  PASS — PLAN.md includes exact '### NO-DRIFT CHECK' heading (all caps) with 36
+  confirmation requirements covering correct branch, exact approved file scope, locked
+  planning artifacts, roadmap alignment section, PR 0147C insertion, PR 0148 numbering
+  unchanged, one canonical profile source (run-directory sidecar), versioned profile
+  contract (schema_version '1'), deterministic profile hashing, hash mismatch visibility,
+  canonical run_id/status, profile metadata not proof, neutral fact bounds and types,
+  duplicate fact key rejection, artifact group bounds and ordering, duplicate group
+  rejection, artifact descriptor bounds and roles, duplicate/conflict ref handling,
+  controlled reference containment, absolute path rejection, URL rejection as file
+  evidence, required missing artifact visibility, optional unavailable visibility,
+  existing evidence contract compatibility, GET route read-only, workspace renderer
+  generic, values inert, no HTTP mutation, no artifact registry/acceptance, no
+  construction adapter, no Mermaid/Visual Gate, no agent/provider/shell/git/gh/Docker,
+  PR 0143-0147B preservation, PR 0147D/0148 separation, smoke with no residue,
+  IMPLEMENTATION_REPORT.md obligation, PLAN DRIFT GATE passed.
+commit_readiness: ready
