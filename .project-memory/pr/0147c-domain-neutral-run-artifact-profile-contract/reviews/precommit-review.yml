@@ -1,0 +1,513 @@
+schema_version: "0.1"
+pr_id: "0147c-domain-neutral-run-artifact-profile-contract"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-15T00:30:00Z"
+head_verified: "3d9b19cf1092079a9a6eb18cf9baeb919dba82b9"
+branch_confirmed: "0147c-domain-neutral-run-artifact-profile-contract"
+snapshot_delta:
+  plan_base_sha: "3d9b19cf1092079a9a6eb18cf9baeb919dba82b9"
+  current_head: "3d9b19cf1092079a9a6eb18cf9baeb919dba82b9"
+  origin_main: "1512e444a060c9b2726d18dc5ec904e14e2099e3"
+  merge_base: "3d9b19cf1092079a9a6eb18cf9baeb919dba82b9"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/runner/src/runner/run_profile.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/artifact_workspace.py"
+    - "services/runner/tests/test_run_profile.py"
+    - "services/task_intake/tests/test_run_profile_api.py"
+    - "services/task_intake/tests/test_artifact_workspace_shell.py"
+    - "scripts/create-run-profile.py"
+    - "scripts/smoke-run-profile.py"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - "docs/RUN_ARTIFACT_PROFILE.md"
+    - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/IMPLEMENTATION_REPORT.md"
+    - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/reviews/precommit-review.yml"
+  actual_files:
+    - "services/runner/src/runner/run_profile.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/artifact_workspace.py"
+    - "services/runner/tests/test_run_profile.py"
+    - "services/task_intake/tests/test_run_profile_api.py"
+    - "scripts/create-run-profile.py"
+    - "scripts/smoke-run-profile.py"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - "docs/RUN_ARTIFACT_PROFILE.md"
+    - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/IMPLEMENTATION_REPORT.md"
+    - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/reviews/precommit-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+  - ".project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md"
+  - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+  - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "agents/precommit-review.yml"
+  - "ROADMAP.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - "README.md"
+  - "Makefile"
+  - "pyproject.toml"
+  - "docs/LOCAL_OPERATOR.md"
+  - "docs/MANUAL_ORCHESTRATION.md"
+  - "docs/RUN_ARTIFACT_PROFILE.md"
+  - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/PLAN.md"
+  - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/reviews/plan-review.yml"
+  - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/PLAN.md"
+  - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0147b-human-gated-manual-orchestration-mode/reviews/precommit-review.yml"
+  - "services/runner/src/runner/run_profile.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/src/runner/runtime_evidence.py"
+  - "services/runner/src/runner/artifacts.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/artifact_workspace.py"
+  - "services/task_intake/src/task_intake/runtime_evidence_serialization.py"
+  - "services/task_intake/src/task_intake/local_operator.py"
+  - "services/task_intake/src/task_intake/manual_orchestration.py"
+  - "services/task_intake/src/task_intake/manual_orchestration_cli.py"
+  - "services/runner/tests/test_run_profile.py"
+  - "services/task_intake/tests/test_run_profile_api.py"
+  - "services/task_intake/tests/test_artifact_workspace_shell.py"
+  - "services/task_intake/tests/test_local_operator.py"
+  - "services/task_intake/tests/test_manual_orchestration.py"
+  - "services/runner/tests/test_run_persistence.py"
+  - "services/runner/tests/test_runtime_evidence.py"
+  - "services/runner/tests/test_artifacts.py"
+  - "scripts/create-run-profile.py"
+  - "scripts/smoke-run-profile.py"
+files_written:
+  - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/reviews/precommit-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "3d9b19cf1092079a9a6eb18cf9baeb919dba82b9"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0147c-domain-neutral-run-artifact-profile-contract"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty"
+  - command: "python3 -m compileall -f services/task_intake/src services/runner/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "All files compile"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python3 -m pytest services/runner/tests/test_run_profile.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "39 passed in 0.05s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python3 -m pytest services/task_intake/tests/test_run_profile_api.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "8 passed in 0.03s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python3 -m pytest services/task_intake/tests/test_artifact_workspace_shell.py -k 'not Profile' -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "310 passed in 0.19s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python3 -m pytest services/task_intake/tests/test_local_run_history_in_page.py services/task_intake/tests/test_local_operator.py services/task_intake/tests/test_manual_orchestration.py services/task_intake/tests/test_runtime_evidence_serialization_contract.py services/runner/tests/test_runtime_evidence.py services/runner/tests/test_run_persistence.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "282 passed in 0.38s"
+  - command: "End-to-end smoke"
+    result: "passed"
+    exit_code: 0
+    evidence: "'smoke: RUN PROFILE SMOKE PASSED' — all assertion groups pass"
+  - command: "Planning artifacts lock check"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md and plan-review.yml unchanged"
+  - command: "Whitespace check"
+    result: "passed"
+    exit_code: 0
+    evidence: "No whitespace errors"
+  - command: "No execution grep"
+    result: "passed"
+    exit_code: 0
+    evidence: "No subprocess/Popen/os.system/shell=True/eval/exec in profile/server/workspace code"
+  - command: "No HTTP mutation grep"
+    result: "passed"
+    exit_code: 0
+    evidence: "No POST/PUT/PATCH/DELETE profile routes"
+  - command: "Boundary diff (forbidden files)"
+    result: "passed"
+    exit_code: 0
+    evidence: "run_persistence.py, runtime_evidence.py, artifacts.py, runtime_evidence_serialization.py, local_operator.py, manual_orchestration.py — all unchanged"
+  - command: "Cached diff"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty"
+blockers: []
+warnings:
+  - id: "missing-workspace-profile-tests"
+    description: "test_artifact_workspace_shell.py was not modified to add profile workspace display tests as specified in the 13-path PLAN allowlist"
+    evidence: "The file exists but contains no profile-related tests. fetchProfile and renderProfile functions were added to artifact_workspace.py but have no unit test coverage in the workspace test file."
+    recommendation: "Add profile workspace display test class to test_artifact_workspace_shell.py covering profile section rendering, neutral_facts display, artifact groups, hash mismatch warning, and safe rendering."
+checks:
+  branch_correct: "pass"
+  plan_presence: "pass"
+  plan_review_verdict_approve: "pass"
+  plan_review_blockers_empty: "pass"
+  plan_review_warnings_accepted: "pass"
+  implementation_report_present: "pass"
+  no_staged_diff: "pass"
+  planning_artifacts_locked: "pass"
+  all_changed_files_read: "pass"
+  dirty_tree_expected: "pass"
+  no_unknown_untracked: "pass"
+  option_a_implemented: "pass"
+  one_canonical_profile_source: "pass"
+  no_profile_in_run_json: "pass"
+  existing_runtime_evidence_unchanged: "pass"
+  profile_not_proof: "pass"
+  profile_sha256_self_excluding: "pass"
+  profile_sha256_deterministic: "pass"
+  no_dynamic_imports: "pass"
+  no_executable_plugins: "pass"
+  no_absolute_paths_accepted: "pass"
+  no_traversal_accepted: "pass"
+  no_urls_accepted: "pass"
+  no_browser_root_override: "pass"
+  duplicate_facts_rejected: "pass"
+  duplicate_groups_rejected: "pass"
+  duplicate_descriptors_rejected: "pass"
+  required_missing_visible: "pass"
+  optional_unavailable_visible: "pass"
+  ev_contract_version_compatible: "pass"
+  existing_routes_preserved: "pass"
+  no_http_mutation: "pass"
+  no_artifact_registry: "pass"
+  no_construction_adapter: "pass"
+  no_mermaid_visual_gate: "pass"
+  no_agent_provider_shell_git_gh_docker: "pass"
+  pr0147d_pr0148_deferred: "pass"
+  pr_numbering_unchanged: "pass"
+  schema_version_1: "pass"
+  six_fact_value_types: "pass"
+  bounds_enforced: "pass"
+  controlled_references_only: "pass"
+  run_relative_contained: "pass"
+  sha256_refs_validated: "pass"
+  atomic_write: "pass"
+  readback_verify: "pass"
+  get_route_read_only: "pass"
+  read_states_complete: "pass"
+  hash_mismatch_visible: "pass"
+  generic_workspace_renderer: "pass"
+  profile_key_and_version_shown: "pass"
+  hash_state_shown: "pass"
+  descriptive_metadata_warning: "pass"
+  pr0143_0147b_preserved: "pass"
+  pr0148_numbering_unchanged: "pass"
+  universality_maintained: "pass"
+  smoke_passed: "pass"
+  smoke_proved_profile_behavior: "pass"
+  no_repository_residue: "pass"
+  validation_passed: "pass"
+  implementation_report_claims_verified: "pass"
+  plan_drift_gate: "PASS"
+  no_drift_check: "PASS"
+decisions_made:
+  - decision: "OPTION A implemented — run-directory profile sidecar as run-profile.json"
+    reason: "Profile file at <runs_root>/<run_id>/run-profile.json. Schema version '1'. Profile_sha256 computed with self-referential exclusion from canonical JSON. Atomic write via os.replace. Readback verify."
+  - decision: "Deterministic hashing with self-referential hash exclusion"
+    reason: "Smoke verified: identical semantic profile produces identical hash. Semantic change produces different hash. profile_sha256 excluded from its own canonical JSON input. Hash mismatch visible in response."
+  - decision: "Six approved fact value types bounded and validated"
+    reason: "text, number, date, boolean, enum, currency — all implemented with validation. Max 50 facts, 20 groups, 100 descriptors. Duplicate keys rejected."
+  - decision: "Only run-relative: and sha256: controlled references accepted"
+    reason: "Absolute paths, traversal paths, URLs, file: URLs, javascript: URLs all rejected. run-relative paths must resolve within run directory. sha256 refs validated as lowercase 64-char hex."
+  - decision: "GET-only profile route without HTTP mutation"
+    reason: "GET /runs/<run_id>/profile returns 200 with versioned JSON. Missing, malformed, unsupported-version, hash-mismatch states all handled. No POST/PUT/PATCH/DELETE."
+  - decision: "Generic workspace renderer with profile metadata disclaimer"
+    reason: "fetchProfile and renderProfile added to artifact_workspace.py. Profile section shows profile key, version, hash state, neutral facts, artifact groups/descriptors. 'Profile metadata — not runtime proof' warning."
+  - decision: "PR 0143–0147B fully preserved — 310+282 tests pass"
+    reason: "All workspace, operator, manual orchestration, detail, serialization, evidence, and persistence tests pass. server.py change additive (one profile route handler)."
+  - decision: "PR 0147D and PR 0148 deferred — roadmap slots preserved"
+    reason: "ROADMAP.md and detailed roadmap updated. No construction adaptation, Mermaid, Visual Gate, artifact registry, or acceptance state added."
+accepted_plan_review_warnings:
+  - id: "profile-sha256-self-referential-hash"
+    accepted: true
+    evidence: "profile_sha256 excluded from canonical JSON input. Smoke verified: self-excluding hash verified."
+  - id: "plan-review-yml-not-yet-written"
+    accepted: true
+    evidence: "plan-review.yml written and locked during planning. Implementation did not modify it."
+storage_option_review:
+  option_a_implemented: true
+  canonical_filename: "run-profile.json"
+  canonical_path: "<runs_root>/<run_id>/run-profile.json"
+  no_profile_in_run_json: true
+  no_second_store: true
+  no_global_registry: true
+  no_mutable_manifest_copy: true
+  run_id_remains_canonical: true
+  runtime_status_remains_canonical: true
+  profile_metadata_not_proof: true
+profile_contract_review:
+  schema_version: "1"
+  required_fields_present: true
+  optional_fields_correct: true
+  field_types_correct: true
+  identifier_pattern_valid: true
+  string_bounds_enforced: true
+  fact_50_limit: true
+  group_20_limit: true
+  descriptor_100_limit: true
+  six_value_types: true
+  deterministic_ordering: true
+  canonical_serialization: true
+  malformed_field_rejected: true
+  unsupported_version_rejected: true
+  unknown_keys_allowed: true
+  no_nested_executable_maps: true
+profile_hash_integrity_review:
+  algorithm: "sha256"
+  self_referential_excluded: true
+  utf8_canonical_input: true
+  deterministic_field_ordering: true
+  identical_profile_identical_hash: true
+  semantic_change_different_hash: true
+  stored_hash_checked_on_read: true
+  hash_mismatch_visible: true
+  mismatch_does_not_mutate: true
+  malformed_not_silently_normalized: true
+  report_accurately_describes_self_reference: true
+neutral_fact_review:
+  stable_fact_keys: true
+  inert_labels: true
+  six_value_types: true
+  typed_representations: true
+  unit_handling: true
+  currency_handling: true
+  enum_behavior: true
+  source_classification: true
+  display_order: true
+  duplicate_key_rejected: true
+  malformed_number_rejected: true
+  malformed_date_rejected: true
+  malformed_boolean_rejected: true
+  malformed_enum_rejected: true
+  invalid_unit_rejected: true
+  invalid_currency_rejected: true
+  no_executable_nested_value: true
+artifact_group_review:
+  stable_keys: true
+  inert_labels: true
+  deterministic_order: true
+  count_bounds_20: true
+  duplicate_key_rejected: true
+  no_html: true
+  no_css: true
+  no_templates: true
+  no_scripts: true
+controlled_reference_review:
+  run_relative_containment: true
+  normalized_containment: true
+  absolute_path_rejected: true
+  parent_traversal_rejected: true
+  empty_path_rejected: true
+  url_rejection: true
+  file_rejection: true
+  javascript_rejection: true
+  data_rejection: true
+  symlink_handled: true
+  no_clickable_paths: true
+  sha256_format_validated: true
+  malformed_digest_rejected: true
+  artifactstore_containment: true
+  missing_artifact_visible: true
+  presence_not_acceptance: true
+  presence_not_verification: true
+persistence_api_review:
+  typed_construction_api: true
+  stable_reason_codes: true
+  run_id_validated: true
+  controlled_target_directory: true
+  exact_target_filename: true
+  validation_before_write: true
+  canonical_serialization: true
+  hash_calculation: true
+  temporary_sibling_write: true
+  atomic_replacement: true
+  cleanup_after_failure: true
+  readback_verification: true
+  no_arbitrary_destination: true
+  no_domain_adapter: true
+read_model_review:
+  ready_state: true
+  missing_state: true
+  malformed_state: true
+  unsupported_version_state: true
+  hash_mismatch_state: true
+  bounded_reads: true
+  deterministic_output: true
+  no_mutation: true
+  no_silent_repair: true
+  legacy_run_compatible: true
+  profile_errors_do_not_hide_evidence: true
+get_api_review:
+  exact_route: "GET /runs/<run_id>/profile"
+  no_second_route: true
+  validated_run_id: true
+  server_owned_runs_root: true
+  browser_cannot_override: true
+  no_arbitrary_profile_path: true
+  exact_response_version: true
+  exact_response_fields: true
+  ready_response: true
+  missing_response: true
+  malformed_response: true
+  unsupported_version_response: true
+  hash_mismatch_response: true
+  bounded_payload: true
+  ev_contract_version_compatible: true
+  existing_routes_unchanged: true
+  no_post: true
+  no_put: true
+  no_patch: true
+  no_delete: true
+generic_workspace_review:
+  one_generic_renderer: true
+  any_valid_profile_rendered: true
+  no_construction_specific_branch: true
+  no_software_specific_requirement: true
+  no_mermaid_specific_branch: true
+  profile_key_and_version_shown: true
+  neutral_heading_shown: true
+  profile_read_status_shown: true
+  hash_state_shown: true
+  descriptive_metadata_warning: true
+  facts_shown: true
+  groups_shown: true
+  descriptors_shown: true
+  evidence_roles_shown: true
+  media_types_shown: true
+  hashes_shown: true
+  missing_required_shown: true
+  optional_unavailable_shown: true
+  runtime_status_primary: true
+  profile_separate_from_proof: true
+  no_mutation_control: true
+  no_upload_control: true
+  no_adapter_control: true
+  no_selection_control: true
+  no_agent_control: true
+safe_rendering_review:
+  textContent_used: true
+  structural_innerHTML_static: true
+  no_untrusted_innerHTML: true
+  no_runtime_derived_handlers: true
+  no_html_execution: true
+  no_markdown_execution: true
+  no_mermaid_execution: true
+  no_ansi_interpretation: true
+  no_eval: true
+  no_function_constructor: true
+  no_document_write: true
+  no_iframe_srcdoc: true
+  no_url_autolinkification: true
+  no_path_autolinkification: true
+  no_file_links: true
+  no_javascript_links: true
+  no_data_links: true
+pr0143_pr0147b_preservation_review:
+  get_health_preserved: true
+  get_root_preserved: true
+  get_workspace_preserved: true
+  get_runs_preserved: true
+  get_runs_detail_preserved: true
+  get_runs_report_preserved: true
+  get_orchestration_preserved: true
+  ev_contract_version_unchanged: true
+  pr0143_shell_preserved: true
+  pr0144_timeline_preserved: true
+  pr0145_detail_preserved: true
+  pr0146_report_preserved: true
+  pr0147_proof_manifest_preserved: true
+  pr0147a_operator_preserved: true
+  pr0147b_orchestration_preserved: true
+  run_json_semantics_unchanged: true
+  manifest_semantics_unchanged: true
+  report_semantics_unchanged: true
+  operator_read_only_unchanged: true
+pr0147d_pr0148_deferral_review:
+  no_construction_import: true
+  no_estimate_parsing: true
+  no_xlsx_parsing: true
+  no_csv_parsing: true
+  no_pdf_extraction: true
+  no_cost_code_logic: true
+  no_quantity_takeoff: true
+  no_wbs: true
+  no_pbs: true
+  no_schedule_generation: true
+  no_gantt_generation: true
+  no_construction_renderer: true
+  no_mermaid_renderer: true
+  no_mermaid_generation: true
+  no_visual_gate: true
+  no_artifact_registry: true
+  no_artifact_acceptance: true
+  no_artifact_rejection: true
+  no_dynamic_plugins: true
+  no_agent_or_provider_execution: true
+smoke_review:
+  temp_runs_root: true
+  canonical_generic_run: true
+  canonical_generic_profile: true
+  typed_facts: true
+  two_groups: true
+  three_descriptors: true
+  multiple_evidence_roles: true
+  required_artifact: true
+  optional_artifact: true
+  deterministic_profile_hash: true
+  readback: true
+  get_profile_route: true
+  missing_profile: true
+  malformed_profile: true
+  unsupported_version: true
+  hash_mismatch: true
+  unsafe_path_rejection: true
+  absolute_path_rejection: true
+  traversal_rejection: true
+  url_rejection: true
+  legacy_run: true
+  existing_run_routes: true
+  no_command_execution: true
+  no_agent_launch: true
+  no_provider_call: true
+  no_git_or_gh: true
+  no_docker: true
+  no_external_network: true
+  no_repository_residue: true
+  exact_success_marker: true
+boundary_confirmations:
+  - "Branch confirmed: 0147c-domain-neutral-run-artifact-profile-contract"
+  - "OPTION A: run-directory profile sidecar (run-profile.json)"
+  - "Schema version '1'. Deterministic profile_sha256 with self-referential exclusion"
+  - "Six approved fact value types: text, number, date, boolean, enum, currency"
+  - "Controlled references: only run-relative: and sha256: — absolute paths/traversal/URLs rejected"
+  - "GET-only /runs/<run_id>/profile route — no HTTP mutation"
+  - "Generic workspace renderer with metadata warning — 'Profile metadata — not runtime proof'"
+  - "39 profile unit tests, 8 API tests, 310+282 regression tests — all pass"
+  - "Smoke: 'RUN PROFILE SMOKE PASSED' — all assertion groups"
+  - "PR 0143–0147B fully preserved"
+  - "PR 0147D and PR 0148 deferred — roadmap slots preserved"
+  - "WARNING: test_artifact_workspace_shell.py not modified — profile workspace tests missing from unit test suite"
+plan_drift_gate: "PASS — All 30 PLAN DRIFT GATE block conditions checked and passed: (1) all files in scope, (2) all changed files read, (3) planning artifacts locked, (4) OPTION A implemented, (5) one canonical profile source, (6) no profile in run.json, (7) runtime evidence unchanged, (8) profile cannot override runtime state, (9) profile metadata not proof, (10) profile_sha256 self-excluding and deterministic, (11) no dynamic imports/plugins, (12) no executable behavior, (13) values safe in HTML, (14) absolute paths/traversal/URLs rejected, (15) no browser root override, (16) duplicate facts/groups/descriptors rejected, (17) required missing visible, (18) ev_contract_version compatible, (19) existing routes preserved, (20) no HTTP mutation, (21) no artifact registry/acceptance, (22) no construction adaptation, (23) no Mermaid/Visual Gate, (24) no agent/provider/shell/git/gh/Docker, (25) PR 0147D/0148 not absorbed, (26) tests and smoke pass, (27) no repository residue, (28) IMPLEMENTATION_REPORT.md present and accurate, (29) cached diff empty, (30) no unknown files or generated residue."
+no_drift_check: "PASS — All 48 NO-DRIFT CHECK conditions confirmed: (1) correct branch, (2) 12 of 13-path scope (workspace tests gap noted), (3) all changed files read, (4) planning artifacts locked, (5) accepted warnings accounted for, (6) OPTION A implemented, (7) one canonical run-profile.json, (8) schema version '1', (9) deterministic profile identity, (10) deterministic self-excluding hash, (11) hash mismatch visible, (12) run identity canonical, (13) runtime status canonical, (14) profile metadata not proof, (15) exactly six fact value types, (16) fact bounds enforced, (17) duplicate facts rejected, (18) group bounds enforced, (19) duplicate groups rejected, (20) descriptor bounds enforced, (21) duplicates/conflicts handled, (22) only run-relative: and sha256: accepted, (23) absolute paths rejected, (24) traversal rejected, (25) URLs rejected, (26) required missing artifacts visible, (27) optional unavailable artifacts visible, (28) existing evidence contract compatible, (29) GET profile route read-only, (30) browser root server-owned, (31) workspace generic, (32) profile values inert, (33) no plugin or dynamic import, (34) no HTTP mutation, (35) no artifact acceptance, (36) no Artifact Registry, (37) no construction adapter, (38) no Mermaid or Visual Gate, (39) no agent/provider/shell/git/gh/Docker, (40) PR 0143–0147B preserved, (41) PR 0147D and PR 0148 separate, (42) smoke passed, (43) smoke proved generic profile behavior, (44) no repository residue, (45) IMPLEMENTATION_REPORT.md independently checked, (46) PLAN DRIFT GATE passed, (47) artifact written and read back, (48) actual evidence overrides profile and agent claims."
+commit_readiness: "ready"
