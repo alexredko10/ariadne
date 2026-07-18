@@ -438,6 +438,24 @@ or HTTP mutation is added.
 PR 0147D (Construction Estimate Read-Only Dogfood Adapter) and PR 0148+
 remain unchanged.
 
+### PR 0147D — Construction Estimate Read-Only Dogfood Adapter (GOVERNANCE INSERTION)
+
+PR 0147D is a non-product governance insertion authorized by the human architect
+between PR 0147C (Domain-Neutral Run and Artifact Profile Contract) and product
+PR 0148 (Mermaid Artifact Type Read Model). It does not consume or renumber
+product roadmap slot PR 0148.
+
+PR 0147D implements the first real non-software dogfood adapter on the PR 0147C
+profile contract. It reads a strict UTF-8 CSV construction estimate with exactly
+12 ordered columns, validates deterministically using Decimal arithmetic for all
+financial values, enforces source immutability via SHA-256 before/after copy, and
+maps the estimate to a version-1 run-profile sidecar with profile_key
+`construction-estimate-v1`. The source CSV is NEVER modified. No new profile fact
+types, evidence roles, or reference forms are introduced. No construction-specific
+HTTP routes, workspace branches, or execution behavior is added. The existing
+generic `GET /runs/<run_id>/profile` route and workspace renderer display the
+profile without modification. PR 0148 remains Mermaid Artifact Type Read Model.
+
 ### Next active stream: Artifact Workspace Read-Only UI (0138+)
 
 The next active stream is read-only Artifact Workspace UI. Detailed roadmap

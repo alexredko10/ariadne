@@ -1,0 +1,8 @@
+estimate_id,title,project_name,currency,line_item_id,description,category,quantity,unit,unit_rate,line_total,notes
+EST-001,Sample Warehouse Construction,Acme Industrial Park,USD,ITEM-001,Site Preparation,site_prep,1,lump_sum,25000.00,25000.00,Mobilize equipment
+EST-001,Sample Warehouse Construction,Acme Industrial Park,USD,ITEM-002,Concrete Foundation (Type A),foundation,500,square_foot,85.00,42500.00,
+EST-001,Sample Warehouse Construction,Acme Industrial Park,USD,ITEM-003,Structural Steel Frame,structure,50,tonne,3200.00,160000.00,Supplier quote attached
+EST-001,Sample Warehouse Construction,Acme Industrial Park,USD,ITEM-004,Metal Roofing,roofing,20000,square_foot,12.50,250000.00,
+EST-001,Sample Warehouse Construction,Acme Industrial Park,USD,ITEM-005,Electrical Rough-In,electrical,1,lump_sum,45000.00,45000.00,
+EST-001,Sample Warehouse Construction,Acme Industrial Park,USD,ITEM-006,Plumbing Rough-In,plumbing,1,lump_sum,35000.00,35000.00,
+EST-001,Sample Warehouse Construction,Acme Industrial Park,USD,ITEM-007,HVAC System,hvac,1,lump_sum,55000.00,55000.00,
