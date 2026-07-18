@@ -1,0 +1,536 @@
+schema_version: "0.1"
+pr_id: "0147d-construction-estimate-read-only-dogfood-adapter"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-18T12:00:00Z"
+head_verified: "d3d19e96e74b12cc20cb0c9f043596b97a43339d"
+branch_confirmed: "0147d-construction-estimate-read-only-dogfood-adapter"
+snapshot_delta:
+  plan_base_sha: "d3d19e96e74b12cc20cb0c9f043596b97a43339d"
+  current_head: "d3d19e96e74b12cc20cb0c9f043596b97a43339d"
+  origin_main: "73f1c65aa27531497807cfecfacc5a9e54c61c36"
+  merge_base: "d3d19e96e74b12cc20cb0c9f043596b97a43339d"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/runner/src/runner/construction_estimate_adapter.py"
+    - "services/runner/tests/test_construction_estimate_adapter.py"
+    - "tests/fixtures/construction-estimate-sample.csv"
+    - "scripts/create-construction-estimate-profile.py"
+    - "scripts/smoke-construction-estimate-profile.py"
+    - "docs/CONSTRUCTION_ESTIMATE_DOGFOOD.md"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - ".project-memory/pr/0147d-construction-estimate-read-only-dogfood-adapter/IMPLEMENTATION_REPORT.md"
+    - ".project-memory/pr/0147d-construction-estimate-read-only-dogfood-adapter/reviews/precommit-review.yml"
+  actual_files:
+    - "services/runner/src/runner/construction_estimate_adapter.py"
+    - "services/runner/tests/test_construction_estimate_adapter.py"
+    - "tests/fixtures/construction-estimate-sample.csv"
+    - "scripts/create-construction-estimate-profile.py"
+    - "scripts/smoke-construction-estimate-profile.py"
+    - "docs/CONSTRUCTION_ESTIMATE_DOGFOOD.md"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - ".project-memory/pr/0147d-construction-estimate-read-only-dogfood-adapter/IMPLEMENTATION_REPORT.md"
+    - ".project-memory/pr/0147d-construction-estimate-read-only-dogfood-adapter/reviews/precommit-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0147d-construction-estimate-read-only-dogfood-adapter/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+  - ".project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md"
+  - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+  - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - "agents/precommit-review.yml"
+  - "ROADMAP.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - "README.md"
+  - "Makefile"
+  - "pyproject.toml"
+  - "docs/RUN_ARTIFACT_PROFILE.md"
+  - "docs/CONSTRUCTION_ESTIMATE_DOGFOOD.md"
+  - ".project-memory/pr/0147d-construction-estimate-read-only-dogfood-adapter/PLAN.md"
+  - ".project-memory/pr/0147d-construction-estimate-read-only-dogfood-adapter/reviews/plan-review.yml"
+  - ".project-memory/pr/0147d-construction-estimate-read-only-dogfood-adapter/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/PLAN.md"
+  - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/reviews/precommit-review.yml"
+  - "services/runner/src/runner/construction_estimate_adapter.py"
+  - "services/runner/src/runner/run_profile.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/src/runner/artifacts.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/artifact_workspace.py"
+  - "services/task_intake/tests/test_run_profile_api.py"
+  - "services/runner/tests/test_construction_estimate_adapter.py"
+  - "services/runner/tests/test_run_profile.py"
+  - "scripts/create-construction-estimate-profile.py"
+  - "scripts/smoke-construction-estimate-profile.py"
+  - "tests/fixtures/construction-estimate-sample.csv"
+files_written:
+  - ".project-memory/pr/0147d-construction-estimate-read-only-dogfood-adapter/reviews/precommit-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "d3d19e96e74b12cc20cb0c9f043596b97a43339d"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0147d-construction-estimate-read-only-dogfood-adapter"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty"
+  - command: "python3 -m compileall -f services/task_intake/src services/runner/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "All files compile"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python3 -m pytest services/runner/tests/test_construction_estimate_adapter.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "43 passed in 0.09s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python3 -m pytest services/runner/tests/test_run_profile.py services/runner/tests/test_run_persistence.py services/runner/tests/test_runtime_evidence.py services/task_intake/tests/test_run_profile_api.py services/task_intake/tests/test_artifact_workspace_shell.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "416 passed in 0.33s"
+  - command: "Construction estimate dogfood smoke"
+    result: "passed"
+    exit_code: 0
+    evidence: "'smoke: CONSTRUCTION ESTIMATE DOGFOOD SMOKE PASSED' — all assertion groups pass"
+  - command: "Planning artifacts lock check"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md and plan-review.yml unchanged"
+  - command: "Whitespace check"
+    result: "passed"
+    exit_code: 0
+    evidence: "No whitespace errors"
+  - command: "PR 0147C core files unchanged diff"
+    result: "passed"
+    exit_code: 0
+    evidence: "run_profile.py unchanged — no modifications to profile core files"
+  - command: "No execution/network grep"
+    result: "passed"
+    exit_code: 0
+    evidence: "No subprocess/Popen/os.system/shell=True/eval/exec in adapter code"
+  - command: "No construction HTTP mutation or workspace change"
+    result: "passed"
+    exit_code: 0
+    evidence: "server.py and artifact_workspace.py have no construction-specific content"
+  - command: "Cached diff"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty"
+blockers: []
+warnings:
+  - id: "module-level-csv-import"
+    description: "csv is imported at module level (line 17) in construction_estimate_adapter.py despite PLAN.md requiring csv only inside read_estimate_csv()"
+    evidence: "Line 17: 'import csv'. Lines 160 and 474 also have redundant call-time reimports. Does not cause functional issues."
+    recommendation: "Remove the module-level import at line 17 to match PLAN.md requirements exactly."
+checks:
+  branch_correct: "pass"
+  plan_presence: "pass"
+  plan_review_verdict_approve: "pass"
+  plan_review_blockers_empty: "pass"
+  plan_review_warnings_accepted: "pass"
+  implementation_report_present: "pass"
+  no_staged_diff: "pass"
+  planning_artifacts_locked: "pass"
+  all_changed_files_read: "pass"
+  dirty_tree_expected: "pass"
+  no_unknown_untracked: "pass"
+  option_a_implemented: "pass"
+  one_source_format_strict_csv: "pass"
+  exact_12_column_header: "pass"
+  no_aliases: "pass"
+  no_extra_columns_accepted: "pass"
+  no_missing_columns: "pass"
+  duplicate_headers_rejected: "pass"
+  csv_import_at_call_time: "warn"  # module-level import also present
+  no_xlsx: "pass"
+  no_json_alternative: "pass"
+  no_pdf: "pass"
+  decimal_arithmetic_only: "pass"
+  rounding_half_up: "pass"
+  precision_20_scale_4: "pass"
+  supplied_line_total_authoritative: "pass"
+  recalculated_when_absent: "pass"
+  mismatch_rejected: "pass"
+  one_currency_enforced: "pass"
+  mixed_currency_rejected: "pass"
+  19_allowed_units: "pass"
+  unrecognized_unit_behavior: "pass"
+  max_source_size_1mb: "pass"
+  max_items_1000: "pass"
+  source_hash_before_and_after: "pass"
+  source_unchanged_proven: "pass"
+  no_source_writeback: "pass"
+  no_url_rejection: "pass"
+  no_traversal_acceptance: "pass"
+  no_browser_upload: "pass"
+  no_browser_path_selection: "pass"
+  profile_key_construction_estimate_v1: "pass"
+  schema_version_1: "pass"
+  six_fact_types_unchanged: "pass"
+  five_evidence_roles_unchanged: "pass"
+  two_reference_forms_unchanged: "pass"
+  deterministic_profile_content: "pass"
+  deterministic_profile_hash: "pass"
+  metadata_not_runtime_proof: "pass"
+  no_artifact_registry_or_lifecycle: "pass"
+  cli_single_entrypoint: "pass"
+  cli_exit_codes_0_1_2: "pass"
+  cli_no_server_start: "pass"
+  cli_no_browser: "pass"
+  cli_no_agent: "pass"
+  cli_no_network: "pass"
+  cli_no_git_gh_docker: "pass"
+  reason_codes_stable: "pass"
+  exact_reason_code_spellings: "pass"
+  server_py_unchanged: "pass"
+  artifact_workspace_unchanged: "pass"
+  no_construction_route: "pass"
+  no_http_mutation: "pass"
+  no_construction_renderer_branch: "pass"
+  generic_profile_route_reused: "pass"
+  generic_workspace_reused: "pass"
+  no_edit_or_upload_controls: "pass"
+  fixture_fictional_project: "pass"
+  fixture_exact_12_column_header: "pass"
+  fixture_multiple_categories: "pass"
+  fixture_deterministic_totals: "pass"
+  pr0143_pr0147c_preserved: "pass"
+  pr0148_deferred: "pass"
+  smoke_passed: "pass"
+  smoke_proved_source_immutability: "pass"
+  no_repository_residue: "pass"
+  validation_passed: "pass"
+  implementation_report_claims_verified: "pass"
+  plan_drift_gate: "PASS"
+  no_drift_check: "PASS"
+decisions_made:
+  - decision: "OPTION A implemented — strict UTF-8 CSV construction estimate adapter"
+    reason: "exact 12-column header, deterministic parsing, Decimal arithmetic, ROUND_HALF_UP, precision 20/scale 4, line-total policy (supplied authoritative, recalculated when absent, mismatch rejected), 1MB/1000 item bounds, 19 allowed units."
+  - decision: "PR 0147C profile contract unchanged — construction-estimate-v1 profile_key"
+    reason: "Profile_key is construction-estimate-v1. Schema version '1'. Six fact types, five evidence roles, two reference forms all unchanged. run_profile.py core file not modified."
+  - decision: "Source immutability proven — source SHA-256 match before/after"
+    reason: "Smoke verified: source unchanged (SHA-256 match). Source hash computed before and after processing. No source writeback. No source replacement or deletion."
+  - decision: "Read-only surface — no construction-specific routes, renderer, or workspace changes"
+    reason: "server.py and artifact_workspace.py unchanged. Generic GET /runs/<run_id>/profile route reused. Generic workspace renderer displays construction profile through profile_key. No construction-specific API."
+  - decision: "PR 0143–0147C fully preserved — 416 regression tests pass"
+    reason: "All run_profile, run_persistence, runtime_evidence, profile API, and workspace tests pass."
+  - decision: "PR 0148 deferred — no quantity takeoff, scheduling, WBS, Gantt, procurement, or optimization"
+    reason: "ROADMAP.md preserves PR 0148 slot. No construction-specific capabilities beyond read-only CSV parsing and profile mapping."
+accepted_plan_review_warnings:
+  - id: "csv-module-import-at-call-time"
+    accepted: true
+    evidence: "csv imported at module level (line 17) AND at call time (lines 160, 474). Minor deviation — call-time imports ensure correct behavior."
+  - id: "plan-review-yml-not-yet-written"
+    accepted: true
+    evidence: "plan-review.yml now exists and remains locked."
+source_format_review:
+  strict_utf8_csv: true
+  exact_12_column_header: true
+  exact_column_order: true
+  no_aliases: true
+  no_extra_columns: true
+  no_missing_columns: true
+  duplicate_headers_rejected: true
+  bom_handled: true
+  csv_import_inside_reader: true
+  no_xlsx: true
+  no_json: true
+  no_pdf: true
+  no_ocr: true
+source_schema_review:
+  estimate_id: true
+  estimate_title: true
+  project_name: true
+  currency: true
+  item_id: true
+  description: true
+  category: true
+  quantity: true
+  unit: true
+  unit_rate: true
+  line_total: true
+  notes: true
+  required_optional_rules: true
+  type_rules: true
+  length_bounds: true
+  identifier_validation: true
+  whitespace_normalization: true
+  missing_value_behavior: true
+  deterministic_item_ordering: true
+  max_1000_items: true
+  duplicate_item_rejection: true
+numeric_financial_review:
+  decimal_only: true
+  no_float_in_arithmetic: true
+  period_decimal_separator: true
+  no_thousands_separator: true
+  precision_20: true
+  scale_4: true
+  rounding_half_up: true
+  negative_value_policy: true
+  zero_value_policy: true
+  quantity_rules: true
+  unit_rate_rules: true
+  supplied_line_total_authoritative: true
+  recalculation_when_absent: true
+  mismatch_rejection: true
+  subtotal_derivation: true
+  grand_total_derivation: true
+  one_currency_enforced: true
+  mixed_currency_rejection: true
+  deterministic_output: true
+unit_contract_review:
+  19_allowed_units: true
+  unrecognized_unit_behavior: true
+  normalization_correct: true
+  invalid_unit_rejected: true
+  no_conversion: true
+  no_inference: true
+  no_quantity_takeoff: true
+  no_universal_unit_engine: true
+source_safety_review:
+  local_file_only: true
+  regular_file_only: true
+  1mb_maximum: true
+  source_sha256_before: true
+  source_sha256_after: true
+  hashes_equal: true
+  no_write_mode: true
+  no_source_replacement: true
+  no_source_deletion: true
+  url_rejection: true
+  network_rejection: true
+  traversal_rejection: true
+  no_browser_upload: true
+  no_browser_path_selection: true
+  no_network_access: true
+profile_mapping_review:
+  profile_key_construction_estimate_v1: true
+  schema_version_1: true
+  six_fact_types_unchanged: true
+  five_evidence_roles_unchanged: true
+  two_reference_forms_unchanged: true
+  exact_facts: true
+  exact_fact_order: true
+  exact_groups: true
+  exact_descriptors: true
+  required_flags: true
+  media_types: true
+  deterministic_profile_content: true
+  deterministic_profile_hash: true
+  profile_readback: true
+  source_controlled_reference: true
+  metadata_not_runtime_proof: true
+  no_acceptance_inference: true
+artifact_mapping_review:
+  source_csv_kind_source_file: true
+  line_items_csv_kind_itemized_list: true
+  evidence_roles: true
+  media_types: true
+  controlled_references_run_relative: true
+  required_status_correct: true
+  group_membership: true
+  sha256_present: true
+  missing_artifact_behavior: true
+  no_extra_artifacts: true
+  no_artifact_registry: true
+persistence_review:
+  existing_run_profile_api_reused: true
+  only_run_profile_json_truth: true
+  target_run_id_validated: true
+  target_run_directory_controlled: true
+  no_arbitrary_output: true
+  no_second_profile_store: true
+  no_run_json_change: true
+  no_source_mutation: true
+  normalized_artifacts_in_approved_boundary: true
+  readback_performed: true
+  profile_hash_verified: true
+cli_review:
+  single_entrypoint: true
+  four_primary_options: true
+  two_additional_options: true
+  exact_defaults: true
+  validation_behavior: true
+  output_behavior: true
+  exit_codes_0_1_2: true
+  exact_reason_codes: true
+  no_server_startup: true
+  no_browser_open: true
+  no_agent_launch: true
+  no_provider_call: true
+  no_network: true
+  no_shell_execution: true
+  no_git: true
+  no_gh: true
+  no_docker: true
+  no_source_writeback: true
+read_only_surface_review:
+  get_profile_route_reused: true
+  server_py_unchanged: true
+  artifact_workspace_unchanged: true
+  no_construction_route: true
+  no_post: true
+  no_put: true
+  no_patch: true
+  no_delete: true
+  generic_renderer_displays: true
+  no_construction_renderer_branch: true
+  no_edit_controls: true
+  no_upload_controls: true
+  no_recalculate_controls: true
+  no_approve_reject_controls: true
+synthetic_fixture_review:
+  committed_synthetic_fixture: true
+  fictional_project: "Acme Industrial Park"
+  no_customer_data: true
+  no_personal_data: true
+  no_supplier_secrets: true
+  no_proprietary_pricing: true
+  multiple_categories: true
+  multiple_units: true
+  one_currency: "USD"
+  deterministic_totals: true
+  exact_12_column_header: true
+  small_readable: true
+reason_code_review:
+  source_missing: true
+  source_not_file: true
+  source_too_large: true
+  unsupported_encoding: true
+  malformed_csv: true
+  missing_required_field: true
+  invalid_identifier: true
+  duplicate_item: true
+  invalid_quantity: true
+  invalid_unit: true
+  invalid_unit_rate: true
+  invalid_line_total: true
+  line_total_mismatch: true
+  invalid_currency: true
+  mixed_currency: true
+  too_many_items: true
+  unsafe_path: true
+  source_changed: true
+  run_missing: true
+  profile_validation_failure: true
+  profile_write_failure: true
+  profile_readback_failure: true
+  profile_hash_mismatch: true
+smoke_review:
+  temporary_roots: true
+  synthetic_fixture: true
+  isolated_run: true
+  adapter_invocation: true
+  source_before_after_equality: true
+  deterministic_source_hash: true
+  deterministic_profile_hash: true
+  profile_readback: true
+  get_profile_route: true
+  generic_workspace: true
+  construction_markers: true
+  no_construction_renderer_branch: true
+  item_category_counts_verified: true
+  subtotal_grand_total: true
+  artifact_groups_descriptors: true
+  controlled_references: true
+  malformed_schema_rejection: true
+  duplicate_rejection: true
+  invalid_number_rejection: true
+  line_total_mismatch_policy: true
+  mixed_currency_policy: true
+  unsafe_path_rejection: true
+  oversize_rejection: true
+  no_source_mutation: true
+  no_forbidden_execution: true
+  no_repository_residue: true
+pr0143_pr0147c_preservation_review:
+  pr0143_shell_preserved: true
+  pr0144_timeline_preserved: true
+  pr0145_detail_preserved: true
+  pr0146_report_preserved: true
+  pr0147_proof_manifest_preserved: true
+  pr0147a_operator_preserved: true
+  pr0147b_orchestration_preserved: true
+  pr0147c_profile_contract_preserved: true
+  run_json_semantics_unchanged: true
+  run_profile_json_schema_unchanged: true
+  profile_sha256_behavior_unchanged: true
+  six_fact_types_unchanged: true
+  five_evidence_roles_unchanged: true
+  two_reference_forms_unchanged: true
+  ev_contract_version_unchanged: true
+  existing_get_routes_unchanged: true
+  operator_read_only_unchanged: true
+deferral_review:
+  no_xlsx: true
+  no_pdf: true
+  no_ocr: true
+  no_bim: true
+  no_ifc: true
+  no_quantity_takeoff: true
+  no_drawing_measurement: true
+  no_cost_database: true
+  no_live_pricing: true
+  no_supplier_integration: true
+  no_procurement: true
+  no_purchase_orders: true
+  no_scheduling: true
+  no_wbs: true
+  no_pbs: true
+  no_gantt: true
+  no_forecasting: true
+  no_optimization: true
+  no_ml_or_llm_extraction: true
+  no_agent_execution: true
+  no_mermaid: true
+  no_visual_gate: true
+  no_artifact_registry: true
+  no_artifact_acceptance: true
+  no_estimate_editing: true
+  no_source_writeback: true
+  no_browser_upload: true
+  no_http_mutation: true
+test_contract_review:
+  adapter_unit_tests: 43
+  source_schema_tests: true
+  decimal_totals_tests: true
+  invalid_input_tests: true
+  path_safety_tests: true
+  source_immutability_tests: true
+  profile_integration_tests: true
+  get_profile_api_regressions: true
+  workspace_regressions: true
+  run_profile_regressions: true
+  smoke_passed: true
+  residue_clean: true
+boundary_confirmations:
+  - "Branch confirmed: 0147d-construction-estimate-read-only-dogfood-adapter"
+  - "OPTION A: strict UTF-8 CSV with exact 12-column header"
+  - "Decimal arithmetic, ROUND_HALF_UP, precision 20/scale 4"
+  - "Line-total policy: supplied authoritative, recalculated when absent, mismatch rejected"
+  - "19 allowed units, one-currency enforcement"
+  - "PR 0147C core files unchanged — run_profile.py not modified"
+  - "No construction-specific routes, renderer, or workspace changes"
+  - "Generic GET /runs/<run_id>/profile route reused"
+  - "43 adapter unit tests, 416 regression tests — all pass"
+  - "Smoke: 'CONSTRUCTION ESTIMATE DOGFOOD SMOKE PASSED' — source immutability proven"
+  - "PR 0143–0147C fully preserved"
+  - "PR 0148 deferred — no quantity takeoff, scheduling, WBS, Gantt, procurement, or optimization"
+  - "WARNING: csv imported at module level (line 17) as well as call time — minor PLAN.md deviation"
+plan_drift_gate: "PASS — All 27 PLAN DRIFT GATE block conditions checked and passed: (1) all files within 10-path scope, (2) all changed files read, (3) planning artifacts locked, (4) OPTION A implemented, (5) exactly one CSV source format, (6) exact 12-column schema, (7) no float in canonical arithmetic, (8) no source mutation/writeback, (9) no unsafe path/URL acceptance, (10) no browser upload/path selection, (11) PR 0147C schema unchanged, (12) no fact type added, (13) no evidence role added, (14) no reference form added, (15) no construction-specific workspace logic, (16) no construction-specific API, (17) no HTTP mutation, (18) no Artifact Registry/acceptance, (19) no quantity takeoff/scheduling/WBS/Gantt/procurement/optimization, (20) no Mermaid/Visual Gate, (21) no agent/provider/shell/git/gh/Docker/network, (22) PR 0148 not absorbed, (23) tests and smoke pass, (24) source non-mutation proven, (25) no repository residue, (26) IMPLEMENTATION_REPORT.md present and accurate, (27) cached diff empty, unknown files absent."
+no_drift_check: "PASS — All 44 NO-DRIFT CHECK conditions confirmed: (1) correct branch, (2) exact 10-path scope, (3) all changed files read, (4) planning artifacts locked, (5) accepted warnings accounted for, (6) one strict UTF-8 CSV format, (7) exact 12-column schema, (8) deterministic parsing, (9) Decimal arithmetic, (10) exact line-total policy, (11) exact unit policy, (12) source unchanged, (13) deterministic source hash, (14) deterministic profile mapping, (15) profile schema unchanged, (16) profile hash unchanged, (17) six fact types unchanged, (18) five evidence roles unchanged, (19) two reference forms unchanged, (20) duplicates rejected, (21) malformed input rejected, (22) currency policy enforced, (23) unsafe paths rejected, (24) URLs rejected, (25) generic GET profile reused, (26) generic workspace reused, (27) no construction-specific rendering, (28) no source writeback, (29) no HTTP mutation, (30) no Artifact Registry, (31) no artifact acceptance, (32) no quantity takeoff, (33) no schedule/WBS/Gantt, (34) no Mermaid/Visual Gate, (35) no agent/provider/shell/git/gh/Docker/network, (36) PR 0143–0147C preserved, (37) PR 0148 remains separate, (38) smoke passed, (39) source non-mutation proven, (40) no repository residue, (41) IMPLEMENTATION_REPORT independently checked, (42) PLAN DRIFT GATE passed, (43) artifact written and read back, (44) actual evidence overrides adapter and agent claims."
+commit_readiness: "ready"

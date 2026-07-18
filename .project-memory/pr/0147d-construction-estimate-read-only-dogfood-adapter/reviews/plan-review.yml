@@ -1,0 +1,358 @@
+schema_version: "0.1"
+pr_id: "0147d"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-17T00:00:00Z"
+snapshot_delta:
+  plan_base_sha: "73f1c65ef1a10c9ee04bfdabf5d62c762727a913"
+  current_head: "73f1c65ef1a10c9ee04bfdabf5d62c762727a913"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0147d-construction-estimate-read-only-dogfood-adapter/PLAN.md"
+  actual_files:
+    - ".project-memory/pr/0147d-construction-estimate-read-only-dogfood-adapter/PLAN.md"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0147d-construction-estimate-read-only-dogfood-adapter/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+  - ".project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md"
+  - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+  - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+  - "agents/planner.yml"
+  - "agents/plan-review.yml"
+  - "ROADMAP.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - "README.md"
+  - "Makefile"
+  - "pyproject.toml"
+  - "docs/RUN_ARTIFACT_PROFILE.md"
+  - "docs/LOCAL_OPERATOR.md"
+  - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/PLAN.md"
+  - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/reviews/precommit-review.yml"
+  - "services/runner/src/runner/run_profile.py"
+  - "services/runner/src/runner/run_persistence.py"
+  - "services/runner/src/runner/artifacts.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/artifact_workspace.py"
+  - "services/runner/tests/test_run_profile.py"
+  - "scripts/create-run-profile.py"
+  - "scripts/smoke-run-profile.py"
+validation:
+  - command: "test -s .project-memory/pr/0147d-construction-estimate-read-only-dogfood-adapter/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is non-empty"
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "73f1c65ef1a10c9ee04bfdabf5d62c762727a913"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0147d-construction-estimate-read-only-dogfood-adapter"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "?? .project-memory/pr/0147d-construction-estimate-read-only-dogfood-adapter/"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty — no tracked files modified"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty — no staged changes"
+  - command: "git log --oneline --decorate -n 12"
+    result: "passed"
+    exit_code: 0
+    evidence: "HEAD at 73f1c65 — PR 0147C merged (#176), origin/main at same commit"
+blockers: []
+warnings:
+  - id: "csv-module-import-at-call-time"
+    description: "PLAN.md states 'The module does NOT import csv at module level — only inside read_estimate_csv()'. This is a defensive pattern but unusual and adds a minor risk of import error discovery at runtime rather than at module load time."
+    evidence: "PLAN.md: 'The module does NOT import csv at module level — only inside read_estimate_csv().'"
+    recommendation: "Consider importing csv at module level — it is a standard-library module always available in Python >=3.11. The defensive pattern is acceptable but may confuse future maintainers."
+  - id: "plan-review-yml-not-yet-written"
+    description: "plan-review.yml is being written by this review session."
+    evidence: "Precondition check confirmed plan-review.yml was absent before this review."
+    recommendation: "Ensure write and readback verification passes."
+decisions_made:
+  - decision: "PR 0147D is an architect-authorized governance insertion preserving PR 0148 and later numbering"
+    reason: "PLAN.md explicitly defers PR 0148 (Mermaid Artifact Type Read Model). ROADMAP.md and the detailed roadmap both document PR 0147D as a governance insertion. PR 0148 numbering is unchanged. PR 0147C is the completed substrate."
+  - decision: "OPTION A — Strict UTF-8 CSV with exact 12-column header contract"
+    reason: "PLAN.md selects CSV over JSON (would duplicate schema) and XLSX (no approved dependency). CSV mirrors real-world estimate exchange. The 12-column header (estimate_id, title, project_name, currency, line_item_id, description, category, quantity, unit, unit_rate, line_total, notes) is exact and unconditional."
+  - decision: "Decimal arithmetic for all financial values"
+    reason: "PLAN.md requires decimal.Decimal for all financial values. Decimal separator is period only. Thousands separator is none. Negative/zero rejected for quantity/unit_rate. Line-total policy: authoritative if supplied, recalculated if absent, mismatch rejected. Max precision 20, max scale 4. ROUND_HALF_UP rounding. No binary float."
+  - decision: "Source immutability guaranteed via SHA-256 before/after"
+    reason: "PLAN.md specifies SHA-256 computed before reading, source copied unchanged to run directory, SHA-256 recomputed on copy. Source file NEVER modified. Source hash part of validation record."
+  - decision: "PR 0147C profile schema unchanged — mapped through create_run_profile()"
+    reason: "No new fact value types, no new evidence roles, no new reference forms. Profile_key 'construction-estimate-v1' uses the existing six types (text, number, currency), five roles (input, output, report, supporting), two reference forms (run-relative:, sha256:)."
+  - decision: "Generic workspace renderer reused — no construction-specific branches"
+    reason: "PLAN.md explicitly prohibits construction-specific JavaScript, Python rendering branches, editing controls, upload controls, approve/reject controls, recalculate controls. Existing GET /runs/<run_id>/profile route reused."
+context_used:
+  labels:
+    - plan-review
+    - pr-0147d
+    - construction-estimate
+    - dogfood-adapter
+  memory_files_read:
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+    - ".project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md"
+    - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+    - ".project-memory/templates/IMPLEMENTATION_REPORT_TEMPLATE.md"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  anchors_used: []
+  files_inspected:
+    - ".project-memory/pr/0147d-construction-estimate-read-only-dogfood-adapter/PLAN.md"
+    - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/PLAN.md"
+    - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/IMPLEMENTATION_REPORT.md"
+    - ".project-memory/pr/0147c-domain-neutral-run-artifact-profile-contract/reviews/precommit-review.yml"
+    - "agents/planner.yml"
+    - "agents/plan-review.yml"
+    - "services/runner/src/runner/run_profile.py"
+    - "services/runner/src/runner/run_persistence.py"
+    - "services/runner/src/runner/artifacts.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/artifact_workspace.py"
+    - "services/runner/tests/test_run_profile.py"
+    - "services/task_intake/tests/test_run_profile_api.py"
+    - "scripts/create-run-profile.py"
+    - "scripts/smoke-run-profile.py"
+    - "docs/RUN_ARTIFACT_PROFILE.md"
+    - "docs/LOCAL_OPERATOR.md"
+    - "README.md"
+    - "Makefile"
+    - "pyproject.toml"
+  files_modified: []
+  files_intentionally_ignored:
+    - ".project-memory/pr/0147d-construction-estimate-read-only-dogfood-adapter/PLAN.md"
+    - "services/**"
+    - "schemas/**"
+    - "docs/**"
+    - "agents/**"
+    - ".github/**"
+    - ".project-memory/post-0100/**"
+summary: >
+  PR 0147D PLAN.md defines a complete, executable, safe, and tightly bounded
+  implementation contract for the first real non-software dogfood adapter built
+  on the PR 0147C run-profile contract. OPTION A (Strict UTF-8 CSV with exact
+  12-column header) is selected with rationale. The source schema is fully
+  specified with exact columns, types, and validation. Decimal arithmetic is
+  required for all financial values with exact precision, scale, rounding,
+  and line-total policy. Source immutability is guaranteed via SHA-256 before
+  and after copy. PR 0147C profile schema remains unchanged — profile_key
+  'construction-estimate-v1' uses existing six fact types, five evidence roles,
+  and two reference forms. The generic workspace renderer is reused with no
+  construction-specific branches. No HTTP mutation, no Artifact Registry, no
+  quantity takeoff, no scheduling. PR 0148 is explicitly deferred. Roadmap
+  alignment is complete. Minor warnings about the deferred csv import and the
+  plan-review artifact write.
+recommendations:
+  - "Consider importing csv at module level for simplicity — it is standard library."
+  - "Ensure the construction-estimate-sample.csv fixture file and all invalid fixtures are committed and versioned."
+  - "Add explicit tests for BOM-stripping behavior and CRLF/LF line ending handling."
+  - "Ensure the --create-run flag source-hash comparison includes the BOM-stripped bytes."
+source_format_assessment: >
+  Exactly one source format selected: Strict UTF-8 CSV. Unconditional. Selection
+  rationale provided: mirrors real-world estimate exchange, standard-library csv
+  module requires no dependency, strict header contract provides deterministic
+  column mapping. XLSX rejected due to no approved dependency. JSON rejected as
+  redundant schema. BOM stripping supported. CRLF and LF accepted. Blank rows
+  silently skipped. Duplicate header detected and rejected.
+source_schema_assessment: >
+  Schema is fully specified with 12 exact case-sensitive headers: estimate_id,
+  title, project_name, currency, line_item_id, description, category, quantity,
+  unit, unit_rate, line_total, notes. All columns have exact types, required
+  status, max lengths, and validation rules. line_item_id must match
+  ^[a-zA-Z0-9_\-\.]+$ and be unique. estimate_id must be consistent across all
+  rows. Missing-field behavior: line_total absent triggers recalculation as
+  quantity * unit_rate. Duplicate line_item_id rejected. All 11 required
+  columns must be present.
+numeric_financial_assessment: >
+  Decimal arithmetic required for all financial values using decimal.Decimal.
+  Decimal separator is period (.), rejects comma as thousands separator.
+  Thousands separator: none — digits only. Negative values rejected for
+  quantity, unit_rate, line_total. Zero values rejected for quantity, unit_rate.
+  Max precision 20 digits, max scale 4 decimal places. Rounding mode
+  ROUND_HALF_UP. Line-total authoritative if supplied (must match quantity *
+  unit_rate within 0.01), recalculated if absent. Subtotal computed as sum of
+  line_totals. Grand total computed as sum of subtotal. No binary float enters
+  canonical arithmetic.
+unit_contract_assessment: >
+  19 exact allowed values (each, hour, day, week, month, lump_sum, linear_foot,
+  square_foot, cubic_foot, linear_meter, square_meter, cubic_meter, kilogram,
+  tonne, pound, gallon, liter, percent) plus any other value accepted as valid
+  but flagged as "unrecognized_unit" in validation report. Max 50 chars. No
+  unit conversion or dimensional inference. No quantity takeoff.
+source_safety_assessment: >
+  Source is local only via --source path. Read-only — source is NEVER modified.
+  Source writeback is explicitly forbidden. URLs rejected via path resolution.
+  Network locations rejected via os.path.realpath() and containment check.
+  Absolute path behavior: accepted if local file (path is resolved, then
+  checked). Traversal: resolved realpath must be under expected directories
+  (hardening). Symlink: optional hardening to reject symlinks escaping
+  expected directories. Max source size 1 MB. Max 1000 rows. UTF-8 only with
+  BOM stripping. Source hash SHA-256 of complete file bytes (excluding BOM).
+  Source-changed-during-read: hash comparison before and after copy. No browser
+  upload or browser path selection.
+profile_mapping_assessment: >
+  Profile schema version remains "1". No new fact value type added — uses text
+  (estimate_id, project_name, currency, source_format, validation_status),
+  number (item_count, category_count), currency (subtotal, grand_total). No
+  new evidence role added — uses input, output, report, supporting. No new
+  reference form added — uses run-relative: and sha256:. profile_key is
+  "construction-estimate-v1". Facts are exact with deterministic ordering.
+  Artifact groups exact (original, normalized, validation). Artifact
+  descriptors exact. Required and optional states exact. Profile mapping is
+  deterministic. Profile metadata labelled "not runtime proof." Profile
+  presence does not imply acceptance or approval. Source estimate reference
+  is run-relative:source-estimate.csv. Line-item detail does not overflow
+  neutral facts (summary-level facts only).
+artifact_mapping_assessment: >
+  Source descriptor: key source_csv, kind source_file, evidence_role input,
+  media_type text/csv, ref run-relative:source-estimate.csv, required true.
+  Normalized representation: key normalized_json, kind normalized_data,
+  evidence_role output, media_type application/json. Summary artifact: key
+  line_items_csv, kind itemized_list, evidence_role report, media_type text/csv.
+  Validation artifact: key validation_report, kind validation, evidence_role
+  supporting, media_type text/plain, required false. All references use
+  run-relative: form. SHA-256 computed for each copied artifact. No Artifact
+  Registry or lifecycle state. Missing behavior: if validation_report fails,
+  the optional descriptor is absent.
+cli_assessment: >
+  One entrypoint: scripts/create-construction-estimate-profile.py. Arguments:
+  --source (required, controlled local path), --runs-root (required, validated),
+  --run-id (required), --create-run (optional flag), --json (optional). Exit
+  codes: 0 success, 1 validation/processing error, 2 unsafe/missing source.
+  No agent, provider, network, shell, git, gh, Docker behavior. No server or
+  browser side effects. Source remains unchanged. run.json remains unchanged
+  except when --create-run is used (creates canonical run via
+  run_persistence.persist_run_record() before processing).
+read_only_surface_assessment: >
+  Existing GET /runs/<run_id>/profile is reused. No construction-specific API
+  added. No HTTP mutation exists. Existing generic workspace renderer is reused.
+  No construction-specific JavaScript or Python rendering branch. No editing
+  controls. No upload controls. No approve/reject controls. No recalculation
+  controls. Canonical runtime evidence remains primary (profile metadata is
+  labelled "not runtime proof").
+synthetic_fixture_assessment: >
+  Fixture is fictional: EST-001 Sample Warehouse Construction, Acme Industrial
+  Park. No real customer data, no personal data, no supplier secrets, no
+  proprietary pricing. 7 line items across multiple categories (site_prep,
+  foundation, structure, roofing, electrical, plumbing, hvac). Multiple units
+  (lump_sum, square_foot, tonne). Deterministic totals (subtotal 662,500.00,
+  grand total 662,500.00). Small and reviewable. Exact committed location:
+  tests/fixtures/construction-estimate-sample.csv. Invalid fixtures also
+  programmatically generated.
+error_contract_assessment: >
+  22 exact reason codes specified: source_missing, source_not_a_file,
+  source_too_large, unsupported_encoding, malformed_csv, malformed_header,
+  missing_required_column:<column_name>, duplicate_header_column:<column_name>,
+  missing_estimate_id, mismatched_estimate_id, invalid_line_item_id:<id>,
+  duplicate_line_item_id:<id>, invalid_quantity:<id>, invalid_unit_rate:<id>,
+  invalid_line_total:<id>, line_total_mismatch:<id>:expected:<expected>:got:<got>,
+  invalid_currency, mixed_currencies:<currencies>, too_many_rows:<count>,
+  unsafe_path, run_not_found, run_missing, profile_validation_error:<code>,
+  profile_write_error, profile_readback_error, profile_hash_mismatch,
+  source_changed_during_read. All lowercase with underscores.
+smoke_assessment: >
+  Smoke (scripts/smoke-construction-estimate-profile.py) uses temporary roots,
+  synthetic fixture, isolated run, adapter invocation. Source before/after hash
+  equality verified. Deterministic source hash. Deterministic profile hash.
+  Profile readback via GET route. Generic workspace renderer through profile
+  response. Construction markers through generic rendering (profile_key
+  displayed, neutral facts, artifact groups, descriptors). Totals and counts
+  verified. Groups and descriptors verified. Controlled refs verified. Malformed
+  input rejection. Duplicate rejection. Invalid number rejection. Line-total
+  mismatch behavior. Currency policy. Unsafe path rejection. Oversize rejection.
+  No source mutation. No HTTP mutation. No agent/provider/shell/git/gh/Docker/
+  network action. No repository residue. Exact deterministic success marker.
+preservation_assessment: >
+  All preserved: PR 0143 shell, PR 0144 Timeline, PR 0145 detail, PR 0146
+  report, PR 0147 proof and manifest, PR 0147A operator, PR 0147B orchestration,
+  PR 0147C profile contract (run-profile.json schema, profile hash behavior,
+  six fact types, five evidence roles, two reference forms), run.json semantics,
+  ev_contract_version "1", existing GET routes, read-only operator behavior.
+  No core profile, workspace, server, operator, or orchestration files modified.
+deferral_assessment: >
+  No PDF or OCR. No BIM or IFC. No quantity takeoff. No drawing measurement.
+  No live prices. No procurement. No schedule generation. No WBS or PBS.
+  No Gantt. No forecasting. No optimization. No ML or LLM extraction. No agent
+  execution. No Mermaid. No Visual Gate. No Artifact Registry. No artifact
+  acceptance. No estimate editing. No writeback. No browser upload. No HTTP
+  mutation. PR 0148 remains separate and unchanged.
+implementation_scope_assessment: >
+  Exact unconditional allowlist with 10 approved files: 1 new source
+  (construction_estimate_adapter.py), 1 new test file, 1 new fixture, 2 new
+  scripts, 1 new doc, 2 roadmap edits, 2 implementation review artifacts. Not
+  modified: run_profile.py, run_persistence.py, runtime_evidence.py, artifacts.py,
+  server.py, artifact_workspace.py, local_operator.py, manual_orchestration.py,
+  manual_orchestration_cli.py, docs/RUN_ARTIFACT_PROFILE.md, docs/LOCAL_OPERATOR.md,
+  docs/MANUAL_ORCHESTRATION.md, Makefile, pyproject.toml, README.md, all
+  existing test files. No new dependency.
+test_contract_assessment: >
+  Test plan has 7 test commands: adapter tests (schema, decimal, path, source
+  immutability, profile mapping), existing profile tests, existing API tests,
+  existing workspace tests, full regression suite, construction dogfood smoke,
+  forbidden checks (source non-mutation grep, no construction workspace branch
+  grep). Each command has exact expected result and block consequence. Tests
+  cover: source parsing and validation, Decimal arithmetic and total derivation,
+  all invalid input types, path safety, source immutability, profile mapping
+  integration, GET profile regressions, workspace regressions, operator
+  regressions, orchestration regressions, profile regressions, and full
+  regression.
+implementation_report_assessment: >
+  PLAN.md requires .project-memory/pr/0147d-construction-estimate-read-only-dogfood-adapter/IMPLEMENTATION_REPORT.md
+  with all 11 standard sections. Validated against IMPLEMENTATION_REPORT_TEMPLATE.md:
+  TASK SUMMARY, FILES READ, FILES CHANGED, IMPLEMENTATION DECISIONS, PLAN
+  ALIGNMENT, DEVIATIONS FROM PLAN, VALIDATION RUN, BOUNDARY CONFIRMATIONS,
+  NON-GOALS PRESERVED, RISKS OR WARNINGS, NEXT REVIEWER FOCUS. The report is
+  described as handoff context, not proof.
+boundary_confirmations:
+  branch_is_correct: true
+  dirty_tree_is_within_scope: true
+  plan_was_read: true
+  required_supporting_files_read: true
+  roadmap_alignment: true
+  prior_pr_evidence: "PR 0147C merged at HEAD 73f1c65 (#176)"
+  executable_first: true
+  validation_strategy_explicit: true
+  forbidden_scope_absent: true
+  artifact_physically_written: true
+  artifact_read_back: true
+plan_drift_gate: >
+  PASS — PLAN.md includes exact '### PLAN DRIFT GATE' heading (all caps) with
+  20 block conditions covering out-of-scope files, multiple source formats,
+  binary floating-point for canonical totals, source mutations/writeback,
+  arbitrary paths/URLs, browser upload/path selection, profile schema version
+  changes, new value types/evidence roles/reference forms, construction-specific
+  rendering, HTTP mutation, quantity takeoff/scheduling/WBS/Gantt,
+  agent/provider/shell/git/gh/Docker/network execution, PR 0148 absorption,
+  tests/smoke failures, repository residue, IMPLEMENTATION_REPORT.md accuracy.
+no_drift_check: >
+  PASS — PLAN.md includes exact '### NO-DRIFT CHECK' heading (all caps) with
+  28 confirmation requirements covering correct branch, exact approved scope,
+  locked planning artifacts, roadmap alignment, one source format (CSV), strict
+  UTF-8 CSV with exact header, Decimal arithmetic, line-total policy,
+  source-file immutability (SHA-256 verified), deterministic profile mapping,
+  profile schema version "1" unchanged, profile_sha256 unchanged, six fact
+  types unchanged, five evidence roles unchanged, two reference forms unchanged,
+  generic GET profile route reused, generic workspace renderer reused (no
+  construction branches), no source writeback, no HTTP mutation, no Artifact
+  Registry/acceptance, no quantity takeoff/schedule/WBS/Gantt, no agent/provider/
+  shell/git/gh/Docker/network execution, PR 0143-0147C preserved, PR 0148
+  separate, construction smoke passes, no repository residue,
+  IMPLEMENTATION_REPORT.md obligation, PLAN DRIFT GATE passed.
+commit_readiness: ready
