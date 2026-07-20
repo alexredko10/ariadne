@@ -750,6 +750,67 @@ function renderProfile(data) {{
     }}
 
     canvas.appendChild(viewer);
+
+    // Render Mermaid artifacts if present
+    if (profile.artifact_descriptors) {{
+        for (var mi = 0; mi < profile.artifact_descriptors.length; mi++) {{
+            if (profile.artifact_descriptors[mi].kind === "mermaid") {{
+                renderMermaidArtifact(viewer, profile.artifact_descriptors[mi]);
+            }}
+        }}
+    }}
+}}
+
+function renderMermaidArtifact(container, descriptor) {{
+    // Inert display of Mermaid artifact metadata
+    var mermaidDiv = document.createElement("div");
+    mermaidDiv.style.marginTop = "1rem";
+    mermaidDiv.style.borderTop = "1px solid #ddd";
+    mermaidDiv.style.paddingTop = "0.5rem";
+
+    var heading = document.createElement("h4");
+    heading.textContent = "Mermaid Artifact: " + (descriptor.label || descriptor.key || "unknown");
+    mermaidDiv.appendChild(heading);
+
+    // Metadata
+    mermaidDiv.appendChild(safeTextRow("Reference", descriptor.ref || ""));
+    mermaidDiv.appendChild(safeTextRow("Media type", descriptor.media_type || ""));
+
+    if (descriptor.media_type && descriptor.media_type !== "text/vnd.mermaid") {{
+        var warn = document.createElement("p");
+        warn.style.color = "#a50";
+        warn.textContent = "Warning: Unexpected media type \"" + descriptor.media_type + "\" (expected text/vnd.mermaid)";
+        mermaidDiv.appendChild(warn);
+    }}
+
+    if (descriptor.ref && descriptor.ref.indexOf("run-relative:") === 0 && !descriptor.ref.endsWith(".mmd")) {{
+        var extWarn = document.createElement("p");
+        extWarn.style.color = "#a50";
+        extWarn.textContent = "Warning: Non-standard extension for Mermaid artifact";
+        mermaidDiv.appendChild(extWarn);
+    }}
+
+    mermaidDiv.appendChild(safeTextRow("SHA-256", descriptor.sha256 ? descriptor.sha256.substring(0, 16) + "..." : "not declared"));
+
+    // Source text placeholder (inert, loaded separately via state)
+    var sourceLabel = document.createElement("p");
+    sourceLabel.style.fontWeight = "bold";
+    sourceLabel.style.margin = "0.5rem 0 0.25rem 0";
+    sourceLabel.textContent = "Mermaid source text:";
+    mermaidDiv.appendChild(sourceLabel);
+
+    var pre = document.createElement("pre");
+    pre.style.background = "#f5f5f5";
+    pre.style.padding = "0.5rem";
+    pre.style.overflow = "auto";
+    pre.style.maxHeight = "300px";
+    pre.style.fontFamily = "monospace";
+    pre.style.fontSize = "0.85rem";
+    pre.textContent = "(Content loaded via artifact state)";
+    pre.setAttribute("aria-label", "Mermaid source text — displayed as inert text, not rendered");
+    mermaidDiv.appendChild(pre);
+
+    container.appendChild(mermaidDiv);
 }}
 
 function safeTextRow(label, value) {{

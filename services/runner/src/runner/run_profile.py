@@ -684,3 +684,161 @@ def read_run_profile(
         "hash_match": True,
         "details": None,
     }
+
+
+# ---------------------------------------------------------------------------
+# Mermaid artifact read helpers
+# ---------------------------------------------------------------------------
+
+
+_MAX_MERMAID_BYTES = 100 * 1024  # 100 KB
+
+
+def read_mermaid_artifact(
+    runs_root: str,
+    run_id: str,
+    descriptor: dict,
+) -> dict:
+    """Read a Mermaid artifact from a controlled reference.
+
+    Parameters
+    ----------
+    runs_root:
+        The runs root directory.
+    run_id:
+        The run ID.
+    descriptor:
+        Profile artifact descriptor with ref, sha256 (optional), required.
+
+    Returns
+    -------
+    dict with keys: ok, error, content, byte_count, sha256_verified, hash_match, sha256_declared.
+    """
+    ref = descriptor.get("ref", "")
+    declared_sha = descriptor.get("sha256")
+
+    # Resolve reference
+    ref_type = validate_reference(ref, [])
+    if ref_type in ("url", "absolute"):
+        return {"ok": False, "error": "unsafe_reference", "content": None, "byte_count": 0,
+                "sha256_verified": False, "hash_match": None, "sha256_declared": declared_sha}
+    if ref_type == "invalid":
+        return {"ok": False, "error": "invalid_reference", "content": None, "byte_count": 0,
+                "sha256_verified": False, "hash_match": None, "sha256_declared": declared_sha}
+
+    if ref_type == "run-relative":
+        file_path = resolve_run_relative(ref, runs_root, run_id)
+        if file_path is None:
+            return {"ok": False, "error": "unsafe_reference", "content": None, "byte_count": 0,
+                    "sha256_verified": False, "hash_match": None, "sha256_declared": declared_sha}
+        if not os.path.isfile(file_path):
+            return {"ok": False, "error": "file_not_found", "content": None, "byte_count": 0,
+                    "sha256_verified": False, "hash_match": None, "sha256_declared": declared_sha}
+    elif ref_type == "sha256":
+        return {"ok": False, "error": "sha256_reference_not_supported",
+                "content": None, "byte_count": 0,
+                "sha256_verified": False, "hash_match": None, "sha256_declared": declared_sha}
+    else:
+        return {"ok": False, "error": "unsupported_reference_type", "content": None, "byte_count": 0,
+                "sha256_verified": False, "hash_match": None, "sha256_declared": declared_sha}
+
+    # Size check
+    try:
+        file_size = os.path.getsize(file_path)
+    except OSError:
+        return {"ok": False, "error": "read_error", "content": None, "byte_count": 0,
+                "sha256_verified": False, "hash_match": None, "sha256_declared": declared_sha}
+
+    if file_size > _MAX_MERMAID_BYTES:
+        return {"ok": False, "error": "artifact_too_large", "content": None, "byte_count": file_size,
+                "sha256_verified": False, "hash_match": None, "sha256_declared": declared_sha}
+
+    # Read file as bytes
+    try:
+        with open(file_path, "rb") as f:
+            raw_bytes = f.read()
+    except OSError:
+        return {"ok": False, "error": "read_error", "content": None, "byte_count": 0,
+                "sha256_verified": False, "hash_match": None, "sha256_declared": declared_sha}
+
+    # Compute hash of raw bytes (for verification)
+    content_hash = hashlib.sha256(raw_bytes).hexdigest()
+
+    # Strip BOM if present
+    if raw_bytes.startswith(b"\xef\xbb\xbf"):
+        raw_bytes = raw_bytes[3:]
+
+    # Decode as UTF-8
+    try:
+        content = raw_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        return {"ok": False, "error": "unsupported_encoding", "content": None, "byte_count": file_size,
+                "sha256_verified": False, "hash_match": None, "sha256_declared": declared_sha}
+
+    # Hash match check
+    hash_match = None
+    sha256_verified = False
+    if declared_sha:
+        hash_match = declared_sha == content_hash
+        sha256_verified = hash_match
+
+    return {
+        "ok": True,
+        "error": None,
+        "content": content,
+        "byte_count": file_size,
+        "sha256_verified": sha256_verified,
+        "hash_match": hash_match,
+        "sha256_declared": declared_sha,
+    }
+
+
+def mermaid_artifact_states_for_profile(
+    profile: dict,
+    runs_root: str,
+    run_id: str,
+) -> list[dict]:
+    """Iterate profile descriptors with kind='mermaid' and return per-descriptor state.
+
+    Parameters
+    ----------
+    profile:
+        Validated profile dict from read_run_profile().
+    runs_root:
+        The runs root directory.
+    run_id:
+        The run ID.
+
+    Returns
+    -------
+    list of dict, each containing:
+      - descriptor_key
+      - descriptor_label
+      - ref
+      - media_type
+      - required
+      - extension_warning
+      - media_type_warning
+      - artifact_state (from read_mermaid_artifact)
+    """
+    descriptors = profile.get("artifact_descriptors", [])
+    if not descriptors:
+        return []
+
+    states: list[dict] = []
+    for desc in descriptors:
+        if desc.get("kind") == "mermaid":
+            art_state = read_mermaid_artifact(runs_root, run_id, desc)
+            ref_val = desc.get("ref", "")
+            states.append({
+                "descriptor_key": desc.get("key", ""),
+                "descriptor_label": desc.get("label", ""),
+                "ref": ref_val,
+                "media_type": desc.get("media_type", ""),
+                "required": desc.get("required", False),
+                "extension_warning": (not ref_val.endswith(".mmd")) if ref_val.startswith("run-relative:") else False,
+                "media_type_warning": desc.get("media_type", "") != "text/vnd.mermaid",
+                "artifact_state": art_state,
+            })
+
+    return states

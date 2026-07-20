@@ -1,0 +1,175 @@
+schema_version: "0.1"
+pr_id: "0148-mermaid-artifact-type-read-model"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-18T00:00:00Z"
+snapshot_delta:
+  plan_base_sha: "3e2085d6aa3b2160b26246c877579e877412da4a"
+  current_head: "3e2085d6aa3b2160b26246c877579e877412da4a"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0148-mermaid-artifact-type-read-model/PLAN.md"
+    - ".project-memory/pr/0148-mermaid-artifact-type-read-model/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+    - "services/runner/src/runner/run_profile.py"
+    - "services/runner/src/runner/artifacts.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/artifact_workspace.py"
+    - "services/runner/tests/test_run_profile.py"
+    - "services/runner/tests/test_artifact_store.py"
+    - "services/runner/tests/test_docker_run_artifacts.py"
+    - "services/task_intake/tests/test_run_profile_api.py"
+    - "services/task_intake/tests/test_artifact_workspace_shell.py"
+  actual_files:
+    - ".project-memory/pr/0148-mermaid-artifact-type-read-model/PLAN.md"
+    - ".project-memory/pr/0148-mermaid-artifact-type-read-model/reviews/plan-review.yml"
+    - ".project-memory/review-artifact.schema.yml"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+    - "services/runner/src/runner/run_profile.py"
+    - "services/runner/src/runner/artifacts.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/artifact_workspace.py"
+    - "services/runner/tests/test_run_profile.py"
+    - "services/runner/tests/test_artifact_store.py"
+    - "services/runner/tests/test_docker_run_artifacts.py"
+    - "services/task_intake/tests/test_run_profile_api.py"
+    - "services/task_intake/tests/test_artifact_workspace_shell.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+  - ".project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md"
+  - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+  - ".project-memory/pr/0148-mermaid-artifact-type-read-model/PLAN.md"
+  - ".project-memory/pr/0148-mermaid-artifact-type-read-model/reviews/plan-review.yml"
+  - "ROADMAP.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - "services/runner/src/runner/run_profile.py"
+  - "services/runner/src/runner/artifacts.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/artifact_workspace.py"
+  - "services/runner/tests/test_run_profile.py"
+  - "services/runner/tests/test_artifact_store.py"
+  - "services/runner/tests/test_docker_run_artifacts.py"
+  - "services/task_intake/tests/test_run_profile_api.py"
+  - "services/task_intake/tests/test_artifact_workspace_shell.py"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "3e2085d6aa3b2160b26246c877579e877412da4a"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0148-mermaid-artifact-type-read-model"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only uncommitted PR directory: .project-memory/pr/0148-mermaid-artifact-type-read-model/"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "Empty — no uncommitted changes outside PR directory"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "Empty — no staged changes"
+  - command: "test -s .project-memory/pr/0148-mermaid-artifact-type-read-model/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is non-empty"
+  - command: "test -s .project-memory/pr/0148-mermaid-artifact-type-read-model/reviews/plan-review.yml"
+    result: "passed"
+    exit_code: 0
+    evidence: "Previous plan-review.yml exists"
+  - command: "rg -n 'services/runner/tests/test_artifacts.py' .project-memory/pr/0148-mermaid-artifact-type-read-model/PLAN.md"
+    result: "passed"
+    exit_code: 1
+    evidence: "No remaining reference to phantom test_artifacts.py file"
+  - command: "test -s services/runner/tests/test_artifact_store.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "Replacement ArtifactStore test file exists"
+  - command: "test -s services/runner/tests/test_docker_run_artifacts.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "Replacement Docker run artifact test file exists"
+  - command: "rg -n mermaid services/runner/src/ services/task_intake/src/"
+    result: "passed"
+    exit_code: 1
+    evidence: "No Mermaid references in runtime source — confirms plan claim"
+  - command: "rg -n mermaid pyproject.toml"
+    result: "passed"
+    exit_code: 1
+    evidence: "No Mermaid dependency — confirms plan claim"
+  - command: "sed -n '928,945p' services/task_intake/src/task_intake/server.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "Current profile response fields match PLAN.md 'CURRENT AND PROPOSED RESPONSE FIELDS' table: ev_contract_version, ok, error, run_id, profile_exists, profile_sha256, hash_match, profile"
+  - command: "grep -E 'renderGatesProofs|renderProfile' services/task_intake/src/task_intake/artifact_workspace.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "renderGatesProofs called from detail/data fetch, not from profile. renderProfile called separately from profile fetch. Zone separation confirmed."
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "B001 is resolved — phantom test_artifacts.py completely removed"
+    reason: "All occurrences of the non-existent test_artifacts.py have been removed from PLAN.md. The full regression command now references test_artifact_store.py and test_docker_run_artifacts.py, both of which physically exist on filesystem."
+  - decision: "W001 is resolved — compatibility test claims now reference physically existing files"
+    reason: "The BACKWARD COMPATIBILITY section now lists test_artifact_store.py and test_docker_run_artifacts.py (both exist), not the phantom test_artifacts.py. The ArtifactStore coverage claim is accurate."
+  - decision: "W002 is resolved — CURRENT AND PROPOSED RESPONSE FIELDS section added"
+    reason: "The plan now has a complete explicit section (CURRENT AND PROPOSED RESPONSE FIELDS) that distinguishes: (1) current GET profile response fields verified against server.py lines 928-945, (2) current profile descriptor fields from run_profile.py, (3) proposed additive Mermaid read-state fields with exact name, type, required/optional, source, missing behavior, malformed behavior, and evidence meaning."
+  - decision: "W003 is resolved — PROFILE VERSUS MANIFEST ZONES section added"
+    reason: "The plan now has a complete section with: a zone table showing affected/unchanged zones, 10 separation rules, exact labels per zone, exact functions unaffected, and regression coverage. Physical source confirms renderGatesProofs is called from detail/data fetch and renderProfile from profile fetch — not cross-wired."
+  - decision: "OPTION A confirmed — Extended Profile Descriptor Read Model"
+    reason: "No new HTTP route, no new schema version, no new serialization contract. Mermaid artifacts use kind='mermaid' and media_type='text/vnd.mermaid' within existing profile descriptors. All existing GET routes and ev_contract_version '1' preserved."
+  - decision: "PR 0149 and later scope deferred"
+    reason: "No VisualGateResult, no diagram rendering, no Visual Gate readiness, no approve/reject, no Artifact Registry. All deferred to PR 0149+."
+  - decision: "Commit readiness is ready"
+    reason: "Verdict is approve, blockers is empty, OPTION A is fully locked, implementation allowlist is exact, validation is executable, both drift gates are sufficient."
+context_used:
+  labels:
+    - plan-review
+    - mermaid
+    - artifact-type
+    - read-model
+    - rerun-review
+  memory_files_read:
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/ORCHESTRATOR_STANDARD.txt"
+    - ".project-memory/workflow/ORCHESTRATOR_THREE_RESPONSE_HAPPY_PATH_STANDARD.md"
+    - ".project-memory/workflow/IMPLEMENTATION_HANDOFF_ARTIFACT_CONTRACT.md"
+    - ".project-memory/pr/0148-mermaid-artifact-type-read-model/PLAN.md"
+    - ".project-memory/pr/0148-mermaid-artifact-type-read-model/reviews/plan-review.yml"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  anchors_used: []
+  files_inspected:
+    - "services/runner/src/runner/run_profile.py"
+    - "services/runner/src/runner/artifacts.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/artifact_workspace.py"
+    - "services/runner/tests/test_run_profile.py"
+    - "services/runner/tests/test_artifact_store.py"
+    - "services/runner/tests/test_docker_run_artifacts.py"
+    - "services/task_intake/tests/test_run_profile_api.py"
+    - "services/task_intake/tests/test_artifact_workspace_shell.py"
+  files_modified:
+    - ".project-memory/pr/0148-mermaid-artifact-type-read-model/reviews/plan-review.yml"
+  files_intentionally_ignored:
+    - ".project-memory/pr/*/reviews/*.yml"
+    - ".project-memory/pr/*/PLAN.md"
+    - ".project-memory/pr/*/IMPLEMENTATION_REPORT.md"

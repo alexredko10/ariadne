@@ -597,3 +597,170 @@ class TestNeutralFacts:
         }
         codes = validate_profile_dict(data)
         assert len(codes) > 0
+
+
+# ---------------------------------------------------------------------------
+# Mermaid artifact read tests
+# ---------------------------------------------------------------------------
+
+
+class TestMermaidArtifactRead:
+    """Tests for Mermaid artifact reading functions."""
+
+    @pytest.fixture
+    def runs_root(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            yield tmp
+
+    @pytest.fixture
+    def run_dir(self, runs_root):
+        rd = os.path.join(runs_root, "mermaid-test-001")
+        os.makedirs(rd, exist_ok=True)
+        return rd
+
+    def test_read_mermaid_artifact_valid(self, runs_root, run_dir):
+        """Valid Mermaid artifact is read correctly."""
+        mmd_path = os.path.join(run_dir, "diagram.mmd")
+        with open(mmd_path, "w") as f:
+            f.write("graph TD\\n    A --> B")
+
+        from runner.run_profile import read_mermaid_artifact
+        result = read_mermaid_artifact(
+            runs_root, "mermaid-test-001",
+            {"ref": "run-relative:diagram.mmd"},
+        )
+        assert result["ok"] is True
+        assert result["content"] is not None
+        assert result["byte_count"] > 0
+
+    def test_read_mermaid_missing_file(self, runs_root, run_dir):
+        """Missing file returns error."""
+        from runner.run_profile import read_mermaid_artifact
+        result = read_mermaid_artifact(
+            runs_root, "mermaid-test-001",
+            {"ref": "run-relative:nonexistent.mmd"},
+        )
+        assert result["ok"] is False
+        assert "file_not_found" in result["error"]
+
+    def test_hash_match(self, runs_root, run_dir):
+        """Hash match is verified."""
+        import hashlib
+        content = "graph TD\\n    A --> B"
+        mmd_path = os.path.join(run_dir, "diagram.mmd")
+        with open(mmd_path, "w") as f:
+            f.write(content)
+        declared_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+        from runner.run_profile import read_mermaid_artifact
+        result = read_mermaid_artifact(
+            runs_root, "mermaid-test-001",
+            {"ref": "run-relative:diagram.mmd", "sha256": declared_hash},
+        )
+        assert result["ok"] is True
+        assert result["sha256_verified"] is True
+        assert result["hash_match"] is True
+
+    def test_hash_mismatch(self, runs_root, run_dir):
+        """Hash mismatch is detected."""
+        mmd_path = os.path.join(run_dir, "diagram.mmd")
+        with open(mmd_path, "w") as f:
+            f.write("content")
+
+        from runner.run_profile import read_mermaid_artifact
+        result = read_mermaid_artifact(
+            runs_root, "mermaid-test-001",
+            {"ref": "run-relative:diagram.mmd", "sha256": "0" * 64},
+        )
+        assert result["ok"] is True
+        assert result["sha256_verified"] is False
+        assert result["hash_match"] is False
+
+    def test_no_hash_declared(self, runs_root, run_dir):
+        """No declared hash returns None for hash_match."""
+        mmd_path = os.path.join(run_dir, "diagram.mmd")
+        with open(mmd_path, "w") as f:
+            f.write("content")
+
+        from runner.run_profile import read_mermaid_artifact
+        result = read_mermaid_artifact(
+            runs_root, "mermaid-test-001",
+            {"ref": "run-relative:diagram.mmd"},
+        )
+        assert result["ok"] is True
+        assert result["hash_match"] is None
+        assert result["sha256_verified"] is False
+
+    def test_rejects_utf8_bom(self, runs_root, run_dir):
+        """BOM is stripped."""
+        mmd_path = os.path.join(run_dir, "diagram.mmd")
+        with open(mmd_path, "wb") as f:
+            f.write(b"\\xef\\xbb\\xbfgraph TD")
+
+        from runner.run_profile import read_mermaid_artifact
+        result = read_mermaid_artifact(
+            runs_root, "mermaid-test-001",
+            {"ref": "run-relative:diagram.mmd"},
+        )
+        assert result["ok"] is True
+
+    def test_rejects_oversized(self, runs_root, run_dir):
+        """Oversized file is rejected."""
+        mmd_path = os.path.join(run_dir, "big.mmd")
+        with open(mmd_path, "wb") as f:
+            f.write(b"x" * 101 * 1024)
+
+        from runner.run_profile import read_mermaid_artifact
+        result = read_mermaid_artifact(
+            runs_root, "mermaid-test-001",
+            {"ref": "run-relative:big.mmd"},
+        )
+        assert result["ok"] is False
+        assert "artifact_too_large" in result["error"]
+
+    def test_rejects_non_utf8(self, runs_root, run_dir):
+        """Non-UTF-8 file is rejected."""
+        mmd_path = os.path.join(run_dir, "bad.mmd")
+        with open(mmd_path, "wb") as f:
+            f.write(b"\xff\xfe")
+
+        from runner.run_profile import read_mermaid_artifact
+        result = read_mermaid_artifact(
+            runs_root, "mermaid-test-001",
+            {"ref": "run-relative:bad.mmd"},
+        )
+        assert result["ok"] is False
+        assert "unsupported_encoding" in result["error"]
+
+    def test_traversal_rejected(self, runs_root):
+        """Traversal reference is rejected."""
+        from runner.run_profile import read_mermaid_artifact
+        result = read_mermaid_artifact(
+            runs_root, "some-run",
+            {"ref": "run-relative:../../etc/passwd"},
+        )
+        assert result["ok"] is False
+
+    def test_url_rejected(self, runs_root):
+        """URL reference is rejected."""
+        from runner.run_profile import read_mermaid_artifact
+        result = read_mermaid_artifact(
+            runs_root, "some-run",
+            {"ref": "https://example.com/evil.mmd"},
+        )
+        assert result["ok"] is False
+
+    def test_empty_file(self, runs_root, run_dir):
+        """Empty file is accepted (content is empty string)."""
+        mmd_path = os.path.join(run_dir, "empty.mmd")
+        with open(mmd_path, "wb") as f:
+            f.write(b"")
+
+        from runner.run_profile import read_mermaid_artifact
+        result = read_mermaid_artifact(
+            runs_root, "mermaid-test-001",
+            {"ref": "run-relative:empty.mmd"},
+        )
+        assert result["ok"] is True
+        assert result["content"] == ""
+        assert result["byte_count"] == 0
