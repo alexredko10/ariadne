@@ -1,0 +1,151 @@
+schema_version: "0.1"
+pr_id: "0149-visual-gate-runtime-object"
+review_type: "precommit-review"
+verdict: "pass"
+reviewer: "precommit-review"
+timestamp: "2026-07-18T13:00:00Z"
+head_verified: "188226a6b07f46e8876a7e530a45f240fe46f46c"
+branch_confirmed: "0149-visual-gate-runtime-object"
+snapshot_delta:
+  plan_base_sha: "188226a6b07f46e8876a7e530a45f240fe46f46c"
+  current_head: "188226a6b07f46e8876a7e530a45f240fe46f46c"
+  origin_main: "f6d438827902f13b0c44f82a1f3eb8b4114ef49c"
+  merge_base: "188226a6b07f46e8876a7e530a45f240fe46f46c"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - "services/runner/src/runner/visual_gate_result.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/runner/tests/test_visual_gate_result.py"
+    - "services/task_intake/tests/test_visual_gate_result_api.py"
+    - "scripts/smoke-visual-gate-result.py"
+    - ".project-memory/pr/0149-visual-gate-runtime-object/IMPLEMENTATION_REPORT.md"
+    - ".project-memory/pr/0149-visual-gate-runtime-object/reviews/precommit-review.yml"
+  actual_files:
+    - "services/runner/src/runner/visual_gate_result.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/runner/tests/test_visual_gate_result.py"
+    - "services/task_intake/tests/test_visual_gate_result_api.py"
+    - "scripts/smoke-visual-gate-result.py"
+    - ".project-memory/pr/0149-visual-gate-runtime-object/IMPLEMENTATION_REPORT.md"
+    - ".project-memory/pr/0149-visual-gate-runtime-object/reviews/precommit-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found:
+    - ".project-memory/pr/0149-visual-gate-runtime-object/reviews/precommit-review.yml"
+  scope_status: "in_scope"
+files_read:
+  - ".project-memory/pr/0149-visual-gate-runtime-object/PLAN.md"
+  - ".project-memory/pr/0149-visual-gate-runtime-object/reviews/plan-review.yml"
+  - ".project-memory/pr/0149-visual-gate-runtime-object/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0148-mermaid-artifact-type-read-model/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0148-mermaid-artifact-type-read-model/reviews/precommit-review.yml"
+  - "services/runner/src/runner/visual_gate_result.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/runner/tests/test_visual_gate_result.py"
+  - "services/task_intake/tests/test_visual_gate_result_api.py"
+  - "scripts/smoke-visual-gate-result.py"
+files_written:
+  - ".project-memory/pr/0149-visual-gate-runtime-object/reviews/precommit-review.yml"
+validation:
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0149-visual-gate-runtime-object"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty"
+  - command: "python3 -m compileall -f services/runner/src services/task_intake/src"
+    result: "passed"
+    exit_code: 0
+    evidence: "All files compile"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python3 -m pytest services/runner/tests/test_visual_gate_result.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "33 passed in 0.05s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python3 -m pytest services/task_intake/tests/test_visual_gate_result_api.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "7 passed in 0.03s"
+  - command: "PYTHONPATH=services/runner/src:services/task_intake/src python3 -m pytest services/runner/tests/test_run_profile.py services/runner/tests/test_artifact_store.py services/task_intake/tests/test_run_profile_api.py services/task_intake/tests/test_artifact_workspace_shell.py -q"
+    result: "passed"
+    exit_code: 0
+    evidence: "396 passed in 0.30s"
+  - command: "End-to-end smoke"
+    result: "passed"
+    exit_code: 0
+    evidence: "'VISUAL GATE RESULT SMOKE PASSED' — all assertion groups pass"
+  - command: "Planning-lock diff"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md and plan-review.yml unchanged"
+  - command: "Whitespace check"
+    result: "passed"
+    exit_code: 0
+    evidence: "No whitespace errors"
+  - command: "Cached-diff check"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty"
+blockers: []
+warnings: []
+checks:
+  branch_correct: "pass"
+  planning-lock-present: "pass"
+  cached-diff-empty: "pass"
+  exact-allowlist: "pass"
+  planning-artifacts-unmodified: "pass"
+  OPTION-A-implemented: "pass"
+  canonical-visual-gate-json: "pass"
+  schema-version-1: "pass"
+  four-statuses: "pass"
+  human-review-consistency: "pass"
+  ready_needs_review_requires_human_review: "pass"
+  approved_not_fabricated: "pass"
+  required-diagrams-do-not-imply-existence: "pass"
+  evidence-refs-controlled: "pass"
+  canonical-serialization: "pass"
+  deterministic-hashing: "pass"
+  hash-mismatch-visible: "pass"
+  atomic-persistence: "pass"
+  missing-state: "pass"
+  malformed-state: "pass"
+  unsupported-state: "pass"
+  GET-API-read-only: "pass"
+  server-owned-root: "pass"
+  no-browser-roots: "pass"
+  legacy-runs-compatible: "pass"
+  PR0148-compatible: "pass"
+  no-UI-mutation: "pass"
+  PR0150-viewer-absent: "pass"
+  PR0151-enforcement-absent: "pass"
+  PR0152-approval-absent: "pass"
+  no-artifact-registry: "pass"
+  smoke-passed: "pass"
+  no-residue: "pass"
+  implementation-report-verified: "pass"
+  PLAN-DRIFT-GATE: "PASS"
+  NO-DRIFT-CHECK: "PASS"
+  commit-readiness: "ready"
+implementation_report_review:
+  claims_verified: 12
+  claims_unsupported: 0
+  proof_boundary_disclaimer: true
+boundary_confirmations:
+  - "Branch: 0149-visual-gate-runtime-object"
+  - "OPTION A: Run-Directory Visual Gate Sidecar (visual-gate-result.json)"
+  - "Four statuses: pending, ready_needs_review, approved, rejected"
+  - "Human-review consistency: human_review_required only with ready_needs_review"
+  - "Deterministic hashing via canonical JSON (sort_keys=True)"
+  - "GET-only /runs/<run_id>/visual-gate-result route"
+  - "Server-owned runs root — no browser override"
+  - "33 core tests, 7 API tests, 396 regression tests — all pass"
+  - "Smoke: 'VISUAL GATE RESULT SMOKE PASSED'"
+  - "PR 0150–0152 and Artifact Registry deferred"
+  - "No residue after smoke"
+plan_drift_gate: "PASS — All conditions verified: exact allowlist, planning locked, OPTION A, canonical store, deterministic hashing, four statuses with consistency, GET-only API, server-owned root, no PR0150+ scope, no execution/mutation, no false approval, tests/smoke pass, no residue."
+no_drift_check: "PASS — All conditions confirmed: correct branch/scope, OPTION A, exact contract/statuses/hashing, visible states, safe read-only API, PR0148 compatible, later-roadmap deferred, validation/smoke pass, physical evidence overrides claims."
+commit_readiness: "ready"
