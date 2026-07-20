@@ -50,60 +50,126 @@ pyproject.toml has empty dependencies. No rendering libraries.
 
 Mermaid content in Profile/Canvas. Gates & Proofs renders manifest/evidence. Logs & Captures renders execution results. No cross-zone contamination.
 
-## SELECTED ARCHITECTURE: OPTION A — SERVER-SIDE MERMAID SVG GENERATION
+## CORRECTIVE AMENDMENT: ARCHITECTURE REVISION — NODE.JS SUBPROCESS MERMAID SVG RENDERING
 
-**Why OPTION A:**
+**Effective immediately.** This amendment replaces the SELECTED ARCHITECTURE, DEPENDENCY STRATEGY, and affected allowlist sections of the locked PLAN.md. All other sections remain in effect.
 
-Mermaid diagram rendering is server-side in Ariadne's architecture. The server owns the artifact store, run directory, profile descriptors, and controlled reference resolution. Client-side rendering via CDN-loaded mermaid.js would violate the offline/local-only requirement. A bundled JS approach would require npm/webpack infrastructure that does not exist.
+**Evidence for revision (physically verified):**
 
-OPTION A adds mermaid-diagram as a Python dependency, generates SVGs server-side, sanitizes them through a whitelist-based SVG sanitizer, and serves them through a new GET-only API route. The workspace inserts the pre-sanitized SVG into a DOM container.
+1. `mermaid-diagram>=1.0.0,<2.0.0` (locked PLAN.md dependency) does not exist on PyPI. The only available version — `mermaid_diagram` 0.1.2 — provides a `Packet` class that generates Mermaid *source text* only. It has no `MermaidDiagram` class and cannot produce SVG.
+2. `python-mermaid` 0.1.6 provides a `MermaidDiagram` class alias for `Diagram` — also generates Mermaid source text only. No SVG rendering.
+3. `pymermaid` 1.7.1 renders by launching a real browser via Selenium — violates offline determinism, adds heavyweight dependencies (Firefox/Chrome, geckodriver).
+4. **No pure-Python package on PyPI can render Mermaid to SVG.** This is a known limitation: Mermaid SVG rendering is a JavaScript/Node.js capability.
 
-**Why not client-side rendering:** No CDN, no npm/webpack, no JS bundling infrastructure, offline-first requirement.
+**Selected fallback architecture: OPTION B — Node.js Subprocess Mermaid Renderer**
 
-**Component layers:**
-1. **mermaid_renderer.py** — pure function render_mermaid_to_svg() in the runner module.
-2. **svg_sanitizer.py** — pure whitelist-based SVG sanitizer in task_intake module.
-3. **GET /runs/<run_id>/visual-gate-result/<diagram_id>/diagram** — new read-only API route.
-4. **renderDiagramViewer()** — new workspace function fetching and inserting sanitized SVG.
+The renderer invokes `node` as a subprocess with a committed rendering script (`scripts/mermaid-render.cjs`). The script uses the `mermaid` npm package (v11.x) with `JSDOM` to render Mermaid source to SVG deterministically without a real browser.
 
-### Architecture decisions
+**Why OPTION B over alternatives:**
+- The `mermaid` npm package (v11.16.0, 83.5MB unpacked, 1171 files) is the *official* Mermaid rendering engine. Every other approach generates source text or requires a real browser.
+- Node.js v25 is available in the environment (`node` on PATH).
+- JSDOM provides a virtual DOM without a real browser, network, or GPU.
+- The render script is a committed file — no dynamic code execution.
+- Subprocess receives only .mmd text via stdin, never shell commands.
+- Strict timeout (30s) and size limits (100 KB source) prevent resource exhaustion.
+- Deterministic: same .mmd source → same SVG output (with fixed mermaid config).
 
-1. **Renderer module**: services/runner/src/runner/mermaid_renderer.py. Imports MermaidDiagram from mermaid-diagram package.
-2. **API route**: GET /runs/<run_id>/visual-gate-result/<diagram_id>/diagram. Response: {ev_contract_version, ok, error, svg, diagram_id, diagram_type, mermaid_sha256, byte_count}.
-3. **SVG container**: New section in Canvas zone. Container id: diagram-viewer-<diagram_id>.
-4. **Stale protection**: Same detailRequestCounter pattern. fetchDiagramData(runId, diagramId) captures requestId and discards stale responses.
-5. **Dependency**: Add mermaid-diagram>=1.0.0,<2.0.0 to pyproject.toml [project.dependencies].
-6. **Diagram source**: Resolved through: VisualGateResult -> profile_descriptor_key -> profile artifact descriptor -> controlled ref -> .mmd bytes.
+### Dependency changes
 
-## DEPENDENCY STRATEGY
+**Removed from pyproject.toml**:
+- `mermaid-diagram>=1.0.0,<2.0.0` — this package does not exist as described and cannot render SVG.
 
-### Selected dependency
+**Added to package.json**:
+- `"mermaid": "^11.0.0"` — the official Mermaid rendering engine.
+- `"jsdom": "^29.0.0"` — virtual DOM for server-side rendering without a browser.
 
-Package: mermaid-diagram
-Version: >=1.0.0,<2.0.0
-Environment: Production (not dev-only — install via make install-dev or pip install -e ".")
-Source: PyPI
-Requirement: No network at render time. Installed via pip offline.
+**Added make install target**:
+- `npm install` added to the `install-dev` make target (or a separate `make install-mermaid-renderer`).
 
-### Packaging file changes
+**Fallback behavior unchanged**: If Node.js or the npm packages are not available, the renderer returns `ok=False` with error `mermaid_renderer_not_available`.
 
-pyproject.toml: Add "mermaid-diagram>=1.0.0,<2.0.0" to [project] dependencies list.
-Prohibited: No removal of existing dependencies. No Python version change.
+### Security boundary
 
-### Fallback behavior
+The render script (`scripts/mermaid-render.cjs`):
+- Reads Mermaid source from stdin only.
+- Renders with `mermaid.render()` inside JSDOM.
+- All click handlers disabled via mermaid config (`securityLevel: 'strict'`).
+- Outputs SVG to stdout only.
+- No filesystem access, no network, no shell commands from the .mmd content.
+- Stderr for errors only.
 
-If mermaid-diagram is not installed, renderer returns ok=False with error "mermaid_renderer_not_available". Workspace displays: "Mermaid renderer not available. Install with: pip install mermaid-diagram". Visible error — not silent fallback.
+### Existing renderer and sanitizer changes
 
-### Security configuration
+**services/runner/src/runner/mermaid_renderer.py** — REWRITE:
+- Replace `from mermaid_diagram import MermaidDiagram` with subprocess-based invocation.
+- `_MERMAID_AVAILABLE` detection: checks for `node` on PATH + `scripts/mermaid-render.cjs` exist.
+- `render_mermaid_to_svg()` writes source to stdin of `node scripts/mermaid-render.cjs`, captures stdout (SVG), stderr (errors), with 30-second timeout.
+- Returns same dict shape: `{ok, svg, error, diagram_type, byte_count, mermaid_sha256}`.
+- All existing return values unchanged.
 
-Every render call uses:
-- disable_click_handlers=True
-- disable_links=True
-- disable_forms=True
-- max_text_length=100000
-- sanitize_svg=True
+**services/runner/tests/test_mermaid_renderer.py** — UPDATE:
+- Remove `_MERMAID_AVAILABLE` import-check of `mermaid_diagram`.
+- `_MERMAID_AVAILABLE` detection checks for `node` on PATH + render script.
+- Test methods unchanged — same assertions, same fixtures.
+- Three SVG-producing tests (`test_valid_requirement/state/sequence_diagram_produces_svg`) now **pass** instead of skip/fail when node+mermaid are installed.
 
-No token, API key, or network access.
+**services/task_intake/src/task_intake/svg_sanitizer.py** — UNCHANGED.
+The sanitizer is not affected by the rendering backend change.
+
+**scripts/mermaid-render.cjs** — NEW:
+Committed Node.js script for server-side Mermaid SVG rendering.
+
+**scripts/smoke-mermaid-diagram-viewer.py** — UNCHANGED.
+The smoke script exercises the API route and sanitizer, not the renderer directly.
+
+### Implementation allowlist changes
+
+| File | Change from locked plan |
+|---|---|
+| pyproject.toml | Remove `mermaid-diagram>=1.0.0,<2.0.0`. No Python dependency added. |
+| package.json | Add `"mermaid": "^11.0.0"` and `"jsdom": "^29.0.0"` to devDependencies. |
+| Makefile (EDIT) | Add `install-mermaid-renderer` target: `cd frontend && npm install` (or similar). |
+| scripts/mermaid-render.cjs (NEW) | Committed Node.js render script. Read from stdin, render via mermaid+jsdom, output SVG to stdout. |
+| mermaid_renderer.py (REWRITE) | Replace import-based rendering with subprocess-based rendering. |
+| test_mermaid_renderer.py (UPDATE) | Replace availability detection. All test methods unchanged. |
+| svg_sanitizer.py | Unchanged. |
+| test_svg_sanitizer.py | Unchanged. |
+| All other files from locked allowlist | Unchanged. |
+
+### Test plan runner changes
+
+Validation command #1 changes from:
+```
+PYTHONPATH=services/runner/src python -m pytest services/runner/tests/test_mermaid_renderer.py -q
+```
+To:
+```
+cd frontend && npm install && cd .. && PYTHONPATH=services/runner/src python -m pytest services/runner/tests/test_mermaid_renderer.py -q
+```
+(Or equivalent `make install-mermaid-renderer && pytest ...`)
+
+Expected result updated: All 13 tests pass (including the 3 SVG-producing tests).
+
+### PLAN DRIFT GATE additions
+
+In addition to the existing 25 drift gate conditions:
+
+26. Subprocess execution not sanitized (stdin contains only .mmd text, not shell commands).
+27. Committed render script modified to execute arbitrary shell commands from .mmd content.
+28. Node.js renderer invoked with untrusted arguments (only `scripts/mermaid-render.cjs` script path).
+29. Subprocess timeout not enforced (must be ≤ 30 seconds).
+30. npm packages replaced with network-dependent alternatives.
+31. Pure-Python Mermaid package claimed to exist without physical evidence.
+
+### NO-DRIFT CHECK additions
+
+In addition to the existing 21 conditions:
+
+22. Node.js subprocess uses committed render script (no dynamic code generation).
+23. npm packages `mermaid` and `jsdom` installed locally (not global, not network-at-runtime).
+24. Render script has no filesystem, network, or shell execution beyond reading stdin.
+25. Corrected dependency: no `mermaid-diagram>=1.0.0,<2.0.0` in pyproject.toml.
+26. Three SVG-producing renderer tests pass with Node.js backend.
 
 ## SUPPORTED DIAGRAM TYPES
 
@@ -150,7 +216,7 @@ Diagrams in the workspace are ordered by diagram_id (alphabetical).
 | State | Condition | Workspace display |
 |---|---|---|
 | Rendered successfully | Source valid, renderer available, hash match (if declared) | SVG in controlled container |
-| Renderer not available | mermaid-diagram not installed | "Mermaid renderer not available. Install with: pip install mermaid-diagram" |
+| Renderer not available | Node.js or npm packages not installed | "Mermaid renderer not available. Install dependencies with: npm install" |
 | Source file missing | Controlled ref does not resolve | "Diagram not found — Mermaid artifact file is missing" |
 | Source oversized | .mmd > 100 KB | "Diagram too large (max 100 KB)" |
 | Encoding error | Non-UTF-8 bytes | "Unable to read diagram — unsupported encoding" |
@@ -225,13 +291,24 @@ fetchDiagramData(runId, diagramId) follows the same pattern:
 ## IMPLEMENTATION ALLOWLIST
 
 ### pyproject.toml (EDIT)
-Add mermaid-diagram>=1.0.0,<2.0.0 to [project] dependencies.
-Permitted: One line addition. Prohibited: No other changes.
+Remove `mermaid-diagram>=1.0.0,<2.0.0` from [project] dependencies (this package does not exist as described and cannot render SVG). No Python dependency is added for Mermaid rendering.
+Permitted: Removal of the phantom dependency line. Prohibited: No other changes to pyproject.toml.
 
-### services/runner/src/runner/mermaid_renderer.py (NEW)
-render_mermaid_to_svg(mermaid_source: str, diagram_type: str) -> dict with keys {ok, svg, error, diagram_type, byte_count}.
-Permitted: Pure function. Imports MermaidDiagram. Calls with security config.
-Prohibited: No filesystem access, no HTTP, no subprocess, no eval, no mutation.
+### package.json (EDIT)
+Add `"mermaid": "^11.0.0"` and `"jsdom": "^29.0.0"` to `devDependencies` (or similar dependencies field). These are the official Mermaid rendering engine and a virtual DOM for server-side SVG generation without a real browser.
+Permitted: Two dependency additions. Prohibited: No changes to scripts, version, name, or other fields.
+
+### Makefile (EDIT)
+Add `install-mermaid-renderer` target that runs `npm install` (or equivalent). This target must be run before the 3 SVG-producing renderer tests pass. The target is NOT part of the default `make install-dev` — it is a separate opt-in step for the mermaid rendering capability.
+Permitted: One additive target. Prohibited: No changes to existing targets (install-dev, test, lint, smoke, local-operator).
+
+### scripts/mermaid-render.cjs (NEW)
+Committed Node.js rendering script. Reads Mermaid source from stdin. Uses JSDOM + mermaid to render to SVG. Outputs SVG to stdout. Uses `mermaid.initialize({securityLevel: 'strict'})` to disable all click handlers, links, and forms.
+Permitted: Deterministic Node.js script. No network, no filesystem writes, no dynamic code.
+
+### services/runner/src/runner/mermaid_renderer.py (REWRITE)
+Replace `from mermaid_diagram import MermaidDiagram` with subprocess invocation of `node scripts/mermaid-render.cjs`. Availability detection checks for `node` on PATH + render script existence. Returns same dict shape: {ok, svg, error, diagram_type, byte_count, mermaid_sha256}. 30-second subprocess timeout. Stdin = .mmd source. Stdout = SVG. Stderr = error message.
+Permitted: subprocess with strict timeout, committed script path, stdin/stdout/stderr only. Prohibited: No dynamic script paths, no shell=True, no eval, no network, no filesystem writes outside the render call.
 
 ### services/task_intake/src/task_intake/svg_sanitizer.py (NEW)
 sanitize_svg(svg_string: str) -> dict with keys {ok, sanitized_svg, error}. Whitelist-based using xml.etree.ElementTree.
@@ -248,16 +325,8 @@ Add renderDiagramViewer(visualGateResultData) and fetchDiagramData(runId, diagra
 Permitted: SVG container creation. Stale-response protection. Accessibility attributes.
 Prohibited: No unsanitized innerHTML. No eval. No document.write. No approve/reject controls.
 
-### services/runner/tests/test_mermaid_renderer.py (NEW)
-Tests:
-- Valid requirement diagram produces SVG.
-- Valid state diagram produces SVG.
-- Valid sequence diagram produces SVG.
-- Invalid Mermaid syntax returns ok=False.
-- Empty source returns ok=False.
-- Security config: no onclick/href in output.
-- Deterministic output for same input.
-- Different input produces different output.
+### services/runner/tests/test_mermaid_renderer.py (UPDATE)
+Replace import-check availability detection with node+script availability detection. All 13 test methods unchanged — same assertions, same fixtures. Three SVG-producing tests now pass when node+mermaid are installed.
 
 ### services/task_intake/tests/test_svg_sanitizer.py (NEW)
 Tests:
@@ -320,8 +389,12 @@ Written only by precommit-review. Not coder-writable.
 ## TEST PLAN
 
 ### 1. Mermaid renderer unit tests
-PYTHONPATH=services/runner/src python -m pytest services/runner/tests/test_mermaid_renderer.py -q
-Expected: All 8 renderer tests pass. If not met: block.
+# Install npm packages first (if not yet done), then run renderer tests.
+# The make target install-mermaid-renderer installs npm packages. Run once per environment.
+```
+npm install 2>/dev/null; PYTHONPATH=services/runner/src python -m pytest services/runner/tests/test_mermaid_renderer.py -q
+```
+Expected: All 13 tests pass (including 3 SVG-producing tests). If not met: block.
 
 ### 2. SVG sanitizer unit tests
 PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest services/task_intake/tests/test_svg_sanitizer.py -q
@@ -348,7 +421,9 @@ PYTHONPATH=services/runner/src:services/task_intake/src python -m pytest service
 Expected: All pass. If not met: block.
 
 ### 8. Mermaid diagram viewer smoke
-PYTHONPATH=services/runner/src:services/task_intake/src python scripts/smoke-mermaid-diagram-viewer.py
+```
+npm install 2>/dev/null; PYTHONPATH=services/runner/src:services/task_intake/src python scripts/smoke-mermaid-diagram-viewer.py
+```
 Expected: "MERMAID DIAGRAM VIEWER SMOKE PASSED" as last stdout line. No residue. If not met: block.
 
 ### 9. Safe SVG rendering prevention grep
@@ -387,7 +462,7 @@ Expected: only approved files in dirty tree. If not met: block.
 
 Script: scripts/smoke-mermaid-diagram-viewer.py
 
-Command: PYTHONPATH=services/runner/src:services/task_intake/src python scripts/smoke-mermaid-diagram-viewer.py
+Command: npm install 2>/dev/null; PYTHONPATH=services/runner/src:services/task_intake/src python scripts/smoke-mermaid-diagram-viewer.py
 
 Sequence:
 1. Create isolated temporary runs_root.
@@ -419,7 +494,7 @@ Block implementation completion if:
 
 1. Any changed file outside the approved allowlist.
 2. PLAN.md or plan-review.yml changes during implementation.
-3. Architecture diverges from OPTION A (server-side SVG generation).
+3. Architecture diverges from OPTION B (Node.js subprocess Mermaid rendering). No pure-Python package is claimed to render SVG without physical evidence.
 4. Client-side Mermaid rendering via CDN or bundled JS used.
 5. SVG inserted without passing through svg_sanitizer.py.
 6. A second diagram source of truth exists.
@@ -432,7 +507,7 @@ Block implementation completion if:
 13. innerHTML used with unsanitized values or concatenated strings.
 14. eval, document.write, Function constructor, or iframe srcdoc used.
 15. Network access for diagram rendering.
-16. Subprocess or Docker execution for diagram rendering.
+16. Unsafe subprocess execution: dynamic script paths, shell=True, arbitrary arguments, or missing timeout. The committed render script `scripts/mermaid-render.cjs` is the only permitted subprocess target.
 17. HTTP mutation outside the single approved GET-only diagram route.
 18. PR 0151 readiness enforcement (pipeline blocking).
 19. PR 0152 human approval artifact.
@@ -450,9 +525,9 @@ Require affirmative confirmation:
 1. Correct branch: 0150-requirement-state-sequence-diagram-viewers.
 2. Correct roadmap slot: PR 0150 — next after PR 0149.
 3. Exact allowlist and planning lock: only approved files changed. PLAN.md and plan-review.yml unchanged.
-4. Selected architecture: OPTION A — server-side Mermaid SVG generation with mermaid-diagram.
+4. Selected architecture: OPTION B — Node.js subprocess Mermaid rendering via committed `scripts/mermaid-render.cjs` + npm `mermaid` package.
 5. One diagram source of truth: PR 0148 Mermaid descriptors via PR 0149 required_diagrams.
-6. Exact dependency: mermaid-diagram>=1.0.0,<2.0.0 added to pyproject.toml.
+6. Corrected dependency: npm packages `mermaid` and `jsdom` added to package.json devDependencies. `pyproject.toml` no longer contains `mermaid-diagram>=1.0.0,<2.0.0` (phantom package does not exist).
 7. Security: svg_sanitizer.py called on EVERY SVG before API response.
 8. No survivor: onclick, href, xlink:href, script, foreignObject, iframe, img external src — all removed.
 9. Stale protection: detailRequestCounter guards all diagram fetches.
@@ -475,8 +550,8 @@ Implementation must stop if:
 
 1. The locked plan cannot be followed (architecture, scope, allowlist).
 2. A required file is outside the allowlist.
-3. mermaid-diagram cannot be installed or used via pip.
-4. The API of mermaid-diagram differs materially (e.g., no security config params).
+3. The Node.js + npm rendering pipeline cannot be installed (node not on PATH, npm install fails, package resolution fails).
+4. The render script cannot produce deterministic SVG for valid Mermaid source.
 5. SVG sanitization cannot be implemented safely.
 6. Renderer cannot produce deterministic output for same input.
 7. Profile schema changes are required.
