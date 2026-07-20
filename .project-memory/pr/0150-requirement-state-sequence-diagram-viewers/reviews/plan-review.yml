@@ -1,0 +1,142 @@
+schema_version: "0.1"
+pr_id: "0150-requirement-state-sequence-diagram-viewers"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-18T00:00:00Z"
+snapshot_delta:
+  plan_base_sha: "45e4a9ef06a5cfa660f1ad2304701ddbcf226a85"
+  current_head: "45e4a9ef06a5cfa660f1ad2304701ddbcf226a85"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0150-requirement-state-sequence-diagram-viewers/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+    - "services/runner/src/runner/run_profile.py"
+    - "services/runner/src/runner/visual_gate_result.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/artifact_workspace.py"
+    - "services/task_intake/tests/test_artifact_workspace_shell.py"
+    - "pyproject.toml"
+  actual_files:
+    - ".project-memory/pr/0150-requirement-state-sequence-diagram-viewers/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+    - "services/runner/src/runner/run_profile.py"
+    - "services/runner/src/runner/visual_gate_result.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/artifact_workspace.py"
+    - "services/task_intake/tests/test_artifact_workspace_shell.py"
+    - "pyproject.toml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0150-requirement-state-sequence-diagram-viewers/PLAN.md"
+  - "ROADMAP.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - ".project-memory/pr/0149-visual-gate-runtime-object/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0149-visual-gate-runtime-object/reviews/precommit-review.yml"
+  - ".project-memory/pr/0148-mermaid-artifact-type-read-model/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0148-mermaid-artifact-type-read-model/reviews/precommit-review.yml"
+  - "services/runner/src/runner/run_profile.py"
+  - "services/runner/src/runner/visual_gate_result.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/artifact_workspace.py"
+  - "services/task_intake/tests/test_artifact_workspace_shell.py"
+  - "pyproject.toml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "45e4a9ef06a5cfa660f1ad2304701ddbcf226a85"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0150-requirement-state-sequence-diagram-viewers"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only uncommitted PR directory: .project-memory/pr/0150-requirement-state-sequence-diagram-viewers/"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty — no staged changes"
+  - command: "test -s .project-memory/pr/0150-requirement-state-sequence-diagram-viewers/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is non-empty"
+  - command: "git log --oneline -n 1 HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "45e4a9e — PR 0149 — Visual Gate Runtime Object (#179)"
+  - command: "grep -n '_VALID_DIAGRAM_TYPES' services/runner/src/runner/visual_gate_result.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "Line 36: frozenset({'requirement', 'state', 'sequence'}) — matches PLAN supported types exactly"
+  - command: "test -s services/runner/tests/test_visual_gate_result.py && test -s services/task_intake/tests/test_artifact_workspace_shell.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "All regression test files physically exist"
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "OPTION A — Server-Side Mermaid SVG Generation selected"
+    reason: "Server owns artifact store, run directory, profile descriptors, and controlled reference resolution. Client-side CDN would violate offline requirement. No npm/webpack tooling exists in repository."
+  - decision: "Dependency: mermaid-diagram>=1.0.0,<2.0.0 added to pyproject.toml"
+    reason: "Pure Python, offline-capable, produces deterministic SVG from Mermaid source. Security parameters applied on every render call (disable_click_handlers, disable_links, disable_forms, max_text_length, sanitize_svg). Fallback message if not installed."
+  - decision: "Whitelist-based SVG sanitizer enforced on every response"
+    reason: "svg_sanitizer.py uses xml.etree.ElementTree with explicit allowed elements and attributes. All event handlers, href, script, foreignObject, iframe, img, feImage, animate elements removed. Sanitizer failure returns ok=False — no unsanitized SVG returned."
+  - decision: "Controlled innerHTML for SVG insertion is correct and safe"
+    reason: "SVG requires XML parsing to render — textContent/createElement cannot render SVG. SVG is server-side pre-sanitized by svg_sanitizer.py before API response. Only the static pre-sanitized SVG string is inserted via innerHTML — no runtime interpolation."
+  - decision: "Required diagram identifiers exactly match existing VisualGateResult"
+    reason: "Physical source visual_gate_result.py line 36 confirms _VALID_DIAGRAM_TYPES = frozenset({'requirement', 'state', 'sequence'}). PLAN.md diagram types, labels, and accessibility text match exactly."
+  - decision: "Resolution chain is exact and verified"
+    reason: "VisualGateResult -> profile_descriptor_key -> profile artifact descriptor with kind='mermaid' -> controlled ref -> .mmd bytes. profile_descriptor_key format confirmed in visual_gate_result.py line 31."
+  - decision: "PR 0148 Mermaid contract fully preserved"
+    reason: "No changes to run_profile.py, profile schema, controlled references, or hash verification. Inert source text remains unchanged alongside rendered diagrams."
+  - decision: "PR 0149 VisualGateResult contract fully preserved"
+    reason: "No changes to visual_gate_result.py, required_diagrams, status, evidence_refs. New diagram route is additive."
+  - decision: "PR 0148 coverage gap closed"
+    reason: "TestMermaidDiagramViewer class added to test_artifact_workspace_shell.py with assertions for renderDiagramViewer, fetchDiagramData, loading/error states, stale protection, no approve/reject, no proof claims, controlled SVG insertion, existing zone preservation."
+  - decision: "PR 0151 readiness and PR 0152 approval deferred"
+    reason: "No pipeline blocking, no readiness enforcement, no human approval, no approve/reject controls. Rendered diagram labelled explicitly as not proof."
+context_used:
+  labels:
+    - plan-review
+    - mermaid
+    - diagram-viewers
+    - stream-3
+  memory_files_read:
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0150-requirement-state-sequence-diagram-viewers/PLAN.md"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+    - ".project-memory/pr/0149-visual-gate-runtime-object/IMPLEMENTATION_REPORT.md"
+    - ".project-memory/pr/0149-visual-gate-runtime-object/reviews/precommit-review.yml"
+    - ".project-memory/pr/0148-mermaid-artifact-type-read-model/IMPLEMENTATION_REPORT.md"
+    - ".project-memory/pr/0148-mermaid-artifact-type-read-model/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "services/runner/src/runner/run_profile.py"
+    - "services/runner/src/runner/visual_gate_result.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/artifact_workspace.py"
+    - "services/task_intake/tests/test_artifact_workspace_shell.py"
+    - "pyproject.toml"
+  files_modified:
+    - ".project-memory/pr/0150-requirement-state-sequence-diagram-viewers/reviews/plan-review.yml"
+  files_intentionally_ignored:
+    - ".project-memory/pr/*/reviews/*.yml"
+    - ".project-memory/pr/*/PLAN.md"
+    - ".project-memory/pr/*/IMPLEMENTATION_REPORT.md"
