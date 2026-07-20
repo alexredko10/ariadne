@@ -46,6 +46,7 @@ from task_intake.runtime_evidence_serialization import (
 from task_intake.artifact_workspace import render_artifact_workspace
 from task_intake.manual_orchestration import read_session, session_to_dict, _validate_session_id
 from runner.run_profile import read_run_profile
+from runner.visual_gate_result import read_visual_gate_result
 
 # Safe run_id pattern: alphanumeric, underscore, hyphen only
 _RUN_ID_RE = re.compile(r"^[a-zA-Z0-9_\-]+$")
@@ -926,6 +927,29 @@ async def app(scope: dict, receive: callable, send: callable, runs_root: str | N
     if method == "GET" and path.startswith("/runs/"):
         is_report = path.endswith("/report")
         is_profile = path.endswith("/profile")
+        is_visual_gate = path.endswith("/visual-gate-result")
+        if is_visual_gate:
+            # Visual gate route: GET /runs/<run_id>/visual-gate-result
+            # (runs_root is resolved above — handled in the is_visual_gate block below)
+            pass
+
+        if is_visual_gate:
+            # --- Visual Gate route: GET /runs/<run_id>/visual-gate-result ---
+            vg_result = read_visual_gate_result(runs_root, run_id)
+            response = {
+                "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                "ok": vg_result.get("ok", False),
+                "error": vg_result.get("error"),
+                "run_id": run_id,
+                "visual_gate_result_exists": vg_result.get("visual_gate_result_exists", False),
+                "visual_gate_sha256": vg_result.get("visual_gate_sha256"),
+                "hash_match": vg_result.get("hash_match"),
+                "visual_gate_result": vg_result.get("visual_gate_result"),
+            }
+            body = json.dumps(response, sort_keys=True, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+            return
+
         if is_profile:
             # --- Profile route: GET /runs/<run_id>/profile ---
             profile_result = read_run_profile(runs_root, run_id)
@@ -949,6 +973,8 @@ async def app(scope: dict, receive: callable, send: callable, runs_root: str | N
         elif is_profile:
             # Profile route: GET /runs/<run_id>/profile
             run_id = path[len("/runs/"):-len("/profile")]
+        elif is_visual_gate:
+            run_id = path[len("/runs/"):-len("/visual-gate-result")]
         else:
             # Detail route: GET /runs/<run_id>
             run_id = path[len("/runs/"):]
