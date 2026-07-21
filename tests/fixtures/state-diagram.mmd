@@ -1,0 +1,7 @@
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Processing: event/start
+    Processing --> Completed: event/done
+    Processing --> Failed: event/error
+    Completed --> [*]
+    Failed --> Idle: event/reset

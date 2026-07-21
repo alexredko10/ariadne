@@ -1,0 +1,10 @@
+sequenceDiagram
+    participant Alice
+    participant Bob
+    participant System
+    Alice->>Bob: Hello Bob, how are you?
+    Bob->>Alice: Good, thanks!
+    Alice->>System: Submit request
+    System-->>Alice: Request acknowledged
+    System->>Bob: Notify
+    Bob-->>System: Confirmed
