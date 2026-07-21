@@ -1,0 +1,110 @@
+schema_version: "0.1"
+pr_id: "0150-requirement-state-sequence-diagram-viewers"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-18T00:00:00Z"
+snapshot_delta:
+  plan_base_sha: "45e4a9ef06a5cfa660f1ad2304701ddbcf226a85"
+  current_head: "22c27f62e872100be2fbe83135f25c3ada841768"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0150-requirement-state-sequence-diagram-viewers/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+  actual_files:
+    - ".project-memory/pr/0150-requirement-state-sequence-diagram-viewers/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0150-requirement-state-sequence-diagram-viewers/PLAN.md"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "22c27f62e872100be2fbe83135f25c3ada841768"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0150-requirement-state-sequence-diagram-viewers"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "DIRTY tree with implementation — not a blocker for plan-review phase"
+  - command: "node --version"
+    result: "passed"
+    exit_code: 0
+    evidence: "v25.6.0 — matches PLAN.md Node.js availability claim"
+  - command: "npm --version"
+    result: "passed"
+    exit_code: 0
+    evidence: "11.8.0 — npm available for install"
+  - command: "npm view mermaid@11.16.0 version"
+    result: "passed"
+    exit_code: 0
+    evidence: "11.16.0 — package exists. Description: 'Markdown-ish syntax for generating flowcharts, mindmaps, sequence diagrams, class diagrams, gantt charts, git graphs and more.' Supports requirementDiagram, sequenceDiagram, stateDiagram-v2."
+  - command: "npm view jsdom@29.1.1 version"
+    result: "passed"
+    exit_code: 0
+    evidence: "29.1.1 — package exists. Description: 'A JavaScript implementation of many web standards.' Peer dep on canvas is optional (not required for SVG rendering)."
+  - command: "npm view mermaid@11.16.0 exports"
+    result: "passed"
+    exit_code: 0
+    evidence: "ESM module at ./dist/mermaid.core.mjs. CJS access via dynamic import() or mermaid.default.render(). PLAN.md's .cjs approach with dynamic import() is viable."
+  - command: "npm view mermaid@11.16.0 keywords"
+    result: "passed"
+    exit_code: 0
+    evidence: "Keywords include 'requirement diagram', 'sequence diagram' — confirms support for all three PLAN types."
+  - command: "Physical render test: mermaid@11.16.0 + jsdom@29.1.1 + Node.js v25.6.0"
+    result: "passed"
+    exit_code: 0
+    evidence: "All three diagram types produce SVG offline: requirement (7536 bytes, hasSvg=true), state (10301 bytes, hasSvg=true), sequence (22672 bytes, hasSvg=true). securityLevel:'strict' prevents all scripts (hasScript=false) and click handlers (hasClick=false). Invalid Mermaid syntax produces parse error. Hostile Mermaid with <script> tags fails at parse stage — no script execution."
+blockers: []
+warnings:
+  - id: "W001"
+    description: "npm install disk impact is significant — mermaid 11.16.0 alone is ~83MB unpacked. Total node_modules/ with all transitive deps (jsdom, d3, cytoscape, etc.) is ~176MB."
+    evidence: "Physical measurement: du -sh /tmp/mermaid-check/node_modules = 176MB. mermaid package = 83MB (1171 files). jsdom = 8.3MB. The remainder is transitive diagramming dependencies (d3, cytoscape, dagre, katex, etc.). This is the standard mermaid install footprint."
+    recommendation: "Document in PLAN.md or a README note that npm install for mermaid rendering adds ~176MB (node_modules/). This is a one-time install cost, not runtime memory."
+  - id: "W002"
+    description: "The render script extension .cjs requires dynamic import('mermaid') because mermaid v11 is ESM-only. A .mjs script could use direct import. The PLAN.md specifies .cjs but does not document that CJS require() of mermaid returns {default: ...} rather than the top-level render/initialize functions."
+    evidence: "Physical test: require('mermaid') returns {__esModule: true, default: {render, initialize, ...}}. Access via mermaid.default.render() or use dynamic import('mermaid') which returns the module directly. Node.js v25 handles both approaches."
+    recommendation: "Update PLAN.md to document that the .cjs script must use await import('mermaid') or mermaid.default.render(), not mermaid.render(). This is a minor implementation detail the coder must know."
+decisions_made:
+  - decision: "OPTION B — Node.js subprocess Mermaid rendering is physically feasible"
+    reason: "Authoritatively verified: Node.js v25.6.0 + mermaid@11.16.0 + jsdom@29.1.1. All three diagram types (requirement, state, sequence) render to SVG offline with securityLevel:'strict'. No CDN or runtime network required. Parse errors are caught and returned as visible error states. Hostile Mermaid input fails during parse, not execution."
+  - decision: "PLAN.md corrective amendment is complete and feasible"
+    reason: "The plan specifies: committed render script (scripts/mermaid-render.cjs), npm dependency addition (mermaid + jsdom), subprocess protocol with 30s timeout, stdin/stdout/stderr, removal of phantom Python dependency, whitelist-based SVG sanitizer, stale-response protection, zone separation, and all required drift/check/preservation sections. The implementation allowlist covers every required file including the new render script, package.json edits, pyproject.toml removal, Makefile target, renderer rewrite, and test updates."
+  - decision: "Plan is a complete and testable implementation contract"
+    reason: "Test plan specifies: npm install before renderer tests, 13 renderer tests including 3 SVG-producing tests that pass only when node+mermaid are installed, 12 sanitizer tests, 15+ workspace display tests (closing PR 0148 coverage gap), full regression, smoke with all three diagram types. Smoke marker is exact ('MERMAID DIAGRAM VIEWER SMOKE PASSED'). No phantom paths. No vague validation."
+  - decision: "PR 0151 and PR 0152 boundaries preserved"
+    reason: "No readiness enforcement, no human approval, no approve/reject controls. Rendered diagram labelled as not proof. VisualGateResult schema unchanged. Profile descriptors unchanged."
+context_used:
+  labels:
+    - plan-review
+    - corrective-review
+    - dependency-verification
+    - nodejs-mermaid
+  memory_files_read:
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0150-requirement-state-sequence-diagram-viewers/PLAN.md"
+  anchors_used: []
+  files_inspected:
+    - "pyproject.toml"
+    - "package.json"
+    - "Makefile"
+    - "services/runner/src/runner/mermaid_renderer.py"
+  files_inspected_during_bounded_discovery:
+    - "/tmp/mermaid-check/node_modules/mermaid (physically installed)"
+    - "/tmp/mermaid-check/node_modules/jsdom (physically installed)"
+  files_modified:
+    - ".project-memory/pr/0150-requirement-state-sequence-diagram-viewers/reviews/plan-review.yml"
+  files_intentionally_ignored:
+    - ".project-memory/pr/*/reviews/*.yml"
+    - ".project-memory/pr/*/PLAN.md"
+    - ".project-memory/pr/*/IMPLEMENTATION_REPORT.md"
+    - "All implementation files (not reviewed in this phase)"

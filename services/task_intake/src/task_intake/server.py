@@ -928,10 +928,34 @@ async def app(scope: dict, receive: callable, send: callable, runs_root: str | N
         is_report = path.endswith("/report")
         is_profile = path.endswith("/profile")
         is_visual_gate = path.endswith("/visual-gate-result")
+        is_diagram = "/visual-gate-result/" in path and path.endswith("/diagram")
         if is_visual_gate:
-            # Visual gate route: GET /runs/<run_id>/visual-gate-result
-            # (runs_root is resolved above — handled in the is_visual_gate block below)
             pass
+
+        if is_diagram:
+            # Diagram route: GET /runs/<run_id>/visual-gate-result/<diagram_id>/diagram
+            # Extract run_id and diagram_id from path
+            remaining = path[len("/runs/"):]
+            parts = remaining.split("/")
+            if len(parts) >= 3:
+                run_id_part = parts[0]
+                diagram_id = parts[2]  # visual-gate-result is parts[1], diagram_id is parts[2]
+            else:
+                run_id_part = ""
+                diagram_id = ""
+
+        # Extract run_id before early-return route handlers
+        if is_diagram:
+            # run_id_part already extracted above
+            pass
+        elif is_visual_gate:
+            run_id = path[len("/runs/"):-len("/visual-gate-result")]
+        elif is_profile:
+            run_id = path[len("/runs/"):-len("/profile")]
+        elif is_report:
+            run_id = path[len("/runs/"):-len("/report")]
+        else:
+            run_id = path[len("/runs/"):]
 
         if is_visual_gate:
             # --- Visual Gate route: GET /runs/<run_id>/visual-gate-result ---
@@ -967,26 +991,216 @@ async def app(scope: dict, receive: callable, send: callable, runs_root: str | N
             await _send_json(send, 200, body)
             return
 
-        if is_report:
-            # Report route: GET /runs/<run_id>/report
-            run_id = path[len("/runs/"):-len("/report")]
-        elif is_profile:
-            # Profile route: GET /runs/<run_id>/profile
-            run_id = path[len("/runs/"):-len("/profile")]
-        elif is_visual_gate:
-            run_id = path[len("/runs/"):-len("/visual-gate-result")]
-        else:
-            # Detail route: GET /runs/<run_id>
-            run_id = path[len("/runs/"):]
-        # Validate run_id
-        if not run_id or not _RUN_ID_RE.match(run_id) or len(run_id) > 128:
-            body = json.dumps({
+        if is_diagram:
+            # --- Diagram route: GET /runs/<run_id>/visual-gate-result/<diagram_id>/diagram ---
+            # Validate run_id
+            if not run_id_part or not _RUN_ID_RE.match(run_id_part) or len(run_id_part) > 128:
+                body = json.dumps({
+                    "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                    "ok": False,
+                    "error": "invalid_run_id",
+                }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                await _send_json(send, 200, body)
+                return
+
+            # Validate diagram_id
+            if not diagram_id or not _RUN_ID_RE.match(diagram_id) or len(diagram_id) > 128:
+                body = json.dumps({
+                    "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                    "ok": False,
+                    "error": "invalid_diagram_id",
+                }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                await _send_json(send, 200, body)
+                return
+
+            # Load VisualGateResult
+            vg_result = read_visual_gate_result(runs_root, run_id_part)
+            if not vg_result.get("ok") or not vg_result.get("visual_gate_result"):
+                body = json.dumps({
+                    "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                    "ok": False,
+                    "error": "visual_gate_result_not_found",
+                }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                await _send_json(send, 200, body)
+                return
+
+            # Find the diagram in required_diagrams
+            vg_data = vg_result["visual_gate_result"]
+            required_diagrams = vg_data.get("required_diagrams", [])
+            matching_diagram = None
+            for rd in required_diagrams:
+                if rd.get("diagram_id") == diagram_id:
+                    matching_diagram = rd
+                    break
+
+            if matching_diagram is None:
+                body = json.dumps({
+                    "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                    "ok": False,
+                    "error": "diagram_not_found_in_visual_gate_result",
+                }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                await _send_json(send, 200, body)
+                return
+
+            # Resolve descriptor_ref -> profile descriptor -> .mmd file
+            import re as _re
+            descriptor_ref = matching_diagram.get("descriptor_ref", "")
+            ref_match = _re.match(r"^profile_descriptor_key:(.+)$", descriptor_ref)
+            if not ref_match:
+                body = json.dumps({
+                    "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                    "ok": False,
+                    "error": "invalid_descriptor_ref",
+                }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                await _send_json(send, 200, body)
+                return
+
+            descriptor_key = ref_match.group(1)
+
+            # Load profile to find the descriptor
+            profile_result = read_run_profile(runs_root, run_id_part)
+            if not profile_result.get("ok") or not profile_result.get("profile"):
+                body = json.dumps({
+                    "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                    "ok": False,
+                    "error": "profile_not_found",
+                }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                await _send_json(send, 200, body)
+                return
+
+            # Find matching descriptor
+            profile_data = profile_result["profile"]
+            descriptors = profile_data.get("artifact_descriptors", [])
+            matching_descriptor = None
+            for desc in descriptors:
+                if desc.get("key") == descriptor_key and desc.get("kind") == "mermaid":
+                    matching_descriptor = desc
+                    break
+
+            if matching_descriptor is None:
+                # Check if descriptor exists but with wrong kind
+                found_wrong_kind = False
+                for desc in descriptors:
+                    if desc.get("key") == descriptor_key:
+                        found_wrong_kind = True
+                        body = json.dumps({
+                            "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                            "ok": False,
+                            "error": f"expected_mermaid_artifact_but_found_kind={desc.get('kind', '')}",
+                        }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                        await _send_json(send, 200, body)
+                        return
+                if not found_wrong_kind:
+                    body = json.dumps({
+                        "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                        "ok": False,
+                        "error": f"descriptor_key_not_found:{descriptor_key}",
+                    }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                    await _send_json(send, 200, body)
+                    return
+
+            # Read .mmd bytes through run-relative reference
+            ref = matching_descriptor.get("ref", "")
+            from runner.run_profile import resolve_run_relative, validate_reference
+            ref_codes: list[str] = []
+            ref_type = validate_reference(ref, ref_codes)
+            if ref_type != "run-relative" or ref_codes:
+                body = json.dumps({
+                    "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                    "ok": False,
+                    "error": "invalid_artifact_ref",
+                }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                await _send_json(send, 200, body)
+                return
+
+            file_path = resolve_run_relative(ref, runs_root, run_id_part)
+            if file_path is None or not os.path.isfile(file_path):
+                body = json.dumps({
+                    "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                    "ok": False,
+                    "error": "diagram_source_file_not_found",
+                }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                await _send_json(send, 200, body)
+                return
+
+            # Check file size
+            if os.path.getsize(file_path) > 100 * 1024:
+                body = json.dumps({
+                    "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                    "ok": False,
+                    "error": "diagram_source_too_large",
+                }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                await _send_json(send, 200, body)
+                return
+
+            # Read .mmd bytes
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    mermaid_source = f.read()
+            except (OSError, UnicodeDecodeError) as e:
+                body = json.dumps({
+                    "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                    "ok": False,
+                    "error": f"diagram_read_error:{e}",
+                }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                await _send_json(send, 200, body)
+                return
+
+            # Render Mermaid to SVG
+            from runner.mermaid_renderer import render_mermaid_to_svg
+            render_result = render_mermaid_to_svg(mermaid_source, matching_diagram.get("diagram_type", ""))
+            if not render_result.get("ok"):
+                body = json.dumps({
+                    "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                    "ok": False,
+                    "error": render_result.get("error", "render_failed"),
+                    "diagram_id": diagram_id,
+                    "diagram_type": matching_diagram.get("diagram_type", ""),
+                    "mermaid_sha256": render_result.get("mermaid_sha256"),
+                }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                await _send_json(send, 200, body)
+                return
+
+            # Sanitize SVG
+            from task_intake.svg_sanitizer import sanitize_svg
+            sanitize_result = sanitize_svg(render_result["svg"])
+            if not sanitize_result.get("ok"):
+                body = json.dumps({
+                    "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                    "ok": False,
+                    "error": sanitize_result.get("error", "svg_sanitization_failed"),
+                    "diagram_id": diagram_id,
+                    "diagram_type": matching_diagram.get("diagram_type", ""),
+                    "mermaid_sha256": render_result.get("mermaid_sha256"),
+                }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                await _send_json(send, 200, body)
+                return
+
+            response = {
                 "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
-                "ok": False,
-                "error": "invalid_run_id",
-            }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                "ok": True,
+                "svg": sanitize_result["sanitized_svg"],
+                "diagram_id": diagram_id,
+                "diagram_type": matching_diagram.get("diagram_type", ""),
+                "mermaid_sha256": render_result.get("mermaid_sha256"),
+                "byte_count": render_result.get("byte_count", 0),
+            }
+            body = json.dumps(response, sort_keys=True, ensure_ascii=False).encode("utf-8")
             await _send_json(send, 200, body)
             return
+
+        # run_id already extracted above (before early-return handlers)
+        # Only detail/report routes reach here; run_id is correct.
+        # Validate run_id (skip for diagram route which uses run_id_part)
+        if not is_diagram:
+            if not run_id or not _RUN_ID_RE.match(run_id) or len(run_id) > 128:
+                body = json.dumps({
+                    "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                    "ok": False,
+                    "error": "invalid_run_id",
+                }, sort_keys=True, ensure_ascii=False).encode("utf-8")
+                await _send_json(send, 200, body)
+                return
 
         # Parse optional runs_root query parameter
         query_string = scope.get("query_string", b"").decode("utf-8")

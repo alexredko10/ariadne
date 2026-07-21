@@ -1,8 +1,11 @@
-.PHONY: test test-python test-js lint smoke install-dev local-operator
+.PHONY: test test-python test-js lint smoke install-dev local-operator install-mermaid-renderer
 
 install-dev:
 	python -m pip install --upgrade pip
 	python -m pip install -e ".[dev]"
+
+install-mermaid-renderer:
+	npm install
 
 test: test-python
 

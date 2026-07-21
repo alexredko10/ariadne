@@ -1,0 +1,10 @@
+graph TD
+    A[Start] --> B{Decision}
+    B -->|Yes| C["OK <script>alert('xss')</script>"]
+    B -->|No| D["Fail onclick='bad()'"]
+    C --> E[https://evil.com]
+    D --> E
+    E --> F
+
+    style A fill:#f00,stroke:#333,stroke-width:2px,onclick:alert("hacked")
+    click C "javascript:alert('clicked')" "tooltip"

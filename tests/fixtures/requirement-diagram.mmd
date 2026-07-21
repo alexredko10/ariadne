@@ -1,0 +1,12 @@
+requirementDiagram
+    requirement test_req {
+        id: "1"
+        text: "the system shall authenticate users"
+        risk: high
+        verifymethod: test
+    }
+    element test_element {
+        type: module
+        docRef: "auth"
+    }
+    test_element - satisfies -> test_req

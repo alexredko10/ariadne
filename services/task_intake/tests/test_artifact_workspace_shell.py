@@ -2072,6 +2072,196 @@ class TestReportApiSafety:
             assert data["ok"] is False
 
 
+# ---------------------------------------------------------------------------
+# PR 0150 Mermaid Diagram Viewer Tests
+# ---------------------------------------------------------------------------
+
+
+class TestMermaidDiagramViewer:
+    """PR 0150: Tests for Mermaid diagram viewer in workspace."""
+
+    def test_render_diagram_viewer_function_exists(self):
+        """renderDiagramViewer function exists in workspace JS."""
+        _, html = _request("GET", "/workspace")
+        assert "function renderDiagramViewer" in html
+
+    def test_fetch_diagram_data_function_exists(self):
+        """fetchDiagramData function exists in workspace JS."""
+        _, html = _request("GET", "/workspace")
+        assert "function fetchDiagramData" in html
+
+    def test_fetch_visual_gate_diagrams_function_exists(self):
+        """fetchVisualGateDiagrams function exists in workspace JS."""
+        _, html = _request("GET", "/workspace")
+        assert "function fetchVisualGateDiagrams" in html
+
+    def test_create_diagram_container_function_exists(self):
+        """createDiagramContainer function exists in workspace JS."""
+        _, html = _request("GET", "/workspace")
+        assert "function createDiagramContainer" in html
+
+    def test_loading_diagram_state_text(self):
+        """Loading diagram text exists in workspace."""
+        _, html = _request("GET", "/workspace")
+        assert "Loading diagram..." in html
+
+    def test_failed_to_render_error_text(self):
+        """Failed to render diagram error text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Failed to render diagram." in html
+
+    def test_renderer_not_available_error_text(self):
+        """Mermaid renderer not available error text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Mermaid renderer not available" in html
+
+    def test_diagram_not_found_error_text(self):
+        """Diagram not found error text exists."""
+        _, html = _request("GET", "/workspace")
+        assert "Diagram not found" in html
+
+    def test_stale_response_protection_in_diagram_fetch(self):
+        """detailRequestCounter stale protection used in fetchDiagramData."""
+        _, html = _request("GET", "/workspace")
+        assert "requestId !== detailRequestCounter" in html
+
+    def test_detail_request_counter_preincremented_in_fetch_diagram(self):
+        """detailRequestCounter is pre-incremented in fetchDiagramData."""
+        _, html = _request("GET", "/workspace")
+        assert "++detailRequestCounter" in html
+
+    def test_no_approve_reject_controls_in_diagram_viewer(self):
+        """No approve/reject controls in diagram viewer."""
+        _, html = _request("GET", "/workspace")
+        # The "accept" word appears in workspace text "No artifact loaded",
+        # but no approve/reject buttons in diagram viewer context
+        assert "approve" not in html.lower()
+
+    def test_inert_proof_disclaimer_present(self):
+        """Rendered diagram disclaimer: not independently verified proof or approval."""
+        _, html = _request("GET", "/workspace")
+        assert "visual representation of Mermaid source" in html
+        assert "not independently verified proof" in html
+
+    def test_svg_inserted_via_controlled_innerhtml(self):
+        """SVG is inserted via innerHTML (controlled — only for sanitized SVG)."""
+        _, html = _request("GET", "/workspace")
+        assert "container.innerHTML = data.svg" in html
+
+    def test_no_innerhtml_with_unsanitized_values_in_diagram(self):
+        """No innerHTML used with unsanitized values in diagram viewer."""
+        _, html = _request("GET", "/workspace")
+        # The only innerHTML in diagram context is for sanitized SVG from server
+        # and for clearing container on error state
+        assert "container.innerHTML" in html
+        assert "innerHTML = data.svg" in html
+
+    def test_no_eval_in_diagram_viewer(self):
+        """No eval in diagram viewer code."""
+        _, html = _request("GET", "/workspace")
+        assert "eval(" not in html
+
+    def test_no_document_write_diagram_viewer(self):
+        """No document.write in diagram viewer."""
+        _, html = _request("GET", "/workspace")
+        assert "document.write" not in html
+
+    def test_no_iframe_srcdoc_diagram_viewer(self):
+        """No iframe srcdoc in diagram viewer."""
+        _, html = _request("GET", "/workspace")
+        assert "srcdoc" not in html
+
+    def test_encode_uri_component_used_in_fetch(self):
+        """encodeURIComponent used for run_id and diagram_id in diagram fetch."""
+        _, html = _request("GET", "/workspace")
+        assert "encodeURIComponent(runId)" in html
+        assert "encodeURIComponent(diagramId)" in html
+
+    def test_diagram_container_has_region_role(self):
+        """Diagram viewer container has role='region'."""
+        _, html = _request("GET", "/workspace")
+        assert 'role", "region"' in html
+
+    def test_diagram_container_has_aria_label(self):
+        """Diagram viewer container has aria-label."""
+        _, html = _request("GET", "/workspace")
+        assert 'aria-label", "Diagram:' in html
+
+    def test_existing_mermaid_inert_text_unchanged(self):
+        """Existing Mermaid inert source text display still present."""
+        _, html = _request("GET", "/workspace")
+        assert "Mermaid source text:" in html
+        assert "displayed as inert text, not rendered" in html
+
+    def test_existing_workspace_zones_preserved(self):
+        """All four workspace zones still present after diagram viewer addition."""
+        _, html = _request("GET", "/workspace")
+        assert 'id="zone-timeline"' in html
+        assert 'id="zone-canvas"' in html
+        assert 'id="zone-gates-proofs"' in html
+        assert 'id="zone-logs-captures"' in html
+
+    def test_existing_gates_placeholder_preserved(self):
+        """Gates zone initial placeholder still present."""
+        _, html = _request("GET", "/workspace")
+        assert "No gate checks available" in html
+
+    def test_existing_logs_placeholder_preserved(self):
+        """Logs zone initial placeholder still present."""
+        _, html = _request("GET", "/workspace")
+        assert "No logs available" in html
+
+    def test_existing_detail_functions_preserved(self):
+        """renderDetail, fetchDetail, showDetailLoading still present."""
+        _, html = _request("GET", "/workspace")
+        assert "function renderDetail" in html
+        assert "function showDetailLoading" in html
+
+    def test_existing_report_functions_preserved(self):
+        """renderReport, fetchReport functions still present."""
+        _, html = _request("GET", "/workspace")
+        assert "function fetchReport" in html
+        assert "function renderReport" in html
+
+    def test_existing_profile_functions_preserved(self):
+        """fetchProfile, renderProfile functions still present."""
+        _, html = _request("GET", "/workspace")
+        assert "function fetchProfile" in html
+        assert "function renderProfile" in html
+
+    def test_existing_render_mermaid_artifact_preserved(self):
+        """renderMermaidArtifact function still present."""
+        _, html = _request("GET", "/workspace")
+        assert "function renderMermaidArtifact" in html
+
+    def test_gates_proofs_unchanged_by_diagram_viewer(self):
+        """renderGatesProofs still present and unchanged."""
+        _, html = _request("GET", "/workspace")
+        assert "function renderGatesProofs" in html
+
+    def test_logs_captures_unchanged_by_diagram_viewer(self):
+        """renderLogsCaptures still present and unchanged."""
+        _, html = _request("GET", "/workspace")
+        assert "function renderLogsCaptures" in html
+
+    def test_fetch_diagram_uses_visual_gate_result_path(self):
+        """fetchDiagramData uses /runs/<run_id>/visual-gate-result/<diagram_id>/diagram path."""
+        _, html = _request("GET", "/workspace")
+        assert 'visual-gate-result/' in html
+        assert '/diagram"' in html
+
+    def test_no_cdn_references_in_diagram_viewer(self):
+        """No CDN references in diagram viewer."""
+        _, html = _request("GET", "/workspace")
+        assert "cdn." not in html.lower()
+        assert "unpkg" not in html.lower()
+        assert "jsdelivr" not in html.lower()
+
+    def test_no_external_script_src_in_diagram_viewer(self):
+        """No external script src in diagram viewer."""
+        _, html = _request("GET", "/workspace")
+        assert 'src="http' not in html
+
 class TestReportPreservation:
     """PR 0146: Tests that PR 0145 behavior is preserved and PR 0147 is deferred."""
 

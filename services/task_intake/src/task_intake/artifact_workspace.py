@@ -203,6 +203,12 @@ function selectRun(runId) {{
     showGatesLoading();
     showLogsLoading();
 
+    // Clear any existing diagram viewers from previous selection
+    var existingViewers = document.querySelectorAll('[id^="diagram-viewer-"]');
+    for (var vi = 0; vi < existingViewers.length; vi++) {
+        existingViewers[vi].remove();
+    }
+
     fetch("/runs/" + encodeURIComponent(runId))
         .then(function(resp) {{
             if (!resp.ok) {{
@@ -564,11 +570,58 @@ function fetchProfile(runId) {{
         .then(function(data) {{
             if (requestId !== detailRequestCounter) return; // stale
             renderProfile(data);
+            // After profile renders, fetch visual gate for diagram IDs
+            if (data.ok && data.profile) {{
+                fetchVisualGateDiagrams(runId);
+            }}
         }})
         .catch(function(err) {{
             if (requestId !== detailRequestCounter) return; // stale
             showProfileUnavailable();
         }});
+}}
+
+function fetchVisualGateDiagrams(runId) {{
+    fetch("/runs/" + encodeURIComponent(runId) + "/visual-gate-result")
+        .then(function(resp) {{
+            if (!resp.ok) throw new Error("HTTP " + resp.status);
+            return resp.json();
+        }})
+        .then(function(data) {{
+            if (!data.ok || !data.visual_gate_result) return;
+            var required = data.visual_gate_result.required_diagrams || [];
+            for (var i = 0; i < required.length; i++) {{
+                var diagramId = required[i].diagram_id;
+                createDiagramContainer(diagramId, required[i]);
+                fetchDiagramData(runId, diagramId);
+            }}
+        }})
+        .catch(function(err) {{
+            // Silent — visual gate result may not exist
+        }});
+}}
+
+function createDiagramContainer(diagramId, diagramData) {{
+    var canvas = document.getElementById("zone-canvas");
+    if (!canvas) return;
+    var existing = document.getElementById("diagram-viewer-" + diagramId);
+    if (existing) existing.remove();
+
+    var viewer = document.createElement("div");
+    viewer.id = "diagram-viewer-" + diagramId;
+    viewer.setAttribute("role", "region");
+    viewer.setAttribute("aria-label", "Diagram: " + (diagramData.diagram_type || "unknown") + " - " + diagramId);
+
+    var heading = document.createElement("h4");
+    heading.textContent = (diagramData.diagram_type || "Diagram") + ": " + diagramId;
+    viewer.appendChild(heading);
+
+    var loadingP = document.createElement("p");
+    loadingP.className = "zone-placeholder";
+    loadingP.textContent = "Loading diagram...";
+    viewer.appendChild(loadingP);
+
+    canvas.appendChild(viewer);
 }}
 
 function showProfileLoading() {{
@@ -811,6 +864,63 @@ function renderMermaidArtifact(container, descriptor) {{
     mermaidDiv.appendChild(pre);
 
     container.appendChild(mermaidDiv);
+}}
+
+// ---- Diagram Viewer ----
+
+function fetchDiagramData(runId, diagramId) {{
+    var requestId = ++detailRequestCounter;
+
+    fetch("/runs/" + encodeURIComponent(runId) + "/visual-gate-result/" + encodeURIComponent(diagramId) + "/diagram")
+        .then(function(resp) {{
+            if (!resp.ok) {{
+                throw new Error("HTTP " + resp.status);
+            }}
+            return resp.json();
+        }})
+        .then(function(data) {{
+            if (requestId !== detailRequestCounter) return; // stale
+            renderDiagramViewer(runId, diagramId, data);
+        }})
+        .catch(function(err) {{
+            if (requestId !== detailRequestCounter) return; // stale
+            var container = document.getElementById("diagram-viewer-" + diagramId);
+            if (container) {{
+                container.innerHTML = '<p class="zone-placeholder">Failed to load diagram. Check that the server is running.</p>';
+            }}
+        }});
+}}
+
+function renderDiagramViewer(runId, diagramId, data) {{
+    var container = document.getElementById("diagram-viewer-" + diagramId);
+    if (!container) return;
+
+    if (data.ok) {{
+        // Insert pre-sanitized SVG from server
+        // SVG must be parsed as XML to render — this is the ONLY intentional innerHTML usage
+        // for pre-sanitized, server-validated SVG content
+        container.innerHTML = data.svg || ""; // sanitized_svg from server
+
+        // Add disclaimer below the diagram
+        var disclaimer = document.createElement("p");
+        disclaimer.style.fontSize = "0.85rem";
+        disclaimer.style.color = "#666";
+        disclaimer.style.marginTop = "0.5rem";
+        disclaimer.textContent = "Rendered diagram \u2014 visual representation of Mermaid source. Not independently verified proof or approval.";
+        container.appendChild(disclaimer);
+    }} else {{
+        var errorMsg = "Failed to render diagram.";
+        if (data.error === "mermaid_renderer_not_available") {{
+            errorMsg = "Mermaid renderer not available. Install dependencies with: npm install";
+        }} else if (data.error === "diagram_source_file_not_found") {{
+            errorMsg = "Diagram not found \u2014 Mermaid artifact file is missing";
+        }}
+        container.innerHTML = "";
+        var p = document.createElement("p");
+        p.className = "zone-placeholder";
+        p.textContent = errorMsg;
+        container.appendChild(p);
+    }}
 }}
 
 function safeTextRow(label, value) {{
