@@ -1,0 +1,135 @@
+schema_version: "0.1"
+pr_id: "0151a-ci-node-dependency-bootstrap"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-18T00:00:00Z"
+snapshot_delta:
+  plan_base_sha: "52683afbf6a7bb95b392875ae3002d3c3be3cad3"
+  current_head: "52683afbf6a7bb95b392875ae3002d3c3be3cad3"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0151a-ci-node-dependency-bootstrap/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".github/workflows/ci.yml"
+    - "package.json"
+    - "package-lock.json"
+    - "scripts/mermaid-render.cjs"
+    - "services/runner/src/runner/mermaid_renderer.py"
+  actual_files:
+    - ".project-memory/pr/0151a-ci-node-dependency-bootstrap/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - ".github/workflows/ci.yml"
+    - "package.json"
+    - "package-lock.json"
+    - "scripts/mermaid-render.cjs"
+    - "services/runner/src/runner/mermaid_renderer.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/pr/0151a-ci-node-dependency-bootstrap/PLAN.md"
+  - ".project-memory/review-artifact.schema.yml"
+  - ".github/workflows/ci.yml"
+  - "package.json"
+  - "package-lock.json"
+  - "scripts/mermaid-render.cjs"
+  - "services/runner/src/runner/mermaid_renderer.py"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "52683afbf6a7bb95b392875ae3002d3c3be3cad3"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0151a-ci-node-dependency-bootstrap"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only uncommitted PR directory: .project-memory/pr/0151a-ci-node-dependency-bootstrap/"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty — no staged changes"
+  - command: "test -s .project-memory/pr/0151a-ci-node-dependency-bootstrap/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is non-empty"
+  - command: "git log --oneline -n 1 HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "52683af — PR 0151 — Visual Gate Readiness Checker (#181)"
+  - command: "grep 'devDependencies' package.json -A3"
+    result: "passed"
+    exit_code: 0
+    evidence: "package.json devDependencies declare mermaid ^11.0.0 and jsdom ^29.0.0 — CORRECT, no change needed"
+  - command: "grep 'node_modules/jsdom' package-lock.json | head -3"
+    result: "passed"
+    exit_code: 0
+    evidence: "jsdom 29.1.1 locked in package-lock.json — CORRECT, no change needed"
+  - command: "grep 'jasmine.*jsdom\|require.*jsdom' scripts/mermaid-render.cjs"
+    result: "passed"
+    exit_code: 0
+    evidence: "scripts/mermaid-render.cjs calls require('jsdom') at runtime — confirms primary failure root cause: cannot find module 'jsdom'"
+  - command: "grep 'node_modules/mermaid' package-lock.json | head -3"
+    result: "passed"
+    exit_code: 0
+    evidence: "mermaid 11.16.0 locked in package-lock.json — CORRECT, no change needed"
+  - command: "grep -E 'setup-node|npm ci|npm install' .github/workflows/ci.yml"
+    result: "failed"
+    exit_code: 1
+    evidence: "ci.yml has NO Node setup or npm install step — confirms root cause. Plan fix is correct."
+  - command: "grep -E 'node.*engines|>=20\\.19\\.0' package-lock.json | head -5"
+    result: "passed"
+    exit_code: 0
+    evidence: "Locked transitive deps require node >=20.19.0. Plan selects Node 22 — satisfies all constraints."
+  - command: "grep -E 'continue-on-error|if:.*false|fail-fast' .github/workflows/ci.yml"
+    result: "passed"
+    exit_code: 1
+    evidence: "No failure waivers in current ci.yml. Plan explicitly requires no waivers added."
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "Root cause confirmed — CI bootstrap gap"
+    reason: "ci.yml has no Node setup or npm install step. scripts/mermaid-render.cjs requires('jsdom') which fails with 'Cannot find module' on a clean runner. Three primary failures are renderer tests requiring jsdom + mermaid. Four cascade failures are fail-closed readiness/API results caused by renderer_unavailable. No implementation defect exists."
+  - decision: "Package manifests are correct — no change needed"
+    reason: "package.json declares mermaid ^11.0.0 and jsdom ^29.0.0 in devDependencies. package-lock.json locks both trees at correct versions (mermaid 11.16.0, jsdom 29.1.1). Neither file requires modification."
+  - decision: "Proposed workflow fix is minimal and correct"
+    reason: "Two steps added to ci.yml: actions/setup-node@v4 with node-version '22' and cache:npm, then npm ci --ignore-scripts. Node 22 satisfies all lockfile engine constraints (>=20.19.0). --ignore-scripts is safe (pure JS rendering, no native addons). npm ci is deterministic (uses lockfile)."
+  - decision: "Product code must NOT be modified"
+    reason: "Root cause is exclusively CI infrastructure — no implementation defect. Modifying renderer, tests, or any product code would mask the real problem. Allowlist is correctly restricted to ci.yml, IMPLEMENTATION_REPORT.md, and precommit-review.yml."
+  - decision: "Validation is complete and executable"
+    reason: "14 validation commands cover: workflow YAML syntax, npm ci, module resolution, focused renderer tests (all 3 previously failing), focused readiness tests (all 4 previously failing), full suite, compile, whitespace, residue, manifest stability, product-code invariance, and no failure waivers. All must pass before commit-readiness."
+  - decision: "Roadmap PR 0152 is preserved"
+    reason: "No PR 0152 scope is consumed. No approve/reject, readiness, or approval semantics are changed. This is an infrastructure-only corrective PR."
+  - decision: "Plan DRIFT GATE and NO-DRIFT CHECK are task-specific and complete"
+    reason: "17 drift gate conditions and 19 no-drift confirmation items. Each is specific to CI bootstrap — not copied from product PRs."
+  - decision: "Smoke marker is exact: CI NODE DEPENDENCY BOOTSTRAP PASSED"
+    reason: "Validated by running all 14 validation commands locally. Final acceptance requires a GitHub-hosted CI run on the merged commit."
+context_used:
+  labels:
+    - plan-review
+    - ci-bootstrap
+    - node-dependency
+    - governance-insertion
+  memory_files_read:
+    - ".project-memory/pr/0151a-ci-node-dependency-bootstrap/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+  anchors_used: []
+  files_inspected:
+    - ".github/workflows/ci.yml"
+    - "package.json"
+    - "package-lock.json"
+    - "scripts/mermaid-render.cjs"
+    - "services/runner/src/runner/mermaid_renderer.py"
+  files_modified:
+    - ".project-memory/pr/0151a-ci-node-dependency-bootstrap/reviews/plan-review.yml"
+  files_intentionally_ignored:
+    - ".project-memory/pr/*/reviews/*.yml"
+    - ".project-memory/pr/*/PLAN.md"
+    - ".project-memory/pr/*/IMPLEMENTATION_REPORT.md"
+    - "All product code (not relevant to CI bootstrap)"
