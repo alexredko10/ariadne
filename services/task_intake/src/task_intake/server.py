@@ -929,6 +929,7 @@ async def app(scope: dict, receive: callable, send: callable, runs_root: str | N
         is_profile = path.endswith("/profile")
         is_visual_gate = path.endswith("/visual-gate-result")
         is_diagram = "/visual-gate-result/" in path and path.endswith("/diagram")
+        is_readiness = path.endswith("/visual-gate-readiness")
         if is_visual_gate:
             pass
 
@@ -945,9 +946,12 @@ async def app(scope: dict, receive: callable, send: callable, runs_root: str | N
                 diagram_id = ""
 
         # Extract run_id before early-return route handlers
+        is_readiness = path.endswith("/visual-gate-readiness")
         if is_diagram:
             # run_id_part already extracted above
             pass
+        elif is_readiness:
+            run_id = path[len("/runs/"):-len("/visual-gate-readiness")]
         elif is_visual_gate:
             run_id = path[len("/runs/"):-len("/visual-gate-result")]
         elif is_profile:
@@ -1201,6 +1205,20 @@ async def app(scope: dict, receive: callable, send: callable, runs_root: str | N
                 }, sort_keys=True, ensure_ascii=False).encode("utf-8")
                 await _send_json(send, 200, body)
                 return
+
+        # Readiness route: GET /runs/<run_id>/visual-gate-readiness
+        is_readiness = path.endswith("/visual-gate-readiness")
+        if is_readiness:
+            from runner.visual_gate_readiness import check_visual_gate_readiness
+            readiness_result = check_visual_gate_readiness(runs_root, run_id)
+            response = {
+                "ev_contract_version": EVIDENCE_CONTRACT_VERSION,
+                "run_id": run_id,
+            }
+            response.update(readiness_result)
+            body = json.dumps(response, sort_keys=True, ensure_ascii=False).encode("utf-8")
+            await _send_json(send, 200, body)
+            return
 
         # Parse optional runs_root query parameter
         query_string = scope.get("query_string", b"").decode("utf-8")

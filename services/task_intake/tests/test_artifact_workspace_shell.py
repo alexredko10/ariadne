@@ -2355,3 +2355,135 @@ class TestReportPreservation:
         status, html = _request("GET", "/")
         assert status == 200
         assert "Ariadne — Local Interaction" in html
+
+
+# ---------------------------------------------------------------------------
+# PR 0151 Visual Gate Readiness Display Tests
+# ---------------------------------------------------------------------------
+
+
+FIXTURES_DIR = os.path.join(
+    os.path.dirname(__file__), "..", "..", "..", "tests", "fixtures"
+)
+
+
+def _load_fixture(name: str) -> str:
+    path = os.path.join(FIXTURES_DIR, name)
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
+
+
+class TestVisualGateReadinessDisplay:
+    """PR 0151: Tests for Visual Gate Readiness display in workspace."""
+
+    def test_render_readiness_result_function_exists(self):
+        """renderReadinessResult function exists in workspace JS."""
+        _, html = _request("GET", "/workspace")
+        assert "function renderReadinessResult" in html
+
+    def test_show_readiness_loading_function_exists(self):
+        """showReadinessLoading function exists in workspace JS."""
+        _, html = _request("GET", "/workspace")
+        assert "function showReadinessLoading" in html
+
+    def test_show_readiness_unavailable_function_exists(self):
+        """showReadinessUnavailable function exists in workspace JS."""
+        _, html = _request("GET", "/workspace")
+        assert "function showReadinessUnavailable" in html
+
+    def test_fetch_readiness_function_exists(self):
+        """fetchReadiness function exists in workspace JS."""
+        _, html = _request("GET", "/workspace")
+        assert "function fetchReadiness" in html
+
+    def test_ready_state_text_present(self):
+        """Ready state text is present in workspace."""
+        _, html = _request("GET", "/workspace")
+        assert "Visual Gate: Ready." in html
+
+    def test_not_ready_state_text_present(self):
+        """Not ready state text is present in workspace."""
+        _, html = _request("GET", "/workspace")
+        assert "Visual Gate: Not ready." in html
+
+    def test_no_gate_state_text_present(self):
+        """No gate state text is present in workspace."""
+        _, html = _request("GET", "/workspace")
+        assert "Visual Gate: Not configured." in html
+
+    def test_unavailable_state_text_present(self):
+        """Unavailable state text is present in workspace."""
+        _, html = _request("GET", "/workspace")
+        assert "Visual Gate: Unavailable." in html
+
+    def test_loading_state_text_present(self):
+        """Loading state text is present in workspace."""
+        _, html = _request("GET", "/workspace")
+        assert "Checking Visual Gate readiness..." in html
+
+    def test_staleness_guard_in_fetch(self):
+        """staleness_guard comparison exists in fetchReadiness."""
+        _, html = _request("GET", "/workspace")
+        assert "staleness_guard" in html
+
+    def test_detail_request_counter_in_readiness_fetch(self):
+        """detailRequestCounter used in fetchReadiness."""
+        _, html = _request("GET", "/workspace")
+        assert "++detailRequestCounter" in html
+        assert "requestId !== detailRequestCounter" in html
+
+    def test_select_run_calls_fetch_readiness(self):
+        """selectRun calls fetchReadiness."""
+        _, html = _request("GET", "/workspace")
+        assert "fetchReadiness(runId)" in html
+
+    def test_no_approve_reject_controls(self):
+        """No approve/reject controls in workspace."""
+        _, html = _request("GET", "/workspace")
+        ws_lower = html.lower()
+        assert "approve</button>" not in ws_lower
+        assert "reject</button>" not in ws_lower
+
+    def test_no_mutation_controls(self):
+        """No mutation controls in workspace."""
+        _, html = _request("GET", "/workspace")
+        ws_lower = html.lower()
+        assert "accept</button>" not in ws_lower
+
+    def test_all_values_via_textcontent(self):
+        """Readiness values use textContent, not innerHTML."""
+        _, html = _request("GET", "/workspace")
+        assert "textContent" in html
+
+    def test_existing_zones_unchanged(self):
+        """All four workspace zones still present."""
+        _, html = _request("GET", "/workspace")
+        assert 'id="zone-timeline"' in html
+        assert 'id="zone-canvas"' in html
+        assert 'id="zone-gates-proofs"' in html
+        assert 'id="zone-logs-captures"' in html
+
+    def test_existing_render_gates_proofs_unchanged(self):
+        """renderGatesProofs function still present and unchanged."""
+        _, html = _request("GET", "/workspace")
+        assert "function renderGatesProofs" in html
+
+    def test_existing_diagram_viewer_unchanged(self):
+        """renderDiagramViewer function still present."""
+        _, html = _request("GET", "/workspace")
+        assert "function renderDiagramViewer" in html
+
+    def test_readiness_uses_gates_zone(self):
+        """Readiness section references gates-content."""
+        _, html = _request("GET", "/workspace")
+        assert "visual-gate-readiness" in html
+
+    def test_readiness_has_region_role(self):
+        """Readiness container has role='region'."""
+        _, html = _request("GET", "/workspace")
+        assert 'role", "region"' in html
+
+    def test_readiness_has_aria_label(self):
+        """Readiness container has aria-label."""
+        _, html = _request("GET", "/workspace")
+        assert 'aria-label", "Visual Gate readiness status"' in html
