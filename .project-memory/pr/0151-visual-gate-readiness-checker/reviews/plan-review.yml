@@ -1,0 +1,162 @@
+schema_version: "0.1"
+pr_id: "0151-visual-gate-readiness-checker"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-18T00:00:00Z"
+snapshot_delta:
+  plan_base_sha: "eb93d4e5458a2fce05c1e8780b01a149d28e2941"
+  current_head: "eb93d4e5458a2fce05c1e8780b01a149d28e2941"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0151-visual-gate-readiness-checker/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+    - "services/runner/src/runner/visual_gate_result.py"
+    - "services/runner/src/runner/run_profile.py"
+    - "services/runner/src/runner/mermaid_renderer.py"
+    - "services/task_intake/src/task_intake/svg_sanitizer.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/artifact_workspace.py"
+  actual_files:
+    - ".project-memory/pr/0151-visual-gate-readiness-checker/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+    - "services/runner/src/runner/visual_gate_result.py"
+    - "services/runner/src/runner/run_profile.py"
+    - "services/runner/src/runner/mermaid_renderer.py"
+    - "services/task_intake/src/task_intake/svg_sanitizer.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/artifact_workspace.py"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0151-visual-gate-readiness-checker/PLAN.md"
+  - "ROADMAP.md"
+  - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+  - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+  - ".project-memory/pr/0150-requirement-state-sequence-diagram-viewers/PLAN.md"
+  - ".project-memory/pr/0150-requirement-state-sequence-diagram-viewers/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0150-requirement-state-sequence-diagram-viewers/reviews/precommit-review.yml"
+  - ".project-memory/pr/0149-visual-gate-runtime-object/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0149-visual-gate-runtime-object/reviews/precommit-review.yml"
+  - ".project-memory/pr/0148-mermaid-artifact-type-read-model/IMPLEMENTATION_REPORT.md"
+  - ".project-memory/pr/0148-mermaid-artifact-type-read-model/reviews/precommit-review.yml"
+  - "services/runner/src/runner/visual_gate_result.py"
+  - "services/runner/src/runner/run_profile.py"
+  - "services/runner/src/runner/mermaid_renderer.py"
+  - "services/task_intake/src/task_intake/svg_sanitizer.py"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/src/task_intake/artifact_workspace.py"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "eb93d4e5458a2fce05c1e8780b01a149d28e2941"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0151-visual-gate-readiness-checker"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "Only uncommitted PR directory: .project-memory/pr/0151-visual-gate-readiness-checker/"
+  - command: "git diff --cached --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: "empty — no staged changes"
+  - command: "test -s .project-memory/pr/0151-visual-gate-readiness-checker/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists and is non-empty"
+  - command: "git log --oneline -n 1 HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "eb93d4e — PR 0150 — Requirement / State / Sequence Diagram Viewers (#180)"
+  - command: "grep 'def read_visual_gate_result' services/runner/src/runner/visual_gate_result.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "Line 440 — read_visual_gate_result() exists. Plan's canonical input physically verified."
+  - command: "grep 'def read_run_profile' services/runner/src/runner/run_profile.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "Line 573 — read_run_profile() exists. Profile loading physically verified."
+  - command: "grep 'def resolve_run_relative' services/runner/src/runner/run_profile.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "Line 144 — resolve_run_relative() exists. Controlled reference resolution physically verified."
+  - command: "grep 'def render_mermaid_to_svg' services/runner/src/runner/mermaid_renderer.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "Line 40 — render_mermaid_to_svg() exists. PR 0150 renderer physically verified."
+  - command: "grep 'def sanitize_svg' services/task_intake/src/task_intake/svg_sanitizer.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "Line 136 — sanitize_svg() exists. SVG sanitizer physically verified."
+  - command: "grep 'is_visual_gate' services/task_intake/src/task_intake/server.py"
+    result: "passed"
+    exit_code: 0
+    evidence: "Lines 928-960 — existing route dispatch pattern (is_profile, is_report, is_visual_gate). Plan's additive is_ready pattern follows the established convention."
+blockers: []
+warnings: []
+decisions_made:
+  - decision: "OPTION A — On-Demand Computed Readiness selected and fully specified"
+    reason: "Readiness is a deterministic function of the current run's artifacts plus renderer availability. No persistence, no caching, no second source of truth. Canonical inputs: read_visual_gate_result(), read_run_profile(), render_mermaid_to_svg(), sanitize_svg() — all physically verified."
+  - decision: "Readiness result schema is exact"
+    reason: "Top-level fields (ok, is_ready, status, reason_codes, explanation, diagram_results, renderer_available, staleness_guard) each have exact type, required/optional, and evidence meaning. DiagramReadinessResult has 11 fields. Status vocabulary is four exact values (ready, not_ready, no_gate, unavailable)."
+  - decision: "Decision table covers 22 scenarios with deterministic mappings"
+    reason: "Every scenario specifies: trigger conditions, resulting status, reason codes, whether evaluation continues, user-visible text, and PR 0152 eligibility. All fail-closed: missing/malformed/hash-mismatched/encoding/oversized/render-failure/sanitize-failure all produce is_ready=False."
+  - decision: "Five-layer responsibility separation enforced"
+    reason: "Plan explicitly models: (1) artifact description (PR 0148), (2) gate declaration (PR 0149), (3) safe rendering (PR 0150), (4) technical readiness (PR 0151), (5) human decision (PR 0152). No two layers are collapsed. Readiness cannot become approval."
+  - decision: "PR 0148, PR 0149, PR 0150 contracts fully preserved"
+    reason: "No modifications to visual_gate_result.py, run_profile.py, mermaid_renderer.py, svg_sanitizer.py. Readiness calls these functions read-only. Existing route patterns preserved — additive GET-only route."
+  - decision: "UI placement in Gates & Proofs is correct"
+    reason: "Readiness is a gate assessment, not a diagram artifact. Canvas zone holds profile metadata, Mermaid source text, rendered SVG viewers. Gates & Proofs zone holds manifest, evidence, proof-refs — and now readiness. renderGatesProofs() is not modified; readiness is additive."
+  - decision: "No approve/reject, mutation, pipeline enforcement, or PR 0152+ authority"
+    reason: "Plan explicitly states: no approve/reject controls, no mutation, no pipeline enforcement, no execution blocking, no Artifact Registry, no acceptance. PR 0152 deferred."
+  - decision: "22+ domain tests cover every decision-table branch and reason code"
+    reason: "Tests explicitly listed for all 22 scenarios plus edge cases (renderer available/unavailable, staleness_guard mismatch, no filesystem mutation). API tests for all GET response states. Workspace tests for all UI states."
+  - decision: "Smoke is deterministic, local, and offline with exact marker"
+    reason: "Script path, npm install prefix, 14-step sequence covering ready/not_ready/no_gate/unavailable + GET route + no mutation + no residue. Exact marker: VISUAL GATE READINESS SMOKE PASSED."
+context_used:
+  labels:
+    - plan-review
+    - visual-gate
+    - readiness-checker
+    - stream-3
+  memory_files_read:
+    - ".project-memory/review-artifact.schema.yml"
+    - ".project-memory/pr/0151-visual-gate-readiness-checker/PLAN.md"
+    - "ROADMAP.md"
+    - ".project-memory/roadmaps/ARIADNA_PRODUCT_ROADMAP_AFTER_PR0136.md"
+    - "docs/adr/0011-pr-batching-and-roadmap-discipline.md"
+    - ".project-memory/pr/0150-requirement-state-sequence-diagram-viewers/PLAN.md"
+    - ".project-memory/pr/0150-requirement-state-sequence-diagram-viewers/IMPLEMENTATION_REPORT.md"
+    - ".project-memory/pr/0150-requirement-state-sequence-diagram-viewers/reviews/precommit-review.yml"
+    - ".project-memory/pr/0149-visual-gate-runtime-object/IMPLEMENTATION_REPORT.md"
+    - ".project-memory/pr/0149-visual-gate-runtime-object/reviews/precommit-review.yml"
+    - ".project-memory/pr/0148-mermaid-artifact-type-read-model/IMPLEMENTATION_REPORT.md"
+    - ".project-memory/pr/0148-mermaid-artifact-type-read-model/reviews/precommit-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "services/runner/src/runner/visual_gate_result.py"
+    - "services/runner/src/runner/run_profile.py"
+    - "services/runner/src/runner/mermaid_renderer.py"
+    - "services/task_intake/src/task_intake/svg_sanitizer.py"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/src/task_intake/artifact_workspace.py"
+  files_modified:
+    - ".project-memory/pr/0151-visual-gate-readiness-checker/reviews/plan-review.yml"
+  files_intentionally_ignored:
+    - ".project-memory/pr/*/reviews/*.yml"
+    - ".project-memory/pr/*/PLAN.md"
+    - ".project-memory/pr/*/IMPLEMENTATION_REPORT.md"
