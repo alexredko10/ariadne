@@ -234,6 +234,9 @@ function selectRun(runId) {{
 
     // Fetch profile in parallel
     fetchProfile(runId);
+
+    // Fetch readiness in parallel
+    fetchReadiness(runId);
 }}
 
 // Show loading state in the canvas
@@ -1417,6 +1420,128 @@ function renderLogsCaptures(data) {{
             content.appendChild(seDiv);
         }}
     }}
+}}
+
+// ---- Visual Gate Readiness ----------------
+
+var __readinessStalenessGuard = null;
+var __readinessLastStalenessGuard = null;
+
+function showReadinessLoading() {{
+    var zone = document.getElementById("zone-gates-proofs");
+    if (!zone) return;
+    var content = zone.querySelector("#gates-content");
+    if (!content) return;
+    var existing = zone.querySelector("#visual-gate-readiness");
+    if (existing) existing.remove();
+    var p = document.createElement("p");
+    p.className = "zone-placeholder";
+    p.textContent = "Checking Visual Gate readiness...";
+    content.appendChild(p);
+}}
+
+function showReadinessUnavailable() {{
+    var zone = document.getElementById("zone-gates-proofs");
+    if (!zone) return;
+    var content = zone.querySelector("#gates-content");
+    if (!content) return;
+    var existing = zone.querySelector("#visual-gate-readiness");
+    if (existing) existing.remove();
+}}
+
+function fetchReadiness(runId) {{
+    var requestId = ++detailRequestCounter;
+    showReadinessLoading();
+
+    fetch("/runs/" + encodeURIComponent(runId) + "/visual-gate-readiness")
+        .then(function(resp) {{
+            if (!resp.ok) {{
+                throw new Error("HTTP " + resp.status);
+            }}
+            return resp.json();
+        }})
+        .then(function(data) {{
+            if (requestId !== detailRequestCounter) return; // stale
+            if (data.staleness_guard && __readinessLastStalenessGuard &&
+                data.staleness_guard !== __readinessLastStalenessGuard) {{
+                // Staleness guard changed — re-fetch on next selection
+                __readinessStalenessGuard = data.staleness_guard;
+                return;
+            }}
+            __readinessStalenessGuard = data.staleness_guard || null;
+            __readinessLastStalenessGuard = data.staleness_guard || null;
+            renderReadinessResult(data);
+        }})
+        .catch(function(err) {{
+            if (requestId !== detailRequestCounter) return; // stale
+            showReadinessUnavailable();
+        }});
+}}
+
+function renderReadinessResult(data) {{
+    var zone = document.getElementById("zone-gates-proofs");
+    if (!zone) return;
+    var content = zone.querySelector("#gates-content");
+    if (!content) return;
+
+    var existing = zone.querySelector("#visual-gate-readiness");
+    if (existing) existing.remove();
+
+    var div = document.createElement("div");
+    div.id = "visual-gate-readiness";
+    div.setAttribute("role", "region");
+    div.setAttribute("aria-label", "Visual Gate readiness status");
+
+    var heading = document.createElement("h3");
+    heading.textContent = "Visual Gate Readiness";
+    div.appendChild(heading);
+
+    if (data.status === "ready") {{
+        var statusP = document.createElement("p");
+        statusP.className = "readiness-ready";
+        statusP.textContent = "Visual Gate: Ready. All required diagrams are valid and renderable.";
+        div.appendChild(statusP);
+    }} else if (data.status === "not_ready") {{
+        var statusP = document.createElement("p");
+        statusP.className = "readiness-not-ready";
+        statusP.textContent = "Visual Gate: Not ready.";
+        div.appendChild(statusP);
+
+        if (data.reason_codes && data.reason_codes.length > 0) {{
+            var ul = document.createElement("ul");
+            ul.setAttribute("role", "list");
+            for (var ri = 0; ri < data.reason_codes.length; ri++) {{
+                var li = document.createElement("li");
+                li.textContent = data.reason_codes[ri];
+                ul.appendChild(li);
+            }}
+            div.appendChild(ul);
+        }}
+
+        if (data.explanation) {{
+            var expP = document.createElement("p");
+            expP.className = "readiness-explanation";
+            expP.textContent = data.explanation;
+            div.appendChild(expP);
+        }}
+    }} else if (data.status === "no_gate") {{
+        var statusP = document.createElement("p");
+        statusP.className = "readiness-no-gate";
+        statusP.textContent = "Visual Gate: Not configured. No VisualGateResult exists for this run.";
+        div.appendChild(statusP);
+    }} else {{
+        // unavailable
+        var statusP = document.createElement("p");
+        statusP.className = "readiness-unavailable";
+        var errMsg = "Visual Gate: Unavailable.";
+        if (data.explanation) {{
+            errMsg += " " + data.explanation;
+        }}
+        statusP.textContent = errMsg;
+        div.appendChild(statusP);
+    }}
+
+    content.appendChild(div);
 }}
 
 // Show a state message in the timeline entries container

@@ -1,0 +1,9 @@
+{
+  "schema_version": "1",
+  "profile_key": "empty",
+  "run_id": "empty-001",
+  "profile_sha256": "",
+  "run_presentation": {
+    "title": "Empty profile"
+  }
+}
