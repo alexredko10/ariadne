@@ -1,0 +1,124 @@
+# PR 0151A — CI Node Dependency Bootstrap Correction — Final Precommit Review
+# Reviewed: 2026-07-21T23:15:48Z
+
+REVIEW ARTIFACT WRITTEN: yes
+PATH: .project-memory/pr/0151a-ci-node-dependency-bootstrap/reviews/precommit-review.yml
+BRANCH: 0151a-ci-node-dependency-bootstrap
+HEAD: 6295da359355d424fc0e158c7adf04ddb359f233
+VERDICT: pass
+COMMIT READINESS: ready
+ROOT CAUSE CONFIRMED: yes — ci.yml had no Node setup or npm install step; scripts/mermaid-render.cjs requires('jsdom') fails with "Cannot find module" on a clean runner. Three primary failures are renderer tests (missing jsdom). Four cascade failures are fail-closed readiness/API results (renderer_unavailable). No implementation defect exists.
+WORKFLOW FIX:
+  - Inserted `actions/setup-node@v4` after checkout, before setup-python
+  - Inserted `npm ci --ignore-scripts` after setup-node, before setup-python
+NODE VERSION: "22"
+NODE COMPATIBILITY: Node 22 satisfies locked engine constraint >=20.19.0 (from jsdom transitive dep @asamuzakjp/css-color)
+CACHE: `actions/setup-node@v4` with `cache: "npm"` and `cache-dependency-path: package-lock.json`
+INSTALL COMMAND: `npm ci --ignore-scripts`
+WORKFLOW ORDER: checkout → setup-node → npm ci → setup-python → pip install → pytest → compileall
+VALIDATION COMMANDS RUN: 14 of 14
+WORKFLOW SYNTAX: YAML OK (exit 0)
+NODE DEPENDENCIES: NODE DEPENDENCIES RESOLVED (exit 0)
+RENDERER TESTS: 12 passed, 1 skipped (exit 0)
+READINESS TESTS: 24 passed, 1 skipped (exit 0)
+API TESTS: included in readiness tests above
+FULL SUITE: 3148 passed, 2 skipped (exit 0)
+COMPILE: python -m compileall services packages — exit 0, no errors
+SEVEN FAILURES RESOLVED:
+  - test_valid_requirement_diagram_produces_svg: PASSED
+  - test_valid_state_diagram_produces_svg: PASSED
+  - test_valid_sequence_diagram_produces_svg: PASSED
+  - test_all_required_diagrams_valid_ready: PASSED
+  - test_renderer_unavailable_state: SKIPPED (expected — renderer IS available)
+  - test_render_failure_state (via readiness suite): PASSED (24/24)
+  - test_ready_state_returns_is_ready_true (API): PASSED (included in 24)
+  Confirmed: all 3 primary + 4 cascade failures resolved.
+DEPENDENCY MANIFESTS: unchanged (package.json, package-lock.json — git diff empty)
+PRODUCT CODE: unchanged (services/, scripts/, tests/ — git diff empty)
+TEST FILES: unchanged
+PLANNING LOCK:
+  - HEAD: 6295da3 ("docs(ci): plan node dependency bootstrap")
+  - PLAN.md committed at HEAD, unchanged from working tree
+  - plan-review.yml committed at HEAD, unchanged from working tree
+  - No planning drift detected
+CHANGED FILES:
+  Modified:
+    - .github/workflows/ci.yml
+  Untracked:
+    - .project-memory/pr/0151a-ci-node-dependency-bootstrap/IMPLEMENTATION_REPORT.md
+    - .project-memory/pr/0151a-ci-node-dependency-bootstrap/reviews/precommit-review.yml
+ALLOWLIST: exact — .github/workflows/ci.yml, IMPLEMENTATION_REPORT.md, precommit-review.yml
+FORBIDDEN FILES:
+  - package.json: unchanged ✓
+  - package-lock.json: unchanged ✓
+  - scripts/mermaid-render.cjs: unchanged ✓
+  - All Python source: unchanged ✓
+  - All tests/fixtures: unchanged ✓
+  - PR 0150 artifacts: unchanged ✓
+  - PR 0151 artifacts: unchanged ✓ (B001 file still deleted ✓)
+  - PLAN.md: unchanged ✓
+  - plan-review.yml: unchanged ✓
+  - ROADMAP.md: unchanged ✓
+  - Dockerfiles/runtime: unchanged ✓
+FAILURE WAIVERS:
+  - grep "continue-on-error\|if:.*false\|fail-fast" ci.yml: exit 1 — none found ✓
+  - No test skips, deselection, conditional bypass, or mock fallback added ✓
+  - --ignore-scripts is correct per plan (not a waiver) ✓
+  - 2 skipped tests are pre-existing (renderer_unavailable in local env with renderer present) ✓
+RESIDUE:
+  - .ariadne: absent ✓
+  - git diff --check: clean (exit 0) ✓
+  - No node_modules committed or staged ✓
+  - No untracked files beyond allowlist ✓
+MARKER: "CI NODE DEPENDENCY BOOTSTRAP PASSED" — confirmed as last stdout line
+CLEAN-RUNNER ACCEPTANCE: pending — local validation passes; final acceptance requires a GitHub-hosted CI run on the merged commit. This is an explicit post-publication gate per PLAN.md.
+ROADMAP 0152 PRESERVED: yes — no PR 0152 scope consumed; no approve/reject, readiness, or approval semantics changed
+PLAN DRIFT GATE: PASS — all 17 conditions clear
+NO-DRIFT CHECK: PASS — all 19 conditions clear
+BLOCKERS: none
+WARNINGS:
+  - 2 tests skipped in full suite (pre-existing, not caused by this PR): renderer_unavailable in local env where renderer IS available. The renderer module's own tests cover the unavailable path.
+  - Clean-runner acceptance is an explicit post-publication gate: the merged commit must pass CI on a GitHub-hosted runner. This PR is not fully closed until that CI run succeeds.
+PHYSICAL READBACK: confirmed — file read back after write
+
+EVIDENCE LEDGER:
+  - branch is correct: 0151a-ci-node-dependency-bootstrap ✓
+  - dirty tree is within scope: ✓ — only ci.yml (M) + IMPLEMENTATION_REPORT.md (??) + precommit-review.yml (??)
+  - all changed files were read: ✓ — ci.yml, IMPLEMENTATION_REPORT.md read in full
+  - IMPLEMENTATION_REPORT.md claims verified: ✓ — all validation claims match observed results
+  - required validation passed: ✓ — all 14 commands exit 0
+  - feature-specific behavior exists: ✓ — npm ci installs jsdom + mermaid, modules resolve, all 7 formerly-failing tests pass
+  - forbidden behavior is absent: ✓ — no product/test/fixture/manifest/workflow-waiver changes
+  - artifact physically written: yes
+  - artifact read back: yes
+
+BOUNDARY CONFIRMATIONS:
+  - Planning lock committed at HEAD (6295da3): ✓
+  - PLAN.md and plan-review.yml unchanged from HEAD: ✓
+  - Only ci.yml + IMPLEMENTATION_REPORT.md + precommit-review.yml in dirty tree: ✓
+  - No implementation commit required (precommit-review before commit workflow): ✓
+  - B001 file (PR 0151) still deleted: ✓
+  - Root cause is CI bootstrap gap (not implementation defect): ✓
+  - Three primary failures are renderer tests requiring jsdom: ✓
+  - Four cascade failures are fail-closed readiness/API results: ✓
+  - Fix is exactly two workflow steps (setup-node@v4 + npm ci): ✓
+  - Node 22 satisfies lockfile engine >=20.19.0: ✓
+  - npm ci --ignore-scripts is deterministic and safe: ✓
+  - No npm install, npx, global deps, or committed node_modules: ✓
+  - No continue-on-error, conditional bypasses, or fallback rendering: ✓
+  - No dependency manifest changed: ✓
+  - No product code or test file changed: ✓
+  - PR 0152 scope untouched: ✓
+  - Clean-runner acceptance remains an explicit post-publication gate: ✓
+
+NEXT REQUIRED ACTION:
+  1. Stage and commit:
+       git add .github/workflows/ci.yml \
+         .project-memory/pr/0151a-ci-node-dependency-bootstrap/IMPLEMENTATION_REPORT.md
+       git commit -m "ci(bootstrap): add node dependency install step"
+  2. Push:
+       git push -u origin 0151a-ci-node-dependency-bootstrap
+  3. Open PR into main:
+       gh pr create --base main --head 0151a-ci-node-dependency-bootstrap ...
+  4. After merge, verify GitHub Actions CI run passes on the clean hosted runner.
+  5. Do not begin PR 0152 until clean-runner acceptance is confirmed.
