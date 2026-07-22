@@ -260,9 +260,15 @@ class TestExistingUIPreserved:
         _, html = _request("GET", "/")
         assert "error-panel" in html
 
-    def test_no_external_assets(self):
+    def test_external_assets_are_only_bulma_cdn(self):
         _, html = _request("GET", "/")
-        assert "cdn" not in html.lower()
+        import re
+        urls = set()
+        for m in re.finditer(r'(?:href|src)="([^"]+)"', html):
+            u = m.group(1)
+            if u.startswith("http") or u.startswith("//"):
+                urls.add(u)
+        assert urls == {"https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css"}, f"unexpected external URLs: {urls}"
         assert "unpkg" not in html.lower()
         assert "jsdelivr" not in html.lower()
 
