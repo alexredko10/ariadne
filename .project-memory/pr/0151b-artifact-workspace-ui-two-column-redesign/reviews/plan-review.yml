@@ -1,0 +1,130 @@
+schema_version: "0.1"
+pr_id: "0151b-artifact-workspace-ui-two-column-redesign"
+review_type: "plan-review"
+verdict: "approve"
+reviewer: "plan-review"
+timestamp: "2026-07-22T10:19:00Z"
+snapshot_delta:
+  plan_base_sha: "1a3331aa45d01369bf676a6ae5d43cde676b2c63"
+  current_head: "1fb5d2fd5e1ab057c7b82c5a9f75e22b0be0383d"
+  action: "continue"
+  stale_snapshot: false
+scope:
+  expected_files:
+    - ".project-memory/pr/0151b-artifact-workspace-ui-two-column-redesign/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - "ROADMAP.md"
+    - ".project-memory/post-0100/strategic-direction/agent-manifest.md"
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/precommit-review.yml"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_local_run_history_in_page.py"
+    - "agents/plan-review.yml"
+  actual_files:
+    - ".project-memory/pr/0151b-artifact-workspace-ui-two-column-redesign/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - "ROADMAP.md"
+    - ".project-memory/post-0100/strategic-direction/agent-manifest.md"
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/precommit-review.yml"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_local_run_history_in_page.py"
+    - "agents/plan-review.yml"
+  forbidden_paths_checked: true
+  forbidden_paths_found: []
+  generated_artifacts_found: []
+  scope_status: "in_scope"
+files_checked:
+  - ".project-memory/review-artifact.schema.yml"
+  - ".project-memory/pr/0151b-artifact-workspace-ui-two-column-redesign/PLAN.md"
+  - "ROADMAP.md"
+  - ".project-memory/post-0100/strategic-direction/agent-manifest.md"
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+  - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/precommit-review.yml"
+  - "services/task_intake/src/task_intake/server.py"
+  - "services/task_intake/tests/test_local_run_history_in_page.py"
+  - "agents/plan-review.yml"
+validation:
+  - command: "git rev-parse --verify HEAD"
+    result: "passed"
+    exit_code: 0
+    evidence: "1fb5d2fd5e1ab057c7b82c5a9f75e22b0be0383d"
+  - command: "git branch --show-current"
+    result: "passed"
+    exit_code: 0
+    evidence: "0151b-artifact-workspace-ui-two-column-redesign"
+  - command: "git status --short"
+    result: "passed"
+    exit_code: 0
+    evidence: "RM 0152 PLAN.md -> 0151b PLAN.md (rename), D 0152 plan-review.yml (old review deleted), MM pyproject.toml (allowed dev fix), ?? 0151b reviews/ (new directory)"
+  - command: "git diff --name-only"
+    result: "passed"
+    exit_code: 0
+    evidence: ".project-memory/pr/0151b-artifact-workspace-ui-two-column-redesign/PLAN.md, pyproject.toml"
+  - command: "git diff .gitignore | wc -l"
+    result: "passed"
+    exit_code: 0
+    evidence: "0 lines — .gitignore is clean. Stop Conditions correctly require .gitignore unchanged."
+  - command: "test -f .project-memory/pr/0151b-artifact-workspace-ui-two-column-redesign/PLAN.md"
+    result: "passed"
+    exit_code: 0
+    evidence: "PLAN.md exists at 0151b path"
+  - command: "grep '__ariadne_run_history' services/task_intake/src/task_intake/server.py | head -1"
+    result: "passed"
+    exit_code: 0
+    evidence: "server.py line 1747: __ariadne_run_history JS array exists"
+  - command: "grep 'cdnjs.cloudflare.com' services/task_intake/src/task_intake/server.py"
+    result: "passed"
+    exit_code: 1
+    evidence: "CDN URL not yet in source — will be added by implementation"
+  - command: "test -d .project-memory/pr/0152-artifact-workspace-ui-redesign"
+    result: "passed"
+    exit_code: 1
+    evidence: "Old 0152 directory no longer exists — cleaned up"
+blockers: []
+warnings:
+  - id: "W001"
+    description: "PLAN.md 'Not Modified' section lists pyproject.toml as not modified, but pyproject.toml IS modified (adds [tool.setuptools] packages = []). The 'Allowed files' section correctly permits this change, but the 'Not Modified' list contradicts it. The plan should either remove pyproject.toml from the 'Not Modified' list or add a note that the dev-fix exclusion is intentional."
+    evidence: "PLAN.md 'Not Modified' list includes 'pyproject.toml, poetry.lock, requirements*.txt'. git diff pyproject.toml shows the change. PLAN.md 'Allowed files:' paragraph permits pyproject.toml. These are inconsistent."
+    recommendation: "Remove pyproject.toml from the 'Not Modified' list, or add a note that pyproject.toml is modified for a documented infrastructure fix."
+  - id: "W002"
+    description: "The Bulma CDN at cdnjs.cloudflare.com introduces a new runtime network dependency for stylesheets. This is acceptable for a dev-tool UI with graceful degradation — the page renders semantically without the stylesheet."
+    evidence: "PLAN.md CDN Verify section. cdnjs.cloudflare.com is CSP-safe. CSS-only <link>, no JS. No external scripts."
+    recommendation: "Confirm that the implementation adds the CDN link as a <link> element only, not a <script>. No unpkg, no jsdelivr."
+  - id: "W003"
+    description: "The test_no_external_assets update is the only described test change, but the DOM restructuring may affect other tests that assert on element ordering or DOM structure rather than just ID/class/tag presence. A baseline test run is recommended before implementation."
+    evidence: "PLAN.md preservation matrix lists 25+ tests. Most assert on element IDs or text fragments. A few (like test_run_list_entries_are_clickable) assert on specific patterns like 'View</button>' which could break if button text or structure changes."
+    recommendation: "Run existing test suite as baseline before implementation. Fix all regressions during implementation."
+decisions_made:
+  - decision: "Approve — all blockers from previous reviews resolved"
+    reason: "(1) .gitignore is clean — Stop Conditions are correct. (2) Old 0152 directory cleaned. (3) Governance insertion paragraph correctly identifies PR 0151b as non-renumbering insertion preserving PR 0152. (4) Scope is frontend-only: server.py HTML string + test update. (5) Bulma CDN is cdnjs.cloudflare.com only. (6) __ariadne_run_history preserved. (7) Routes preserved. (8) pyproject.toml dev fix is documented and justified. (9) Prior gates (PR 0139, PR 0151A) confirmed pass."
+  - decision: "PR 0151b governance insertion correctly preserves roadmap"
+    reason: "PLAN.md states: 'PR 0151B is authorized by the human architect between PR 0151A (CI Node Dependency Bootstrap Correction) and product PR 0152 (Human Visual Approval Artifact). It does not consume or renumber product roadmap slot PR 0152.'"
+  - decision: "All key checks met"
+    reason: "SCOPE: frontend-only (server.py + test). BULMA CDN: cdnjs.cloudflare.com only. __ariadne_run_history: preserved. ROUTES: all explicitly listed as preserved. EXECUTABLE-FIRST: server.py Python + test file. VALIDATION: compileall, focused tests, full UI suite, regression. PRIOR GATE: PR 0139 precommit pass. ROADMAP: governance insertion, Stream 1, no runtime/production line reopened."
+context_used:
+  labels:
+    - plan-review
+    - frontend-redesign
+    - bulma-cdn
+    - governance-insertion
+  memory_files_read:
+    - ".project-memory/pr/0151b-artifact-workspace-ui-two-column-redesign/PLAN.md"
+    - ".project-memory/review-artifact.schema.yml"
+    - "ROADMAP.md"
+    - ".project-memory/post-0100/strategic-direction/agent-manifest.md"
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/PLAN.md"
+    - ".project-memory/pr/0139-artifact-workspace-local-run-list-view/reviews/precommit-review.yml"
+    - "services/task_intake/src/task_intake/server.py"
+    - "services/task_intake/tests/test_local_run_history_in_page.py"
+    - "agents/plan-review.yml"
+  anchors_used: []
+  files_inspected:
+    - "services/task_intake/src/task_intake/server.py (line 1500: _HTML_PAGE, line 1747: __ariadne_run_history)"
+    - "services/task_intake/tests/test_local_run_history_in_page.py (1058 lines, 41 tests)"
+  files_modified:
+    - ".project-memory/pr/0151b-artifact-workspace-ui-two-column-redesign/reviews/plan-review.yml"
+  files_intentionally_ignored:
+    - ".project-memory/pr/*/reviews/*.yml"
+    - ".project-memory/pr/*/PLAN.md"
+    - ".project-memory/pr/*/IMPLEMENTATION_REPORT.md"

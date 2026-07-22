@@ -1,11 +1,11 @@
-# PR 0152 — Artifact Workspace UI: Two-Column Layout
+# PR 0151b — Artifact Workspace UI: Two-Column Layout
 
 ## Roadmap Alignment
 
 | Field | Value |
 |-------|-------|
 | **Track** | Artifact Workspace UI Redesign (Stream 1) |
-| **Slot** | PR 0152 (UI redesign after PR 0139 run list view and PR 0146 run detail panel) |
+| **Slot** | PR 0151b (UI redesign after PR 0139 run list view and PR 0146 run detail panel) |
 | **Why this PR is next** | The current single-column debug form has accumulated features (summary card, execution trace, structured view, raw JSON, feedback panel, session report, confusion signals, onboarding) into a long vertical scroll. This PR replaces it with a clean two-column layout: left panel for task input + runner selection + run history, right panel for tabbed result views. Bulma CSS from CDN provides the grid/tab/chip components without a build step. All route handlers remain untouched. |
 | **Batching policy** | Single-purpose: layout redesign only. No new backend routes, no runtime changes. |
 | **Drift heuristic** | Does not add backend routes, does not change POST /runs/execute behavior, does not change GET /runs response shape, does not add authentication, does not add persistence, does not add Docker execution, does not add a frontend build step. |
@@ -55,7 +55,7 @@ This URL is stable and does not require CSP changes (no CSP header is set by the
 
 ## UI Slice Identity
 
-1. PR 0152 is the **Artifact Workspace UI Two-Column Layout Redesign**.
+1. PR 0151b is the **Artifact Workspace UI Two-Column Layout Redesign**.
 2. This replaces the **inline CSS** with **Bulma from CDN** plus minimal custom overrides.
 3. This preserves all **existing JS function signatures** (`pushRunHistory`, `renderRunHistory`, `clearRunHistory`, `fetchRunDetail`, `renderRunDetail`, `get`, `val`, `boolSpan`, `listItems`, `keyValue`, `section`, etc.).
 4. This preserves all **existing JS variables** (`__ariadne_run_history`, `__ariadne_confusion_signals`, `__ariadne_session_ref`, `TRACE_STEPS`, etc.).
@@ -94,13 +94,12 @@ This URL is stable and does not require CSP changes (no CSP header is set by the
 - `ROADMAP.md`
 - `docs/`, `agents/`, `schemas/`
 - `pyproject.toml`, `poetry.lock`, `requirements*.txt`
-- `.gitignore`
 - All previous PR artifacts
 - All Python files except `server.py` (and only the HTML string)
 - All test files except `test_local_run_history_in_page.py` (and only specific test updates)
 
 ## Layout Design
-
+| **Governance insertion** | PR 0151B is authorized by the human architect between PR 0151A (CI Node Dependency Bootstrap Correction) and product PR 0152 (Human Visual Approval Artifact). It does not consume or renumber product roadmap slot PR 0152. PR 0152 remains Human Visual Approval Artifact. |
 ### Two-Column Layout (Bulma)
 
 The page uses Bulma's `columns` grid:
@@ -272,6 +271,8 @@ def test_allowed_cdn_only(self):
     assert "jsdelivr" not in html.lower()
 ```
 
+## Allowed files:
+pyproject.toml — dev environment fix only: adds [tool.setuptools] packages = [] to suppress egg-info generation during local dev install
 This is the only test that **must** change its assertion logic. All other tests can be preserved by keeping the existing element IDs, class names, JS function/variable names, and text content in the new layout.
 
 ## Route Preservation
@@ -406,7 +407,7 @@ grep -R -n -E \
   "git add|git commit|git push|gh pr create|git reset|git checkout|git switch|git merge|git rebase|git clean|git tag|docker|docker compose|docker run|pip install|shell=True|os.system" \
   services/task_intake/src/task_intake/server.py \
   services/task_intake/tests/test_local_run_history_in_page.py \
-  .project-memory/pr/0152-artifact-workspace-ui-redesign
+  .project-memory/pr/0151b-artifact-workspace-ui-two-column-redesign
 ```
 
 Expected: no unsafe real mutation authority added.
@@ -433,9 +434,9 @@ Expected: only `server.py` and `test_local_run_history_in_page.py` modified (plu
 Verify that only the planned files are changed:
 - `services/task_intake/src/task_intake/server.py`
 - `services/task_intake/tests/test_local_run_history_in_page.py`
-- `.project-memory/pr/0152-artifact-workspace-ui-redesign/PLAN.md`
-- `.project-memory/pr/0152-artifact-workspace-ui-redesign/reviews/plan-review.yml`
-- `.project-memory/pr/0152-artifact-workspace-ui-redesign/reviews/precommit-review.yml`
+- `.project-memory/pr/0151b-artifact-workspace-ui-two-column-redesign/PLAN.md`
+- `.project-memory/pr/0151b-artifact-workspace-ui-two-column-redesign/reviews/plan-review.yml`
+- `.project-memory/pr/0151b-artifact-workspace-ui-two-column-redesign/reviews/precommit-review.yml`
 
 If any other file is modified: block.
 
@@ -487,7 +488,7 @@ If any other file is modified: block.
 ## Stop Conditions
 
 This PLAN is blocked if any:
-- Branch is not `0152-artifact-workspace-ui-redesign`
+- Branch is not `0151b-artifact-workspace-ui-two-column-redesign`
 - `server.py` `GET /` route cannot be found
 - `test_local_run_history_in_page.py` has assertions that cannot be preserved without backend changes
 - Bulma CDN URL is unreachable at task time
