@@ -1502,9 +1502,38 @@ _HTML_PAGE = r"""<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <title>Ariadne — Local Interaction</title>
+<link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css">
 <style>
-body { font-family: sans-serif; margin: 2rem; }
-pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
+html, body { height: 100%; margin: 0; background: #fafaf9; font-family: system-ui, -apple-system, sans-serif; }
+body { display: flex; flex-direction: column; min-height: 100vh; }
+.ariadne-main { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 52px); }
+.ariadne-left { width: 320px; min-width: 280px; flex-shrink: 0; border-right: 1px solid #e5e5e3; background: #f5f5f4; display: flex; flex-direction: column; overflow: hidden; }
+.ariadne-right { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fff; }
+.left-scroll { flex: 1; overflow-y: auto; padding: 12px; }
+.section-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; margin-top: 10px; }
+.section-label:first-child { margin-top: 0; }
+.runner-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.runner-chip { font-size: 12px; padding: 4px 12px; border-radius: 20px; border: 1px solid #d1d5db; background: #fff; color: #4b5563; cursor: pointer; transition: all 0.15s; }
+.runner-chip.is-active { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; }
+.ariadne-tabs { display: flex; border-bottom: 1px solid #e5e5e3; padding: 0 16px; background: #fafaf9; flex-shrink: 0; }
+.ariadne-tab { font-size: 13px; padding: 10px 16px; cursor: pointer; color: #6b7280; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.ariadne-tab.is-active { color: #1d4ed8; border-color: #3b82f6; }
+.tab-pane { display: none; flex: 1; padding: 16px; overflow-y: auto; }
+.tab-pane.is-active { display: block; }
+.result-card { background: #fff; border: 1px solid #e5e5e3; border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+.result-card-title { font-size: 13px; font-weight: 600; color: #1a1a18; margin-bottom: 10px; }
+.kv-row { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; border-bottom: 1px solid #f3f4f6; font-size: 12px; }
+.kv-row:last-child { border: none; }
+.kv-key { color: #6b7280; }
+.kv-val { font-weight: 500; max-width: 60%; word-break: break-all; }
+.val-ok { color: #10b981; }
+.val-err { color: #ef4444; }
+.ariadne-bottom { border-top: 1px solid #e5e5e3; background: #fafaf9; }
+.bottom-toggle { padding: 6px 16px; font-size: 12px; color: #6b7280; cursor: pointer; border-bottom: 1px solid #e5e5e3; user-select: none; }
+.bottom-toggle:hover { background: #f0f0ee; }
+.bottom-content { padding: 12px 16px; }
+/* Preserved original styles from old layout for JS compatibility */
 .status-completed { color: #0a0; font-weight: bold; }
 .status-requires_review, .status-blocked { color: #a50; font-weight: bold; }
 .status-failed, .status-error { color: #a00; font-weight: bold; }
@@ -1559,181 +1588,294 @@ pre { background: #f5f5f5; padding: 1rem; overflow-x: auto; }
 .confusion-note { color: #555; margin-left: 0.5rem; }
 .confusion-time { color: #888; font-size: 0.8rem; margin-left: 0.5rem; }
 #clear-confusion-btn { margin-top: 0.5rem; }
+#status-bar { font-size: 12px; padding: 6px 16px; background: #f0fdf4; color: #166534; border-top: 1px solid #bbf7d0; }
+.json-key { color: #7c3aed; }
+.json-str { color: #059669; }
+.json-num { color: #d97706; }
+.json-bool { color: #dc2626; }
+pre#json, pre { font-size: 11px; background: #f5f5f4; padding: 12px; border-radius: 6px; overflow: auto; white-space: pre-wrap; word-break: break-all; }
+.empty-state { text-align: center; color: #9ca3af; font-size: 13px; padding: 32px 0; }
 </style>
 </head>
 <body>
-<h1>Ariadne — Local Interaction</h1>
-<div id="onboarding-panel">
-<button class="onboarding-dismiss" id="dismiss-onboarding-btn">Dismiss</button>
-<h2>Welcome to Ariadne</h2>
-<p>Ariadne is a local execution substrate for agentic software development.</p>
-<p>It accepts a task, builds an execution request, dispatches it through a selected runner, and returns a deterministic result with an execution envelope and review boundary.</p>
-<p><strong>Local/no-op runner (default):</strong> A deterministic simulation that returns results without executing any real work. No Docker daemon, no process spawning, no network calls.</p>
-<p><strong>Docker agent runner (opt-in):</strong> A boundary that runs tasks in a Docker container. Must be explicitly selected. Selecting it returns a structured blocked result without running Docker — enabling real execution requires additional configuration.</p>
-<p>After submitting a task, inspect the summary card, execution trace, structured result, and raw JSON.</p>
-<p>Use the feedback panel to capture your observations.</p>
-<h3>Step-by-step local flow</h3>
-<ol class="onboarding-steps">
-<li>Select a guided scenario or type your own task.</li>
-<li>Choose a runner (local/no-op default, docker-agent opt-in).</li>
-<li>Click Submit.</li>
-<li>Inspect the summary card, execution trace, and structured result.</li>
-<li>Use the feedback panel to record observations.</li>
-<li>Generate and copy a run report.</li>
-</ol>
-</div>
-<div id="explanation">
-<p>Ariadne turns your task into an execution request.</p>
-<p>The local harness dispatches the request to a selected runner adapter.</p>
-<p><strong>Default mode is deterministic local/no-op.</strong> No real agent execution happens by default.</p>
-<p>Docker agent is an explicit opt-in boundary. Selecting it returns a structured result without running Docker.</p>
-<p>The response includes execution result, execution envelope, and review boundary.</p>
-</div>
-<fieldset id="scenarios">
-<legend>Guided scenarios</legend>
-<p>Click a scenario to prefill the task and runner, then click Submit.</p>
-<div id="scenario-buttons">
-<button onclick="fillScenario('noop','Implement a JWT authentication middleware for FastAPI')">1. Default local/no-op run</button>
-<button onclick="fillScenario('noop','Add input validation to all API endpoints')">2. Inspect summary and trace</button>
-<button onclick="fillScenario('docker-agent','Run unit tests on the authentication module')">3. Docker-agent opt-in boundary</button>
-<button onclick="fillScenario('noop','Create a health check endpoint')">4. Generate user-test feedback</button>
-</div>
-</fieldset>
-<fieldset id="runner-selection">
-<legend>Runner adapter</legend>
-<label><input type="radio" name="runner" value="noop" checked> Local deterministic / no-op (default)</label>
-<br>
-<label><input type="radio" name="runner" value="docker-agent"> Docker agent (opt-in)</label>
-<br>
-<label><input type="checkbox" id="allow-docker-checkbox"> Enable real Docker execution (requires ARIADNE_ALLOW_DOCKER_EXECUTION environment variable)</label>
-</fieldset>
-<label for="task">Task:</label>
-<textarea id="task" rows="4" cols="60" placeholder="Describe your task…">Implement JWT authentication middleware</textarea>
-<div id="task-validation" class="validation-error">Task text is required.</div>
-<br>
-<button id="submit">Submit</button>
-<div id="error-panel">
-<h3>Request Error</h3>
-<p id="error-message"></p>
-<button id="dismiss-error-btn">Dismiss</button>
-</div>
-<div id="status-bar" style="margin-top:0.5rem;"></div>
-<div id="result">
-<h2>Result</h2>
-<div id="summary-card">
-<h3>Ariadne Local Run Summary</h3>
-<p id="summary-placeholder">Submit a task to see the run summary.</p>
-</div>
-<div id="run-report-section" style="display:none;">
-<h2>Run Report</h2>
-<p id="run-report-placeholder" style="display:none;">Run a task to generate a run report.</p>
-<button id="generate-run-report-btn">Generate run report</button>
-<button id="copy-run-report-btn" style="margin-left:0.5rem;">Copy report</button>
-<button id="download-run-report-btn" style="margin-left:0.5rem;">Download report (.txt)</button>
-<textarea id="run-report-output" rows="10" cols="80" readonly style="margin-top:0.5rem; display:block; width:100%;"></textarea>
-</div>
-<div id="run-history-section">
-<h2>Run History</h2>
-<p id="run-history-placeholder">No runs yet. Submit a task to see your run history.</p>
-<button id="clear-history-btn" style="display:none;">Clear history</button>
-<div id="run-history-list"></div>
-</div>
-<div id="run-detail-panel" style="display:none;">
-<h2>Run Detail</h2>
-<p><strong>Selected run:</strong> <span id="detail-run-id"></span></p>
-<div id="run-detail-content"></div>
-</div>
-<div id="execution-trace-section">
-<h3>Execution Trace</h3>
-<div id="trace-steps"></div>
-</div>
-<div id="structured-view"></div>
-<h3>Raw JSON</h3>
-<pre id="json"></pre>
-</div>
-<div id="feedback-panel">
-<h2>User Test Feedback</h2>
-<div id="manual-checklist">
-<h3>Manual Acceptance Checklist</h3>
-<p class="checklist-counter" id="checklist-counter">0/15 checked</p>
-<button id="reset-checklist-btn">Reset all</button>
-<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 1. First-time onboarding is visible and understandable</label></div>
-<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 2. Scenario can be selected (task prefilled, runner set)</label></div>
-<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 3. Task can be submitted</label></div>
-<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 4. Local/no-op remains default</label></div>
-<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 5. Docker-agent remains opt-in and non-default</label></div>
-<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 6. Summary card is visible after run</label></div>
-<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 7. Execution trace is visible after run</label></div>
-<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 8. Structured result is visible after run</label></div>
-<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 9. Raw JSON remains available</label></div>
-<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 10. Feedback can be captured</label></div>
-<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 11. Session report can be generated</label></div>
-<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 12. Run report can be copied/exported</label></div>
-<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 13. Local run history updates</label></div>
-<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 14. Empty task validation works (inline message shown)</label></div>
-<div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 15. Error state preserves previous run and history</label></div>
-</div>
-<div id="confusion-signals-panel">
-<h3>Confusion Signals</h3>
-<p>Click a button to record a moment of confusion.</p>
-<div class="confusion-buttons">
-<button class="confusion-btn" onclick="addConfusionSignal('unclear_next_step')">Unclear next step</button>
-<button class="confusion-btn" onclick="addConfusionSignal('unexpected_result')">Unexpected result</button>
-<button class="confusion-btn" onclick="addConfusionSignal('runner_confusion')">Runner confusion</button>
-<button class="confusion-btn" onclick="addConfusionSignal('report_export_confusion')">Report/export confusion</button>
-</div>
-<div class="confusion-note-area">
-<label for="confusion-note-input">Optional note (applied to last/next signal):</label>
-<br>
-<textarea id="confusion-note-input" rows="2" cols="60" placeholder="What were you confused about? (optional)"></textarea>
-</div>
-<button id="clear-confusion-btn">Clear all signals</button>
-<div id="confusion-signal-list" class="confusion-list"></div>
-</div>
-<fieldset>
-<label><input type="radio" name="q_understood" value="yes"> Yes</label>
-<label><input type="radio" name="q_understood" value="no"> No</label>
-</fieldset>
-<fieldset>
-<legend>2. Was runner selection clear?</legend>
-<label><input type="radio" name="q_runner_clear" value="yes"> Yes</label>
-<label><input type="radio" name="q_runner_clear" value="no"> No</label>
-</fieldset>
-<fieldset>
-<legend>3. Was the summary card clear?</legend>
-<label><input type="radio" name="q_summary_clear" value="yes"> Yes</label>
-<label><input type="radio" name="q_summary_clear" value="no"> No</label>
-</fieldset>
-<fieldset>
-<legend>4. Was the execution trace useful?</legend>
-<label><input type="radio" name="q_trace_useful" value="yes"> Yes</label>
-<label><input type="radio" name="q_trace_useful" value="no"> No</label>
-</fieldset>
-<fieldset>
-<legend>5. What was confusing?</legend>
-<textarea id="q_confusing" rows="3" cols="60" placeholder="Describe what was confusing…"></textarea>
-</fieldset>
-<fieldset>
-<legend>6. What would you expect Ariadne to do next?</legend>
-<textarea id="q_expect_next" rows="3" cols="60" placeholder="Describe your expectation…"></textarea>
-</fieldset>
-<fieldset>
-<legend>Additional notes</legend>
-<textarea id="feedback_notes" rows="3" cols="60" placeholder="Optional additional notes…"></textarea>
-</fieldset>
-<button id="generate-feedback-btn">Generate &amp; copy feedback</button>
-<textarea id="feedback-output" rows="6" cols="80" readonly style="margin-top:0.5rem; display:none;"></textarea>
-<hr>
-<button id="generate-session-report-btn">Generate session report</button>
-<button id="copy-report-btn" style="margin-left:0.5rem;">Copy report</button>
-<textarea id="session-report-output" rows="10" cols="80" readonly style="margin-top:0.5rem; display:block; width:100%;"></textarea>
-<hr>
-<h3>Product Iteration Session Capture</h3>
-<p>Record a product iteration signal with current session data.</p>
-<button id="record-session-btn">Record session signal</button>
-<span id="session-status" style="margin-left:0.5rem;"></span>
-</div>
+
+<!-- TOP NAVBAR -->
+<nav class="navbar is-white" role="navigation" style="border-bottom:1px solid #e5e5e3;min-height:52px">
+  <div class="navbar-brand">
+    <span class="navbar-item" style="font-weight:600;font-size:15px">Ariadne</span>
+  </div>
+  <div class="navbar-menu is-active">
+    <div class="navbar-start">
+      <a class="navbar-item is-active" style="font-size:13px">runs</a>
+      <a class="navbar-item" style="font-size:13px;color:#d1d5db;pointer-events:none">artifacts</a>
+      <a class="navbar-item" style="font-size:13px;color:#d1d5db;pointer-events:none">context</a>
+      <a class="navbar-item" style="font-size:13px;color:#d1d5db;pointer-events:none">proofs</a>
+    </div>
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <span class="tag is-success is-light" id="runner-badge">local</span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN: LEFT + RIGHT -->
+<div class="ariadne-main">
+
+  <!-- LEFT COLUMN -->
+  <div class="ariadne-left">
+    <div class="left-scroll">
+
+      <!-- Onboarding panel (preserved id) -->
+      <div id="onboarding-panel">
+        <button class="onboarding-dismiss" id="dismiss-onboarding-btn">Dismiss</button>
+        <h2>Welcome to Ariadne</h2>
+        <p>Ariadne is a local execution substrate for agentic software development.</p>
+        <p>It accepts a task, builds an execution request, dispatches it through a selected runner, and returns a deterministic result with an execution envelope and review boundary.</p>
+        <p><strong>Local/no-op runner (default):</strong> A deterministic simulation that returns results without executing any real work. No Docker daemon, no process spawning, no network calls.</p>
+        <p><strong>Docker agent runner (opt-in):</strong> A boundary that runs tasks in a Docker container. Must be explicitly selected. Selecting it returns a structured blocked result without running Docker &mdash; enabling real execution requires additional configuration.</p>
+        <p>After submitting a task, inspect the summary card, execution trace, structured result, and raw JSON.</p>
+        <p>Use the feedback panel to capture your observations.</p>
+        <h3>Step-by-step local flow</h3>
+        <ol class="onboarding-steps">
+          <li>Select a guided scenario or type your own task.</li>
+          <li>Choose a runner (local/no-op default, docker-agent opt-in).</li>
+          <li>Click Submit.</li>
+          <li>Inspect the summary card, execution trace, and structured result.</li>
+          <li>Use the feedback panel to record observations.</li>
+          <li>Generate and copy a run report.</li>
+        </ol>
+      </div>
+
+      <!-- Explanation box (preserved) -->
+      <div id="explanation">
+        <p>Ariadne turns your task into an execution request.</p>
+        <p>The local harness dispatches the request to a selected runner adapter.</p>
+        <p><strong>Default mode is deterministic local/no-op.</strong> No real agent execution happens by default.</p>
+        <p>Docker agent is an explicit opt-in boundary. Selecting it returns a structured result without running Docker.</p>
+        <p>The response includes execution result, execution envelope, and review boundary.</p>
+      </div>
+
+      <!-- Guided scenarios (preserved id) -->
+      <fieldset id="scenarios">
+        <legend>Guided scenarios</legend>
+        <p>Click a scenario to prefill the task and runner, then click Submit.</p>
+        <div id="scenario-buttons">
+          <button onclick="fillScenario('noop','Implement a JWT authentication middleware for FastAPI')">1. Default local/no-op run</button>
+          <button onclick="fillScenario('noop','Add input validation to all API endpoints')">2. Inspect summary and trace</button>
+          <button onclick="fillScenario('docker-agent','Run unit tests on the authentication module')">3. Docker-agent opt-in boundary</button>
+          <button onclick="fillScenario('noop','Create a health check endpoint')">4. Generate user-test feedback</button>
+        </div>
+      </fieldset>
+
+      <!-- Runner selection (preserved name="runner" and id) -->
+      <fieldset id="runner-selection">
+        <legend>Runner adapter</legend>
+        <label><input type="radio" name="runner" value="noop" checked> Local deterministic / no-op (default)</label>
+        <br>
+        <label><input type="radio" name="runner" value="docker-agent"> Docker agent (opt-in)</label>
+        <br>
+        <label><input type="checkbox" id="allow-docker-checkbox"> Enable real Docker execution (requires ARIADNE_ALLOW_DOCKER_EXECUTION environment variable)</label>
+      </fieldset>
+
+      <!-- Task input -->
+      <label for="task">Task:</label>
+      <textarea id="task" class="textarea is-small" rows="4" placeholder="Describe your task\u2026">Implement JWT authentication middleware</textarea>
+      <div id="task-validation" class="validation-error">Task text is required.</div>
+
+      <!-- Submit button -->
+      <button id="submit" class="button is-dark is-fullwidth is-small" style="margin-top:6px">Submit</button>
+
+      <!-- Error panel (preserved ids) -->
+      <div id="error-panel">
+        <h3>Request Error</h3>
+        <p id="error-message"></p>
+        <button id="dismiss-error-btn">Dismiss</button>
+      </div>
+
+      <!-- Status bar -->
+      <div id="status-bar"></div>
+
+      <!-- Run history (all ids preserved) -->
+      <div id="run-history-section" style="margin-top:12px">
+        <h2>Run History</h2>
+        <p id="run-history-placeholder">No runs yet. Submit a task to see your run history.</p>
+        <button id="clear-history-btn" style="display:none;">Clear history</button>
+        <div id="run-history-list"></div>
+      </div>
+
+      <!-- Run detail panel (all ids preserved) -->
+      <div id="run-detail-panel" style="display:none;margin-top:12px">
+        <h2>Run Detail</h2>
+        <p><strong>Selected run:</strong> <span id="detail-run-id"></span></p>
+        <div id="run-detail-content"></div>
+      </div>
+
+    </div><!-- /left-scroll -->
+  </div><!-- /ariadne-left -->
+
+  <!-- RIGHT COLUMN -->
+  <div class="ariadne-right">
+
+    <!-- Tab bar -->
+    <div class="ariadne-tabs">
+      <div class="ariadne-tab is-active" onclick="switchTab('summary',this)">Summary</div>
+      <div class="ariadne-tab" onclick="switchTab('trace',this)">Trace</div>
+      <div class="ariadne-tab" onclick="switchTab('structured',this)">Structured</div>
+      <div class="ariadne-tab" onclick="switchTab('json',this)">Raw JSON</div>
+    </div>
+
+    <!-- Summary tab -->
+    <div class="tab-pane is-active" id="tab-summary">
+      <div id="result">
+        <h2>Result</h2>
+        <div id="summary-card">
+          <h3>Ariadne Local Run Summary</h3>
+          <p id="summary-placeholder">Submit a task to see the run summary.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trace tab -->
+    <div class="tab-pane" id="tab-trace">
+      <div id="execution-trace-section">
+        <h3>Execution Trace</h3>
+        <div id="trace-steps"></div>
+      </div>
+    </div>
+
+    <!-- Structured tab -->
+    <div class="tab-pane" id="tab-structured">
+      <div id="structured-view"></div>
+    </div>
+
+    <!-- Raw JSON tab -->
+    <div class="tab-pane" id="tab-json">
+      <h3>Raw JSON</h3>
+      <pre id="json"></pre>
+    </div>
+
+  </div><!-- /ariadne-right -->
+</div><!-- /ariadne-main -->
+
+<!-- BOTTOM STRIP -->
+<div class="ariadne-bottom">
+  <div class="bottom-toggle" onclick="toggleBottom()">
+    &#x25B8; Reports &amp; Feedback
+  </div>
+  <div class="bottom-content" id="bottom-content" style="display:none">
+
+    <!-- Run report (preserved ids) -->
+    <div id="run-report-section" style="margin-bottom:12px">
+      <h2>Run Report</h2>
+      <p id="run-report-placeholder" style="display:none;">Run a task to generate a run report.</p>
+      <button id="generate-run-report-btn">Generate run report</button>
+      <button id="copy-run-report-btn" style="margin-left:0.5rem;">Copy report</button>
+      <button id="download-run-report-btn" style="margin-left:0.5rem;">Download report (.txt)</button>
+      <textarea id="run-report-output" rows="10" cols="80" readonly style="margin-top:0.5rem; display:block; width:100%;"></textarea>
+    </div>
+
+    <!-- Feedback panel (preserved ids) -->
+    <div id="feedback-panel">
+      <h2>User Test Feedback</h2>
+      <div id="manual-checklist">
+        <h3>Manual Acceptance Checklist</h3>
+        <p class="checklist-counter" id="checklist-counter">0/15 checked</p>
+        <button id="reset-checklist-btn">Reset all</button>
+        <div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 1. First-time onboarding is visible and understandable</label></div>
+        <div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 2. Scenario can be selected (task prefilled, runner set)</label></div>
+        <div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 3. Task can be submitted</label></div>
+        <div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 4. Local/no-op remains default</label></div>
+        <div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 5. Docker-agent remains opt-in and non-default</label></div>
+        <div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 6. Summary card is visible after run</label></div>
+        <div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 7. Execution trace is visible after run</label></div>
+        <div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 8. Structured result is visible after run</label></div>
+        <div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 9. Raw JSON remains available</label></div>
+        <div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 10. Feedback can be captured</label></div>
+        <div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 11. Session report can be generated</label></div>
+        <div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 12. Run report can be copied/exported</label></div>
+        <div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 13. Local run history updates</label></div>
+        <div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 14. Empty task validation works (inline message shown)</label></div>
+        <div class="checklist-item"><label><input type="checkbox" onchange="updateChecklistCounter()" class="checklist-cb"> 15. Error state preserves previous run and history</label></div>
+      </div>
+      <div id="confusion-signals-panel">
+        <h3>Confusion Signals</h3>
+        <p>Click a button to record a moment of confusion.</p>
+        <div class="confusion-buttons">
+          <button class="confusion-btn" onclick="addConfusionSignal('unclear_next_step')">Unclear next step</button>
+          <button class="confusion-btn" onclick="addConfusionSignal('unexpected_result')">Unexpected result</button>
+          <button class="confusion-btn" onclick="addConfusionSignal('runner_confusion')">Runner confusion</button>
+          <button class="confusion-btn" onclick="addConfusionSignal('report_export_confusion')">Report/export confusion</button>
+        </div>
+        <div class="confusion-note-area">
+          <label for="confusion-note-input">Optional note (applied to last/next signal):</label>
+          <br>
+          <textarea id="confusion-note-input" rows="2" cols="60" placeholder="What were you confused about? (optional)"></textarea>
+        </div>
+        <button id="clear-confusion-btn">Clear all signals</button>
+        <div id="confusion-signal-list" class="confusion-list"></div>
+      </div>
+      <fieldset>
+        <legend>1. Did you understand what Ariadne does?</legend>
+        <label><input type="radio" name="q_understood" value="yes"> Yes</label>
+        <label><input type="radio" name="q_understood" value="no"> No</label>
+      </fieldset>
+      <fieldset>
+        <legend>2. Was runner selection clear?</legend>
+        <label><input type="radio" name="q_runner_clear" value="yes"> Yes</label>
+        <label><input type="radio" name="q_runner_clear" value="no"> No</label>
+      </fieldset>
+      <fieldset>
+        <legend>3. Was the summary card clear?</legend>
+        <label><input type="radio" name="q_summary_clear" value="yes"> Yes</label>
+        <label><input type="radio" name="q_summary_clear" value="no"> No</label>
+      </fieldset>
+      <fieldset>
+        <legend>4. Was the execution trace useful?</legend>
+        <label><input type="radio" name="q_trace_useful" value="yes"> Yes</label>
+        <label><input type="radio" name="q_trace_useful" value="no"> No</label>
+      </fieldset>
+      <fieldset>
+        <legend>5. What was confusing?</legend>
+        <textarea id="q_confusing" rows="3" cols="60" placeholder="Describe what was confusing\u2026"></textarea>
+      </fieldset>
+      <fieldset>
+        <legend>6. What would you expect Ariadne to do next?</legend>
+        <textarea id="q_expect_next" rows="3" cols="60" placeholder="Describe your expectation\u2026"></textarea>
+      </fieldset>
+      <fieldset>
+        <legend>Additional notes</legend>
+        <textarea id="feedback_notes" rows="3" cols="60" placeholder="Optional additional notes\u2026"></textarea>
+      </fieldset>
+      <button id="generate-feedback-btn">Generate &amp; copy feedback</button>
+      <textarea id="feedback-output" rows="6" cols="80" readonly style="margin-top:0.5rem; display:none;"></textarea>
+      <hr>
+      <button id="generate-session-report-btn">Generate session report</button>
+      <button id="copy-report-btn" style="margin-left:0.5rem;">Copy report</button>
+      <textarea id="session-report-output" rows="10" cols="80" readonly style="margin-top:0.5rem; display:block; width:100%;"></textarea>
+      <hr>
+      <h3>Product Iteration Session Capture</h3>
+      <p>Record a product iteration signal with current session data.</p>
+      <button id="record-session-btn">Record session signal</button>
+      <span id="session-status" style="margin-left:0.5rem;"></span>
+    </div>
+
+  </div><!-- /bottom-content -->
+</div><!-- /ariadne-bottom -->
+
 <script>
+
+function switchTab(name, el) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('is-active'));
+  document.querySelectorAll('.ariadne-tab').forEach(b => b.classList.remove('is-active'));
+  document.getElementById('tab-' + name).classList.add('is-active');
+  el.classList.add('is-active');
+}
+function toggleBottom() {
+  var bc = document.getElementById('bottom-content');
+  bc.style.display = bc.style.display === 'none' ? '' : 'none';
+}
+
 var TRACE_STEPS = [
     {label: "Task received", field: null, complete: true},
     {label: "Execution request built", field: "execution_request.execution_request_id"},
@@ -2471,13 +2613,8 @@ function renderRunDetail(data) {
 // Fetch evidence-backed run list on page load
 fetchRuns();
 </script>
+
 </body>
 </html>
 """
-
-
-# ---------------------------------------------------------------------------
-# Expose app title for PLAN import check
-# ---------------------------------------------------------------------------
-
 title = "Task Intake API"

@@ -87,14 +87,18 @@ class TestGetRoot:
         _, body, _ = _request("GET", "/")
         assert "/runs/execute" in body
 
-    def test_has_no_external_assets(self):
+    def test_external_assets_are_only_bulma_cdn(self):
         _, body, _ = _request("GET", "/")
-        assert "src=\"" not in body
-        assert "href=\"" not in body or "style>" in body
-
-    def test_has_no_cdn(self):
-        _, body, _ = _request("GET", "/")
-        assert "cdn" not in body.lower()
+        import re
+        # Extract every external href/src URL from the HTML
+        urls = set()
+        for m in re.finditer(r'(?:href|src)="([^"]+)"', body):
+            u = m.group(1)
+            if u.startswith("http") or u.startswith("//"):
+                urls.add(u)
+        # The only external URL must be the Bulma CDN stylesheet
+        assert urls == {"https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css"}, f"unexpected external URLs: {urls}"
+        # Continue rejecting unpkg and jsdelivr at any level
         assert "unpkg" not in body.lower()
         assert "jsdelivr" not in body.lower()
 

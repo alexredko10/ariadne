@@ -1,0 +1,131 @@
+# PR 0151b — Artifact Workspace UI: Two-Column Layout — Precommit Review (Rerun)
+# Reviewed: 2026-07-22T17:37:19Z
+
+REVIEW ARTIFACT WRITTEN: yes
+PATH: .project-memory/pr/0151b-artifact-workspace-ui-two-column-redesign/reviews/precommit-review.yml
+VERDICT: pass
+
+BRANCH: 0151b-artifact-workspace-ui-two-column-redesign
+HEAD: 4c1caa51c692f597fe92556b4e9bb796b5c9f21d
+CACHED DIFF: empty (no staged changes)
+DIRTY TREE: server.py + 14 test files + IMPLEMENTATION_REPORT.md + precommit-review.yml (all within expected correction scope)
+
+## Previous Blocker Resolution
+
+### B001 — IMPLEMENTATION_REPORT.md absent → RESOLVED
+IMPLEMENTATION_REPORT.md now exists at:
+`.project-memory/pr/0151b-artifact-workspace-ui-two-column-redesign/IMPLEMENTATION_REPORT.md`
+Contains real implementation evidence: files read, files changed, decisions made, PLAN alignment table, validation run record, boundary confirmations.
+
+### B002 — PLAN-specified UI tests failed → RESOLVED
+All 14 test files updated with `test_external_assets_are_only_bulma_cdn` using exact set-based CDN allowlist. All 1357 tests pass.
+
+## Validation Commands
+
+| Command | Result | Exit Code | Evidence |
+|---------|--------|-----------|----------|
+| `git diff --check` | passed | 0 | No whitespace errors or merge conflicts |
+| `python -m compileall -q services/task_intake/src services/task_intake/tests` | passed | 0 | All Python files compile, no errors |
+| `PYTHONPATH=... python -m pytest services/task_intake/tests/ -q` | passed | 0 | 1357 passed in 2.33s |
+| `grep -RInE '"cdn"[ ]+not[ ]+in\|def test_(no_external_assets\|...)' tests/` | passed | 0 | Only 3 hits in test_artifact_workspace_shell.py (correct — tests the /workspace endpoint, not affected by Bulma CDN) |
+| `python - <<'PY' ast duplicate check` | passed | 0 | No duplicate test method names in any test file |
+| `grep subprocess\|os.system\|import docker\|import requests server.py` | passed | 0 | No unsafe imports found |
+| `grep PLACEHOLDER\|water_meter\|broken_clock\|.grace server.py` | passed | 0 | Forbidden names found only in test assertions checking for absence |
+| `.ariadne residue check` | passed | 0 | .ariadne absent |
+
+## CDN Allowlist Assessment
+
+All 14 GET `/` test files enforce **exact set-based CDN allowlist**:
+
+```python
+import re
+urls = set()
+for m in re.finditer(r'(?:href|src)="([^"]+)"', html):
+    u = m.group(1)
+    if u.startswith("http") or u.startswith("//"):
+        urls.add(u)
+assert urls == {"https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css"}
+assert "unpkg" not in html.lower()
+assert "jsdelivr" not in html.lower()
+```
+
+This is a **real allowlist** — not a weak substring check. The assertion confirms:
+- The only external URL is exactly the approved Bulma CDN stylesheet
+- No unpkg, no jsdelivr at any level
+- No unexpected external href/src URLs
+
+## Files Reviewed
+
+### Implementation
+- `services/task_intake/src/task_intake/server.py` — Full HTML page replaced with two-column Bulma layout. Navbar, left/right columns, tab strip, bottom strip. All JS functions preserved. All route handlers unchanged.
+
+### Test files (all 14 modified)
+- `services/task_intake/tests/test_local_interaction_page.py` ✓
+- `services/task_intake/tests/test_local_run_summary_card.py` ✓
+- `services/task_intake/tests/test_local_runner_selection.py` ✓
+- `services/task_intake/tests/test_local_execution_trace.py` ✓
+- `services/task_intake/tests/test_local_result_structured_view.py` ✓
+- `services/task_intake/tests/test_local_user_test_feedback_panel.py` ✓
+- `services/task_intake/tests/test_local_user_test_session_report.py` ✓
+- `services/task_intake/tests/test_local_user_confusion_signals.py` ✓
+- `services/task_intake/tests/test_first_time_user_onboarding_panel.py` ✓
+- `services/task_intake/tests/test_guided_local_user_test_scenarios.py` ✓
+- `services/task_intake/tests/test_local_empty_error_states.py` ✓
+- `services/task_intake/tests/test_local_run_history_in_page.py` ✓
+- `services/task_intake/tests/test_copy_export_local_run_report.py` ✓
+- `services/task_intake/tests/test_manual_acceptance_checklist.py` ✓
+
+### Other required reads
+- `.project-memory/pr/0151b-artifact-workspace-ui-two-column-redesign/PLAN.md`
+- `.project-memory/pr/0151b-artifact-workspace-ui-two-column-redesign/reviews/plan-review.yml`
+- `.project-memory/pr/0151b-artifact-workspace-ui-two-column-redesign/IMPLEMENTATION_REPORT.md`
+- `.project-memory/review-artifact.schema.yml`
+- `.project-memory/post-0100/strategic-direction/agent-manifest.md`
+- `.project-memory/pr/0151a-ci-node-dependency-bootstrap/reviews/precommit-review.yml`
+
+## Review Requirements Assessment
+
+| # | Requirement | Status | Evidence |
+|---|-------------|--------|----------|
+| 1 | PLAN scope only | ✓ | Only server.py + test files + PR directory modified |
+| 2 | Route handlers unchanged | ✓ | Python handlers inspected — GET /, POST /runs/execute, GET /runs, GET /runs/<run_id>, POST /product/iterations all unchanged |
+| 3 | Required IDs and JS functions preserved | ✓ | All element IDs and all 30+ JS functions present in server.py _HTML_PAGE string |
+| 4 | Bulma CDN exactly PLAN-approved | ✓ | `cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css` — exactly as specified |
+| 5 | Tests reject unpkg and jsdelivr | ✓ | All 14 test files assert `"unpkg" not in html.lower()` and `"jsdelivr" not in html.lower()` |
+| 6 | Tests do not allow arbitrary external URLs | ✓ | All 14 use exact set-based allowlist — only the exact Bulma URL is permitted |
+| 7 | No stale assertions remain | ✓ | grep for `"cdn" not in html.lower()` found NO matches in any test file. Only hits are in test_artifact_workspace_shell.py (correct — workspace endpoint) |
+| 8 | No duplicate test method names | ✓ | AST analysis across all test files — zero duplicates found |
+| 9 | IMPLEMENTATION_REPORT.md exists at correct path | ✓ | Found at `.project-memory/pr/0151b-artifact-workspace-ui-two-column-redesign/IMPLEMENTATION_REPORT.md` |
+| 10 | IMPLEMENTATION_REPORT.md contains real evidence | ✓ | Documents files read, files changed, decisions, PLAN alignment, validation runs, boundary confirmations — not invented |
+| 11 | No .ariadne runtime residue | ✓ | .ariadne absent |
+| 12 | No unsafe imports or forbidden names | ✓ | No subprocess, os.system, docker, requests in server.py. Forbidden names only in test assertions |
+
+## EVIDENCE LEDGER
+
+- branch is correct: `0151b-artifact-workspace-ui-two-column-redesign`
+- dirty tree is within scope: server.py + 14 test files (correction for B002) + IMPLEMENTATION_REPORT.md + precommit-review.yml
+- all changed files were read: all 14 test files + server.py read in full
+- IMPLEMENTATION_REPORT.md claims verified: matched against files, diffs, and validation output — all claims are supported
+- required validation passed: all commands exit 0, 1357 tests pass
+- feature-specific behavior exists: Bulma CDN, navbar, two-column layout, tabs, all JS functions preserved
+- forbidden behavior is absent: no subprocess, os.system, docker, requests; no stale CDN assertions
+- artifact physically written: yes
+- artifact read back: yes
+
+## BOUNDARY CONFIRMATIONS
+
+- Branch matches PLAN: YES
+- Cached diff empty: YES
+- IMPLEMENTATION_REPORT.md at correct path: YES
+- PR 0152 slot not consumed: YES (governance insertion confirmed)
+- PR 0151A prior gate: PASS
+- No backend route handlers changed: YES
+- No services/runner/ changes: YES
+- No agents/schemas/docs/ROADMAP.md changes: YES
+- No frontend build step: YES
+- No docker, subprocess, auth, persistence: YES
+- Bulma CDN only (cdnjs.cloudflare.com): YES
+- No unpkg, no jsdelivr: YES
+- .ariadne absent: YES
+- All previous blockers B001 and B002 resolved: YES
+- All 1357 tests pass: YES
